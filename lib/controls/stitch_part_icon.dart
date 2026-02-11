@@ -5,10 +5,12 @@ import 'package:knitty_griddy/stitchrepo/stitch_definition.dart';
 class StitchPartIcon extends StatelessWidget {
   final StitchDefinition stitchDefinition;
   final int stitchDefinitionColumn;
+  final double iconSize;
 
   const StitchPartIcon({
     required this.stitchDefinition,
     int? stitchDefinitionColumn,
+    this.iconSize = 38,
     super.key
   }) : stitchDefinitionColumn = stitchDefinitionColumn?? 1;
 
@@ -17,11 +19,11 @@ class StitchPartIcon extends StatelessWidget {
     List<IconData> icons = stitchDefinition.iconAt(stitchDefinitionColumn);
     return 
       icons.length == 1 ? 
-      Icon(icons.first) : 
+      Icon(icons.first, size: iconSize,) : 
       Stack(
         children: [
           for (IconData icon in icons)
-            Positioned(child: Icon(icon))
+            Positioned(child: Icon(icon, size: iconSize,))
         ],
       );
   }

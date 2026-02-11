@@ -58,7 +58,7 @@ class StitchesToolbarPanel extends StatelessWidget {
                               child: Row(
                                 children: [
                                   SizedBox(width: spacerwidth,),
-                                  StitchIcon(stitchDefinition: stitchDefinition),
+                                  StitchIcon(stitchDefinition: stitchDefinition, iconSize: 16,),
                                   SizedBox(width: spacerwidth,),
                                   Text(stitchDefinition.name)
                                 ],

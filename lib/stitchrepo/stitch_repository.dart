@@ -24,5 +24,5 @@ class StitchRepository {
   static const StitchDefinition errorStitch = StitchDefinition(name: 'Error stitch', abbreviation: '', iconData: [[Icons.question_mark]]);
   static const StitchDefinition knit = StitchDefinition(name: 'Knit', abbreviation: 'k', iconData: [[Knitting.knit]], category: 'General');
   static const StitchDefinition purl = StitchDefinition(name: 'Purl', abbreviation: 'p', iconData: [[Knitting.purl]], category: 'General');
-  static const StitchDefinition c2r = StitchDefinition(name: 'C2R', abbreviation: 'C2R', iconData: [[Knitting.knit], [Knitting.purl], [Knitting.knit], [Knitting.purl]], category: 'Cables');
+  static const StitchDefinition c2r = StitchDefinition(name: 'C2R', abbreviation: 'C2R', iconData: [[Knitting.cr2_1], [Knitting.c2r_2], [Knitting.c2r_3], [Knitting.c2r_4]], category: 'Cables');
 }
