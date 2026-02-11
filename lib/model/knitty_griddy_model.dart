@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:knitty_griddy/controls/named_colour.dart';
 import 'package:knitty_griddy/model/app_state.dart';
 import 'package:knitty_griddy/model/griddy_model.dart';
+import 'package:knitty_griddy/model/knitting_pattern.dart';
 import 'package:knitty_griddy/model/pattern_settings.dart';
 import 'package:knitty_griddy/model/stitch_cell.dart';
+import 'package:knitty_griddy/model/undo_redo_manager.dart';
 import 'package:knitty_griddy/stitchrepo/stitch_definition.dart';
 import 'package:knitty_griddy/stitchrepo/stitch_repository.dart';
 
@@ -12,8 +14,29 @@ class KnittyGriddyModel extends ChangeNotifier {
 
   // The immutable model being accessed throughout the app
   GriddyModel _model;
+  final UndoRedoManager<KnittingPattern> _undoRedoManager;
 
-  KnittyGriddyModel() : _model = const GriddyModel();
+  KnittyGriddyModel() : _model = const GriddyModel(), _undoRedoManager = UndoRedoManager() {
+    _storeForUndo();
+  }
+
+  void _storeForUndo() {
+    _undoRedoManager.store(_model.knittingPattern.copyWith());
+  }
+
+  void undo() {
+    if (_undoRedoManager.canUndo()) {
+      _model = _model.copyWith(knittingPattern: _undoRedoManager.undo());
+      notifyListeners();
+    }
+  }
+
+  void redo() {
+    if (_undoRedoManager.canRedo()) {
+      _model = _model.copyWith(knittingPattern: _undoRedoManager.redo());
+      notifyListeners();
+    }
+  }
 
   PatternSettings get settings => _model.knittingPattern.patternSettings;
   StitchCell stitchCell(int row, int column) => _model.knittingPattern.stitchCell(row, column);
@@ -62,7 +85,7 @@ class KnittyGriddyModel extends ChangeNotifier {
       StitchCell oldCell = _model.knittingPattern.stitches.firstWhere((c) => c.row == newCell.row && c.column == newCell.column);
       if (oldCell.stitchDefinition.columns > 1) {
         int oldCellStart = oldCell.column - (oldCell.stitchDefinitionColumn - 1);
-        for (int clearIdx = 1; clearIdx < oldCell.stitchDefinition.columns; clearIdx++) {
+        for (int clearIdx = 0; clearIdx < oldCell.stitchDefinition.columns; clearIdx++) {
           // don't clear if this is already a new cell
           if (!newStitchCells.any((c) => c.row == oldCell.row && c.column == oldCellStart + clearIdx)) {
             clearedCells.add(StitchCell(row: oldCell.row, column: oldCellStart + clearIdx, stitchDefinition: StitchRepository.noStitch, colour: oldCell.colour));
@@ -71,6 +94,12 @@ class KnittyGriddyModel extends ChangeNotifier {
       }
     }
     newStitchCells.addAll(clearedCells);
+
+    if (newStitchCells.isEmpty) {
+      return;
+    }
+
+    _storeForUndo();
 
     _model = _model.copyWith(
       knittingPattern: _model.knittingPattern.copyWith(
@@ -84,6 +113,9 @@ class KnittyGriddyModel extends ChangeNotifier {
   }
   
   void setStitchColour(int row, int column, NamedColour colour) {
+
+    _storeForUndo();
+    
     _model = _model.copyWith(
       knittingPattern: _model.knittingPattern.copyWith(
         stitches: _model.knittingPattern.stitches.map((stitch) =>

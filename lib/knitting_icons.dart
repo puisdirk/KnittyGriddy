@@ -21,7 +21,11 @@ class Knitting {
   static const _kFontFam = 'Knitting';
   static const String? _kFontPkg = null;
 
-  static const IconData clear = IconData(0xe803, fontFamily: _kFontFam, fontPackage: _kFontPkg);
-  static const IconData purl = IconData(0xe804, fontFamily: _kFontFam, fontPackage: _kFontPkg);
+  static const IconData c2r_2 = IconData(0xe800, fontFamily: _kFontFam, fontPackage: _kFontPkg);
+  static const IconData c2r_3 = IconData(0xe801, fontFamily: _kFontFam, fontPackage: _kFontPkg);
+  static const IconData c2r_4 = IconData(0xe802, fontFamily: _kFontFam, fontPackage: _kFontPkg);
+  static const IconData cr2_1 = IconData(0xe804, fontFamily: _kFontFam, fontPackage: _kFontPkg);
   static const IconData knit = IconData(0xe805, fontFamily: _kFontFam, fontPackage: _kFontPkg);
+  static const IconData purl = IconData(0xe806, fontFamily: _kFontFam, fontPackage: _kFontPkg);
+  static const IconData clear = IconData(0xe807, fontFamily: _kFontFam, fontPackage: _kFontPkg);
 }
