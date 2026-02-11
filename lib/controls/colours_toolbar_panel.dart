@@ -1,0 +1,107 @@
+
+import 'package:flutter/material.dart';
+import 'package:knitty_griddy/controls/named_colour.dart';
+import 'package:knitty_griddy/model/app_state.dart';
+import 'package:knitty_griddy/model/knitty_griddy_model.dart';
+import 'package:provider/provider.dart';
+
+class ColoursToolbarPanel extends StatelessWidget {
+
+  const ColoursToolbarPanel({
+    super.key
+  });
+
+  String _truncateName(String name, int maxLength) {
+    if (name.length <= maxLength) return name;
+    return '${name.substring(0, maxLength)}...';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: Selector<KnittyGriddyModel, List<NamedColour>>(
+        selector: (_, model) => model.usedColours,
+        builder: (context, usedColours, _) {
+          double spacerWidth = 8;
+          double colourWellWidth = 40;
+          double minWidth = 0;
+          double iconWidth = 16;
+          for (NamedColour colour in usedColours) {
+            double width = colourWellWidth + (iconWidth * 3) + (spacerWidth * 4) + (_truncateName(colour.name, 25).length * 16);
+            if (width > minWidth) {
+              minWidth = width;
+            }
+          }
+          return Column(
+            children: [
+              Selector<KnittyGriddyModel, AppState>(
+                selector: (_, model) => model.appState,
+                builder: (context, appState, _) {
+                  return Wrap(
+                    alignment: WrapAlignment.start,
+                    children: [
+                      for (NamedColour colour in usedColours)
+                        SizedBox(
+                          width: minWidth, height: 50,
+                          child: Card(
+                            color: appState.currentTool != Tool.select ? appState.selectedColour == colour ? Colors.blue.withAlpha(60) : null : null,
+                            child: InkWell(
+                              borderRadius: const BorderRadius.all(Radius.circular(10)),
+                              splashColor: Colors.blue.withAlpha(30),
+                              onTap: () {
+                                switch (appState.currentTool) {
+                                  case Tool.stitch:
+                                  case Tool.colour:
+                                    Provider.of<KnittyGriddyModel>(context, listen: false).appUseColour(colour);
+                                    break;
+                                  case Tool.select:
+                                    // TODO: fill current selection with this colour
+                                    break;
+                                  default:
+                                }
+                              },
+                              child: Row(
+                                children: [
+                                  SizedBox(width: spacerWidth,),
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: const BorderRadius.all(Radius.circular(5)), 
+                                      color: colour.color
+                                    ), 
+                                    width: colourWellWidth, 
+                                    height: 30,),
+                                  SizedBox(width: spacerWidth,),
+                                  Text(_truncateName(colour.name, 25)),
+                                  SizedBox(width: spacerWidth,),
+                                  IconButton(
+                                    icon: const Icon(Icons.edit), 
+                                    iconSize: iconWidth, 
+                                    onPressed: () {
+                                      // TODO: show colour editing dialogue for selected NamedColor
+                                    },),
+                                  SizedBox(width: spacerWidth,),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  );
+                }
+              ),
+              const SizedBox(height: 20,),
+              Align(
+                alignment: Alignment.bottomCenter, 
+                child: IconButton.outlined(
+                  onPressed: () {
+                  // TODO: show colour editing dialogue withouth a selected NamedColor
+                }, 
+                icon: const Icon(Icons.add))
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
