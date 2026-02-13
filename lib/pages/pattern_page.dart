@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:knitty_griddy/controls/knitting_toolbar.dart';
+import 'package:knitty_griddy/controls/toolbar/knitting_toolbar.dart';
 import 'package:knitty_griddy/controls/pattern_control.dart';
 import 'package:knitty_griddy/model/knitty_griddy_model.dart';
 import 'package:provider/provider.dart';

@@ -18,7 +18,7 @@ class KnittingPattern {
   const KnittingPattern({
     required this.patternSettings,
     this.usedStitches = const[StitchRepository.noStitch, StitchRepository.knit, StitchRepository.purl, StitchRepository.c2r],
-    this.usedColours = const[NamedColour(name: 'MC', color: Colors.white)],
+    this.usedColours = const[defaultMainColor],
     this.stitches = defaultStitches,
   });
 
@@ -42,4 +42,6 @@ class KnittingPattern {
     }
     return StitchCell.empty(row, column);
   }
+
+  NamedColour get mainColour => usedColours.firstWhere((colour) => colour.isMainColor);
 }

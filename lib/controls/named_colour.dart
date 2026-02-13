@@ -5,10 +5,12 @@ import 'package:flutter/material.dart';
 class NamedColour {
   final String name;
   final Color color;
+  final bool isMainColor;
 
   const NamedColour({
     required this.name,
     required this.color,
+    this.isMainColor = false
   });
 
   @override

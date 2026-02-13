@@ -1,8 +1,8 @@
 
 import 'package:flutter/material.dart';
-import 'package:knitty_griddy/controls/colours_toolbar_panel.dart';
-import 'package:knitty_griddy/controls/grid_options_toolbar_panel.dart';
-import 'package:knitty_griddy/controls/stitches_toolbar_panel.dart';
+import 'package:knitty_griddy/controls/toolbar/colours_toolbar_panel.dart';
+import 'package:knitty_griddy/controls/toolbar/grid_options_toolbar_panel.dart';
+import 'package:knitty_griddy/controls/toolbar/stitches_toolbar_panel.dart';
 
 class KnittingToolbar extends StatelessWidget {
 

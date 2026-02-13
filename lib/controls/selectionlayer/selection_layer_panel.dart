@@ -2,11 +2,11 @@
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/constants.dart';
 
-class AddColumnOrRowIndicator extends StatelessWidget {
+class SelectionLayerPanel extends StatelessWidget {
   final int rows;
   final int columns;
 
-  const AddColumnOrRowIndicator({
+  const SelectionLayerPanel({
     required this.rows,
     required this.columns,  
     super.key
