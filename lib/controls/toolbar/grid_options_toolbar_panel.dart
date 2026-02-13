@@ -68,6 +68,35 @@ class GridOptionsToolbarPanel extends StatelessWidget {
                   ),
                 ),
               ),
+              const Spacer(),
+              Row(
+                children: [
+                  const Spacer(),
+                  Selector<KnittyGriddyModel, bool>(
+                    selector: (_, model) => model.canUndo,
+                    builder: (context, canUndo, _) {
+                      return TextButton.icon(
+                        onPressed: canUndo ?
+                          () => Provider.of<KnittyGriddyModel>(context, listen: false).undo() : null, 
+                        icon: const Icon(Icons.undo),
+                        label: const Text('Undo'),
+                      );
+                    }
+                  ),
+                  Selector<KnittyGriddyModel, bool>(
+                    selector: (_, model) => model.canRedo,
+                    builder: (context, canRedo, _) {
+                      return TextButton.icon(
+                        onPressed: canRedo ?
+                          () => Provider.of<KnittyGriddyModel>(context, listen: false).redo() : null, 
+                        icon: const Icon(Icons.redo),
+                        label: const Text('Redo'),
+                      );
+                    }
+                  ),
+                  const Spacer(),
+                ],
+              )
             ],
           ),
         );

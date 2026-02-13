@@ -1,10 +1,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/constants.dart';
-import 'package:knitty_griddy/controls/add_column_or_row_indicator.dart';
-import 'package:knitty_griddy/controls/column_and_row_number_controls.dart';
+import 'package:knitty_griddy/controls/editgrid/add_column_or_row_indicators_panel.dart';
+import 'package:knitty_griddy/controls/editgrid/column_and_row_numbers_panel.dart';
 import 'package:knitty_griddy/controls/outline_layer.dart';
-import 'package:knitty_griddy/controls/selection_layer.dart';
+import 'package:knitty_griddy/controls/selectionlayer/selection_layer_panel.dart';
 import 'package:knitty_griddy/controls/stitches_grid.dart';
 import 'package:knitty_griddy/model/knitty_griddy_model.dart';
 import 'package:knitty_griddy/model/pattern_settings.dart';
@@ -23,33 +23,33 @@ class PatternControl extends StatelessWidget {
       builder: (context, patternSettings, _) {
         return SingleChildScrollView(
           child: SizedBox(
-            width: (patternSettings.columns * stitchCellWidth) + (2 * columnsAndRowNumbersWidth),
-            height: (patternSettings.rows * stitchCellHeight) + (2 * columnsAndRowNumbersHeight),
+            width: (patternSettings.columns * stitchCellWidth) + (4 * columnsAndRowNumbersWidth),
+            height: (patternSettings.rows * stitchCellHeight) + (4 * columnsAndRowNumbersHeight),
             child: Stack(
               children: [
                 // colored background
                 Positioned(
-                  top: stitchCellHeight,
-                  left: stitchCellWidth,
+                  top: 2 * stitchCellHeight,
+                  left: 2 * stitchCellWidth,
                   child: SizedBox(
                     width: patternSettings.columns * stitchCellWidth,
                     height: patternSettings.rows * stitchCellHeight,
                     child: Container(color: const Color.fromARGB(30, 30, 30, 30),)
                   )
                 ),
-                Positioned(top: stitchCellHeight, left: stitchCellWidth, 
+                Positioned(top: 2 * stitchCellHeight, left: 2 * stitchCellWidth, 
                   child: StitchesGrid(
                     rows: patternSettings.rows, columns: patternSettings.columns, 
                   )
                 ),
+                const Positioned(top: stitchCellHeight, left: stitchCellWidth,
+                  child: ColumnAndRowNumbersPanel()),
                 Positioned(
-                  child: ColumnAndRowNumberControls(patternSettings: patternSettings)),
-                Positioned(top: stitchCellHeight, left: stitchCellWidth, 
-                  child: AddColumnOrRowIndicator(rows: patternSettings.rows, columns: patternSettings.columns,)),
-                Positioned(
+                  child: AddColumnOrRowIndicatorsPanel(rows: patternSettings.rows, columns: patternSettings.columns,)),
+                Positioned(top: stitchCellHeight, left: stitchCellWidth,
                   child: OutlineLayer(rows: patternSettings.rows, columns: patternSettings.columns,)),
-                Positioned(top: stitchCellHeight, left: stitchCellWidth, 
-                  child: SelectionLayer(rows: patternSettings.rows, columns: patternSettings.columns,)),
+                Positioned(top: 2 * stitchCellHeight, left: 2 * stitchCellWidth, 
+                  child: SelectionLayerPanel(rows: patternSettings.rows, columns: patternSettings.columns,)),
               ],
             ),
           )

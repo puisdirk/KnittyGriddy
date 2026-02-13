@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:knitty_griddy/constants.dart';
 import 'package:knitty_griddy/controls/named_colour.dart';
 import 'package:knitty_griddy/stitchrepo/stitch_definition.dart';
 import 'package:knitty_griddy/stitchrepo/stitch_repository.dart';
@@ -25,7 +26,7 @@ class StitchCell {
   });
 
   factory StitchCell.empty(int row, int column) {
-    return StitchCell(row: row, column: column, stitchDefinition: StitchRepository.noStitch, colour: const NamedColour(name: 'MC', color: Colors.white));
+    return StitchCell(row: row, column: column, stitchDefinition: StitchRepository.noStitch, colour: defaultMainColor);
   }
 
   StitchCell copyWith({

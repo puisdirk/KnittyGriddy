@@ -24,6 +24,9 @@ class KnittyGriddyModel extends ChangeNotifier {
     _undoRedoManager.store(_model.knittingPattern.copyWith());
   }
 
+  bool get canUndo => _undoRedoManager.canUndo();
+  bool get canRedo => _undoRedoManager.canRedo();
+
   void undo() {
     if (_undoRedoManager.canUndo()) {
       _model = _model.copyWith(knittingPattern: _undoRedoManager.undo());
@@ -113,7 +116,6 @@ class KnittyGriddyModel extends ChangeNotifier {
   }
   
   void setStitchColour(int row, int column, NamedColour colour) {
-
     _storeForUndo();
     
     _model = _model.copyWith(
@@ -127,4 +129,159 @@ class KnittyGriddyModel extends ChangeNotifier {
     );
     notifyListeners();
   }
+
+  void insertColumn(int beforeColumn) {
+    _storeForUndo();
+
+    // Find multi-column stitches that will get broken
+    List<StitchCell> brokenStitches = _model.knittingPattern.stitches.where((stitch) =>
+      stitch.stitchDefinition.columns > 1 && 
+      beforeColumn > stitch.column - (stitch.stitchDefinitionColumn - 1) && 
+      beforeColumn < (stitch.column - (stitch.stitchDefinitionColumn - 1)) + stitch.stitchDefinition.columns
+    ).toList();
+
+    // Clear these broken stitches
+    _model = _model.copyWith(
+      knittingPattern: _model.knittingPattern.copyWith(
+        stitches: _model.knittingPattern.stitches.map((stitch) => 
+          brokenStitches.contains(stitch) ? stitch.copyWith(
+            stitchDefinition: StitchRepository.noStitch, stitchDefinitionColumn: 1) : stitch
+        ).toList()
+      )
+    );
+
+    _model = _model.copyWith(
+      knittingPattern: _model.knittingPattern.copyWith(
+        patternSettings: _model.knittingPattern.patternSettings.copyWith(
+          columns: _model.knittingPattern.patternSettings.columns + 1,
+        ),
+        stitches: _model.knittingPattern.stitches.map((stitch) =>
+          stitch.column < beforeColumn ? 
+            stitch : 
+            stitch.copyWith(column: stitch.column + 1)
+        ).toList()
+      )
+    );
+
+    List<StitchCell> newStitches = List.from(_model.knittingPattern.stitches);
+    newStitches.addAll(List<StitchCell>.generate(
+      _model.knittingPattern.patternSettings.rows,
+      (row) =>
+        StitchCell(
+          row: row + 1, 
+          column: beforeColumn, 
+          stitchDefinition: StitchRepository.noStitch, 
+          colour: _model.knittingPattern.mainColour
+        )
+    ));
+
+    _model = _model.copyWith(knittingPattern: _model.knittingPattern.copyWith(stitches: newStitches));
+
+    notifyListeners();
+  }
+
+  void insertRow(int beforeRow) {
+    _storeForUndo();
+
+    _model = _model.copyWith(
+      knittingPattern: _model.knittingPattern.copyWith(
+        patternSettings: _model.knittingPattern.patternSettings.copyWith(
+          rows: _model.knittingPattern.patternSettings.rows + 1
+        ),
+        stitches: _model.knittingPattern.stitches.map((stitch) =>
+          stitch.row < beforeRow ? stitch : stitch.copyWith(
+            row: stitch.row + 1
+          )
+        ).toList()
+      )
+    );
+
+    List<StitchCell> newStitches = List.from(_model.knittingPattern.stitches);
+    newStitches.addAll(
+      List<StitchCell>.generate(
+        _model.knittingPattern.patternSettings.columns, 
+        (col) => 
+          StitchCell(
+            row: beforeRow, 
+            column: col + 1, 
+            stitchDefinition: StitchRepository.noStitch, 
+            colour: _model.knittingPattern.mainColour
+          )
+      )
+    );
+
+    _model = _model.copyWith(knittingPattern: _model.knittingPattern.copyWith(stitches: newStitches));
+
+    notifyListeners();
+  }
+
+  void deleteColumn(int column) {
+    _storeForUndo();
+
+    // Find multi-column stitches that will get broken
+    List<StitchCell> brokenStitches = _model.knittingPattern.stitches.where((stitch) =>
+      stitch.stitchDefinition.columns > 1 && 
+      column >= stitch.column - (stitch.stitchDefinitionColumn - 1) && 
+      column < (stitch.column - (stitch.stitchDefinitionColumn - 1)) + stitch.stitchDefinition.columns
+    ).toList();
+
+    // Clear these broken stitches
+    _model = _model.copyWith(
+      knittingPattern: _model.knittingPattern.copyWith(
+        stitches: _model.knittingPattern.stitches.map((stitch) => 
+          brokenStitches.contains(stitch) ? stitch.copyWith(
+            stitchDefinition: StitchRepository.noStitch, stitchDefinitionColumn: 1) : stitch
+        ).toList()
+      )
+    );
+
+    // Remove the column stitches
+    _model = _model.copyWith(
+      knittingPattern: _model.knittingPattern.copyWith(
+        stitches: _model.knittingPattern.stitches.where((stitch) => stitch.column != column).toList()
+      )
+    );
+
+    _model = _model.copyWith(
+      knittingPattern: _model.knittingPattern.copyWith(
+        patternSettings: _model.knittingPattern.patternSettings.copyWith(
+          columns: _model.knittingPattern.patternSettings.columns - 1,
+        ),
+        stitches: _model.knittingPattern.stitches.map((stitch) =>
+          stitch.column > column ? 
+            stitch.copyWith(column: stitch.column - 1) :
+            stitch
+        ).toList()
+      )
+    );
+
+    notifyListeners();
+  }
+
+  void deleteRow(int row) {
+    _storeForUndo();
+
+    // Remove the stitches
+    _model = _model.copyWith(
+      knittingPattern: _model.knittingPattern.copyWith(
+        stitches: _model.knittingPattern.stitches.where((stitch) => stitch.row != row).toList()
+      )
+    );
+
+    _model = _model.copyWith(
+      knittingPattern: _model.knittingPattern.copyWith(
+        patternSettings: _model.knittingPattern.patternSettings.copyWith(
+          rows: _model.knittingPattern.patternSettings.rows - 1
+        ),
+        stitches: _model.knittingPattern.stitches.map((stitch) =>
+          stitch.row < row ? stitch : stitch.copyWith(
+            row: stitch.row - 1
+          )
+        ).toList()
+      )
+    );
+
+    notifyListeners();
+  }
+
 }
