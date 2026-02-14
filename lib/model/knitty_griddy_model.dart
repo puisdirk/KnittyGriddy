@@ -21,6 +21,7 @@ class KnittyGriddyModel extends ChangeNotifier {
   }
 
   void _storeForUndo() {
+    print('storing');
     _undoRedoManager.store(_model.knittingPattern.copyWith());
   }
 
@@ -102,8 +103,6 @@ class KnittyGriddyModel extends ChangeNotifier {
       return;
     }
 
-    _storeForUndo();
-
     _model = _model.copyWith(
       knittingPattern: _model.knittingPattern.copyWith(
         stitches: _model.knittingPattern.stitches.map((stitch) =>
@@ -112,12 +111,11 @@ class KnittyGriddyModel extends ChangeNotifier {
         ).toList(),
       )
     );
+    _storeForUndo();
     notifyListeners();
   }
   
   void setStitchColour(int row, int column, NamedColour colour) {
-    _storeForUndo();
-    
     _model = _model.copyWith(
       knittingPattern: _model.knittingPattern.copyWith(
         stitches: _model.knittingPattern.stitches.map((stitch) =>
@@ -127,12 +125,11 @@ class KnittyGriddyModel extends ChangeNotifier {
         ).toList()
       )
     );
+    _storeForUndo();
     notifyListeners();
   }
 
   void insertColumn(int beforeColumn) {
-    _storeForUndo();
-
     // Find multi-column stitches that will get broken
     List<StitchCell> brokenStitches = _model.knittingPattern.stitches.where((stitch) =>
       stitch.stitchDefinition.columns > 1 && 
@@ -177,12 +174,11 @@ class KnittyGriddyModel extends ChangeNotifier {
 
     _model = _model.copyWith(knittingPattern: _model.knittingPattern.copyWith(stitches: newStitches));
 
+    _storeForUndo();
     notifyListeners();
   }
 
   void insertRow(int beforeRow) {
-    _storeForUndo();
-
     _model = _model.copyWith(
       knittingPattern: _model.knittingPattern.copyWith(
         patternSettings: _model.knittingPattern.patternSettings.copyWith(
@@ -212,12 +208,11 @@ class KnittyGriddyModel extends ChangeNotifier {
 
     _model = _model.copyWith(knittingPattern: _model.knittingPattern.copyWith(stitches: newStitches));
 
+    _storeForUndo();
     notifyListeners();
   }
 
   void deleteColumn(int column) {
-    _storeForUndo();
-
     // Find multi-column stitches that will get broken
     List<StitchCell> brokenStitches = _model.knittingPattern.stitches.where((stitch) =>
       stitch.stitchDefinition.columns > 1 && 
@@ -255,12 +250,11 @@ class KnittyGriddyModel extends ChangeNotifier {
       )
     );
 
+    _storeForUndo();
     notifyListeners();
   }
 
   void deleteRow(int row) {
-    _storeForUndo();
-
     // Remove the stitches
     _model = _model.copyWith(
       knittingPattern: _model.knittingPattern.copyWith(
@@ -281,6 +275,7 @@ class KnittyGriddyModel extends ChangeNotifier {
       )
     );
 
+    _storeForUndo();
     notifyListeners();
   }
 
