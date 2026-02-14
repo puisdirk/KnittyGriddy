@@ -49,7 +49,7 @@ class _DeleteColumnIndicatorState extends State<DeleteColumnIndicator> {
             height: widget.height - (2 * stitchCellHeight), 
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: (stitchCellWidth / 2) - 2),
-              child: Container(color: visible ? Colors.red.shade700 : Colors.transparent),
+              child: IgnorePointer(child: Container(color: visible ? Colors.red.shade700 : Colors.transparent)),
             )),
           MouseRegion(
             onHover: (_) { if (!visible) {setState(() => visible = true);} },

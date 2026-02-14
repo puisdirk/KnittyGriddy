@@ -9,7 +9,7 @@ import 'package:provider/provider.dart';
 
 class StitchCellControl extends StatelessWidget {
   final StitchCell stitchCell;
-  
+
   const StitchCellControl({
     required this.stitchCell,
     super.key
@@ -24,6 +24,7 @@ class StitchCellControl extends StatelessWidget {
           top: (stitchCell.row - 1) * stitchCellHeight,
           left: (stitchCell.column - 1) * stitchCellWidth,  
           child: MouseRegion(
+            cursor: SystemMouseCursors.click,
             onEnter: (event) {
               if (appState.mouseOption == MouseOption.painting && event.buttons != 0) {
                 if (appState.currentTool == Tool.stitch && stitchCell.stitchDefinition != appState.selectedStitch) {
@@ -57,11 +58,9 @@ class StitchCellControl extends StatelessWidget {
                 color: stitchCell.colour.color,
                 height: stitchCellHeight,
                 width: stitchCellWidth,
-                child: Center(
-                  child: StitchPartIcon(
-                    stitchDefinition: stitchCell.stitchDefinition, 
-                    stitchDefinitionColumn: stitchCell.stitchDefinitionColumn,
-                  ),
+                child: StitchPartIcon(
+                  stitchDefinition: stitchCell.stitchDefinition, 
+                  stitchDefinitionColumn: stitchCell.stitchDefinitionColumn,
                 ),
               ),
             ),

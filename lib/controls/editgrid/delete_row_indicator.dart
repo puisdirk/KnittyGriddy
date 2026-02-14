@@ -49,7 +49,7 @@ class _DeleteRowIndicatorState extends State<DeleteRowIndicator> {
             width: widget.width - (2 * stitchCellWidth), 
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: (stitchCellHeight / 2) - 2),
-              child: Container(color: visible ? Colors.red.shade700 : Colors.transparent),
+              child: IgnorePointer(child: Container(color: visible ? Colors.red.shade700 : Colors.transparent)),
             )),
           MouseRegion(
             onHover: (_) { if (!visible) {setState(() => visible = true);} },

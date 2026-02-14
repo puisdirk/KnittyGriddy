@@ -14,6 +14,7 @@ class UndoRedoManager<T> {
     if (maxItems != null && _undoStack.length > maxItems!) {
       _undoStack.removeAt(0);
     }
+    print('undo has ${_undoStack.length} items, redo has ${_redoStack.length}');
   }
 
   void dispose() {
@@ -28,6 +29,7 @@ class UndoRedoManager<T> {
     if (canUndo()) {
       final undoneState = _undoStack.removeLast();
       _redoStack.add(undoneState);
+    print('undo has ${_undoStack.length} items, redo has ${_redoStack.length}');
       return _undoStack.isEmpty ? null : _undoStack.last;
     }
     return null;
@@ -37,6 +39,7 @@ class UndoRedoManager<T> {
     if (canRedo()) {
       final redoneState = _redoStack.removeLast();
       _undoStack.add(redoneState);
+    print('undo has ${_undoStack.length} items, redo has ${_redoStack.length}');
       return redoneState;
     }
     return null;
