@@ -48,8 +48,8 @@ class PatternControl extends StatelessWidget {
                   child: AddColumnOrRowIndicatorsPanel(rows: patternSettings.rows, columns: patternSettings.columns,)),
                 Positioned(top: stitchCellHeight, left: stitchCellWidth,
                   child: IgnorePointer(child: OutlineLayer(rows: patternSettings.rows, columns: patternSettings.columns,))),
-                Positioned(top: 2 * stitchCellHeight, left: 2 * stitchCellWidth, 
-                  child: IgnorePointer(child: SelectionLayerPanel(rows: patternSettings.rows, columns: patternSettings.columns,))),
+                Positioned(left: stitchCellWidth, top: stitchCellHeight,
+                  child: SelectionLayerPanel(rows: patternSettings.rows, columns: patternSettings.columns,)),
               ],
             ),
           )
