@@ -190,6 +190,7 @@ class KnittyGriddyModel extends ChangeNotifier {
       )
     );
 
+    // Move the columns after the insertion point to the right
     _model = _model.copyWith(
       knittingPattern: _model.knittingPattern.copyWith(
         patternSettings: _model.knittingPattern.patternSettings.copyWith(
@@ -204,12 +205,13 @@ class KnittyGriddyModel extends ChangeNotifier {
       )
     );
 
+    // Create the new column of cells
     List<StitchCell> newStitches = List.from(_model.knittingPattern.stitches);
     newStitches.addAll(List<StitchCell>.generate(
       _model.knittingPattern.patternSettings.rows,
-      (row) =>
+      (idx) =>
         StitchCell(
-          row: row + 1, 
+          row: idx + 1, 
           column: beforeColumn, 
           stitchDefinition: StitchRepository.noStitch, 
           colour: _model.knittingPattern.mainColour
@@ -408,4 +410,42 @@ class KnittyGriddyModel extends ChangeNotifier {
     notifyListeners();
   }
 
+// ************************ Edit or create colours *******************************************
+
+  void setNamedColour(NamedColour colour, Color newColor, String newName) {
+
+    _model = _model.copyWith(
+      knittingPattern: _model.knittingPattern.copyWith(
+        usedColours: _model.knittingPattern.usedColours.map((col) =>
+          col.name != colour.name ? col : col.copyWith(
+            name: newName,
+            color: newColor
+          )
+        ).toList(),
+        stitches: _model.knittingPattern.stitches.map((stitch) =>
+          stitch.colour != colour ? stitch : stitch.copyWith(
+            colour: stitch.colour.copyWith(
+              name: newName,
+              color: newColor
+            )
+          )
+        ).toList()
+      )
+    );
+
+    _storeForUndo();
+    notifyListeners();
+  }
+
+  void addNamedColour(Color newColor, String newName) {
+    _model = _model.copyWith(
+      knittingPattern: _model.knittingPattern.copyWith(
+        usedColours: [..._model.knittingPattern.usedColours, NamedColour(name: newName, color: newColor)]
+      )
+    );
+
+    _storeForUndo();
+    notifyListeners();
+  }
 }
+

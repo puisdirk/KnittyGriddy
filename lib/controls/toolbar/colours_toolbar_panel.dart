@@ -1,6 +1,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/controls/named_colour.dart';
+import 'package:knitty_griddy/controls/toolbar/add_new_colour_dialog.dart';
+import 'package:knitty_griddy/controls/toolbar/edit_colour_dialog.dart';
 import 'package:knitty_griddy/model/app_state.dart';
 import 'package:knitty_griddy/model/knitty_griddy_model.dart';
 import 'package:knitty_griddy/model/selection.dart';
@@ -86,9 +88,14 @@ class ColoursToolbarPanel extends StatelessWidget {
                                       IconButton(
                                         icon: const Icon(Icons.edit), 
                                         iconSize: iconWidth, 
-                                        onPressed: () {
-                                          // TODO: show colour editing dialogue for selected NamedColor
-                                        },),
+                                        onPressed: () => 
+                                          showDialog(
+                                            context: context,
+                                            builder: (context) {
+                                              return EditColourDialog(colour: colour, usedColours: usedColours);
+                                            }
+                                          ),
+                                      ),
                                       SizedBox(width: spacerWidth,),
                                     ],
                                   ),
@@ -105,10 +112,14 @@ class ColoursToolbarPanel extends StatelessWidget {
               Align(
                 alignment: Alignment.bottomCenter, 
                 child: IconButton.outlined(
-                  onPressed: () {
-                  // TODO: show colour editing dialogue withouth a selected NamedColor
-                }, 
-                icon: const Icon(Icons.add))
+                  onPressed: () => showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AddNewColourDialog(usedColours: usedColours);
+                    }
+                  ),
+                  icon: const Icon(Icons.add)
+                )
               ),
             ],
           );

@@ -71,17 +71,6 @@ const List<StitchCell> defaultStitches = [
   StitchCell(row: 5, column: 9, stitchDefinition: StitchRepository.noStitch, colour: defaultMainColor),
   StitchCell(row: 5, column: 10, stitchDefinition: StitchRepository.noStitch, colour: defaultMainColor),
 
-  StitchCell(row: 5, column: 1, stitchDefinition: StitchRepository.noStitch, colour: defaultMainColor),
-  StitchCell(row: 5, column: 2, stitchDefinition: StitchRepository.noStitch, colour: defaultMainColor),
-  StitchCell(row: 5, column: 3, stitchDefinition: StitchRepository.noStitch, colour: defaultMainColor),
-  StitchCell(row: 5, column: 4, stitchDefinition: StitchRepository.noStitch, colour: defaultMainColor),
-  StitchCell(row: 5, column: 5, stitchDefinition: StitchRepository.noStitch, colour: defaultMainColor),
-  StitchCell(row: 5, column: 6, stitchDefinition: StitchRepository.noStitch, colour: defaultMainColor),
-  StitchCell(row: 5, column: 7, stitchDefinition: StitchRepository.noStitch, colour: defaultMainColor),
-  StitchCell(row: 5, column: 8, stitchDefinition: StitchRepository.noStitch, colour: defaultMainColor),
-  StitchCell(row: 5, column: 9, stitchDefinition: StitchRepository.noStitch, colour: defaultMainColor),
-  StitchCell(row: 5, column: 10, stitchDefinition: StitchRepository.noStitch, colour: defaultMainColor),
-
   StitchCell(row: 6, column: 1, stitchDefinition: StitchRepository.noStitch, colour: defaultMainColor),
   StitchCell(row: 6, column: 2, stitchDefinition: StitchRepository.noStitch, colour: defaultMainColor),
   StitchCell(row: 6, column: 3, stitchDefinition: StitchRepository.noStitch, colour: defaultMainColor),
