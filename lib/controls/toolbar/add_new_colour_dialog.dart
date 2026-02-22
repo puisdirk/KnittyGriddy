@@ -54,12 +54,15 @@ class _AddNewColourDialogState extends State<AddNewColourDialog> {
             ColorPicker(
               pickerColor: pickerColor,
               onColorChanged: (newColor) => setState(() => pickerColor = newColor),
-              displayThumbColor: true,
+              displayThumbColor: false,
               portraitOnly: true,
             ),
             Row(
               children: [
-                const Text('Name: '),
+                Text('Name: ', style: isValidColourName ? 
+                  Theme.of(context).textTheme.bodyMedium : 
+                  Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.red)
+                ),
                 SizedBox(
                   width: 200,
                   child: TextField(

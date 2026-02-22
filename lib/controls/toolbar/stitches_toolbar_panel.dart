@@ -4,6 +4,7 @@ import 'package:knitty_griddy/controls/stitch_icon.dart';
 import 'package:knitty_griddy/model/app_state.dart';
 import 'package:knitty_griddy/model/knitty_griddy_model.dart';
 import 'package:knitty_griddy/model/selection.dart';
+import 'package:knitty_griddy/pages/stitch_repo_page.dart';
 import 'package:knitty_griddy/stitchrepo/stitch_definition.dart';
 import 'package:provider/provider.dart';
 
@@ -86,12 +87,24 @@ class StitchesToolbarPanel extends StatelessWidget {
               const SizedBox(height: 20,),
               Align(
                 alignment: Alignment.bottomCenter, 
-                child: IconButton.outlined(
-                  onPressed: () {
-                  // TODO: show stitches repo to select a stitch
-                }, 
-                icon: const Icon(Icons.add)),
-                // TODO: add a fill button to fill with preset patterns
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton.outlined(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (context) => const StitchRepoPage())
+                        );
+                      }, 
+                      icon: const Icon(Icons.add)
+                    ),
+                    const SizedBox(width: 20,),
+                    IconButton.outlined(
+                      onPressed: () => Provider.of<KnittyGriddyModel>(context, listen: false).pruneUnusedStitches(),
+                      icon: const Icon(Icons.content_cut)
+                    ),
+                  ],
+                ),
               ),
             ],
           );

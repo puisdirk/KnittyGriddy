@@ -48,6 +48,35 @@ class KnittyGriddyModel extends ChangeNotifier {
   List<StitchDefinition> get usedStitches => _model.knittingPattern.usedStitches;
   List<NamedColour> get usedColours => _model.knittingPattern.usedColours;
   Selection get selection => _model.knittingPattern.selection;
+  KnittingPattern get knittingPattern => _model.knittingPattern;
+
+/*  List<StitchDefinition> selectStitchDefinitions(String filter) {
+    if (filter.isEmpty) {
+      return StitchRepository.definitions;
+    }
+
+    return StitchRepository.definitions.where((sd) => sd.passesFilter(filter)).toList();
+  }
+*/
+  Map<String, List<StitchDefinition>> selectStitchDefinitionsPerCategory(String filter) {
+    if (filter.isEmpty) {
+      return StitchRepository.definitionsPerCategory;
+    }
+
+    Map<String, List<StitchDefinition>> filtered = {};
+    StitchRepository.definitionsPerCategory.forEach((key, value) {
+      if (value.any((sd) => sd.passesFilter(filter))) {
+        filtered[key] = value.where((sd) => sd.passesFilter(filter)).toList();
+      }
+    });
+    return filtered;
+  }
+
+  bool isStitchUsedInPattern(StitchDefinition definition) =>
+    _model.knittingPattern.stitches.any((cell) => cell.stitchDefinition == definition);
+
+  bool isColourUsedInPattern(NamedColour colour) =>
+    colour.isMainColor || _model.knittingPattern.stitches.any((cell) => cell.colour == colour);
 
   AppState get appState => _model.appState;
   void appUseStitch(StitchDefinition stitchDefinition) {
@@ -447,5 +476,56 @@ class KnittyGriddyModel extends ChangeNotifier {
     _storeForUndo();
     notifyListeners();
   }
+
+  // *************************** Stitch repo ************************************************
+
+  void toggleUsedStitch(StitchDefinition definition) {
+    final bool wantToRemove = _model.knittingPattern.usedStitches.contains(definition);
+    
+    if (wantToRemove) {
+      // Guard against removing definitions in use on the pattern
+      if (isStitchUsedInPattern(definition)) {
+        return;
+      }
+
+      _model = _model.copyWith(
+        knittingPattern: _model.knittingPattern.copyWith(
+          usedStitches: _model.knittingPattern.usedStitches.where((s) => s != definition).toList()
+        )
+      );
+    } else {
+      _model = _model.copyWith(
+        knittingPattern: _model.knittingPattern.copyWith(
+          usedStitches: [..._model.knittingPattern.usedStitches, definition]
+        )
+      );
+    }
+
+    _storeForUndo();
+    notifyListeners();
+  }
+
+  void pruneUnusedStitches() {
+    _model = _model.copyWith(
+      knittingPattern: _model.knittingPattern.copyWith(
+        usedStitches: _model.knittingPattern.usedStitches.where((us) => us == StitchRepository.noStitch || isStitchUsedInPattern(us)).toList()
+      )
+    );
+
+    _storeForUndo();
+    notifyListeners();
+  }
+
+  void pruneUnusedColours() {
+    _model = _model.copyWith(
+      knittingPattern: _model.knittingPattern.copyWith(
+        usedColours: _model.knittingPattern.usedColours.where((uc) => isColourUsedInPattern(uc)).toList()
+      )
+    );
+
+    _storeForUndo();
+    notifyListeners();
+  }
+
 }
 

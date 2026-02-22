@@ -66,7 +66,10 @@ class _EditColourDialogState extends State<EditColourDialog> {
               ),
               Row(
                 children: [
-                  const Text('Name: '),
+                  Text('Name: ', style: isValidColourName ? 
+                    Theme.of(context).textTheme.bodyMedium : 
+                    Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.red)
+                  ),
                   SizedBox(
                     width: 200,
                     child: TextField(
