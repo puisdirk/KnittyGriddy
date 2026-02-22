@@ -111,14 +111,24 @@ class ColoursToolbarPanel extends StatelessWidget {
               const SizedBox(height: 20,),
               Align(
                 alignment: Alignment.bottomCenter, 
-                child: IconButton.outlined(
-                  onPressed: () => showDialog(
-                    context: context,
-                    builder: (context) {
-                      return AddNewColourDialog(usedColours: usedColours);
-                    }
-                  ),
-                  icon: const Icon(Icons.add)
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton.outlined(
+                      onPressed: () => showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AddNewColourDialog(usedColours: usedColours);
+                        }
+                      ),
+                      icon: const Icon(Icons.add)
+                    ),
+                    const SizedBox(width: 20,),
+                    IconButton.outlined(
+                      onPressed: () => Provider.of<KnittyGriddyModel>(context, listen: false).pruneUnusedColours(), 
+                      icon: const Icon(Icons.content_cut)
+                    )
+                  ],
                 )
               ),
             ],

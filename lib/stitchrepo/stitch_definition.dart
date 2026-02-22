@@ -27,6 +27,10 @@ class StitchDefinition {
     return iconData[column - 1];
   }
   int get columns => iconData.length;
+  
+  bool passesFilter(String filter) =>
+    name.toLowerCase().contains(filter.toLowerCase()) || abbreviation.toLowerCase().contains(filter.toLowerCase()) || 
+    category.toLowerCase().contains(filter.toLowerCase()) || description.toLowerCase().contains(filter.toLowerCase());
 
   @override
   int get hashCode => name.hashCode ^ abbreviation.hashCode ^ iconData.hashCode ^ category.hashCode ^ description.hashCode;

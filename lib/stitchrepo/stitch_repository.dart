@@ -25,4 +25,13 @@ class StitchRepository {
   static const StitchDefinition knit = StitchDefinition(name: 'Knit', abbreviation: 'k', iconData: [[Knitting.knit]], category: 'General');
   static const StitchDefinition purl = StitchDefinition(name: 'Purl', abbreviation: 'p', iconData: [[Knitting.purl]], category: 'General');
   static const StitchDefinition c2r = StitchDefinition(name: 'C2R', abbreviation: 'C2R', iconData: [[Knitting.cr2_1], [Knitting.c2r_2], [Knitting.c2r_3], [Knitting.c2r_4]], category: 'Cables');
+
+  static const List<StitchDefinition> definitions = [
+    noStitch, knit, purl, c2r,
+  ];
+
+  static const Map<String, List<StitchDefinition>> definitionsPerCategory = {
+    'general': [noStitch, knit, purl, ],
+    'cables': [c2r],
+  };
 }
