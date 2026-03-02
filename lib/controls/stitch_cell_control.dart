@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:knitty_griddy/color_utilities.dart';
 import 'package:knitty_griddy/constants.dart';
 import 'package:knitty_griddy/controls/stitch_part_icon.dart';
 import 'package:knitty_griddy/model/app_state.dart';
@@ -71,6 +72,7 @@ class StitchCellControl extends StatelessWidget {
                     child: StitchPartIcon(
                       stitchDefinition: stitchCell.stitchDefinition, 
                       stitchDefinitionColumn: stitchCell.stitchDefinitionColumn,
+                      iconColor: ColorUtilities.contrastingFromColor(stitchCell.colour.color),
                     ),
                   );
                 }
