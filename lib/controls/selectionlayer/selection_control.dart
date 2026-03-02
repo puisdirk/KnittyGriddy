@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/constants.dart';
+import 'package:knitty_griddy/controls/selectionlayer/selection_handle_control.dart';
 import 'package:knitty_griddy/model/knitty_griddy_model.dart';
 import 'package:knitty_griddy/model/selection.dart';
 import 'package:provider/provider.dart';
@@ -296,90 +297,53 @@ class _SelectionControlState extends State<SelectionControl> {
               width: panType == PanType.none ? selection.numberOfColumns * stitchCellWidth : panSelectionRect.width,
               height: panType == PanType.none ? selection.numberOfRows * stitchCellHeight : panSelectionRect.height,
               child: Container(
-                color: Colors.yellow.withAlpha(50),
+                decoration: BoxDecoration(
+                  color: Colors.yellow.withAlpha(50),
+                  border: Border.all(width: 2, color: Colors.green)
+                ),
                 child: Stack(
                   children: [
                     // Top left
                     Positioned(
-                      child: MouseRegion(
-                        cursor: SystemMouseCursors.resizeUpLeft,
-                        child: GestureDetector(
-                          onPanStart: (details) {
-                            startPan(PanType.topleft);
-                          },
-                          onPanUpdate: (details) {
-                            addPanOffset(details.delta);
-                          },
-                          onPanEnd: (details) {
-                            endPan();
-                          },
-                          child: SizedBox(
-                            width: stitchCellWidth / 2, height: stitchCellHeight / 2,
-                            child: Container(color: Colors.red.withAlpha(70),),),
-                        ),
+                      child: SelectionHandleControl(
+                        panType: PanType.topleft, 
+                        cursor: SystemMouseCursors.resizeUpLeft, 
+                        startPan: startPan, 
+                        addPanOffset: addPanOffset, 
+                        endPan: endPan
                       ),
                     ),
                     // Top right
                     Positioned(
                       right: 0,
-                      child: MouseRegion(
-                        cursor: SystemMouseCursors.resizeUpRight,
-                        child: GestureDetector(
-                          onPanStart: (details) {
-                            startPan(PanType.topright);
-                          },
-                          onPanUpdate: (details) {
-                            addPanOffset(details.delta);
-                          },
-                          onPanEnd: (details) {
-                            endPan();
-                          },
-                          child: SizedBox(
-                            width: stitchCellWidth / 2, height: stitchCellHeight / 2,
-                            child: Container(color: Colors.red.withAlpha(70),),),
-                        ),
+                      child: SelectionHandleControl(
+                        panType: PanType.topright, 
+                        cursor: SystemMouseCursors.resizeUpRight, 
+                        startPan: startPan, 
+                        addPanOffset: addPanOffset, 
+                        endPan: endPan
                       ),
                     ),
                     // bottom left
                     Positioned(
                       bottom: 0,
-                      child: MouseRegion(
-                        cursor: SystemMouseCursors.resizeDownLeft,
-                        child: GestureDetector(
-                          onPanStart: (details) {
-                            startPan(PanType.bottomleft);
-                          },
-                          onPanUpdate: (details) {
-                            addPanOffset(details.delta);
-                          },
-                          onPanEnd: (details) {
-                            endPan();
-                          },
-                          child: SizedBox(
-                            width: stitchCellWidth / 2, height: stitchCellHeight / 2,
-                            child: Container(color: Colors.red.withAlpha(70),),),
-                        ),
+                      child: SelectionHandleControl(
+                        panType: PanType.bottomleft, 
+                        cursor: SystemMouseCursors.resizeDownLeft, 
+                        startPan: startPan, 
+                        addPanOffset: addPanOffset, 
+                        endPan: endPan
                       ),
                     ),
                     // Bottom right
                     Positioned(
                       right: 0, bottom: 0,
-                      child: MouseRegion(
-                        cursor: SystemMouseCursors.resizeDownRight,
-                        child: GestureDetector(
-                          onPanStart: (details) {
-                            startPan(PanType.bottomright);
-                          },
-                          onPanUpdate: (details) {
-                            addPanOffset(details.delta);
-                          },
-                          onPanEnd: (details) {
-                            endPan();
-                          },
-                          child: SizedBox(
-                            width: stitchCellWidth / 2, height: stitchCellHeight / 2,
-                            child: Container(color: Colors.red.withAlpha(70),),),
-                        ),
+                      child: SelectionHandleControl(
+                        panType: PanType.bottomright, 
+                        cursor: SystemMouseCursors.resizeDownRight, 
+                        startPan: startPan, 
+                        addPanOffset: addPanOffset, 
+                        endPan: endPan
                       ),
                     ),
                     // Top
@@ -389,22 +353,12 @@ class _SelectionControlState extends State<SelectionControl> {
                           ((selection.numberOfColumns * stitchCellWidth) / 2) - (stitchCellWidth / 4): 
                           (panSelectionRect.width / 2) - (stitchCellWidth / 4), 
                         top: 0,
-                        child: MouseRegion(
-                          cursor: SystemMouseCursors.resizeUp,
-                          child: GestureDetector(
-                            onPanStart: (details) {
-                              startPan(PanType.top);
-                            },
-                            onPanUpdate: (details) {
-                              addPanOffset(details.delta);
-                            },
-                            onPanEnd: (details) {
-                              endPan();
-                            },
-                            child: SizedBox(
-                              width: stitchCellWidth / 2, height: stitchCellHeight / 2,
-                              child: Container(color: Colors.red.withAlpha(70),),),
-                          ),
+                        child: SelectionHandleControl(
+                          panType: PanType.top, 
+                          cursor: SystemMouseCursors.resizeUp, 
+                          startPan: startPan, 
+                          addPanOffset: addPanOffset, 
+                          endPan: endPan
                         ),
                       ),
                     // Bottom
@@ -414,22 +368,12 @@ class _SelectionControlState extends State<SelectionControl> {
                           ((selection.numberOfColumns * stitchCellWidth) / 2) - (stitchCellWidth / 4): 
                           (panSelectionRect.width / 2) - (stitchCellWidth / 4), 
                         bottom: 0,
-                        child: MouseRegion(
-                          cursor: SystemMouseCursors.resizeDown,
-                          child: GestureDetector(
-                            onPanStart: (details) {
-                              startPan(PanType.bottom);
-                            },
-                            onPanUpdate: (details) {
-                              addPanOffset(details.delta);
-                            },
-                            onPanEnd: (details) {
-                              endPan();
-                            },
-                            child: SizedBox(
-                              width: stitchCellWidth / 2, height: stitchCellHeight / 2,
-                              child: Container(color: Colors.red.withAlpha(70),),),
-                          ),
+                        child: SelectionHandleControl(
+                          panType: PanType.bottom, 
+                          cursor: SystemMouseCursors.resizeDown, 
+                          startPan: startPan, 
+                          addPanOffset: addPanOffset, 
+                          endPan: endPan
                         ),
                       ),
                     // Left
@@ -439,22 +383,12 @@ class _SelectionControlState extends State<SelectionControl> {
                         top: panType == PanType.none ?
                           ((selection.numberOfRows * stitchCellHeight) / 2) - (stitchCellHeight / 4) :
                          (panSelectionRect.height / 2) - (stitchCellHeight / 4), 
-                        child: MouseRegion(
-                          cursor: SystemMouseCursors.resizeLeft,
-                          child: GestureDetector(
-                            onPanStart: (details) {
-                              startPan(PanType.left);
-                            },
-                            onPanUpdate: (details) {
-                              addPanOffset(details.delta);
-                            },
-                            onPanEnd: (details) {
-                              endPan();
-                            },
-                            child: SizedBox(
-                              width: stitchCellWidth / 2, height: stitchCellHeight / 2,
-                              child: Container(color: Colors.red.withAlpha(70),),),
-                          ),
+                        child: SelectionHandleControl(
+                          panType: PanType.left, 
+                          cursor: SystemMouseCursors.resizeLeft, 
+                          startPan: startPan, 
+                          addPanOffset: addPanOffset, 
+                          endPan: endPan
                         ),
                       ),
                     // Right
@@ -464,22 +398,12 @@ class _SelectionControlState extends State<SelectionControl> {
                         top: panType == PanType.none ?
                           ((selection.numberOfRows * stitchCellHeight) / 2) - (stitchCellHeight / 4) :
                           (panSelectionRect.height / 2) - (stitchCellHeight / 4), 
-                        child: MouseRegion(
-                          cursor: SystemMouseCursors.resizeRight,
-                          child: GestureDetector(
-                            onPanStart: (details) {
-                              startPan(PanType.right);
-                            },
-                            onPanUpdate: (details) {
-                              addPanOffset(details.delta);
-                            },
-                            onPanEnd: (details) {
-                              endPan();
-                            },
-                            child: SizedBox(
-                              width: stitchCellWidth / 2, height: stitchCellHeight / 2,
-                              child: Container(color: Colors.red.withAlpha(70),),),
-                          ),
+                        child: SelectionHandleControl(
+                          panType: PanType.right, 
+                          cursor: SystemMouseCursors.resizeRight, 
+                          startPan: startPan, 
+                          addPanOffset: addPanOffset, 
+                          endPan: endPan
                         ),
                       ),
                     // Middle
@@ -498,22 +422,12 @@ class _SelectionControlState extends State<SelectionControl> {
                         left: panType == PanType.none ? 
                           ((selection.numberOfColumns * stitchCellWidth) / 2) - (stitchCellWidth / 4): 
                           (panSelectionRect.width / 2) - (stitchCellWidth / 4),
-                        child: MouseRegion(
-                          cursor: SystemMouseCursors.move,
-                          child: GestureDetector(
-                            onPanStart: (details) {
-                              startPan(PanType.middle);
-                            },
-                            onPanUpdate: (details) {
-                              addPanOffset(details.delta);
-                            },
-                            onPanEnd: (details) {
-                              endPan();
-                            },
-                            child: SizedBox(
-                              width: stitchCellWidth / 2, height: stitchCellHeight / 2,
-                              child: Container(color: Colors.red.withAlpha(70),),),
-                          ),
+                        child: SelectionHandleControl(
+                          panType: PanType.middle, 
+                          cursor: SystemMouseCursors.move, 
+                          startPan: startPan, 
+                          addPanOffset: addPanOffset, 
+                          endPan: endPan
                         ),
                       ),
                   ],

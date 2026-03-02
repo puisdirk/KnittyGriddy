@@ -69,7 +69,8 @@ class GridLinesPainter extends CustomPainter {
     Paint gridLinesPaint = Paint()
       ..color = Colors.grey.shade600
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1;
+      ..strokeWidth = 1
+      ..blendMode = BlendMode.difference;
 
     canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), gridLinesPaint);
 

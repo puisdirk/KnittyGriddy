@@ -14,7 +14,7 @@ class GriddyModel {
 
   const GriddyModel({
     this.knittingPattern = const KnittingPattern(
-      patternSettings: PatternSettings(rows: defaultGridRows, columns: defaultGridColumns),
+      patternSettings: PatternSettings(rows: defaultGridRows, columns: defaultGridColumns, gridType: GridType.flat),
     ),
     this.appState = const AppState(),
   });

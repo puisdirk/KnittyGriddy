@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/constants.dart';
+import 'package:knitty_griddy/controls/selectionlayer/selection_control.dart';
 
 const Selection emptySelection = Selection(fromRow: -1, fromColumn: -1, upToRow: -1, upToColumn: -1);
 
@@ -65,4 +66,47 @@ class Selection {
     numberOfRows * stitchCellHeight
   );
 
+  int getRowOfPanType(PanType panType) {
+    if (isEmpty) {
+      return 0;
+    }
+    switch (panType) {
+      case PanType.bottom:
+      case PanType.bottomleft:
+      case PanType.bottomright:
+        return upToRow;
+      case PanType.left:
+      case PanType.middle:
+      case PanType.right:
+        return (fromRow + ((upToRow - fromRow) / 2)).floor();
+      case PanType.top:
+      case PanType.topleft:
+      case PanType.topright:
+        return fromRow;
+      case PanType.none:
+        return 0;
+    }
+  }
+
+  int getColOfPanType(PanType panType) {
+    if (isEmpty) {
+      return 0;
+    }
+    switch (panType) {
+      case PanType.bottom:
+      case PanType.middle:
+      case PanType.top:
+        return (fromColumn + ((upToColumn - fromColumn) / 2)).floor();
+      case PanType.right:
+      case PanType.bottomright:
+      case PanType.topright:
+        return upToColumn;
+      case PanType.left:
+      case PanType.bottomleft:
+      case PanType.topleft:
+        return fromColumn;
+      case PanType.none:
+        return 0;
+    }
+  }
 }

@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/controls/named_colour.dart';
+import 'package:knitty_griddy/controls/selectionlayer/selection_control.dart';
 import 'package:knitty_griddy/model/app_state.dart';
 import 'package:knitty_griddy/model/griddy_model.dart';
 import 'package:knitty_griddy/model/knitting_pattern.dart';
@@ -95,6 +96,25 @@ class KnittyGriddyModel extends ChangeNotifier {
     _model = _model.copyWith(
       appState: _model.appState.setSelectedMouseOption(mouseOption: option)
     );
+    notifyListeners();
+  }
+
+  Color cellColorAtSelectionHandle(PanType panType) {
+    int row = _model.knittingPattern.selection.getRowOfPanType(panType);
+    int col = _model.knittingPattern.selection.getColOfPanType(panType);
+    return _model.knittingPattern.stitches.firstWhere((cell) => cell.row == row && cell.column == col).colour.color;
+  }
+
+  void useGridType(GridType newGridType){
+    _model = _model.copyWith(
+      knittingPattern: _model.knittingPattern.copyWith(
+        patternSettings: _model.knittingPattern.patternSettings.copyWith(
+          gridType: newGridType
+        )
+      )
+    );
+
+    _storeForUndo();
     notifyListeners();
   }
 
@@ -511,7 +531,7 @@ class KnittyGriddyModel extends ChangeNotifier {
         usedStitches: _model.knittingPattern.usedStitches.where((us) => us == StitchRepository.noStitch || isStitchUsedInPattern(us)).toList()
       )
     );
-
+    
     _storeForUndo();
     notifyListeners();
   }
