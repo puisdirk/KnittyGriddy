@@ -51,21 +51,13 @@ class KnittyGriddyModel extends ChangeNotifier {
   Selection get selection => _model.knittingPattern.selection;
   KnittingPattern get knittingPattern => _model.knittingPattern;
 
-/*  List<StitchDefinition> selectStitchDefinitions(String filter) {
-    if (filter.isEmpty) {
-      return StitchRepository.definitions;
-    }
-
-    return StitchRepository.definitions.where((sd) => sd.passesFilter(filter)).toList();
-  }
-*/
   Map<String, List<StitchDefinition>> selectStitchDefinitionsPerCategory(String filter) {
     if (filter.isEmpty) {
-      return StitchRepository.definitionsPerCategory;
+      return StitchRepository.getDefinitionsPerCategory();
     }
 
     Map<String, List<StitchDefinition>> filtered = {};
-    StitchRepository.definitionsPerCategory.forEach((key, value) {
+    StitchRepository.getDefinitionsPerCategory().forEach((key, value) {
       if (value.any((sd) => sd.passesFilter(filter))) {
         filtered[key] = value.where((sd) => sd.passesFilter(filter)).toList();
       }

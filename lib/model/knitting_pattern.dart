@@ -20,7 +20,7 @@ class KnittingPattern {
 
   const KnittingPattern({
     required this.patternSettings,
-    this.usedStitches = const[StitchRepository.noStitch, StitchRepository.knit, StitchRepository.purl, StitchRepository.c2r],
+    this.usedStitches = const[StitchRepository.noStitch, StitchRepository.knit, StitchRepository.purl, ],
     this.usedColours = const[defaultMainColor],
     this.stitches = defaultStitches,
     this.selection = const Selection(fromRow: -1, fromColumn: -1, upToRow: -1, upToColumn: -1)

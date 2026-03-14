@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:knitty_griddy/controls/toolbar/knitting_toolbar.dart';
 import 'package:knitty_griddy/controls/pattern_control.dart';
+import 'package:knitty_griddy/model/font_service.dart';
 import 'package:knitty_griddy/model/knitty_griddy_model.dart';
 import 'package:knitty_griddy/pages/grid_settings_view.dart';
 import 'package:provider/provider.dart';
@@ -60,6 +61,10 @@ class _PatternPageState extends State<PatternPage> {
               onPressed: () => setState(() => isGridSettingsMenuOpen = !isGridSettingsMenuOpen),
             ),
           ),
+          IconButton(
+            icon: const Icon(Icons.share),
+            onPressed: () async => await FontService.parseFont(),
+          )
         ],
       ),
       body: KeyboardListener(
