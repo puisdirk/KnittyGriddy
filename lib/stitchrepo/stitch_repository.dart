@@ -1,37 +1,34 @@
-
-import 'package:flutter/material.dart';
 import 'package:knitty_griddy/knitting_icons.dart';
 import 'package:knitty_griddy/stitchrepo/stitch_definition.dart';
 
-//const noStitchDefinition = StitchDefinition(name: 'No stitch', abbreviation: '', iconData: [[Knitting.clear]], category: 'General');
-
-//@immutable
 class StitchRepository {
-  //final List<StitchDefinition> stitchDefinitions;
-
   StitchRepository._();
 
-/*  const StitchRepository() : stitchDefinitions = const[
-    noStitchDefinition,
-    StitchDefinition(name: 'Knit', abbreviation: 'k', iconData: [[Knitting.knit]], category: 'General'),
-    StitchDefinition(name: 'Purl', abbreviation: 'p', iconData: [[Knitting.purl]], category: 'General'),
-    StitchDefinition(name: 'C2R', abbreviation: 'C2R', iconData: [[Knitting.knit], [Knitting.purl], [Knitting.knit], [Knitting.purl]], category: 'Cables'),
-    StitchDefinition(name: 'JUSTUSINGAREALLYREALLYLONGNAMEHEREWWW', abbreviation: 's', iconData: [[Knitting.knit]]),
-  ];
-*/
-
-  static const StitchDefinition noStitch = StitchDefinition(name: 'No stitch', abbreviation: '', iconData: [[Knitting.clear]], category: 'General');
-  static const StitchDefinition errorStitch = StitchDefinition(name: 'Error stitch', abbreviation: '', iconData: [[Icons.question_mark]]);
+  static const StitchDefinition noStitch = StitchDefinition(name: 'No stitch', abbreviation: '', iconData: [[Knitting.nostitch]], category: 'General');
   static const StitchDefinition knit = StitchDefinition(name: 'Knit', abbreviation: 'k', iconData: [[Knitting.knit]], category: 'General');
   static const StitchDefinition purl = StitchDefinition(name: 'Purl', abbreviation: 'p', iconData: [[Knitting.purl]], category: 'General');
-  static const StitchDefinition c2r = StitchDefinition(name: 'C2R', abbreviation: 'C2R', iconData: [[Knitting.cr2_1], [Knitting.c2r_2], [Knitting.c2r_3], [Knitting.c2r_4]], category: 'Cables');
 
   static const List<StitchDefinition> definitions = [
-    noStitch, knit, purl, c2r,
+    noStitch, knit, purl, 
+    StitchDefinition(name: 'K2tog', abbreviation: 'k2tog', iconData: [[Knitting.k2tog]], category: 'Decrease'), 
+    StitchDefinition(name: 'K3tog', abbreviation: 'k3tog', iconData: [[Knitting.k3tog]], category: 'Decrease'), 
+    StitchDefinition(name: 'P2tog', abbreviation: 'p2tog', iconData: [[Knitting.p2tog]], category: 'Decrease'), 
+    StitchDefinition(name: 'P3tog', abbreviation: 'p3tog', iconData: [[Knitting.p3tog]], category: 'Decrease'), 
+    StitchDefinition(name: 'SSK', abbreviation: 'ssk', iconData: [[Knitting.ssk]], category: 'Decrease'), 
+    StitchDefinition(name: 'SSP', abbreviation: 'ssp', iconData: [[Knitting.ssp]], category: 'Decrease'), 
+    StitchDefinition(name: 'KTBL', abbreviation: 'ktbl', iconData: [[Knitting.ktbl]], category: 'General'), 
+    StitchDefinition(name: 'YO', abbreviation: 'yo', iconData: [[Knitting.yarnover]], category: 'Increase'), 
   ];
 
-  static const Map<String, List<StitchDefinition>> definitionsPerCategory = {
-    'general': [noStitch, knit, purl, ],
-    'cables': [c2r],
-  };
+  static Map<String, List<StitchDefinition>> getDefinitionsPerCategory() {
+    Map<String, List<StitchDefinition>> defs = {};
+    for (StitchDefinition def in definitions) {
+      if (!defs.containsKey(def.category)) {
+        defs[def.category] = [];
+      }
+      defs[def.category]!.add(def);
+    }
+
+    return defs;
+  }
 }
