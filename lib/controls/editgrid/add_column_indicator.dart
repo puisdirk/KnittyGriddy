@@ -22,7 +22,7 @@ class _AddColumnIndicatorState extends State<AddColumnIndicator> {
   bool visible = false;
 
   void _insertColumn(BuildContext context) {
-    Provider.of<KnittyGriddyModel>(context, listen: false).insertColumn(widget.column + 1);
+    Provider.of<KnittyGriddyModel>(context, listen: false).insertColumn(widget.column);
   }
 
   @override

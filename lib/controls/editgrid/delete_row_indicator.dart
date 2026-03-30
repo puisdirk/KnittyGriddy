@@ -22,7 +22,7 @@ class _DeleteRowIndicatorState extends State<DeleteRowIndicator> {
   bool visible = false;
 
   void _deleteRow(BuildContext context) {
-    Provider.of<KnittyGriddyModel>(context, listen: false).deleteRow(widget.row + 1);
+    Provider.of<KnittyGriddyModel>(context, listen: false).deleteRow(widget.row);
   }
 
   @override

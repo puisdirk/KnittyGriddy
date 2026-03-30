@@ -17,14 +17,20 @@ class StitchIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return stitchDefinition.columns == 1 ? 
-      StitchPartIcon(stitchDefinition: stitchDefinition, iconSize: iconSize, iconColor: iconColor,) : 
-      Row(
-        children: [
-          for (int column = 1; column <= stitchDefinition.columns; column++) 
-            StitchPartIcon(stitchDefinition: stitchDefinition, stitchDefinitionColumn: column, iconSize: iconSize, iconColor: iconColor,),
-        ],
-      );
-
+    return Center(
+      child: SizedBox(
+        width: iconSize,
+        height: iconSize,
+        child:     
+          stitchDefinition.columns == 1 ? 
+            StitchPartIcon(stitchDefinition: stitchDefinition, iconSize: iconSize, iconColor: iconColor,) : 
+            Row(
+              children: [
+                for (int column = 0; column < stitchDefinition.columns; column++) 
+                  StitchPartIcon(stitchDefinition: stitchDefinition, stitchDefinitionColumn: column, iconSize: iconSize, iconColor: iconColor,),
+              ],
+            ),
+      )
+    );
   }
 }

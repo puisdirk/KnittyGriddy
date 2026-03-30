@@ -53,11 +53,11 @@ class KnittyGriddyModel extends ChangeNotifier {
 
   Map<String, List<StitchDefinition>> selectStitchDefinitionsPerCategory(String filter) {
     if (filter.isEmpty) {
-      return StitchRepository.getDefinitionsPerCategory();
+      return StitchRepository.getDefinitionsPerCategory(_model.customStitches);
     }
 
     Map<String, List<StitchDefinition>> filtered = {};
-    StitchRepository.getDefinitionsPerCategory().forEach((key, value) {
+    StitchRepository.getDefinitionsPerCategory(_model.customStitches).forEach((key, value) {
       if (value.any((sd) => sd.passesFilter(filter))) {
         filtered[key] = value.where((sd) => sd.passesFilter(filter)).toList();
       }
@@ -123,7 +123,7 @@ class KnittyGriddyModel extends ChangeNotifier {
     for (int columnOffset = 0; columnOffset < stitchDefinition.columns; columnOffset++) {
       newStitchCells.add(
         _model.knittingPattern.stitches.firstWhere((s) => s.row == row && s.column == column + columnOffset).
-          copyWith(stitchDefinition: stitchDefinition, stitchDefinitionColumn: columnOffset + 1));
+          copyWith(stitchDefinition: stitchDefinition, stitchDefinitionColumn: columnOffset));
     }
 
     // Calculate which cell need to be cleared
@@ -132,7 +132,7 @@ class KnittyGriddyModel extends ChangeNotifier {
       // If the cell under the new stitch is a multi-column
       StitchCell oldCell = _model.knittingPattern.stitches.firstWhere((c) => c.row == newCell.row && c.column == newCell.column);
       if (oldCell.stitchDefinition.columns > 1) {
-        int oldCellStart = oldCell.column - (oldCell.stitchDefinitionColumn - 1);
+        int oldCellStart = oldCell.column - (oldCell.stitchDefinitionColumn);
         for (int clearIdx = 0; clearIdx < oldCell.stitchDefinition.columns; clearIdx++) {
           // don't clear if this is already a new cell
           if (!newStitchCells.any((c) => c.row == oldCell.row && c.column == oldCellStart + clearIdx)) {
@@ -252,7 +252,7 @@ class KnittyGriddyModel extends ChangeNotifier {
       _model.knittingPattern.patternSettings.rows,
       (idx) =>
         StitchCell(
-          row: idx + 1, 
+          row: idx, 
           column: beforeColumn, 
           stitchDefinition: StitchRepository.noStitch, 
           colour: _model.knittingPattern.mainColour
@@ -284,10 +284,10 @@ class KnittyGriddyModel extends ChangeNotifier {
     newStitches.addAll(
       List<StitchCell>.generate(
         _model.knittingPattern.patternSettings.columns, 
-        (col) => 
+        (idx) => 
           StitchCell(
             row: beforeRow, 
-            column: col + 1, 
+            column: idx, 
             stitchDefinition: StitchRepository.noStitch, 
             colour: _model.knittingPattern.mainColour
           )

@@ -84,7 +84,7 @@ class ColoursToolbarPanel extends StatelessWidget {
                                           Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.grey.shade400) :
                                           Theme.of(context).textTheme.bodyMedium!,
                                       ),
-                                      SizedBox(width: spacerWidth,),
+                                      const Spacer(),
                                       IconButton(
                                         icon: const Icon(Icons.edit), 
                                         iconSize: iconWidth, 

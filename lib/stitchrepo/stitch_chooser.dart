@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/controls/stitch_icon.dart';
+import 'package:knitty_griddy/stitchrepo/edit_stitch_page.dart';
 import 'package:knitty_griddy/model/knitting_pattern.dart';
 import 'package:knitty_griddy/model/knitty_griddy_model.dart';
 import 'package:knitty_griddy/stitchrepo/stitch_definition.dart';
@@ -39,23 +40,25 @@ class _StitchChooserState extends State<StitchChooser> {
   }
 
   static const double _spacerwidth = 14;
+  static const double _iconWidth = 16;
 
-  Widget createCategory(KnittingPattern pattern, MapEntry<String, List<StitchDefinition>> entry) {
+  Widget createCategory(KnittingPattern pattern, MapEntry<String, List<StitchDefinition>> stitchesInCategory) {
     double widestStitchWidth = 0;
-    for (StitchDefinition def in entry.value) {
-      double width = (_spacerwidth * 3) + (def.columns * 28.0) + (def.name.length * 10);
+    for (StitchDefinition def in stitchesInCategory.value) {
+      double width = (_spacerwidth * 4) + (def.columns * 28.0) + (def.name.length * 10) + _iconWidth;
       if (width > widestStitchWidth) {
         widestStitchWidth = width;
       }
     }
 
     List<Widget> cards = [];
-    for (StitchDefinition sd in entry.value) {
+    for (StitchDefinition sd in stitchesInCategory.value) {
       bool stitchInPattern = pattern.stitches.any((cell) => cell.stitchDefinition == sd);
       bool stitchSelected = pattern.usedStitches.contains(sd);
 
       cards.add(SizedBox(
-        width: widestStitchWidth, height: 50,
+        width: widestStitchWidth, 
+        height: 50,
         child: Card(
           color: stitchSelected ? Colors.blue.withAlpha(60) : null,
           child: InkWell(
@@ -64,21 +67,37 @@ class _StitchChooserState extends State<StitchChooser> {
             onTap: stitchInPattern ? null : () => Provider.of<KnittyGriddyModel>(context, listen: false).toggleUsedStitch(sd),
             child: Row(
               children: [
-                const SizedBox(width: 14,),
-                StitchIcon(stitchDefinition: sd, iconSize: 16, iconColor: stitchInPattern || stitchSelected ? Colors.white : null,),
-                const SizedBox(width: 14,),
+                const SizedBox(width: _spacerwidth,),
+                StitchIcon(stitchDefinition: sd, iconSize: _iconWidth, iconColor: stitchInPattern || stitchSelected ? Colors.white : null,),
+                const SizedBox(width: _spacerwidth,),
                 Text(sd.name,
                   style: sd == StitchRepository.noStitch || stitchInPattern || stitchSelected ?
                     Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.white) : 
                     Theme.of(context).textTheme.bodyMedium!
                 ),
+                const Spacer(),
+                IconButton(
+                  iconSize: _iconWidth,
+                  onPressed: () {
+                    Navigator.of(context).push(
+                          MaterialPageRoute(builder: (context) => EditStitchPage(stitchDefinition: sd)),
+                    );
+                  },
+                  icon: const Icon(Icons.edit)
+                )
               ],
             ),
           ),
         ),
       ));
     }
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(entry.key), Wrap(children: cards,)],);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start, 
+      children: [
+        Text(stitchesInCategory.key), 
+        Wrap(children: cards,)
+      ],
+    );
   }
 
   @override
@@ -113,7 +132,7 @@ class _StitchChooserState extends State<StitchChooser> {
               }
             );
           }
-        )
+        ),
       ],
     );
   }
