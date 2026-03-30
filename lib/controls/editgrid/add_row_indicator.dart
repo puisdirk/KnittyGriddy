@@ -22,7 +22,7 @@ class _AddRowIndicatorState extends State<AddRowIndicator> {
   bool visible = false;
 
   void _insertRow(BuildContext context) {
-    Provider.of<KnittyGriddyModel>(context, listen: false).insertRow(widget.row + 1);
+    Provider.of<KnittyGriddyModel>(context, listen: false).insertRow(widget.row);
   }
 
   @override

@@ -22,7 +22,7 @@ class StitchCell {
     required this.column,
     required this.stitchDefinition,
     required this.colour,
-    this.stitchDefinitionColumn = 1,
+    this.stitchDefinitionColumn = 0,
   });
 
   factory StitchCell.empty(int row, int column) {
@@ -36,6 +36,9 @@ class StitchCell {
     NamedColour? colour,
     int? stitchDefinitionColumn,
   }) {
+    if (stitchDefinitionColumn != null && stitchDefinitionColumn != 0) {
+      print('ouch');
+    }
     return StitchCell(
       row: row?? this.row, 
       column: column?? this.column, 

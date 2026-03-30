@@ -43,6 +43,8 @@ dependencies:
   xml: ^6.5.0
   file_picker: ^10.3.10
   archive: ^4.0.9
+  path_drawing: ^1.0.1
+  flutter_dial_knob: ^0.1.1
 
 dev_dependencies:
   flutter_test:
@@ -83,10 +85,10 @@ flutter:
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   # example:
-  fonts:
-    - family: Knitting
-      fonts:
-        - asset: fonts/Knitting.ttf
+#  fonts:
+#    - family: Knitting
+#      fonts:
+#        - asset: fonts/Knitting.ttf
 
   #   - family: Schyler
   #     fonts:

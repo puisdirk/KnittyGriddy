@@ -22,7 +22,7 @@ class _DeleteColumnIndicatorState extends State<DeleteColumnIndicator> {
   bool visible = false;
 
   void _deleteColumn(BuildContext context) {
-    Provider.of<KnittyGriddyModel>(context, listen: false).deleteColumn(widget.column + 1);
+    Provider.of<KnittyGriddyModel>(context, listen: false).deleteColumn(widget.column);
   }
 
   @override

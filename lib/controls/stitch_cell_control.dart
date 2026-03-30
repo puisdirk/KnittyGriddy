@@ -23,8 +23,8 @@ class StitchCellControl extends StatelessWidget {
       selector: (_, model) => model.appState,
       builder: (context, appState, _) {
         return Positioned(
-          top: (stitchCell.row - 1) * stitchCellHeight,
-          left: (stitchCell.column - 1) * stitchCellWidth,  
+          top: (stitchCell.row) * stitchCellHeight,
+          left: (stitchCell.column) * stitchCellWidth,  
           child: MouseRegion(
             cursor: SystemMouseCursors.click,
             onEnter: (event) {
@@ -65,15 +65,25 @@ class StitchCellControl extends StatelessWidget {
               child: Selector<KnittyGriddyModel, Selection>(
                 selector: (_, model) => model.selection,
                 builder: (context, selection, _) {
+                  if (stitchCell.stitchDefinitionColumn != 0) {
+                    print('ouch');
+                  }
                   return Container(
                     color: stitchCell.colour.color,
                     height: stitchCellHeight,
                     width: stitchCellWidth,
-                    child: StitchPartIcon(
-                      stitchDefinition: stitchCell.stitchDefinition, 
-                      stitchDefinitionColumn: stitchCell.stitchDefinitionColumn,
-                      iconColor: ColorUtilities.contrastingFromColor(stitchCell.colour.color),
-                    ),
+                    child: Center(
+                      child: SizedBox(
+                        width: 36,
+                        height: 36,
+                        child: StitchPartIcon(
+                          stitchDefinition: stitchCell.stitchDefinition, 
+                          stitchDefinitionColumn: stitchCell.stitchDefinitionColumn,
+                          iconColor: ColorUtilities.contrastingFromColor(stitchCell.colour.color,),
+                          iconSize: 36,
+                        ),
+                      )
+                    )
                   );
                 }
               ),

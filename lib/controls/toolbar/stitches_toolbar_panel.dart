@@ -24,7 +24,7 @@ class StitchesToolbarPanel extends StatelessWidget {
           double spacerwidth = 14;
           double widestStitchWidth = 0;
           for (StitchDefinition def in usedStitches) {
-            double width = (spacerwidth * 3) + (def.columns * 28.0) + (def.name.length * 10);
+            double width = (spacerwidth * 2) + (def.columns * 28.0) + (def.name.length * 10);
             if (width > widestStitchWidth) {
               widestStitchWidth = width;
             }
