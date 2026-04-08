@@ -5,7 +5,6 @@ import 'package:knitty_griddy/model/knitting_symbol_part.dart';
 import 'package:knitty_griddy/model/basicshapes/knitting_symbol_path.dart';
 import 'package:knitty_griddy/model/knitting_symbol_parts.dart';
 import 'package:knitty_griddy/model/knitty_griddy_model.dart';
-import 'package:knitty_griddy/stitchrepo/knitting_symbol_part_control.dart';
 import 'package:knitty_griddy/stitchrepo/stitch_definition.dart';
 import 'package:provider/provider.dart';
 
@@ -124,7 +123,7 @@ class _StitchPartsChooserState extends State<StitchPartsChooser> {
   Widget createCategory(MapEntry<String, List<StitchDefinition>> entry) {
     double widestStitchWidth = 0;
     for (StitchDefinition def in entry.value) {
-      double width = (_spacerwidth * 3) + (def.columns * 28.0) + (def.name.length * 10);
+      double width = (_spacerwidth * 5) + (def.columns * 28.0) + (def.name.length * 10);
       if (width > widestStitchWidth) {
         widestStitchWidth = width;
       }

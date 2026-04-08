@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:knitty_griddy/constants.dart';
 import 'package:knitty_griddy/model/knitting_symbol.dart';
 import 'package:knitty_griddy/model/knitting_symbol_part.dart';
-import 'package:knitty_griddy/model/knitting_symbols.dart';
 import 'package:knitty_griddy/controls/stitcheditor/add_stitch_column_indicator.dart';
 import 'package:knitty_griddy/stitchrepo/knitting_symbol_control.dart';
 import 'package:knitty_griddy/stitchrepo/knitting_symbol_part_control.dart';
@@ -57,7 +56,7 @@ class EditStitchPartsControl extends StatelessWidget {
                 child: AddStitchColumnIndicator(
                   onTap: () => onStitchDefinitionChanged(
                     stitchDefinition.copyWith(
-                      symbols: [...stitchDefinition.symbols, KnittingSymbols.blank]
+                      symbols: [...stitchDefinition.symbols, const KnittingSymbol(name: 'blank', parts: [])]
                     ),
                   )
                 )

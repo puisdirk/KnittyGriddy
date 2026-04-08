@@ -140,7 +140,7 @@ class _EditStitchPageState extends State<EditStitchPage> {
                     stitchDefinition: newStitchDefinition,
                     selectedColumn: selectedColumn,
                     selectedRow: selectedRow, 
-                    onStitchDefinitionChanged: (newDefinition) => setState(() => newStitchDefinition = newDefinition),//.prune()
+                    onStitchDefinitionChanged: (newDefinition) => setState(() => newStitchDefinition = newDefinition),
                     onSelectionChanged: (newSelectedColumn, newSelectedRow) => setState(() { 
                       selectedColumn = newSelectedColumn; 
                       selectedRow = newSelectedRow;

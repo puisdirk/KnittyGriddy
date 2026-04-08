@@ -6,6 +6,12 @@ import 'package:knitty_griddy/stitchrepo/stitch_definition.dart';
 
 abstract class KnittingSymbolPart {
 
+  static const Offset defaultScale = Offset(1, 1);
+  static const Offset defaultTranslation = Offset.zero;
+  static const double defaultRotation = 0;
+  static const bool defaultFilled = true;
+  static const double defaultStrokeWidth = 1;
+
   final String name;
   final Offset scale;
   final Offset translation;
@@ -21,11 +27,11 @@ abstract class KnittingSymbolPart {
     bool? filled,
     double? strokeWidth,
   }) : 
-    scale = scale?? const Offset(1,1), 
-    translation = translation?? Offset.zero, 
-    rotation = rotation?? 0,
-    filled = filled?? true,
-    strokeWidth = strokeWidth?? 1;
+    scale = scale?? defaultScale, 
+    translation = translation?? defaultTranslation, 
+    rotation = rotation?? defaultRotation,
+    filled = filled?? defaultFilled,
+    strokeWidth = strokeWidth?? defaultStrokeWidth;
 
   @override
   int get hashCode => name.hashCode ^ scale.hashCode ^ translation.hashCode ^ rotation.hashCode ^ filled.hashCode ^ strokeWidth.hashCode;

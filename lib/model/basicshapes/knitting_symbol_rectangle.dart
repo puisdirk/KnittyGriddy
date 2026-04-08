@@ -6,6 +6,14 @@ import 'package:knitty_griddy/stitchrepo/stitch_definition.dart';
 
 class KnittingSymbolRectangle extends KnittingSymbolPart {
 
+  static const double _defaultHeight = 20;
+  static const double _defaultWidth = 20;
+  static const bool _defaultRounded = false;
+  static const double _defaultTopLeftRadius = 0;
+  static const double _defaultTopRightRadius = 0;
+  static const double _defaultBottomLeftRadius = 0;
+  static const double _defaultBottomRightRadius = 0;
+
   final double height;
   final double width;
   final bool rounded;
@@ -29,13 +37,13 @@ class KnittingSymbolRectangle extends KnittingSymbolPart {
     super.translation,
     super.rotation,
   }) : 
-    height = height?? 10, 
-    width = width?? 10, 
-    rounded = rounded?? false,
-    topLeftRadius = topLeftRadius?? 0,
-    topRightRadius = topRightRadius?? 0,
-    bottomLeftRadius = bottomLeftRadius?? 0,
-    bottomRightRadius = bottomRightRadius?? 0,
+    height = height?? _defaultHeight, 
+    width = width?? _defaultWidth, 
+    rounded = rounded?? _defaultRounded,
+    topLeftRadius = topLeftRadius?? _defaultTopLeftRadius,
+    topRightRadius = topRightRadius?? _defaultTopRightRadius,
+    bottomLeftRadius = bottomLeftRadius?? _defaultBottomLeftRadius,
+    bottomRightRadius = bottomRightRadius?? _defaultBottomRightRadius,
     super();
 
   @override
@@ -415,5 +423,64 @@ class KnittingSymbolRectangle extends KnittingSymbolPart {
         ),
       ],
     );
+  }
+
+  @override
+  String toString() {
+    String defString =  '''
+KnittingSymbolRectangle(
+  name: '$name',''';
+
+    if (height != _defaultHeight) {
+      defString += '''height: $height,''';
+    }
+
+    if (width != _defaultWidth) {
+      defString += '''width: $width,''';
+    }
+
+    if (rounded != _defaultRounded) {
+      defString += '''rounded: $rounded,''';
+    }
+
+    if (topLeftRadius != _defaultTopLeftRadius) {
+      defString += '''topLeftRadius: $topLeftRadius,''';
+    }
+
+    if (topRightRadius != _defaultTopRightRadius) {
+      defString += '''topRightRadius: $topRightRadius,''';
+    }
+
+    if (bottomLeftRadius != _defaultBottomLeftRadius) {
+      defString += '''bottomLeftRadius: $bottomLeftRadius,''';
+    }
+
+    if (bottomRightRadius != _defaultBottomRightRadius) {
+      defString += '''bottomRightRadius: $bottomRightRadius,''';
+    }
+
+    if (scale != KnittingSymbolPart.defaultScale) {
+      defString += '''scale: Offset(${scale.dx}, ${scale.dy}),''';
+    }
+    
+    if (translation != KnittingSymbolPart.defaultTranslation) {
+      defString += '''translation: Offset(${translation.dx}, ${translation.dy}),''';
+    }
+    
+    if (rotation != KnittingSymbolPart.defaultRotation) {
+      defString += '''rotation: $rotation,''';
+    }
+
+    if (filled != KnittingSymbolPart.defaultFilled) {
+      defString += '''filled: $filled,''';
+    }
+  
+    if (strokeWidth != KnittingSymbolPart.defaultStrokeWidth) {
+      defString += '''strokeWidth: $strokeWidth,''';
+    }
+
+    defString += ''')''';
+
+    return defString;
   }
 }
