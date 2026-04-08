@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/controls/stitcheditor/symbol_part_controls.dart';
-import 'package:knitty_griddy/controls/stitcheditor/symbol_part_transform_controls.dart';
 import 'package:knitty_griddy/controls/stitcheditor/symbol_transform_controls.dart';
 import 'package:knitty_griddy/model/knitting_symbol.dart';
 import 'package:knitty_griddy/model/knitting_symbol_part.dart';
@@ -185,14 +184,6 @@ class _EditStitchPageState extends State<EditStitchPage> {
                             symbolColumn: selectedColumn!, 
                             onChanged: (newDefinition) => setState(() => newStitchDefinition = newDefinition,),
                           ),
-                        if (selectedColumn != null && selectedRow != null)
-                          SymbolPartTransformControls(
-                            stitchDefinition: newStitchDefinition, 
-                            symbolPartColumn: selectedColumn!, 
-                            symbolPartRow: selectedRow!, 
-                            onChanged: (newDefinition) => setState(() => newStitchDefinition = newDefinition,),
-                          ),
-                        const SizedBox(height: 20,),
                         if (selectedColumn != null && selectedRow != null)
                           SymbolPartControls(
                             stitchDefinition: newStitchDefinition,

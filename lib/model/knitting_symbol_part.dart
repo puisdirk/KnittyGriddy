@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinbox/material.dart';
+import 'package:knitty_griddy/controls/stitcheditor/symbol_part_transform_controls.dart';
 import 'package:knitty_griddy/model/knitting_symbol.dart';
 import 'package:knitty_griddy/stitchrepo/stitch_definition.dart';
 
@@ -71,9 +72,15 @@ abstract class KnittingSymbolPart {
     int partColumn, 
     int partRow,
     Function(StitchDefinition newDefinition) onChanged) {
-      // TODO: put transform controls here?
       return Column(
         children: [
+          SymbolPartTransformControls(
+            stitchDefinition: stitchDefinition, 
+            symbolPartColumn: partColumn, 
+            symbolPartRow: partRow, 
+            onChanged: onChanged
+          ),
+          const SizedBox(height: 10,),
           Row(
             children: [
               const SizedBox(

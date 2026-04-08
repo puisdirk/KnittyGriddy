@@ -10,6 +10,7 @@ class LinkedSpinbox extends StatefulWidget {
   final double step;
   final int precision;
   final double width;
+  final String unit;
   
   const LinkedSpinbox({
     required this.onChanged,
@@ -20,8 +21,15 @@ class LinkedSpinbox extends StatefulWidget {
     double? step,
     int? precision,
     double? width,
+    String? unit,
     super.key
-  }) : min = min?? 0, max = max?? 10000, step = step?? 1, precision = precision?? 0, width = width?? 70;
+  }) : 
+    min = min?? 0, 
+    max = max?? 10000, 
+    step = step?? 1, 
+    precision = precision?? 0, 
+    width = width?? 70, 
+    unit = unit?? '';
 
   @override
   State<LinkedSpinbox> createState() => _LinkedSpinboxState();
@@ -34,54 +42,76 @@ class _LinkedSpinboxState extends State<LinkedSpinbox> {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        SizedBox(
-          width: widget.width,
-          child: SpinBox(
-            min: widget.min,
-            max: widget.max,
-            decimals: widget.precision,
-            step: widget.step,
-            value: widget.value1,
-            onChanged: (value) {
-              if (valuesLocked) {
-                double newVal2 = widget.value2 + (value - widget.value1);
-                if (newVal2 < widget.min) {
-                  newVal2 = widget.min;
-                }
-                if (newVal2 > widget.max) {
-                  newVal2 = widget.max;
-                }
-                widget.onChanged(value, newVal2);
-              } else {
-                widget.onChanged(value, widget.value2);
-              }
-            },
-          )
+        Stack(
+          children: [
+            Positioned(
+              child: SizedBox(
+                width: widget.width,
+                child: SpinBox(
+                  min: widget.min,
+                  max: widget.max,
+                  decimals: widget.precision,
+                  step: widget.step,
+                  value: widget.value1,
+                  onChanged: (value) {
+                    if (valuesLocked) {
+                      double newVal2 = widget.value2 + (value - widget.value1);
+                      if (newVal2 < widget.min) {
+                        newVal2 = widget.min;
+                      }
+                      if (newVal2 > widget.max) {
+                        newVal2 = widget.max;
+                      }
+                      widget.onChanged(value, newVal2);
+                    } else {
+                      widget.onChanged(value, widget.value2);
+                    }
+                  },
+                )
+              ),
+            ),
+            Positioned(
+              right: widget.width / 4,
+              bottom: 10,
+              child: Text(widget.unit, style: const TextStyle(fontSize: 20),)
+            )
+          ]
         ),
         const SizedBox(width: 10,),
-        SizedBox(
-          width: widget.width,
-          child: SpinBox(
-            min: widget.min,
-            max: widget.max,
-            decimals: widget.precision,
-            step: widget.step,
-            value: widget.value2,
-            onChanged: (value) {
-              if (valuesLocked) {
-                double newVal1 = widget.value1 + (value - widget.value2);
-                if (newVal1 < widget.min) {
-                  newVal1 = widget.min;
-                }
-                if (newVal1 > widget.max) {
-                  newVal1 = widget.max;
-                }
-                widget.onChanged(newVal1, value);
-              } else {
-                widget.onChanged(widget.value1, value);
-              }
-            },
-          )
+        Stack(
+          children: [
+            Positioned(
+              child: SizedBox(
+              width: widget.width,
+              child: SpinBox(
+                min: widget.min,
+                max: widget.max,
+                decimals: widget.precision,
+                step: widget.step,
+                value: widget.value2,
+                onChanged: (value) {
+                  if (valuesLocked) {
+                    double newVal1 = widget.value1 + (value - widget.value2);
+                    if (newVal1 < widget.min) {
+                      newVal1 = widget.min;
+                    }
+                    if (newVal1 > widget.max) {
+                      newVal1 = widget.max;
+                    }
+                    widget.onChanged(newVal1, value);
+                  } else {
+                    widget.onChanged(widget.value1, value);
+                  }
+                },
+              )
+            ),
+          ),
+            Positioned(
+              right: widget.width / 4,
+              bottom: 10,
+              child: Text(widget.unit, style: const TextStyle(fontSize: 20),)
+            )
+          ]
         ),
         const SizedBox(width: 10,),
         MouseRegion(

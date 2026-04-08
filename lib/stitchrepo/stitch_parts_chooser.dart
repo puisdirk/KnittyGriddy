@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/controls/stitch_icon.dart';
+import 'package:knitty_griddy/controls/stitch_part_icon.dart';
 import 'package:knitty_griddy/model/knitting_symbol_part.dart';
 import 'package:knitty_griddy/model/basicshapes/knitting_symbol_path.dart';
 import 'package:knitty_griddy/model/knitting_symbol_parts.dart';
@@ -100,7 +101,7 @@ class _StitchPartsChooserState extends State<StitchPartsChooser> {
             child: Row(
               children: [
                 const SizedBox(width: _spacerwidth,),
-                KnittingSymbolPartControl(knittingSymbolPart: part, iconSize: _iconWidth,),
+                StitchPartIcon(part: part, iconSize: _iconWidth,),
                 const SizedBox(width: _spacerwidth,),
                 Text(part.name),
                 const SizedBox(width: _spacerwidth,)
