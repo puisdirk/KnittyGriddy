@@ -28,6 +28,47 @@ class SymbolTransformControls extends StatelessWidget {
               width: 100,
               child: Align(
                 alignment: Alignment.centerRight,
+                child: Text('Mirror')
+              )
+            ),
+            const SizedBox(width: 10,),
+            IconButton.outlined(
+              onPressed: () {
+                onChanged(
+                  stitchDefinition.scaleSymbol(
+                    symbolColumn,
+                    stitchDefinition.symbolAt(symbolColumn).scale.dx * -1, 
+                    stitchDefinition.symbolAt(symbolColumn).scale.dy,
+                  )
+                );
+              }, 
+              icon: const Icon(Icons.flip)
+            ),
+            const SizedBox(width: 20,),
+            Transform.rotate(
+              angle: MathUtitilies.toRadians(90),
+              child: IconButton.outlined(
+                onPressed: () {
+                  onChanged(
+                    stitchDefinition.scaleSymbol(
+                      symbolColumn,
+                      stitchDefinition.symbolAt(symbolColumn).scale.dx, 
+                      stitchDefinition.symbolAt(symbolColumn).scale.dy * -1,
+                    )
+                  );
+                }, 
+                icon: const Icon(Icons.flip)
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10,),
+        Row(
+          children: [
+            const SizedBox(
+              width: 100,
+              child: Align(
+                alignment: Alignment.centerRight,
                 child: Text('Translation')
               )
             ),
@@ -68,14 +109,25 @@ class SymbolTransformControls extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 10,),
-            SizedBox(
-              width: 160,
-              child: SpinBox(
-                min: -360,
-                max: 360,
-                onChanged: (value) { onChanged(stitchDefinition.rotateSymbol(symbolColumn, value)); }, 
-                value: MathUtitilies.toDegrees(stitchDefinition.symbolAt(symbolColumn).rotation), 
-              ),
+            Stack(
+              children: [
+                Positioned(
+                  child: SizedBox(
+                    width: 160,
+                    child: SpinBox(
+                      min: -360,
+                      max: 360,
+                      onChanged: (value) { onChanged(stitchDefinition.rotateSymbol(symbolColumn, value)); }, 
+                      value: MathUtitilies.toDegrees(stitchDefinition.symbolAt(symbolColumn).rotation), 
+                    ),
+                  ),
+                ),
+                const Positioned(
+                  left: 100,
+                  top: 2,
+                  child: Text('°', style: TextStyle(fontSize: 24),)
+                )
+              ]
             ),
           ],
         ),
@@ -92,13 +144,13 @@ class SymbolTransformControls extends StatelessWidget {
             const SizedBox(width: 10,),
             LinkedSpinbox(
               width: 160,
-              min: -100,
-              max: 100,
+              min: -1000,
+              max: 1000,
               step: 1,
-              precision: 2,
-              onChanged: (value1, value2) { onChanged(stitchDefinition.scaleSymbol(symbolColumn, value1, value2)); }, 
-              value1: stitchDefinition.symbolAt(symbolColumn).scale.dx,
-              value2: stitchDefinition.symbolAt(symbolColumn).scale.dy,
+              unit: '%',
+              onChanged: (value1, value2) { onChanged(stitchDefinition.scaleSymbol(symbolColumn, value1 / 100, value2 / 100)); }, 
+              value1: stitchDefinition.symbolAt(symbolColumn).scale.dx * 100,
+              value2: stitchDefinition.symbolAt(symbolColumn).scale.dy * 100,
             ),
           ],
         ),

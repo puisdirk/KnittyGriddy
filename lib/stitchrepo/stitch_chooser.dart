@@ -39,13 +39,13 @@ class _StitchChooserState extends State<StitchChooser> {
     super.dispose();
   }
 
-  static const double _spacerwidth = 14;
+  static const double _spacerwidth = 12;
   static const double _iconWidth = 16;
 
   Widget createCategory(KnittingPattern pattern, MapEntry<String, List<StitchDefinition>> stitchesInCategory) {
     double widestStitchWidth = 0;
     for (StitchDefinition def in stitchesInCategory.value) {
-      double width = (_spacerwidth * 4) + (def.columns * 28.0) + (def.name.length * 10) + _iconWidth;
+      double width = (_spacerwidth * 6) + (def.columns * 28.0) + (def.name.length * 10) + _iconWidth;
       if (width > widestStitchWidth) {
         widestStitchWidth = width;
       }

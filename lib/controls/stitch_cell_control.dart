@@ -76,7 +76,6 @@ class StitchCellControl extends StatelessWidget {
                         child: KnittingSymbolControl(
                           knittingSymbol: stitchCell.stitchDefinition.symbolAt(stitchCell.stitchDefinitionColumn),
                           symbolColor: ColorUtilities.contrastingFromColor(stitchCell.colour.color),
-                          symbolSize: 36,
                         )
                       )
                     )

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:knitty_griddy/constants.dart';
 import 'package:knitty_griddy/stitchrepo/knitting_symbol_control.dart';
 import 'package:knitty_griddy/stitchrepo/stitch_definition.dart';
 
@@ -12,22 +13,25 @@ class StitchIcon extends StatelessWidget {
     double? iconSize,
     this.iconColor,
     super.key
-  }) : iconSize = iconSize?? 38;
+  }) : iconSize = iconSize?? stitchCellHeight;
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: SizedBox(
-        width: iconSize,
-        height: iconSize,
-        child:
-          Row(
-            children: [
-              for (int column = 0; column < stitchDefinition.columns; column++) 
-                KnittingSymbolControl(knittingSymbol: stitchDefinition.symbolAt(column), symbolColor: iconColor, symbolSize: iconSize)
-            ],
-          ),
-      )
+    return Transform.scale(
+      scale: iconSize / stitchCellHeight,
+      child: Center(
+        child: SizedBox(
+          width: stitchCellWidth,
+          height: stitchCellHeight,
+          child:
+            Row(
+              children: [
+                for (int column = 0; column < stitchDefinition.columns; column++) 
+                  KnittingSymbolControl(knittingSymbol: stitchDefinition.symbolAt(column), symbolColor: iconColor)
+              ],
+            ),
+        )
+      ),
     );
   }
 }

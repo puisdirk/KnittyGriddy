@@ -30,6 +30,47 @@ class SymbolPartTransformControls extends StatelessWidget {
               width: 100,
               child: Align(
                 alignment: Alignment.centerRight,
+                child: Text('Mirror')
+              )
+            ),
+            const SizedBox(width: 10,),
+            IconButton.outlined(
+              onPressed: () {
+                onChanged(
+                  stitchDefinition.scaleSymbolPart(
+                    symbolPartColumn, symbolPartRow, 
+                    stitchDefinition.symbolPartAt(symbolPartColumn, symbolPartRow).scale.dx * -1, 
+                    stitchDefinition.symbolPartAt(symbolPartColumn, symbolPartRow).scale.dy,
+                  )
+                );
+              }, 
+              icon: const Icon(Icons.flip)
+            ),
+            const SizedBox(width: 20,),
+            Transform.rotate(
+              angle: MathUtitilies.toRadians(90),
+              child: IconButton.outlined(
+                onPressed: () {
+                  onChanged(
+                    stitchDefinition.scaleSymbolPart(
+                      symbolPartColumn, symbolPartRow, 
+                      stitchDefinition.symbolPartAt(symbolPartColumn, symbolPartRow).scale.dx, 
+                      stitchDefinition.symbolPartAt(symbolPartColumn, symbolPartRow).scale.dy * -1,
+                    )
+                  );
+                }, 
+                icon: const Icon(Icons.flip)
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10,),
+        Row(
+          children: [
+            const SizedBox(
+              width: 100,
+              child: Align(
+                alignment: Alignment.centerRight,
                 child: Text('Translation')
               )
             ),
@@ -70,14 +111,25 @@ class SymbolPartTransformControls extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 10,),
-            SizedBox(
-              width: 160,
-              child: SpinBox(
-                min: -360,
-                max: 360,
-                value: MathUtitilies.toDegrees(stitchDefinition.symbolPartAt(symbolPartColumn, symbolPartRow).rotation),
-                onChanged: (value) { onChanged(stitchDefinition.rotateSymbolPart(symbolPartColumn, symbolPartRow, value)); }, 
-              ),
+            Stack(
+              children: [
+                Positioned(
+                  child: SizedBox(
+                    width: 160,
+                    child: SpinBox(
+                      min: -360,
+                      max: 360,
+                      value: MathUtitilies.toDegrees(stitchDefinition.symbolPartAt(symbolPartColumn, symbolPartRow).rotation),
+                      onChanged: (value) { onChanged(stitchDefinition.rotateSymbolPart(symbolPartColumn, symbolPartRow, value)); }, 
+                    ),
+                  ),
+                ),
+                const Positioned(
+                  left: 100,
+                  top: 2,
+                  child: Text('°', style: TextStyle(fontSize: 24),)
+                )
+              ]
             ),
           ],
         ),
@@ -94,13 +146,13 @@ class SymbolPartTransformControls extends StatelessWidget {
             const SizedBox(width: 10,),
             LinkedSpinbox(
               width: 160,
-              min: -100,
-              max: 100,
+              min: -1000,
+              max: 1000,
               step: 1,
-              precision: 2,
-              onChanged: (value1, value2) { onChanged(stitchDefinition.scaleSymbolPart(symbolPartColumn, symbolPartRow, value1, value2)); }, 
-              value1: stitchDefinition.symbolPartAt(symbolPartColumn, symbolPartRow).scale.dx,
-              value2: stitchDefinition.symbolPartAt(symbolPartColumn, symbolPartRow).scale.dy,
+              unit: '%',
+              onChanged: (value1, value2) { onChanged(stitchDefinition.scaleSymbolPart(symbolPartColumn, symbolPartRow, value1 / 100, value2 / 100)); }, 
+              value1: stitchDefinition.symbolPartAt(symbolPartColumn, symbolPartRow).scale.dx * 100,
+              value2: stitchDefinition.symbolPartAt(symbolPartColumn, symbolPartRow).scale.dy * 100,
             ),
           ],
         ),

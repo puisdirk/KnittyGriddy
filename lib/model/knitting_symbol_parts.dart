@@ -21,9 +21,9 @@ class KnittingSymbolParts {
   static const KnittingSymbolPart line = KnittingSymbolPath(name: 'line', path: 'M5.8,17.6L35.1091,17.6L35.1091,20.8L5.8,20.8L5.8,17.6z');
   static const KnittingSymbolPart circle = KnittingSymbolPath(name: 'circle', path: 'M20.9376,9.0999L20.939,7.6599C24.0263,7.6629,26.8402,8.8464,28.957,10.7822C31.3649,12.9842,32.8778,16.166,32.8813,19.7007L32.8813,19.7036C32.8778,23.2382,31.3649,26.4202,28.957,28.6222C26.8402,30.5579,24.0263,31.7414,20.939,31.7444L20.9362,31.7444C17.8489,31.7414,15.0348,30.5579,12.9182,28.6222C10.5101,26.4202,8.9974,23.2382,8.9938,19.7036L8.9938,19.7007C8.9974,16.166,10.5101,12.9842,12.9182,10.7822C15.0348,8.8464,17.8489,7.6629,20.9362,7.6599L20.9376,9.0999zM20.9376,10.5399C18.5994,10.5426,16.4707,11.436,14.8617,12.9074C13.0289,14.5835,11.8769,17.0035,11.8737,19.7022C11.8769,22.4007,13.0289,24.8208,14.8617,26.4969C16.4707,27.9682,18.5994,28.8617,20.9376,28.8644C23.2758,28.8617,25.4044,27.9682,27.0134,26.4969C28.8461,24.8208,29.9983,22.4007,30.0013,19.7022C29.9983,17.0035,28.8461,14.5835,27.0134,12.9074C25.4044,11.436,23.2758,10.5426,20.9376,10.5399z');
 
-  static const KnittingSymbolPart rectangle = KnittingSymbolRectangle(name: 'rectangle');
-  static const KnittingSymbolPart arc = KnittingSymbolArc(name: 'arc');
-  static const KnittingSymbolCurve curve = KnittingSymbolCurve(name: 'curve');
+  static const KnittingSymbolPart rectangle = KnittingSymbolRectangle(name: 'rectangle', height: 20, width: 20);
+  static const KnittingSymbolPart arc = KnittingSymbolArc(name: 'arc', height: 20, width: 20);
+  static const KnittingSymbolCurve curve = KnittingSymbolCurve(name: 'curve', length: 20, amplitude: 10);
 
   static final List<KnittingSymbolPart> parts = [
     purl,ktbl,k2tog,ssk,knit,yarnover,k3tog,p2tog,p3tog,ssp,nostitch,line,circle, 
