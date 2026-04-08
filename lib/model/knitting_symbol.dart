@@ -1,8 +1,12 @@
-// Represents the icondata for one stitch part on a single layer. Replaces use of iconData.
 import 'package:flutter/painting.dart';
 import 'package:knitty_griddy/model/knitting_symbol_part.dart';
 
 class KnittingSymbol {
+
+  static const Offset _defaultScale = Offset(1, 1);
+  static const Offset _defaultTranslation = Offset.zero;
+  static const double _defaultRotation = 0;
+
   final String name;
   final List<KnittingSymbolPart> parts;
   final Offset scale;
@@ -17,7 +21,10 @@ class KnittingSymbol {
     Offset? scale,
     Offset? translation,
     double? rotation,
-  }) : scale = scale?? const Offset(1,1), translation = translation?? Offset.zero, rotation = rotation?? 0;
+  }) : 
+    scale = scale?? _defaultScale, 
+    translation = translation?? _defaultTranslation, 
+    rotation = rotation?? _defaultRotation;
 
   KnittingSymbol copyWith({
     String? name,
@@ -50,17 +57,29 @@ class KnittingSymbol {
 
   @override
   String toString() {
-    String pathsString = '';
+    String partsString = '';
     for (KnittingSymbolPart path in parts) {
-      pathsString += '$path, ';
+      partsString += '$path, ';
     }
-    return '''
+    String defString = '''
 KnittingSymbol(
   name: '$name',
-  paths: [$pathsString],
-  scale: Offset(${scale.dx}, ${scale.dy}),
-  translation: Offset(${translation.dx}, ${translation.dy}),
-  rotation: $rotation,
-)''';
+  parts: [$partsString],''';
+
+    if (scale != _defaultScale) {
+      defString += '''scale: Offset(${scale.dx}, ${scale.dy}),''';
+    }
+    
+    if (translation != _defaultTranslation) {
+      defString += '''translation: Offset(${translation.dx}, ${translation.dy}),''';
+    }
+    
+    if (rotation != _defaultRotation) {
+      defString += '''rotation: $rotation,''';
+    }
+    
+    defString += ''')''';
+    
+    return defString;
   }
 }

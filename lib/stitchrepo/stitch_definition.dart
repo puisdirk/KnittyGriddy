@@ -4,7 +4,6 @@ import 'package:knitty_griddy/math_utitilies.dart';
 import 'package:knitty_griddy/model/knitting_symbol.dart';
 import 'package:knitty_griddy/model/knitting_symbol_part.dart';
 import 'package:knitty_griddy/model/knitting_symbol_parts.dart';
-import 'package:knitty_griddy/model/knitting_symbols.dart';
 
 @immutable
 class StitchDefinition {
@@ -240,7 +239,7 @@ class StitchDefinition {
     if (columns > col && symbols[col].rows > row) {
       return symbols[col].parts[row];
     }
-    return KnittingSymbolParts.blankPath;
+    return KnittingSymbolParts.blankPart;
   }
 
   bool passesFilter(String filter) =>
@@ -270,15 +269,34 @@ class StitchDefinition {
     for (KnittingSymbol symbol in symbols) {
       symbolsString += '$symbol, ';
     }
-    return '''
+    String defString = '''
 StitchDefinition(
   name: '$name',
   abbreviation: '$abbreviation',
-  symbols: [$symbolsString],
-  category: '$category',
-  description: '$description',
-  consumes: $consumes,
-  produces: $produces,
-  custom: false,)''';
+  symbols: [$symbolsString],''';
+
+    if (category.isNotEmpty) {
+      defString += '''category: '$category',''';
+    }
+    
+    if (description.isNotEmpty) {
+      defString += '''description: '$description',''';
+    }
+    
+    if (consumes != 1) {
+      defString += '''consumes: $consumes,''';
+    }
+    
+    if (produces != 1) {
+      defString += '''produces: $produces,''';
+    }
+    
+    if (custom == true) {
+      defString += '''custom: true,''';
+    }
+
+    defString += ''')''';
+
+    return defString;
   }
 }

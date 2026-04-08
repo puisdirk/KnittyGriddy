@@ -8,6 +8,12 @@ import 'package:knitty_griddy/stitchrepo/stitch_definition.dart';
 
 class KnittingSymbolArc extends KnittingSymbolPart {
   
+  static const double _defaultHeight = 10;
+  static const double _defaultWidth = 10;
+  static const double _defaultStartAngle = 0;
+  static const double _defaultSweepAngle = 360;
+  static const bool _defaultClosed = true;
+
   final double height;
   final double width;
   final double startAngle;
@@ -27,11 +33,11 @@ class KnittingSymbolArc extends KnittingSymbolPart {
     super.translation,
     super.rotation,
   }) : 
-    height = height?? 10,
-    width = width?? 10,
-    startAngle = startAngle?? 0,
-    sweepAngle = sweepAngle?? 360,
-    closed = closed?? true,
+    height = height?? _defaultHeight,
+    width = width?? _defaultWidth,
+    startAngle = startAngle?? _defaultStartAngle,
+    sweepAngle = sweepAngle?? _defaultSweepAngle,
+    closed = closed?? _defaultClosed,
     super();
 
   @override
@@ -184,7 +190,7 @@ class KnittingSymbolArc extends KnittingSymbolPart {
                 max: 200,
                 step: 0.1,
                 decimals: 1,
-                value: width
+                value: height
               ),
             ),           
           ],
@@ -313,6 +319,58 @@ class KnittingSymbolArc extends KnittingSymbolPart {
       ),
       ],
     );
+  }
+
+  @override
+  String toString() {
+    String defString = '''
+KnittingSymbolArc(
+  name: '$name',''';
+
+    if (height != _defaultHeight) {
+      defString += '''height: $height,''';
+    }
+
+    if (width != _defaultWidth) {
+      defString += '''width: $width,''';
+    }
+
+    if (startAngle != _defaultStartAngle) {
+      defString += '''startAngle: $startAngle,''';
+    }
+
+    if (sweepAngle != _defaultSweepAngle) {
+      defString += '''sweepAngle: $sweepAngle,''';
+    }
+
+    if (closed != _defaultClosed) {
+      defString += '''closed: $closed,''';
+    }
+
+    if (scale != KnittingSymbolPart.defaultScale) {
+      defString += '''scale: Offset(${scale.dx}, ${scale.dy}),''';
+    }
+    
+    if (translation != KnittingSymbolPart.defaultTranslation) {
+      defString += '''translation: Offset(${translation.dx}, ${translation.dy}),''';
+    }
+    
+    if (rotation != KnittingSymbolPart.defaultRotation) {
+      defString += '''rotation: $rotation,''';
+    }
+
+    if (filled != KnittingSymbolPart.defaultFilled) {
+      defString += '''filled: $filled,''';
+    }
+  
+    if (strokeWidth != KnittingSymbolPart.defaultStrokeWidth) {
+      defString += '''strokeWidth: $strokeWidth,''';
+    }
+
+    defString += ''')''';
+
+    return defString;
+
   }
 
 }

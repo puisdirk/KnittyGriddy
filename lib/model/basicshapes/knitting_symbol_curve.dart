@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_spinbox/material.dart';
 import 'package:knitty_griddy/model/knitting_symbol.dart';
 import 'package:knitty_griddy/model/knitting_symbol_part.dart';
 import 'package:knitty_griddy/stitchrepo/stitch_definition.dart';
 
 class KnittingSymbolCurve extends KnittingSymbolPart {
+
+  static const double _defaultLength = 20;
+  static const double _defaultAmplitude = 0;
+  static const double _defaultSlant = 0;
+  static const bool _defaultClosed = false;
+  static const bool _defaultFilled = false;
+  static const double _defaultStrokeWidth = 3;
 
   final double length;
   final double amplitude;
@@ -24,11 +30,11 @@ class KnittingSymbolCurve extends KnittingSymbolPart {
     double? slant,
     bool? closed,
   }) :
-    length = length?? 20,
-    amplitude = amplitude?? 0,
-    slant = slant?? 0,
-    closed = closed?? false,
-    super(filled: filled?? false, strokeWidth: strokeWidth?? 3);
+    length = length?? _defaultLength,
+    amplitude = amplitude?? _defaultAmplitude,
+    slant = slant?? _defaultSlant,
+    closed = closed?? _defaultClosed,
+    super(filled: filled?? _defaultFilled, strokeWidth: strokeWidth?? _defaultStrokeWidth);
 
   @override
   KnittingSymbolPart copyWith({
@@ -273,6 +279,53 @@ class KnittingSymbolCurve extends KnittingSymbolPart {
         )
       ],
     );
+  }
+
+  @override
+  String toString() {
+    String defString = '''
+KnittingSymbolCurve(
+  name: '$name',''';
+
+    if (length != _defaultLength) {
+      defString += '''length: $length,''';
+    }
+
+    if (amplitude != _defaultAmplitude) {
+      defString += '''amplitude: $amplitude,''';
+    }
+
+    if (slant != _defaultSlant) {
+      defString += '''slant: $slant,''';
+    }
+
+    if (closed != _defaultClosed) {
+      defString += '''closed: $closed,''';
+    }
+
+    if (scale != KnittingSymbolPart.defaultScale) {
+      defString += '''scale: Offset(${scale.dx}, ${scale.dy}),''';
+    }
+    
+    if (translation != KnittingSymbolPart.defaultTranslation) {
+      defString += '''translation: Offset(${translation.dx}, ${translation.dy}),''';
+    }
+    
+    if (rotation != KnittingSymbolPart.defaultRotation) {
+      defString += '''rotation: $rotation,''';
+    }
+
+    if (filled != _defaultFilled) {
+      defString += '''filled: $filled,''';
+    }
+  
+    if (strokeWidth != _defaultStrokeWidth) {
+      defString += '''strokeWidth: $strokeWidth,''';
+    }
+
+    defString += ''')''';
+
+    return defString;
   }
 
 }

@@ -62,18 +62,38 @@ class KnittingSymbolPath extends KnittingSymbolPart {
 
     @override
   String toString() {
-    return '''
+    String defString = '''
 KnittingSymbolPath(
   name: '$name',
-  path: '$path',
-  scale: Offset(${scale.dx}, ${scale.dy}),
-  translation: Offset(${translation.dx}, ${translation.dy}),
-  rotation: $rotation,
-)''';
+  path: '$path',''';
+
+    if (scale != KnittingSymbolPart.defaultScale) {
+      defString += '''scale: Offset(${scale.dx}, ${scale.dy}),''';
+    }
+    
+    if (translation != KnittingSymbolPart.defaultTranslation) {
+      defString += '''translation: Offset(${translation.dx}, ${translation.dy}),''';
+    }
+    
+    if (rotation != KnittingSymbolPart.defaultRotation) {
+      defString += '''rotation: $rotation,''';
+    }
+
+    if (filled != KnittingSymbolPart.defaultFilled) {
+      defString += '''filled: $filled,''';
+    }
+  
+    if (strokeWidth != KnittingSymbolPart.defaultStrokeWidth) {
+      defString += '''strokeWidth: $strokeWidth,''';
+    }
+
+    defString += ''')''';
+
+    return defString;
   }
 
   @override
   Widget getPartControls(StitchDefinition stitchDefinition, int partColumn, int partRow, Function(StitchDefinition newDefinition) onChanged) {
-    return const SizedBox(width: 1,);
+    return const SizedBox.shrink();
   }
 }
