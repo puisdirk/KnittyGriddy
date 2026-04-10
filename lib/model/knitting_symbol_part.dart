@@ -18,15 +18,18 @@ abstract class KnittingSymbolPart {
   final double rotation;
   final bool filled;
   final double strokeWidth;
+  final bool allowStroke;
 
   const KnittingSymbolPart({
     required this.name,
+    bool? allowStroke,
     Offset? scale,
     Offset? translation,
     double? rotation,
     bool? filled,
     double? strokeWidth,
   }) : 
+    allowStroke = allowStroke?? true,
     scale = scale?? defaultScale, 
     translation = translation?? defaultTranslation, 
     rotation = rotation?? defaultRotation,
@@ -87,6 +90,7 @@ abstract class KnittingSymbolPart {
             onChanged: onChanged
           ),
           const SizedBox(height: 10,),
+          if (allowStroke)
           Row(
             children: [
               const SizedBox(
