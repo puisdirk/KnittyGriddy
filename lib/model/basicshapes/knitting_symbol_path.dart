@@ -1,10 +1,14 @@
 
 import 'package:flutter/material.dart';
+import 'package:knitty_griddy/model/basicshapes/text_entry_control.dart';
+import 'package:knitty_griddy/model/knitting_symbol.dart';
 import 'package:knitty_griddy/model/knitting_symbol_part.dart';
 import 'package:knitty_griddy/stitchrepo/stitch_definition.dart';
 import 'package:path_drawing/path_drawing.dart';
 
 class KnittingSymbolPath extends KnittingSymbolPart {
+
+  static const bool _defaultFilled = false;
 
   final String path;
 
@@ -14,9 +18,9 @@ class KnittingSymbolPath extends KnittingSymbolPart {
     super.scale,
     super.translation,
     super.rotation,
-    super.filled,
+    bool? filled,
     super.strokeWidth,
-  }) : super();
+  }) : super(filled: filled?? _defaultFilled);
   
   @override
   KnittingSymbolPath copyWith({
@@ -79,7 +83,7 @@ KnittingSymbolPath(
       defString += '''rotation: $rotation,''';
     }
 
-    if (filled != KnittingSymbolPart.defaultFilled) {
+    if (filled != _defaultFilled) {
       defString += '''filled: $filled,''';
     }
   
@@ -94,6 +98,49 @@ KnittingSymbolPath(
 
   @override
   Widget getPartControls(StitchDefinition stitchDefinition, int partColumn, int partRow, Function(StitchDefinition newDefinition) onChanged) {
-    return const SizedBox.shrink();
+    return Column(
+      children: [
+        Row(
+          children: [
+            const SizedBox(
+              width: 100,
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: Text('Path text'),
+              ),
+            ),
+            const SizedBox(width: 10,),
+            TextEntryControl(
+              initialText: path,
+              width: 400,
+              maxlines: 10,
+              onChanged: (String newText) {
+                List<KnittingSymbol> newSymbols = [];
+            
+                for (int col = 0; col < stitchDefinition.columns; col++) {
+                  if (col == partColumn) {
+                    List<KnittingSymbolPart> newParts = [];
+                    for (int row = 0; row < stitchDefinition.symbolAt(col).rows; row++) {
+                      if (row == partRow) {
+                        newParts.add(copyWith(path: newText));
+                      } else {
+                        newParts.add(stitchDefinition.symbolPartAt(col, row));
+                      }
+                    }
+                    newSymbols.add(stitchDefinition.symbolAt(col).copyWith(parts: newParts));
+                  } else {
+                    newSymbols.add(stitchDefinition.symbolAt(col));
+                  }
+                }
+            
+                onChanged(stitchDefinition.copyWith(
+                  symbols: newSymbols
+                ));
+              }
+            ),
+          ]
+        )
+      ]
+    );
   }
 }

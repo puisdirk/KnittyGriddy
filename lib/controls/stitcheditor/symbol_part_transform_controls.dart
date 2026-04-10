@@ -4,6 +4,8 @@ import 'package:flutter_spinbox/material.dart';
 import 'package:knitty_griddy/constants.dart';
 import 'package:knitty_griddy/controls/stitcheditor/linked_spinbox.dart';
 import 'package:knitty_griddy/math_utitilies.dart';
+import 'package:knitty_griddy/model/knitting_symbol.dart';
+import 'package:knitty_griddy/model/knitting_symbol_part.dart';
 import 'package:knitty_griddy/stitchrepo/stitch_definition.dart';
 
 class SymbolPartTransformControls extends StatelessWidget {
@@ -61,6 +63,34 @@ class SymbolPartTransformControls extends StatelessWidget {
                 }, 
                 icon: const Icon(Icons.flip)
               ),
+            ),
+            const SizedBox(width: 20,),
+            const SizedBox(
+              width: 100,
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: Text('Duplicate')
+              )
+            ),
+            const SizedBox(width: 10,),
+            IconButton.outlined(
+              onPressed: () {
+                List<KnittingSymbol> newSymbols = [];
+            
+                for (int col = 0; col < stitchDefinition.columns; col++) {
+                  if (col == symbolPartColumn) {
+                    List<KnittingSymbolPart> newParts = [...stitchDefinition.symbolAt(col).parts, stitchDefinition.symbolPartAt(symbolPartColumn, symbolPartRow)];
+                    newSymbols.add(stitchDefinition.symbolAt(col).copyWith(parts: newParts));
+                  } else {
+                    newSymbols.add(stitchDefinition.symbolAt(col));
+                  }
+                }
+            
+                onChanged(stitchDefinition.copyWith(
+                  symbols: newSymbols
+                ));
+              }, 
+              icon: const Icon(Icons.add_to_photos)
             ),
           ],
         ),

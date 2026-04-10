@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:knitty_griddy/controls/stitch_icon.dart';
 import 'package:knitty_griddy/controls/stitch_part_icon.dart';
 import 'package:knitty_griddy/model/knitting_symbol_part.dart';
-import 'package:knitty_griddy/model/basicshapes/knitting_symbol_path.dart';
 import 'package:knitty_griddy/model/knitting_symbol_parts.dart';
 import 'package:knitty_griddy/model/knitty_griddy_model.dart';
 import 'package:knitty_griddy/stitchrepo/stitch_definition.dart';
@@ -187,7 +186,7 @@ class _StitchPartsChooserState extends State<StitchPartsChooser> {
       ),
       actions: [
         ElevatedButton.icon(
-          onPressed: () => Navigator.of(context).pop(<List<KnittingSymbolPath>>[]), 
+          onPressed: () => Navigator.of(context).pop(<List<KnittingSymbolPart>>[]), 
           label: const Text('Cancel'),
           icon: const Icon(Icons.cancel_outlined),
         ),
