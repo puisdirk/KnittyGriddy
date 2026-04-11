@@ -1086,6 +1086,713 @@ class StitchRepository {
       category: 'Elongated',
     ),
 
+    /******************** Cables version 1 ***************/
+
+    StitchDefinition(
+      name: '1/1 LC (LT)',
+      abbreviation: '1/1lc',
+      symbols: [
+        KnittingSymbol(
+          name: 'col1',
+          parts: [
+            KnittingSymbolRectangle(
+              name: 'r',
+              height: 60,
+              width: 3,
+              translation: Offset(-1.4, 0),
+              rotation: -0.7853981633974483,
+            ), 
+            KnittingSymbolRectangle(
+              name: 'r',
+              height: 40,
+              width: 3,
+              translation: Offset(0, 18),
+              rotation: 1.5707963267948966,
+            ), 
+            KnittingSymbolRectangle(
+              name: 'r',
+              height: 40,
+              width: 3,
+              translation: Offset(0, -18),
+              rotation: 1.5707963267948966,
+            ), 
+            KnittingSymbolRectangle(
+              name: 'r',
+              height: 23.4,
+              width: 3,
+              translation: Offset(-9.7, 9),
+              rotation: 0.7853981633974483,
+            ), 
+          ],
+        ), 
+        KnittingSymbol(
+          name: 'col2',
+          parts: [
+            KnittingSymbolRectangle(
+              name: 'r',
+              height: 60,
+              width: 3,
+              translation: Offset(0.9, 0),
+              rotation: -0.7853981633974483,
+            ), 
+            KnittingSymbolRectangle(
+              name: 'r',
+              height: 39.8,
+              width: 3,
+              translation: Offset(0, 18),
+              rotation: 1.5707963267948966,
+            ), 
+            KnittingSymbolRectangle(
+              name: 'r',
+              height: 39.5,
+              width: 3,
+              translation: Offset(0, -18),
+              rotation: 1.5707963267948966,
+            ), 
+            KnittingSymbolRectangle(
+              name: 'r',
+              height: 23.4,
+              width: 3,
+              translation: Offset(10.4, -9),
+              rotation: 0.7853981633974483,
+            ), 
+          ],
+        ), 
+      ],
+      category: 'Cables v1',
+      description: 'sl 1 st onto cn, hold in front, k1, k1 from cn OR with right needle behind left needle, knit 2nd st tbl, knit first st, drop both sts from left needle',
+    ),
+
+    StitchDefinition(
+      name: '1/1 RC (RT)',
+      abbreviation: '1/1rc',
+      symbols: [
+        KnittingSymbol(
+          name: 'col1',
+          parts: [
+            KnittingSymbolRectangle(
+              name: 'r',
+              height: 60,
+              width: 3,
+              translation: Offset(0.9, 0),
+              rotation: -0.7853981633974483,
+            ), 
+            KnittingSymbolRectangle(
+              name: 'r',
+              height: 39.8,
+              width: 3,
+              translation: Offset(0, 18),
+              rotation: 1.5707963267948966,
+            ), 
+            KnittingSymbolRectangle(
+              name: 'r',
+              height: 39.5,
+              width: 3,
+              translation: Offset(0, -18),
+              rotation: 1.5707963267948966,
+            ), 
+            KnittingSymbolRectangle(
+              name: 'r',
+              height: 23.4,
+              width: 3,
+              translation: Offset(10.4, -9),
+              rotation: 0.7853981633974483,
+            ), 
+          ],
+          scale: Offset(-1, 1),
+        ), 
+        KnittingSymbol(
+          name: 'col2',
+          parts: [
+            KnittingSymbolRectangle(
+              name: 'r',
+              height: 60,
+              width: 3,
+              translation: Offset(-1.4, 0),
+              rotation: -0.7853981633974483,
+            ), 
+            KnittingSymbolRectangle(
+              name: 'r',
+              height: 40,
+              width: 3,
+              translation: Offset(0, 18),
+              rotation: 1.5707963267948966,
+            ), 
+            KnittingSymbolRectangle(
+              name: 'r',
+              height: 40,
+              width: 3,
+              translation: Offset(0, -18),
+              rotation: 1.5707963267948966,
+            ), 
+            KnittingSymbolRectangle(
+              name: 'r',
+              height: 23.4,
+              width: 3,
+              translation: Offset(-9.7, 9),
+              rotation: 0.7853981633974483,
+            ), 
+          ],
+          scale: Offset(-1, 1),
+        ), 
+      ],
+      category: 'Cables v1',
+      description: 'sl 1 st onto cn, hold in back, k1, k1 from cn OR k2tog but do not drop sts from left needle, k1, drop both sts from left needle',
+    ),
+
+    StitchDefinition(
+      name: '1/1 LPC',
+      abbreviation: '1/1lpc',
+      symbols: [
+        KnittingSymbol(
+          name: 'col2',
+          parts: [
+            KnittingSymbolRectangle(name: 'r',height: 60,width: 3,translation: Offset(-1.4, 0),rotation: -0.7853981633974483,), 
+            KnittingSymbolRectangle(name: 'r',height: 40,width: 3,translation: Offset(0, 18),rotation: 1.5707963267948966,), 
+            KnittingSymbolRectangle(name: 'r',height: 40,width: 3,translation: Offset(0, -18),rotation: 1.5707963267948966,), 
+            KnittingSymbolRectangle(name: 'r',height: 23.4,width: 3,translation: Offset(-9.7, 9),rotation: 0.7853981633974483,), 
+            KnittingSymbolRectangle(name: 'r',height: 21,width: 21,translation: Offset(-0.2, 16),rotation: 0.7853981633974483,), ],
+          ), 
+          KnittingSymbol(
+            name: 'col1',
+            parts: [
+              KnittingSymbolRectangle(name: 'r',height: 60,width: 3,translation: Offset(0.9, 0),rotation: -0.7853981633974483,), 
+              KnittingSymbolRectangle(name: 'r',height: 39.8,width: 3,translation: Offset(0, 18),rotation: 1.5707963267948966,), 
+              KnittingSymbolRectangle(name: 'r',height: 39.5,width: 3,translation: Offset(0, -18),rotation: 1.5707963267948966,), 
+              KnittingSymbolRectangle(name: 'r',height: 23.4,width: 3,translation: Offset(10.4, -9),rotation: 0.7853981633974483,), 
+              KnittingSymbolRectangle(name: 'r',height: 21,width: 21,translation: Offset(1.1, -16.5),rotation: 0.7853981633974483,), 
+            ],
+          ), 
+        ],
+        category: 'Cables v1',
+        description: 'sl 1 st onto cn, hold in front, p1, k1 from cn',
+    ),
+
+    StitchDefinition(
+      name: '1/1 RPC',
+      abbreviation: '1/1rpc',
+      symbols: [
+        KnittingSymbol(
+          name: 'col1',
+          parts: [
+            KnittingSymbolRectangle(
+              name: 'r',
+              height: 60,
+              width: 3,
+              translation: Offset(0.9, 0),
+              rotation: -0.7853981633974483,
+            ), 
+            KnittingSymbolRectangle(
+              name: 'r',
+              height: 39.8,
+              width: 3,
+              translation: Offset(0, 18),
+              rotation: 1.5707963267948966,
+            ), 
+            KnittingSymbolRectangle(
+              name: 'r',
+              height: 39.5,
+              width: 3,
+              translation: Offset(0, -18),
+              rotation: 1.5707963267948966,
+            ), 
+            KnittingSymbolRectangle(
+              name: 'r',
+              height: 23.4,
+              width: 3,
+              translation: Offset(10.4, -9),
+              rotation: 0.7853981633974483,
+            ), 
+            KnittingSymbolRectangle(
+              name: 'rectangle',
+              height: 21,
+              width: 21,
+              translation: Offset(1.1, -16.5),
+              rotation: 0.7853981633974483,
+            ), 
+          ],
+          scale: Offset(-1, 1),
+        ), 
+        KnittingSymbol(
+          name: 'col2',
+          parts: [
+            KnittingSymbolRectangle(
+              name: 'r',
+              height: 60,
+              width: 3,
+              translation: Offset(-1.4, 0),
+              rotation: -0.7853981633974483,
+            ), 
+            KnittingSymbolRectangle(
+              name: 'r',
+              height: 40,
+              width: 3,
+              translation: Offset(0, 18),
+              rotation: 1.5707963267948966,
+            ), 
+            KnittingSymbolRectangle(
+              name: 'r',
+              height: 40,
+              width: 3,
+              translation: Offset(0, -18),
+              rotation: 1.5707963267948966,
+            ), 
+            KnittingSymbolRectangle(
+              name: 'r',
+              height: 23.4,
+              width: 3,
+              translation: Offset(-9.7, 9),
+              rotation: 0.7853981633974483,
+            ), 
+            KnittingSymbolRectangle(
+              name: 'r',
+              height: 21,
+              width: 21,
+              translation: Offset(-0.2, 16),
+              rotation: 0.7853981633974483,
+            ), 
+          ],
+          scale: Offset(-1, 1),
+        ), 
+      ],
+      category: 'Cables v1',
+      description: 'sl 1 st onto cn, hold in back, k1, p1 from cn',
+    ),
+
+    StitchDefinition(
+      name: '2/1 LC',
+      abbreviation: '2/1lc',
+      symbols: [
+        KnittingSymbol(
+          name: 'col1',
+          parts: [
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 41,translation: Offset(0, -18),), 
+            KnittingSymbolRectangle(name: 'rectangle',height: 30,width: 3,translation: Offset(10, 12),rotation: -1.0471975511965976,), 
+            KnittingSymbolRectangle(name: 'r',height: 3,width: 57,translation: Offset(0.9, 0),rotation: -0.7853981633974483,), 
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 41,translation: Offset(0, 18),), 
+          ],
+          scale: Offset(-1, 1),
+        ), 
+        KnittingSymbol(
+          name: 'col2',
+          parts: [
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 41,translation: Offset(0, -18),), 
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 41,translation: Offset(0, 18),), 
+          ],
+        ), 
+        KnittingSymbol(
+          name: 'col3',
+          parts: [
+            KnittingSymbolRectangle(name: 'r',height: 3,width: 57,translation: Offset(-1.2, 0),rotation: -0.7853981633974483,), 
+            KnittingSymbolRectangle(name: 'r',height: 3,width: 41,translation: Offset(0, 18),), 
+            KnittingSymbolRectangle(name: 'r',height: 30,width: 3,translation: Offset(-10.1, -12.8),rotation: -1.0471975511965976,), 
+            KnittingSymbolRectangle(name: 'r',height: 3,width: 41,translation: Offset(0, -18),), 
+          ],
+          scale: Offset(-1, 1),
+        ), 
+      ],
+      category: 'Cables v1',
+      description: 'sl 2 sts onto cn, hold in front, k1, k2 from cn',
+    ),
+
+    StitchDefinition(
+      name: '2/1 RC',
+      abbreviation: '2/1rc',
+      symbols: [
+        KnittingSymbol(
+          name: 'col1',
+          parts: [
+            KnittingSymbolRectangle(name: 'r',height: 3,width: 57,translation: Offset(-1.2, 0),rotation: -0.7853981633974483,), 
+            KnittingSymbolRectangle(name: 'r',height: 3,width: 41,translation: Offset(0, 18),), 
+            KnittingSymbolRectangle(name: 'r',height: 30,width: 3,translation: Offset(-10.1, -12.8),rotation: -1.0471975511965976,), 
+            KnittingSymbolRectangle(name: 'r',height: 3,width: 41,translation: Offset(0, -18),), 
+          ],
+        ), 
+        KnittingSymbol(
+          name: 'col2',
+          parts: [
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 41,translation: Offset(0, -18),), 
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 41,translation: Offset(0, 18),), 
+          ],
+        ), 
+        KnittingSymbol(
+          name: 'col3',
+          parts: [
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 41,translation: Offset(0, -18),), 
+            KnittingSymbolRectangle(name: 'rectangle',height: 30,width: 3,translation: Offset(10, 12),rotation: -1.0471975511965976,), 
+            KnittingSymbolRectangle(name: 'r',height: 3,width: 57,translation: Offset(0.9, 0),rotation: -0.7853981633974483,), 
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 41,translation: Offset(0, 18),), 
+          ],
+        ), 
+      ],
+      category: 'Cables v1',
+      description: 'sl 1 st onto cn, hold in back, k2, k1 from cn',
+    ),
+
+    StitchDefinition(
+      name: '2/1 LPC',
+      abbreviation: '2/1lpc',
+      symbols: [
+        KnittingSymbol(
+          name: 'col1',
+          parts: [
+            KnittingSymbolPath(name: 'path', path: 'M21,24L0,40L40,40L21,24z', scale: Offset(-1, 1), filled: true,), 
+            KnittingSymbolRectangle(name: 'r',height: 3,width: 41,translation: Offset(0, -18),), 
+            KnittingSymbolRectangle(name: 'r',height: 30,width: 3,translation: Offset(10, 12),rotation: -1.0471975511965976,), 
+            KnittingSymbolRectangle(name: 'r',height: 3,width: 57,translation: Offset(0.9, 0),rotation: -0.7853981633974483,), 
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 41,translation: Offset(0, 18),), 
+          ],
+          scale: Offset(-1, 1),
+        ), 
+        KnittingSymbol(
+          name: 'col2',
+          parts: [
+            KnittingSymbolRectangle(name: 'r',height: 3,width: 41,translation: Offset(0, -18),), 
+            KnittingSymbolRectangle(name: 'r',height: 3,width: 41,translation: Offset(0, 18),), 
+          ],
+        ), 
+        KnittingSymbol(
+          name: 'col3',
+          parts: [
+            KnittingSymbolRectangle(name: 'r',height: 3,width: 57,translation: Offset(-1.2, 0),rotation: -0.7853981633974483,), 
+            KnittingSymbolRectangle(name: 'r',height: 3,width: 41,translation: Offset(0, 18),), 
+            KnittingSymbolPath(name: 'path',path: 'M20,24L0,40L40,40L20,24z',scale: Offset(-1, -1),filled: true,), 
+            KnittingSymbolRectangle(name: 'r',height: 30,width: 3,translation: Offset(-10.1, -12.8),rotation: -1.0471975511965976,), 
+            KnittingSymbolRectangle(name: 'r',height: 3,width: 41,translation: Offset(0, -18),), 
+          ],
+          scale: Offset(-1, 1),
+        ), 
+      ],
+      category: 'Cables v1',
+      description: 'sl 2 sts onto cn, hold in front, p1, k2 from cn',
+    ),
+
+    StitchDefinition(
+      name: '2/1 RPC',
+      abbreviation: '2/1rpc',
+      symbols: [
+        KnittingSymbol(
+          name: 'col1',
+          parts: [
+            KnittingSymbolRectangle(name: 'r',height: 3,width: 57,translation: Offset(-1.2, 0),rotation: -0.7853981633974483,), 
+            KnittingSymbolRectangle(name: 'r',height: 3,width: 41,translation: Offset(0, 18),), 
+            KnittingSymbolPath(name: 'path', path: 'M20,24L0,40L40,40L20,24z',scale: Offset(-1, -1),filled: true,), 
+            KnittingSymbolRectangle(name: 'r',height: 30,width: 3,translation: Offset(-10.1, -12.8),rotation: -1.0471975511965976,), 
+            KnittingSymbolRectangle(name: 'r',height: 3,width: 41,translation: Offset(0, -18),), 
+          ],
+        ), 
+        KnittingSymbol(
+          name: 'col2',
+          parts: [
+            KnittingSymbolRectangle(name: 'r',height: 3,width: 41,translation: Offset(0, -18),), 
+            KnittingSymbolRectangle(name: 'r',height: 3,width: 41,translation: Offset(0, 18),), 
+          ],
+        ), 
+        KnittingSymbol(
+          name: 'col3',
+          parts: [
+            KnittingSymbolPath(name: 'path',path: 'M21,24L0,40L40,40L21,24z',scale: Offset(-1, 1),filled: true,), 
+            KnittingSymbolRectangle(name: 'r',height: 3,width: 41,translation: Offset(0, -18),), 
+            KnittingSymbolRectangle(name: 'r',height: 30,width: 3,translation: Offset(10, 12),rotation: -1.0471975511965976,), 
+            KnittingSymbolRectangle(name: 'r',height: 3,width: 57,translation: Offset(0.9, 0),rotation: -0.7853981633974483,), 
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 41,translation: Offset(0, 18),), 
+          ],
+        ), 
+      ],
+      category: 'Cables v1',
+      description: 'sl 1 st onto cn, hold in back, k2, p1 from cn',
+    ),
+
+    StitchDefinition(
+      name: '2/2 LC',
+      abbreviation: '2/2lc',
+      symbols: [
+        KnittingSymbol(
+          name: 'col1',
+          parts: [
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 41,translation: Offset(0, -18),), 
+            KnittingSymbolRectangle(name: 'rectangle',height: 47.7,width: 3,translation: Offset(4.6, 11),rotation: -1.1868238913561442,), 
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 41,translation: Offset(0, 18),), 
+            KnittingSymbolRectangle(name: 'r',height: 3,width: 57,translation: Offset(0.9, -7),rotation: -0.4188790204786391,), 
+          ],
+          scale: Offset(-1, 1),
+        ), 
+        KnittingSymbol(
+          name: 'col2',
+          parts: [
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 41,translation: Offset(0, 18),), 
+            KnittingSymbolRectangle(name: 'r',height: 3,width: 41,translation: Offset(0, -18),), 
+            KnittingSymbolRectangle(name: 'r',height: 3,width: 57,translation: Offset(0.9, 10.1),rotation: -0.3665191429188092,), 
+          ],
+          scale: Offset(-1, 1),
+        ), 
+        KnittingSymbol(
+          name: 'col3',
+          parts: [
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 41,translation: Offset(0, -18),), 
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 41,translation: Offset(0, 18),), 
+            KnittingSymbolRectangle(name: 'r',height: 3,width: 85.9,translation: Offset(0, -8.1),rotation: -0.4188790204786391,), 
+          ],
+          scale: Offset(-1, 1),
+        ), 
+        KnittingSymbol(
+          name: 'col4',
+          parts: [
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 41,translation: Offset(0, 18),), 
+            KnittingSymbolRectangle(name: 'r',height: 3,width: 45,translation: Offset(0.9, -8.5),rotation: -0.4188790204786391,), 
+            KnittingSymbolRectangle(name: 'rectangle',height: 53.8,width: 3,translation: Offset(4.6, 11),rotation: -1.1868238913561442,), 
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 41,translation: Offset(0, -18),), 
+          ],
+        ), 
+      ],
+      category: 'Cables v1',
+      description: 'sl 2 sts onto cn, hold in front, k2, k2 from cn',
+    ),
+
+    StitchDefinition(
+      name: '2/2 RC',
+      abbreviation: '2/2rc',
+      symbols: [
+        KnittingSymbol(
+          name: 'col1',
+          parts: [
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 41,translation: Offset(0, 18),), 
+            KnittingSymbolRectangle(name: 'r',height: 3,width: 45,translation: Offset(0.9, -8.5),rotation: -0.4188790204786391,), 
+            KnittingSymbolRectangle(name: 'rectangle',height: 53.8,width: 3,translation: Offset(4.6, 11),rotation: -1.1868238913561442,), 
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 41,translation: Offset(0, -18),), 
+          ],
+          scale: Offset(-1, 1),
+        ), 
+        KnittingSymbol(
+          name: 'col2',
+          parts: [
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 41,translation: Offset(0, -18),), 
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 41,translation: Offset(0, 18),), 
+            KnittingSymbolRectangle(name: 'r',height: 3,width: 85.9,translation: Offset(0, -8.1),rotation: -0.4188790204786391,), 
+          ],
+        ),
+        KnittingSymbol(
+          name: 'col3',
+          parts: [
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 41,translation: Offset(0, 18),), 
+            KnittingSymbolRectangle(name: 'r',height: 3,width: 41,translation: Offset(0, -18),), 
+            KnittingSymbolRectangle(name: 'r',height: 3,width: 57,translation: Offset(0.9, 10.1),rotation: -0.3665191429188092,), 
+          ],
+        ), 
+        KnittingSymbol(
+          name: 'col4',
+          parts: [
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 41,translation: Offset(0, -18),), 
+            KnittingSymbolRectangle(name: 'rectangle',height: 47.7,width: 3,translation: Offset(4.6, 11),rotation: -1.1868238913561442,), 
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 41,translation: Offset(0, 18),), 
+            KnittingSymbolRectangle(name: 'r',height: 3,width: 57,translation: Offset(0.9, -7),rotation: -0.4188790204786391,), 
+          ],
+        ), 
+      ],
+      category: 'Cables v1',
+      description: 'sl 2 sts onto cn, hold in back, k2, k2 from cn',
+    ),
+
+    StitchDefinition(
+      name: '2/2 LPC',
+      abbreviation: '2/2lpc',
+      symbols: [
+        KnittingSymbol(
+          name: 'col1',
+          parts: [
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 41,translation: Offset(0, -18),), 
+            KnittingSymbolRectangle(name: 'rectangle',height: 47.7,width: 3,translation: Offset(4.6, 11),rotation: -1.1868238913561442,), 
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 41,translation: Offset(0, 18),), 
+            KnittingSymbolRectangle(name: 'rectangle',height: 40,width: 40,scale: Offset(-1, 1),translation: Offset(-7.6, 28.8),rotation: 1.2042771838760873,), 
+            KnittingSymbolRectangle(name: 'r',height: 3,width: 57,translation: Offset(0.9, -7),rotation: -0.4188790204786391,), 
+          ],
+          scale: Offset(-1, 1),
+        ), 
+        KnittingSymbol(
+          name: 'col2',
+          parts: [
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 41,translation: Offset(0, 18),), 
+            KnittingSymbolRectangle(name: 'r',height: 3,width: 41,translation: Offset(0, -18),), 
+            KnittingSymbolRectangle(name: 'r',height: 3,width: 57,translation: Offset(0.9, 10.1),rotation: -0.3665191429188092,), 
+            KnittingSymbolRectangle(name: 'rectangle',height: 40,width: 40,translation: Offset(13.6, 27.7),rotation: 1.2042771838760873,), 
+          ],
+          scale: Offset(-1, 1),
+        ), 
+        KnittingSymbol(
+          name: 'col3',
+          parts: [
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 41,translation: Offset(0, -18),), 
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 41,translation: Offset(0, 18),), 
+            KnittingSymbolRectangle(name: 'r',height: 3,width: 85.9,translation: Offset(0, -8.1),rotation: -0.4188790204786391,), 
+            KnittingSymbolRectangle(name: 'rectangle',height: 40,width: 40,translation: Offset(-8.6, -24.6),rotation: 1.1693705988362009,), 
+          ],
+          scale: Offset(-1, 1),
+        ), 
+        KnittingSymbol(
+          name: 'col4',
+          parts: [
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 41,translation: Offset(0, 18),), 
+            KnittingSymbolRectangle(name: 'r',height: 3,width: 45,translation: Offset(0.9, -8.5),rotation: -0.4188790204786391,), 
+            KnittingSymbolRectangle(name: 'rectangle',height: 53.8,width: 3,translation: Offset(4.6, 11),rotation: -1.1868238913561442,), 
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 41,translation: Offset(0, -18),), 
+            KnittingSymbolRectangle(name: 'rectangle',height: 40,width: 40,translation: Offset(-8.6, -24.6),rotation: 1.1693705988362009,), 
+          ],
+        ), 
+      ],
+      category: 'Cables v1',
+      description: 'sl 2 sts onto cn, hold in front, k2, p2 from cn',
+    ),
+
+    StitchDefinition(
+      name: '2/2 RPC',
+      abbreviation: '2/2rpc',
+      symbols: [
+        KnittingSymbol(
+          name: 'col1',
+          parts: [
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 41,translation: Offset(0, 18),), 
+            KnittingSymbolRectangle(name: 'r',height: 3,width: 45,translation: Offset(0.9, -8.5),rotation: -0.4188790204786391,), 
+            KnittingSymbolRectangle(name: 'rectangle',height: 53.8,width: 3,translation: Offset(4.6, 11),rotation: -1.1868238913561442,), 
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 41,translation: Offset(0, -18),), 
+            KnittingSymbolRectangle(name: 'rectangle',height: 40,width: 40,translation: Offset(-8.6, -24.6),rotation: 1.1693705988362009,), 
+          ],
+          scale: Offset(-1, 1),
+        ), 
+        KnittingSymbol(
+          name: 'col2',
+          parts: [
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 41,translation: Offset(0, -18),), 
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 41,translation: Offset(0, 18),), 
+            KnittingSymbolRectangle(name: 'r',height: 3,width: 85.9,translation: Offset(0, -8.1),rotation: -0.4188790204786391,), 
+            KnittingSymbolRectangle(name: 'rectangle',height: 40,width: 40,translation: Offset(-8.6, -24.6),rotation: 1.1693705988362009,), 
+          ],
+        ), 
+        KnittingSymbol(
+          name: 'col3',
+          parts: [
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 41,translation: Offset(0, 18),), 
+            KnittingSymbolRectangle(name: 'r',height: 3,width: 41,translation: Offset(0, -18),), 
+            KnittingSymbolRectangle(name: 'r',height: 3,width: 57,translation: Offset(0.9, 10.1),rotation: -0.3665191429188092,), 
+            KnittingSymbolRectangle(name: 'rectangle',height: 40,width: 40,translation: Offset(13.6, 27.7),rotation: 1.2042771838760873,), 
+          ],
+        ), 
+        KnittingSymbol(
+          name: 'col4',
+          parts: [
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 41,translation: Offset(0, -18),), 
+            KnittingSymbolRectangle(name: 'rectangle',height: 47.7,width: 3,translation: Offset(4.6, 11),rotation: -1.1868238913561442,), 
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 41,translation: Offset(0, 18),), 
+            KnittingSymbolRectangle(name: 'rectangle',height: 40,width: 40,scale: Offset(-1, 1),translation: Offset(-7.6, 28.8),rotation: 1.2042771838760873,), 
+            KnittingSymbolRectangle(name: 'r',height: 3,width: 57,translation: Offset(0.9, -7),rotation: -0.4188790204786391,), 
+          ],
+        ), 
+      ],
+      category: 'Cables v1',
+      description: 'sl 2 sts onto cn, hold in back, k2, p2 from cn',
+    ),
+
+    StitchDefinition(
+      name: '2/1/2 LPC',
+      abbreviation: '212lpc',
+      symbols: [
+        KnittingSymbol(
+          name: 'col1',
+          parts: [
+            KnittingSymbolPath(name: 'path',path: 'M0,0L41,20L41,0L0,0z',scale: Offset(1, -1),filled: true,), 
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 44.9,translation: Offset(0, -7.4),rotation: 0.4014257279586958,), 
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 41,translation: Offset(0, -18),), 
+          ],
+        ), 
+        KnittingSymbol(
+          name: 'col2',
+          parts: [
+            KnittingSymbolPath(name: 'path',path: 'M-1,0L41,20L41,0L0,0z',scale: Offset(-1, -1),filled: true,), 
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 41,translation: Offset(0, -18),), 
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 41,translation: Offset(0, 18),), 
+          ],
+        ), 
+        KnittingSymbol(
+          name: 'col3',
+          parts: [
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 41,translation: Offset(0, -18),), 
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 41,translation: Offset(0, 18),), 
+          ],
+        ), 
+        KnittingSymbol(
+          name: 'col4',
+          parts: [
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 41,translation: Offset(0, -18),), 
+            KnittingSymbolPath(name: 'path',path: 'M0,0L41,20L41,0L0,0z',filled: true,), 
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 41,translation: Offset(0, 18),), 
+          ],
+        ), 
+        KnittingSymbol(
+          name: 'col5',
+          parts: [
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 41,translation: Offset(0, 18),), 
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 44.9,translation: Offset(0, 7.4),rotation: 0.4014257279586958,), 
+            KnittingSymbolPath(name: 'path',path: 'M0,0L40,20L40,0L0,0z',scale: Offset(-1, 1),filled: true,), 
+          ],
+        ), 
+      ],
+      category: 'Cables v1',
+      description: 'sl 2 sts onto first cn and hold in front, sl 1 st onto 2nd cn and hold in back, k2, p1 from 2nd cn, k2 from first cn',
+    ),
+
+    StitchDefinition(
+      name: '2/1/2 RPC',
+      abbreviation: '212rpc',
+      symbols: [
+        KnittingSymbol(
+          name: 'col1',
+          parts: [
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 44,translation: Offset(0, 12.7),rotation: -0.2792526803190927,), 
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 45,scale: Offset(1, -1),translation: Offset(0, -11.3),rotation: -0.29670597283903605,), 
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 45,translation: Offset(0, -19),), 
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 45,translation: Offset(0, 18.5),), 
+          ],
+        ), 
+        KnittingSymbol(
+          name: 'col2',
+          parts: [
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 44,translation: Offset(0, 0.5),rotation: -0.29670597283903605,), 
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 25.5,scale: Offset(-1, 1),translation: Offset(-14.4, -3.4),rotation: -0.2792526803190927,), 
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 45,translation: Offset(0, -19),), 
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 45,translation: Offset(0, 18.5),), 
+          ],
+        ), 
+        KnittingSymbol(
+          name: 'col3',
+          parts: [
+            KnittingSymbolPath(name: 'path',path: 'M0,0L0,3L20,10L41,3L51,0L0,0z',filled: true,), 
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 28.9,translation: Offset(6.9, 10.2),rotation: -0.29670597283903605,), 
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,translation: Offset(-11.1, -8.7),rotation: -0.2792526803190927,), 
+            KnittingSymbolPath(name: 'path',path: 'M0,39L0,36L20,30L41,36L41,39L0,39z',translation: Offset(0, 1.4),filled: true,), 
+          ],
+        ), 
+        KnittingSymbol(
+          name: 'col4',
+          parts: [
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 44,translation: Offset(0, 0.3),rotation: -0.2792526803190927,), 
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,scale: Offset(1, -1),translation: Offset(12.5, 2.9),rotation: -0.2792526803190927,), 
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 45,translation: Offset(0, -19),), 
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 45,translation: Offset(0, 18.5),), 
+          ],
+        ), 
+        KnittingSymbol(
+          name: 'col5',
+          parts: [
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 44,translation: Offset(0, -11.6),rotation: -0.2792526803190927,), 
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 44,scale: Offset(1, -1),translation: Offset(0, 11.5),rotation: -0.29670597283903605,), 
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 41.8,translation: Offset(-1, 18.5),), 
+            KnittingSymbolRectangle(name: 'rectangle',height: 3,width: 45,translation: Offset(0, -19),), 
+          ],
+        ), 
+      ],
+      category: 'Cables v1',
+      description: 'sl 2 sts onto first cn and hold in back, sl 1 st onto 2nd cn and hold in back, k2, p1 from 2nd cn, k2 from first cn',
+    ),
+
   ];
 
   static Map<String, List<StitchDefinition>> getDefinitionsPerCategory(List<StitchDefinition> customStitches) {

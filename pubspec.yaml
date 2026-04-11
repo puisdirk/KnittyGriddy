@@ -46,6 +46,7 @@ dependencies:
   path_drawing: ^1.0.1
   flutter_dial_knob: ^0.1.1
   flutter_spinbox: ^0.13.1
+  fitted_scale: ^1.0.3
 
 dev_dependencies:
   flutter_test:

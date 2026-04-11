@@ -1,3 +1,4 @@
+import 'package:fitted_scale/fitted_scale.dart';
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/constants.dart';
 import 'package:knitty_griddy/stitchrepo/knitting_symbol_control.dart';
@@ -17,20 +18,20 @@ class StitchIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Transform.scale(
+    return FittedScale(
       scale: iconSize / stitchCellHeight,
-      child: Center(
-        child: SizedBox(
-          width: stitchCellWidth,
-          height: stitchCellHeight,
-          child:
-            Row(
-              children: [
-                for (int column = 0; column < stitchDefinition.columns; column++) 
-                  KnittingSymbolControl(knittingSymbol: stitchDefinition.symbolAt(column), symbolColor: iconColor)
-              ],
-            ),
-        )
+      child: SizedBox(
+        width: stitchCellWidth * stitchDefinition.columns,
+        height: stitchCellHeight,
+        child:
+          Stack(
+            children: [
+              for (int column = 0; column < stitchDefinition.columns; column++) 
+                Positioned(
+                  left: column * stitchCellWidth, 
+                  child: KnittingSymbolControl(knittingSymbol: stitchDefinition.symbolAt(column), symbolColor: iconColor))
+            ],
+          ),
       ),
     );
   }

@@ -1,4 +1,5 @@
 
+import 'package:fitted_scale/fitted_scale.dart';
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/constants.dart';
 import 'package:knitty_griddy/model/knitting_symbol_part.dart';
@@ -18,7 +19,7 @@ class StitchPartIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Transform.scale(
+    return FittedScale(
       scale: iconSize / stitchCellHeight,
       child: Center(
         child: SizedBox(

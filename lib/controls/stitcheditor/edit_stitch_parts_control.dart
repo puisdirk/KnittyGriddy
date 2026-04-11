@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/constants.dart';
+import 'package:knitty_griddy/controls/stitcheditor/stitch_parts_borders.dart';
 import 'package:knitty_griddy/model/knitting_symbol.dart';
 import 'package:knitty_griddy/model/knitting_symbol_part.dart';
 import 'package:knitty_griddy/controls/stitcheditor/add_stitch_column_indicator.dart';
@@ -70,20 +71,10 @@ class EditStitchPartsControl extends StatelessWidget {
                   child: SizedBox(
                     width: stitchCellWidth, 
                     height: stitchCellHeight, 
-                    child: Container(
-                      decoration: BoxDecoration(
-                        border: Border(
-                          top: stitchDefinition.hasPartAt(col, row + 1) ? BorderSide.none : BorderSide(color: Colors.grey.shade300),
-                          bottom: BorderSide(color: Colors.grey.shade300),
-                          right: stitchDefinition.hasPartAt(col + 1, row) ? BorderSide.none : BorderSide(color: Colors.grey.shade300),
-                          left: stitchDefinition.hasPartAt(col - 1, row) ? BorderSide.none : BorderSide(color: Colors.grey.shade300),
-                        ),
-                      ),
-                      child: KnittingSymbolPartControl(
-                        knittingSymbolPart: stitchDefinition.symbolPartAt(col, row),
-                        symbolColor: Colors.black,
-                        onTap: () => onSelectionChanged(col, row),
-                      )
+                    child: KnittingSymbolPartControl(
+                      knittingSymbolPart: stitchDefinition.symbolPartAt(col, row),
+                      symbolColor: Colors.black,
+                      onTap: () => onSelectionChanged(col, row),
                     ),
                   ),
                 ),
@@ -104,36 +95,22 @@ class EditStitchPartsControl extends StatelessWidget {
                 child: SizedBox(
                   width: stitchCellWidth, 
                   height: stitchCellHeight, 
-                  child: Container(
-                    decoration: BoxDecoration(
-                      border: 
-                      stitchDefinition.columns > 1 ?
-                        (col == 0) ?
-                          Border(
-                            top: BorderSide(color: Colors.grey.shade300),
-                            left: BorderSide(color: Colors.grey.shade300),
-                            bottom: BorderSide(color: Colors.grey.shade300),
-                        ) :
-                        (col == stitchDefinition.columns - 1) ?
-                          Border(
-                            top: BorderSide(color: Colors.grey.shade300),
-                            right: BorderSide(color: Colors.grey.shade300),
-                            bottom: BorderSide(color: Colors.grey.shade300),
-                          ) :
-                        Border(
-                          top: BorderSide(color: Colors.grey.shade300),
-                          bottom: BorderSide(color: Colors.grey.shade300),
-                        ) :
-                      Border(
-                        top: BorderSide(color: Colors.grey.shade300),
-                        bottom: BorderSide(color: Colors.grey.shade300),
-                        left: BorderSide(color: Colors.grey.shade300),
-                        right: BorderSide(color: Colors.grey.shade300),
-                      )
-                    ),
-                    child: KnittingSymbolControl(
-                      knittingSymbol: stitchDefinition.symbolAt(col),
-                      onTap: () => onSelectionChanged(col, null),
+                  child: KnittingSymbolControl(
+                    knittingSymbol: stitchDefinition.symbolAt(col),
+                    onTap: () => onSelectionChanged(col, null),
+                  ),
+                ),
+              ),
+              // Grid
+              Positioned(
+                top: stitchCellHeight,
+                child: IgnorePointer(
+                  child: SizedBox(
+                    width: (stitchDefinition.columns * stitchCellWidth),
+                    height: ((stitchDefinition.maxRows + 1) * stitchCellHeight) + spacer,
+                    child: StitchPartsBorders(
+                      stitchDefinition: stitchDefinition,
+                      symbolRowSpace: spacer,
                     ),
                   ),
                 ),

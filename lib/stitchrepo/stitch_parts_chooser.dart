@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/controls/stitch_icon.dart';
 import 'package:knitty_griddy/controls/stitch_part_icon.dart';
+import 'package:knitty_griddy/math_utitilies.dart';
 import 'package:knitty_griddy/model/knitting_symbol_part.dart';
 import 'package:knitty_griddy/model/knitting_symbol_parts.dart';
 import 'package:knitty_griddy/model/knitty_griddy_model.dart';
@@ -77,18 +78,18 @@ class _StitchPartsChooserState extends State<StitchPartsChooser> {
   }
 
   Widget createStandardPartsCategory() {
-    double widestSymbolPath = 0;
-    for (KnittingSymbolPart part in KnittingSymbolParts.parts) {
-      double width = (_spacerwidth * 4) + (part.name.length * 10) + _iconWidth;
-      if (width > widestSymbolPath) {
-        widestSymbolPath = width;
-      }
-    }
-
     List<Widget> cards = [];
     for (KnittingSymbolPart part in KnittingSymbolParts.parts) {
+      
+      double cardWidth = 
+        _spacerwidth +
+        _iconWidth +
+        _spacerwidth +
+        MathUtitilies.textSize(part.name, Theme.of(context).textTheme.bodyMedium!).width +
+        _spacerwidth + _spacerwidth;
+
       cards.add(SizedBox(
-        width: widestSymbolPath, 
+        width: cardWidth, 
         height: 50,
         child: Card(
           color: _selectedParts.contains(part) ? Colors.blue.withAlpha(60) : null,
@@ -120,20 +121,19 @@ class _StitchPartsChooserState extends State<StitchPartsChooser> {
   }
 
   Widget createCategory(MapEntry<String, List<StitchDefinition>> entry) {
-    double widestStitchWidth = 0;
-    for (StitchDefinition def in entry.value) {
-      double width = (_spacerwidth * 5) + (def.columns * 28.0) + (def.name.length * 10);
-      if (width > widestStitchWidth) {
-        widestStitchWidth = width;
-      }
-    }
-
     List<Widget> cards = [];
     for (StitchDefinition sd in entry.value) {
       bool stitchSelected = _selectedStitches.contains(sd);
 
+      double cardWidth =
+        _spacerwidth +
+        (sd.columns * _iconWidth) +
+        _spacerwidth +
+        MathUtitilies.textSize(sd.name, Theme.of(context).textTheme.bodyMedium!).width +
+        _spacerwidth + _spacerwidth;
+
       cards.add(SizedBox(
-        width: widestStitchWidth, 
+        width: cardWidth, 
         height: 50,
         child: Card(
           color: stitchSelected ? Colors.blue.withAlpha(60) : null,

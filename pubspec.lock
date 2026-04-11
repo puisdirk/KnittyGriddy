@@ -113,6 +113,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "10.3.10"
+  fitted_scale:
+    dependency: "direct main"
+    description:
+      name: fitted_scale
+      sha256: af02710f0682ab8fb72ccc1ca170dde5415f5420f4ae3ebf955e4cf9fe8c6f8b
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.3"
   flutter:
     dependency: "direct main"
     description: flutter
