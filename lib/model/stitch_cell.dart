@@ -36,9 +36,6 @@ class StitchCell {
     NamedColour? colour,
     int? stitchDefinitionColumn,
   }) {
-    if (stitchDefinitionColumn != null && stitchDefinitionColumn != 0) {
-      print('ouch');
-    }
     return StitchCell(
       row: row?? this.row, 
       column: column?? this.column, 
