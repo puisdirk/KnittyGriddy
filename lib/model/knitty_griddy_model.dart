@@ -390,9 +390,9 @@ class KnittyGriddyModel extends ChangeNotifier {
     _model = _model.copyWith(
       knittingPattern: _model.knittingPattern.copyWith(
         selection: Selection(
-          fromRow: 1, fromColumn: 1, 
-          upToRow: _model.knittingPattern.patternSettings.rows, 
-          upToColumn: _model.knittingPattern.patternSettings.columns)
+          fromRow: 0, fromColumn: 0, 
+          upToRow: _model.knittingPattern.patternSettings.rows - 1, 
+          upToColumn: _model.knittingPattern.patternSettings.columns - 1)
       )
     );
 
@@ -424,10 +424,10 @@ class KnittyGriddyModel extends ChangeNotifier {
     _model = _model.copyWith(
       knittingPattern: _model.knittingPattern.copyWith(
         selection: Selection(
-          fromRow: row + 1, 
-          upToRow: row + 1, 
-          fromColumn: 1,
-          upToColumn: _model.knittingPattern.patternSettings.columns)
+          fromRow: row, 
+          upToRow: row, 
+          fromColumn: 0,
+          upToColumn: _model.knittingPattern.patternSettings.columns - 1)
       )
     );
 
@@ -439,10 +439,10 @@ class KnittyGriddyModel extends ChangeNotifier {
     _model = _model.copyWith(
       knittingPattern: _model.knittingPattern.copyWith(
         selection: Selection(
-          fromColumn: column + 1, 
-          upToColumn: column + 1,
-          fromRow: 1, 
-          upToRow: _model.knittingPattern.patternSettings.rows, 
+          fromColumn: column, 
+          upToColumn: column,
+          fromRow: 0, 
+          upToRow: _model.knittingPattern.patternSettings.rows - 1, 
         )
       )
     );

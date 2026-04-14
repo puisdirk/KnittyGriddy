@@ -1,9 +1,8 @@
 
 import 'package:flutter/material.dart';
-import 'package:knitty_griddy/constants.dart';
 import 'package:knitty_griddy/controls/stitch_icon.dart';
 import 'package:knitty_griddy/controls/stitcheditor/edit_stitch_page.dart';
-import 'package:knitty_griddy/math_utitilies.dart';
+import 'package:knitty_griddy/utils/math_utitilies.dart';
 import 'package:knitty_griddy/model/knitting_pattern.dart';
 import 'package:knitty_griddy/model/knitty_griddy_model.dart';
 import 'package:knitty_griddy/stitchrepo/stitch_definition.dart';
@@ -81,7 +80,7 @@ class _StitchChooserState extends State<StitchChooser> {
                   iconSize: _iconWidth,
                   onPressed: () {
                     Navigator.of(context).push(
-                          MaterialPageRoute(builder: (context) => EditStitchPage(stitchDefinition: sd)),
+                      MaterialPageRoute(builder: (context) => EditStitchPage(stitchDefinition: sd)),
                     );
                   },
                   icon: const Icon(Icons.edit)
@@ -95,8 +94,9 @@ class _StitchChooserState extends State<StitchChooser> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start, 
       children: [
-        Text(stitchesInCategory.key), 
-        Wrap(children: cards,)
+        Text(stitchesInCategory.key, style: const TextStyle(fontSize: 18),),
+        Wrap(children: cards,),
+        const SizedBox(height: 14,)
       ],
     );
   }

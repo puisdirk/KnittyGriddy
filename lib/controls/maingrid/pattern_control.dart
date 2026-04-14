@@ -1,11 +1,11 @@
 
 import 'package:flutter/material.dart';
-import 'package:knitty_griddy/constants.dart';
+import 'package:knitty_griddy/utils/constants.dart';
 import 'package:knitty_griddy/controls/editgrid/add_column_or_row_indicators_panel.dart';
 import 'package:knitty_griddy/controls/editgrid/column_and_row_numbers_panel.dart';
-import 'package:knitty_griddy/controls/outline_layer.dart';
+import 'package:knitty_griddy/controls/maingrid/outline_layer.dart';
 import 'package:knitty_griddy/controls/selectionlayer/selection_layer_panel.dart';
-import 'package:knitty_griddy/controls/stitches_grid.dart';
+import 'package:knitty_griddy/controls/maingrid/stitches_grid.dart';
 import 'package:knitty_griddy/model/knitty_griddy_model.dart';
 import 'package:knitty_griddy/model/pattern_settings.dart';
 import 'package:provider/provider.dart';

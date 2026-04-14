@@ -1,6 +1,6 @@
 
 import 'package:flutter/material.dart';
-import 'package:knitty_griddy/constants.dart';
+import 'package:knitty_griddy/utils/constants.dart';
 import 'package:knitty_griddy/controls/editgrid/add_column_indicator.dart';
 import 'package:knitty_griddy/controls/editgrid/add_row_indicator.dart';
 import 'package:knitty_griddy/controls/editgrid/delete_column_indicator.dart';

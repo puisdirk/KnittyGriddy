@@ -1,6 +1,6 @@
 
 import 'package:flutter/material.dart';
-import 'package:knitty_griddy/constants.dart';
+import 'package:knitty_griddy/utils/constants.dart';
 import 'package:knitty_griddy/model/knitty_griddy_model.dart';
 import 'package:provider/provider.dart';
 

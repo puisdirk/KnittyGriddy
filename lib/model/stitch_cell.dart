@@ -1,6 +1,6 @@
 
 import 'package:flutter/material.dart';
-import 'package:knitty_griddy/constants.dart';
+import 'package:knitty_griddy/utils/constants.dart';
 import 'package:knitty_griddy/controls/named_colour.dart';
 import 'package:knitty_griddy/stitchrepo/stitch_definition.dart';
 import 'package:knitty_griddy/stitchrepo/stitch_repository.dart';

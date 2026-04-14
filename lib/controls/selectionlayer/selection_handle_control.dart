@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
-import 'package:knitty_griddy/color_utilities.dart';
-import 'package:knitty_griddy/constants.dart';
+import 'package:knitty_griddy/utils/color_utilities.dart';
+import 'package:knitty_griddy/utils/constants.dart';
 import 'package:knitty_griddy/controls/selectionlayer/selection_control.dart';
 import 'package:knitty_griddy/model/knitting_pattern.dart';
 import 'package:knitty_griddy/model/knitty_griddy_model.dart';

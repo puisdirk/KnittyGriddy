@@ -1,6 +1,6 @@
 
 import 'package:flutter/material.dart';
-import 'package:knitty_griddy/constants.dart';
+import 'package:knitty_griddy/utils/constants.dart';
 
 class AddStitchColumnIndicator extends StatefulWidget {
   
