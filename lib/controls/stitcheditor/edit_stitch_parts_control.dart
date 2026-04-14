@@ -1,6 +1,6 @@
 
 import 'package:flutter/material.dart';
-import 'package:knitty_griddy/constants.dart';
+import 'package:knitty_griddy/utils/constants.dart';
 import 'package:knitty_griddy/controls/stitcheditor/stitch_parts_borders.dart';
 import 'package:knitty_griddy/model/knitting_symbol.dart';
 import 'package:knitty_griddy/model/knitting_symbol_part.dart';
@@ -315,7 +315,7 @@ class EditStitchPartsControl extends StatelessWidget {
                                   );
                                   onSelectionChanged(null, null);
                                 } else {
-                                  // Delete an individual path
+                                  // Delete an individual part
                                   List<KnittingSymbol> newSymbols = [];
                                   for (int col = 0; col < stitchDefinition.columns; col++) {
                                     if (col != selectedColumn) {
@@ -323,13 +323,18 @@ class EditStitchPartsControl extends StatelessWidget {
                                     } else {
                                       List<KnittingSymbolPart> newParts = List.from(stitchDefinition.symbols[col].parts);
                                       newParts.removeAt(selectedRow!);
-                                      // Prevent a symbol without parts
-//                                      if (newParts.isEmpty) {
-//                                        newParts.add(KnittingSymbolParts.blankPath);
-//                                      }
+
                                       newSymbols.add(stitchDefinition.symbols[col].copyWith(
                                         parts: newParts
                                       ));
+                                    }
+                                  }
+                                  // If this was a top part, select the part below it if there is any
+                                  if (selectedRow == stitchDefinition.symbolAt(selectedColumn!).rows - 1) {
+                                    if (stitchDefinition.hasPartAt(selectedColumn!, selectedRow! - 1)) {
+                                      onSelectionChanged(selectedColumn!, selectedRow! - 1);
+                                    } else {
+                                      onSelectionChanged(null, null);
                                     }
                                   }
                                   onStitchDefinitionChanged(stitchDefinition.copyWith(

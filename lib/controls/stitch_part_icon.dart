@@ -1,7 +1,7 @@
 
 import 'package:fitted_scale/fitted_scale.dart';
 import 'package:flutter/material.dart';
-import 'package:knitty_griddy/constants.dart';
+import 'package:knitty_griddy/utils/constants.dart';
 import 'package:knitty_griddy/model/knitting_symbol_part.dart';
 import 'package:knitty_griddy/stitchrepo/knitting_symbol_part_control.dart';
 

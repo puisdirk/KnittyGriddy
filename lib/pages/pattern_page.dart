@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:knitty_griddy/controls/toolbar/knitting_toolbar.dart';
-import 'package:knitty_griddy/controls/pattern_control.dart';
+import 'package:knitty_griddy/controls/maingrid/pattern_control.dart';
 import 'package:knitty_griddy/stitchrepo/font_service.dart';
 import 'package:knitty_griddy/model/knitty_griddy_model.dart';
 import 'package:knitty_griddy/pages/grid_settings_view.dart';

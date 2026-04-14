@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
-import 'package:knitty_griddy/color_utilities.dart';
-import 'package:knitty_griddy/constants.dart';
+import 'package:knitty_griddy/utils/color_utilities.dart';
+import 'package:knitty_griddy/utils/constants.dart';
 import 'package:knitty_griddy/model/app_state.dart';
 import 'package:knitty_griddy/model/knitty_griddy_model.dart';
 import 'package:knitty_griddy/model/selection.dart';
@@ -69,16 +69,10 @@ class StitchCellControl extends StatelessWidget {
                     color: stitchCell.colour.color,
                     height: stitchCellHeight,
                     width: stitchCellWidth,
-                    child: Center(
-                      child: SizedBox(
-                        width: 36,
-                        height: 36,
-                        child: KnittingSymbolControl(
-                          knittingSymbol: stitchCell.stitchDefinition.symbolAt(stitchCell.stitchDefinitionColumn),
-                          symbolColor: ColorUtilities.contrastingFromColor(stitchCell.colour.color),
-                        )
+                      child: KnittingSymbolControl(
+                        knittingSymbol: stitchCell.stitchDefinition.symbolAt(stitchCell.stitchDefinitionColumn),
+                        symbolColor: ColorUtilities.contrastingFromColor(stitchCell.colour.color),
                       )
-                    )
                   );
                 }
               ),

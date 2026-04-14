@@ -1,6 +1,6 @@
 
 import 'package:flutter/material.dart';
-import 'package:knitty_griddy/constants.dart';
+import 'package:knitty_griddy/utils/constants.dart';
 import 'package:knitty_griddy/controls/selectionlayer/selection_handle_control.dart';
 import 'package:knitty_griddy/model/knitty_griddy_model.dart';
 import 'package:knitty_griddy/model/selection.dart';
@@ -258,20 +258,20 @@ class _SelectionControlState extends State<SelectionControl> {
     double heightLeniency = stitchCellHeight * 0.25;
 
     if (panType == PanType.middle) {
-      int fromRow = ((panSelectionRect.top - heightLeniency) / stitchCellHeight).ceil();
-      int fromColumn = ((panSelectionRect.left - widthLeniency) / stitchCellWidth).ceil();
+      int fromRow = ((panSelectionRect.top - stitchCellHeight - heightLeniency) / stitchCellHeight).ceil();
+      int fromColumn = ((panSelectionRect.left - stitchCellWidth - widthLeniency) / stitchCellWidth).ceil();
       Provider.of<KnittyGriddyModel>(context, listen: false).selectInRect(
         fromRow: fromRow, 
-        upToRow: fromRow + (panSelectionRect.height / stitchCellHeight).toInt() - 1, 
+        upToRow: fromRow + ((panSelectionRect.height) / stitchCellHeight).toInt() - 1, 
         fromColumn: fromColumn, 
-        upToColumn: fromColumn + (panSelectionRect.width / stitchCellWidth).toInt() - 1
+        upToColumn: fromColumn + ((panSelectionRect.width) / stitchCellWidth).toInt() - 1
       );
     } else {
       Provider.of<KnittyGriddyModel>(context, listen: false).selectInRect(
-        fromRow: ((panSelectionRect.top - heightLeniency) / stitchCellHeight).ceil(), 
-        upToRow: ((panSelectionRect.bottom - stitchCellHeight + heightLeniency) / stitchCellHeight).floor(), 
-        fromColumn: ((panSelectionRect.left - widthLeniency) / stitchCellWidth).ceil(), 
-        upToColumn: ((panSelectionRect.right - stitchCellWidth + widthLeniency) / stitchCellWidth).floor()
+        fromRow: ((panSelectionRect.top - stitchCellHeight - heightLeniency) / stitchCellHeight).ceil(), 
+        upToRow: ((panSelectionRect.bottom - stitchCellHeight - stitchCellHeight + heightLeniency) / stitchCellHeight).floor(), 
+        fromColumn: ((panSelectionRect.left - stitchCellWidth - widthLeniency) / stitchCellWidth).ceil(), 
+        upToColumn: ((panSelectionRect.right - stitchCellWidth - stitchCellWidth + widthLeniency) / stitchCellWidth).floor()
       );
     }
     setState(() {
@@ -291,8 +291,8 @@ class _SelectionControlState extends State<SelectionControl> {
         return selection.isEmpty ?
           const Positioned(child: Placeholder(color: Colors.transparent,)) :
           Positioned(
-            top: panType == PanType.none ? selection.fromRow * stitchCellHeight : panSelectionRect.top, 
-            left: panType == PanType.none ? selection.fromColumn * stitchCellWidth : panSelectionRect.left,
+            top: panType == PanType.none ? (selection.fromRow + 1) * stitchCellHeight : panSelectionRect.top, 
+            left: panType == PanType.none ? (selection.fromColumn + 1) * stitchCellWidth : panSelectionRect.left,
             child: SizedBox(
               width: panType == PanType.none ? selection.numberOfColumns * stitchCellWidth : panSelectionRect.width,
               height: panType == PanType.none ? selection.numberOfRows * stitchCellHeight : panSelectionRect.height,

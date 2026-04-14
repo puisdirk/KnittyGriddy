@@ -1,6 +1,6 @@
 
 import 'package:flutter/material.dart';
-import 'package:knitty_griddy/constants.dart';
+import 'package:knitty_griddy/utils/constants.dart';
 import 'package:knitty_griddy/controls/selectionlayer/selection_control.dart';
 
 const Selection emptySelection = Selection(fromRow: -1, fromColumn: -1, upToRow: -1, upToColumn: -1);
@@ -60,8 +60,8 @@ class Selection {
   }
 
   Rect get asRect => Rect.fromLTWH(
-    fromColumn * stitchCellWidth, 
-    fromRow * stitchCellHeight, 
+    (fromColumn + 1) * stitchCellWidth, 
+    (fromRow + 1) * stitchCellHeight, 
     numberOfColumns * stitchCellWidth, 
     numberOfRows * stitchCellHeight
   );

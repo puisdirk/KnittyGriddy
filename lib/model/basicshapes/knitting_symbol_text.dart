@@ -76,7 +76,7 @@ class KnittingSymbolText extends KnittingSymbolPart {
   @override
   void drawPart(Canvas canvas, Size size, Paint ink) {
     TextStyle style = TextStyle(
-      color: Colors.black,
+      color: ink.color,// Colors.black,
       fontSize: 24,
       fontWeight: bold ? FontWeight.w900 : FontWeight.w400,
       fontStyle: italic ? FontStyle.italic : FontStyle.normal,

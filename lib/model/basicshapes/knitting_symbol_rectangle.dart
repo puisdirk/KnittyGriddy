@@ -88,10 +88,10 @@ class KnittingSymbolRectangle extends KnittingSymbolPart {
           width: width, 
           height: height
         ),
-        topLeft: Radius.circular(topLeftRadius),
-        topRight: Radius.circular(topRightRadius),
-        bottomLeft: Radius.circular(bottomLeftRadius),
-        bottomRight: Radius.circular(bottomRightRadius)
+        topLeft: rounded ? Radius.circular(topLeftRadius) : Radius.zero,
+        topRight: rounded ? Radius.circular(topRightRadius) : Radius.zero,
+        bottomLeft: rounded ? Radius.circular(bottomLeftRadius) : Radius.zero,
+        bottomRight: rounded ? Radius.circular(bottomRightRadius) : Radius.zero,
       ),
       ink);
   }

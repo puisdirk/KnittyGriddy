@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
-import 'package:knitty_griddy/constants.dart';
-import 'package:knitty_griddy/controls/stitch_cell_control.dart';
+import 'package:knitty_griddy/utils/constants.dart';
+import 'package:knitty_griddy/controls/maingrid/stitch_cell_control.dart';
 import 'package:knitty_griddy/model/app_state.dart';
 import 'package:knitty_griddy/model/knitty_griddy_model.dart';
 import 'package:knitty_griddy/model/stitch_cell.dart';

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:knitty_griddy/constants.dart';
+import 'package:knitty_griddy/utils/constants.dart';
 import 'package:knitty_griddy/controls/stitcheditor/edit_stitch_parts_control.dart';
 import 'package:knitty_griddy/stitchrepo/stitch_definition.dart';
 
