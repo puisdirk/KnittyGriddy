@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 import 'package:knitty_griddy/controls/editgrid/add_column_or_row_indicators_panel.dart';
 import 'package:knitty_griddy/controls/editgrid/column_and_row_numbers_panel.dart';
-import 'package:knitty_griddy/controls/maingrid/outline_layer.dart';
+import 'package:knitty_griddy/controls/maingrid/outline_control.dart';
 import 'package:knitty_griddy/controls/selectionlayer/selection_layer_panel.dart';
 import 'package:knitty_griddy/controls/maingrid/stitches_grid.dart';
 import 'package:knitty_griddy/model/knitty_griddy_model.dart';
@@ -46,10 +46,10 @@ class PatternControl extends StatelessWidget {
                   child: ColumnAndRowNumbersPanel()),
                 Positioned(
                   child: AddColumnOrRowIndicatorsPanel(rows: patternSettings.rows, columns: patternSettings.columns,)),
-                Positioned(top: stitchCellHeight, left: stitchCellWidth,
-                  child: IgnorePointer(child: OutlineLayer(rows: patternSettings.rows, columns: patternSettings.columns,))),
                 Positioned(left: stitchCellWidth, top: stitchCellHeight,
                   child: SelectionLayerPanel(rows: patternSettings.rows, columns: patternSettings.columns,)),
+                Positioned(top: 2 * stitchCellHeight, left: 2 * stitchCellWidth,
+                  child: IgnorePointer(child: OutlineControl(rows: patternSettings.rows, columns: patternSettings.columns,))),
               ],
             ),
           )

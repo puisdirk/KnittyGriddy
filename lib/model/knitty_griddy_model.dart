@@ -1,12 +1,13 @@
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/controls/named_colour.dart';
-import 'package:knitty_griddy/controls/selectionlayer/selection_control.dart';
+import 'package:knitty_griddy/model/cell_address.dart';
+import 'package:knitty_griddy/model/selection.dart';
 import 'package:knitty_griddy/model/app_state.dart';
 import 'package:knitty_griddy/model/griddy_model.dart';
 import 'package:knitty_griddy/model/knitting_pattern.dart';
 import 'package:knitty_griddy/model/pattern_settings.dart';
-import 'package:knitty_griddy/model/selection.dart';
 import 'package:knitty_griddy/model/stitch_cell.dart';
 import 'package:knitty_griddy/model/undo_redo_manager.dart';
 import 'package:knitty_griddy/stitchrepo/stitch_definition.dart';
@@ -49,6 +50,7 @@ class KnittyGriddyModel extends ChangeNotifier {
   List<StitchDefinition> get usedStitches => _model.knittingPattern.usedStitches;
   List<NamedColour> get usedColours => _model.knittingPattern.usedColours;
   Selection get selection => _model.knittingPattern.selection;
+  Set<CellAddress> get outline => _model.knittingPattern.outline;
   KnittingPattern get knittingPattern => _model.knittingPattern;
 
   Map<String, List<StitchDefinition>> selectStitchDefinitionsPerCategory(String filter) {
@@ -89,12 +91,6 @@ class KnittyGriddyModel extends ChangeNotifier {
       appState: _model.appState.setSelectedMouseOption(mouseOption: option)
     );
     notifyListeners();
-  }
-
-  Color cellColorAtSelectionHandle(PanType panType) {
-    int row = _model.knittingPattern.selection.getRowOfPanType(panType);
-    int col = _model.knittingPattern.selection.getColOfPanType(panType);
-    return _model.knittingPattern.stitches.firstWhere((cell) => cell.row == row && cell.column == col).colour.color;
   }
 
   void useGridType(GridType newGridType){
@@ -180,15 +176,35 @@ class KnittyGriddyModel extends ChangeNotifier {
   // ********************************************* Fill selection ************************************
 
   void fillSelectionWithStitch(StitchDefinition stitchDefinition) {
-    // selection must be wide enough
-    if (selection.numberOfColumns < stitchDefinition.columns) {
+    if (!selection.hasWidthOf(stitchDefinition.columns)) {
       return;
     }
 
-    // We go column per column to take multi-column stitches into account
-    for (int row = selection.fromRow; row <= selection.upToRow; row++) {
-      for (int startCol = selection.fromColumn; startCol + stitchDefinition.columns - 1 <= selection.upToColumn; startCol += stitchDefinition.columns) {
-        setStitch(row, startCol, stitchDefinition, storeForUndo: false, emitNotification: false);
+    // single-column stitches don't need all these calculations
+    if (stitchDefinition.columns < 2) {
+      for (CellAddress address in selection.selectedCells) {
+        setStitch(address.row, address.column, stitchDefinition);
+      }
+    } else {
+      for (int row = 0; row < _model.knittingPattern.patternSettings.rows; row++) {
+        List<CellAddress> addressesOnRow = selection.addressesOnRow(row);
+        if (addressesOnRow.isEmpty) {
+          continue;
+        }
+        addressesOnRow.sort();
+        List<CellAddress> visited = [];
+        for (CellAddress address in addressesOnRow) {
+          if (visited.contains(address)) {
+            continue;
+          }
+          visited.add(address);
+
+          List<CellAddress> needed = List.generate(stitchDefinition.columns - 1, (idx) => CellAddress(column: address.column + idx + 1, row: row));
+          if (selection.selectedCells.containsAll(needed)) {
+            setStitch(row, address.column, stitchDefinition);
+            visited.addAll(needed);
+          }
+        }
       }
     }
 
@@ -200,7 +216,7 @@ class KnittyGriddyModel extends ChangeNotifier {
     _model = _model.copyWith(
       knittingPattern: _model.knittingPattern.copyWith(
         stitches: _model.knittingPattern.stitches.map((stitch) =>
-          _model.knittingPattern.selection.containsCell(stitch.row, stitch.column) ?
+          _model.knittingPattern.selection.isSelected(stitch.column, stitch.row) ?
             stitch.copyWith(colour: colour) :
             stitch
         ).toList()
@@ -231,7 +247,7 @@ class KnittyGriddyModel extends ChangeNotifier {
       )
     );
 
-    // Move the columns after the insertion point to the right
+    // Move the columns after the insertion point to the right and clear the selection
     _model = _model.copyWith(
       knittingPattern: _model.knittingPattern.copyWith(
         patternSettings: _model.knittingPattern.patternSettings.copyWith(
@@ -389,10 +405,9 @@ class KnittyGriddyModel extends ChangeNotifier {
   void selectAll() {
     _model = _model.copyWith(
       knittingPattern: _model.knittingPattern.copyWith(
-        selection: Selection(
-          fromRow: 0, fromColumn: 0, 
-          upToRow: _model.knittingPattern.patternSettings.rows - 1, 
-          upToColumn: _model.knittingPattern.patternSettings.columns - 1)
+        selection: selection.selectAll(
+          _model.knittingPattern.patternSettings.columns, 
+          _model.knittingPattern.patternSettings.rows)
       )
     );
 
@@ -400,19 +415,10 @@ class KnittyGriddyModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void selectInRect({
-    required int fromRow, 
-    required int upToRow, 
-    required int fromColumn,
-    required int upToColumn
-  }) {
+  void invertSelection() {
     _model = _model.copyWith(
       knittingPattern: _model.knittingPattern.copyWith(
-        selection: Selection(
-          fromRow: fromRow, 
-          upToRow: upToRow, 
-          fromColumn: fromColumn,
-          upToColumn: upToColumn)
+        selection: _model.knittingPattern.selection.invert(_model.knittingPattern.patternSettings.columns, _model.knittingPattern.patternSettings.rows)
       )
     );
 
@@ -420,14 +426,16 @@ class KnittyGriddyModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void selectRow(int row) {
+  void setOutline() {
+    Set<CellAddress> newOutline = {};
+    // clear if selection is the same as current marks
+    if (!setEquals(selection.selectedCells, outline)) {
+      newOutline.addAll(selection.selectedCells);
+    }
+
     _model = _model.copyWith(
       knittingPattern: _model.knittingPattern.copyWith(
-        selection: Selection(
-          fromRow: row, 
-          upToRow: row, 
-          fromColumn: 0,
-          upToColumn: _model.knittingPattern.patternSettings.columns - 1)
+        outline: newOutline
       )
     );
 
@@ -435,15 +443,100 @@ class KnittyGriddyModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void selectColumn(int column) {
+  void toggleCell(int column, int row) {
     _model = _model.copyWith(
       knittingPattern: _model.knittingPattern.copyWith(
-        selection: Selection(
-          fromColumn: column, 
-          upToColumn: column,
-          fromRow: 0, 
-          upToRow: _model.knittingPattern.patternSettings.rows - 1, 
-        )
+        selection: _model.knittingPattern.selection.toggleCell(column, row)
+      )
+    );
+
+    _storeForUndo();
+    notifyListeners();
+  }
+
+  void toggleRow(int row) {
+    _model = _model.copyWith(
+      knittingPattern: _model.knittingPattern.copyWith(
+        selection: _model.knittingPattern.selection.toggleRows(
+          [row], 
+          _model.knittingPattern.patternSettings.columns)
+      )
+    );
+
+    _storeForUndo();
+    notifyListeners();
+  }
+
+  void toggleColumn(int column) {
+    _model = _model.copyWith(
+      knittingPattern: _model.knittingPattern.copyWith(
+        selection: _model.knittingPattern.selection.toggleColumns(
+          [column], 
+          _model.knittingPattern.patternSettings.rows)
+      )
+    );
+
+    _storeForUndo();
+    notifyListeners();
+  }
+
+  void toggleOddRows() {
+    List<int> rows = [];
+    for (int row = 1; row < _model.knittingPattern.patternSettings.rows; row += 2) {
+      rows.add(row);
+    }
+    _model = _model.copyWith(
+      knittingPattern: _model.knittingPattern.copyWith(
+        selection: _model.knittingPattern.selection.toggleRows(
+          rows, _model.knittingPattern.patternSettings.columns)
+      )
+    );
+
+    _storeForUndo();
+    notifyListeners();
+  }
+
+  void toggleEvenRows() {
+    List<int> rows = [];
+    for (int row = 0; row < _model.knittingPattern.patternSettings.rows; row += 2) {
+      rows.add(row);
+    }
+    _model = _model.copyWith(
+      knittingPattern: _model.knittingPattern.copyWith(
+        selection: _model.knittingPattern.selection.toggleRows(
+          rows, _model.knittingPattern.patternSettings.columns)
+      )
+    );
+
+    _storeForUndo();
+    notifyListeners();
+  }
+
+  void toggleOddColumns() {
+    List<int> columns = [];
+    for (int col = 1; col < _model.knittingPattern.patternSettings.columns; col += 2) {
+      columns.add(col);
+    }
+    _model = _model.copyWith(
+      knittingPattern: _model.knittingPattern.copyWith(
+        selection: _model.knittingPattern.selection.toggleColumns(
+          columns, _model.knittingPattern.patternSettings.rows)
+      )
+    );
+
+    _storeForUndo();
+    notifyListeners();
+  }
+
+  void toggleEvenColumns() {
+    List<int> columns = [];
+    for (int col = 0; col < _model.knittingPattern.patternSettings.columns; col += 2) {
+      columns.add(col);
+    }
+    _model = _model.copyWith(
+      knittingPattern: _model.knittingPattern.copyWith(
+        selection: _model.knittingPattern.selection.toggleColumns(
+          columns, _model.knittingPattern.patternSettings.rows)
       )
     );
 

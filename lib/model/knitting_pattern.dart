@@ -1,9 +1,10 @@
 
 import 'package:flutter/material.dart';
+import 'package:knitty_griddy/model/cell_address.dart';
+import 'package:knitty_griddy/model/selection.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 import 'package:knitty_griddy/controls/named_colour.dart';
 import 'package:knitty_griddy/model/pattern_settings.dart';
-import 'package:knitty_griddy/model/selection.dart';
 import 'package:knitty_griddy/model/stitch_cell.dart';
 import 'package:knitty_griddy/stitchrepo/stitch_definition.dart';
 import 'package:knitty_griddy/stitchrepo/stitch_repository.dart';
@@ -16,14 +17,15 @@ class KnittingPattern {
   final List<StitchDefinition> usedStitches;
   final List<NamedColour> usedColours;
   final Selection selection;
-
+  final Set<CellAddress> outline;
 
   const KnittingPattern({
     required this.patternSettings,
     this.usedStitches = const[StitchRepository.noStitch, StitchRepository.knit, StitchRepository.purl, ],
     this.usedColours = const[defaultMainColor],
     this.stitches = defaultStitches,
-    this.selection = const Selection(fromRow: -1, fromColumn: -1, upToRow: -1, upToColumn: -1)
+    this.selection = emptySelection,
+    this.outline = const {},
   });
 
   KnittingPattern copyWith({
@@ -32,6 +34,7 @@ class KnittingPattern {
     List<StitchDefinition>? usedStitches,
     List<NamedColour>? usedColours,
     Selection? selection,
+    Set<CellAddress>? outline,
   }) {
     return KnittingPattern(
       patternSettings: patternSettings?? this.patternSettings,
@@ -39,6 +42,7 @@ class KnittingPattern {
       usedStitches: usedStitches?? this.usedStitches,
       usedColours: usedColours?? this.usedColours,
       selection: selection?? this.selection,
+      outline: outline?? this.outline,
     );
   }
 
@@ -53,7 +57,8 @@ class KnittingPattern {
 
   @override
   int get hashCode => 
-    patternSettings.hashCode ^ stitches.hashCode ^ usedStitches.hashCode ^ usedColours.hashCode ^ selection.hashCode;
+    patternSettings.hashCode ^ stitches.hashCode ^ usedStitches.hashCode ^ usedColours.hashCode ^ 
+    selection.hashCode ^ outline.hashCode;
     
       @override
       bool operator ==(Object other) =>
@@ -63,7 +68,8 @@ class KnittingPattern {
           stitches == other.stitches &&
           usedStitches == other.usedStitches &&
           usedColours == other.usedColours &&
-          selection == other.selection;
+          selection == other.selection &&
+          outline == other.outline;
 
   
 }
