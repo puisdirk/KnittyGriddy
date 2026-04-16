@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/controls/stitch_icon.dart';
+import 'package:knitty_griddy/model/selection.dart';
 import 'package:knitty_griddy/utils/math_utitilies.dart';
 import 'package:knitty_griddy/model/app_state.dart';
 import 'package:knitty_griddy/model/knitty_griddy_model.dart';
-import 'package:knitty_griddy/model/selection.dart';
 import 'package:knitty_griddy/pages/stitch_repo_page.dart';
 import 'package:knitty_griddy/stitchrepo/stitch_definition.dart';
 import 'package:provider/provider.dart';
@@ -51,7 +51,8 @@ class StitchesToolbarPanel extends StatelessWidget {
                                     return InkWell(
                                       borderRadius: const BorderRadius.all(Radius.circular(10)),
                                       splashColor: Colors.blue.withAlpha(30),
-                                      onTap: (appState.currentTool == Tool.select && selection.numberOfColumns < stitchDefinition.columns) ?
+                                      // Disable the stitch button in select mode if the selection has less columns than needed
+                                      onTap: (appState.currentTool == Tool.select && !selection.hasWidthOf(stitchDefinition.columns)) ?
                                         null :
                                         () {
                                         switch (appState.currentTool) {
@@ -69,11 +70,14 @@ class StitchesToolbarPanel extends StatelessWidget {
                                         mainAxisAlignment: MainAxisAlignment.start,
                                         children: [
                                           const SizedBox(width: _spacerwidth, ),
-                                          StitchIcon(stitchDefinition: stitchDefinition, iconSize: _iconSize,),
+                                          StitchIcon(
+                                            stitchDefinition: stitchDefinition, 
+                                            iconSize: _iconSize, 
+                                            iconColor: (appState.currentTool == Tool.select && !selection.hasWidthOf(stitchDefinition.columns)) ? Colors.grey.shade400 : Colors.black,),
                                           const SizedBox(width: _spacerwidth, ),
                                           Text(stitchDefinition.name, 
                                             style: 
-                                              (appState.currentTool == Tool.select && (selection.isEmpty || selection.numberOfColumns < stitchDefinition.columns)) ?
+                                              (appState.currentTool == Tool.select && (selection.isEmpty || !selection.hasWidthOf(stitchDefinition.columns))) ?
                                                 Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.grey.shade400) : 
                                                 Theme.of(context).textTheme.bodyMedium!
                                           ),

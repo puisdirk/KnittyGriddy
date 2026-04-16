@@ -1,112 +1,140 @@
+import 'package:knitty_griddy/model/cell_address.dart';
 
-import 'package:flutter/material.dart';
-import 'package:knitty_griddy/utils/constants.dart';
-import 'package:knitty_griddy/controls/selectionlayer/selection_control.dart';
+const Selection emptySelection = Selection(selectedCells: {});
 
-const Selection emptySelection = Selection(fromRow: -1, fromColumn: -1, upToRow: -1, upToColumn: -1);
-
-@immutable
 class Selection {
-
-  final int fromRow;
-  final int fromColumn;
-  final int upToRow;
-  final int upToColumn;
+  final Set<CellAddress> selectedCells;
 
   const Selection({
-    required this.fromRow,
-    required this.fromColumn,
-    required this.upToRow,
-    required this.upToColumn,
+    required this.selectedCells,
   });
 
   Selection copyWith({
-    int? fromRow,
-    int? fromColumn,
-    int? upToRow,
-    int? upToColumn,
+    Set<CellAddress>? selectedCells,
   }) {
     return Selection(
-      fromRow: fromRow?? this.fromRow, 
-      fromColumn: fromColumn?? this.fromColumn, 
-      upToRow: upToRow?? this.upToRow, 
-      upToColumn: upToColumn?? this.upToColumn);
+      selectedCells: selectedCells?? this.selectedCells,
+    );
   }
 
-  @override
-  int get hashCode => fromRow.hashCode ^ fromColumn.hashCode ^ upToRow.hashCode ^ upToColumn.hashCode;
+  bool isSelected(int column, int row) {
+    return selectedCells.contains(CellAddress(column: column, row: row));
+  }
 
-  @override
-  bool operator ==(Object other) =>
-    identical(this, other) ||
-      other is Selection &&
-      fromRow == other.fromRow &&
-      fromColumn == other.fromColumn &&
-      upToRow == other.upToRow &&
-      upToColumn == other.upToColumn;
+  List<CellAddress> addressesOnRow(int row) {
+    return selectedCells.where((cell) => cell.row == row).toList();
+  }
 
-  bool get isNotEmpty => fromRow != -1;
-  bool get isEmpty => !isNotEmpty;
+  bool get isEmpty => selectedCells.isEmpty;
+  bool hasWidthOf(int cols) {
+    if (cols < 2) { return !isEmpty; }
+    List<CellAddress> visited = [];
+    for (CellAddress address in selectedCells) {
+      if (visited.contains(address)) {
+        continue;
+      }
+      visited.add(address);
 
-  int get numberOfRows => isEmpty ? 0 : upToRow - fromRow + 1;
-  int get numberOfColumns => isEmpty ? 0 : upToColumn - fromColumn + 1;
-
-  bool containsCell(int row, int column) {
-    if (isNotEmpty) {
-      bool inside = row >= fromRow && row <= upToRow && column >= fromColumn && column <= upToColumn;
-      return inside;
+      int contiguousCells = 1;
+      // Count on the left
+      int offset = 1;
+      while(true) {
+        CellAddress adjacentAddress = CellAddress(column: address.column - offset, row: address.row);
+        visited.add(adjacentAddress);
+        if (isSelected(adjacentAddress.column, adjacentAddress.row)) {
+          contiguousCells++;
+          offset++;
+        } else {
+          break;
+        }
+      }
+      // Count on the left
+      offset = 1;
+      while(true) {
+        CellAddress adjacentAddress = CellAddress(column: address.column + offset, row: address.row);
+        visited.add(adjacentAddress);
+        if (isSelected(adjacentAddress.column, adjacentAddress.row)) {
+          contiguousCells++;
+          offset++;
+        } else {
+          break;
+        }
+      }
+      if (contiguousCells >= cols) {
+        return true;
+      }
     }
+
     return false;
   }
 
-  Rect get asRect => Rect.fromLTWH(
-    (fromColumn + 1) * stitchCellWidth, 
-    (fromRow + 1) * stitchCellHeight, 
-    numberOfColumns * stitchCellWidth, 
-    numberOfRows * stitchCellHeight
-  );
-
-  int getRowOfPanType(PanType panType) {
-    if (isEmpty) {
-      return 0;
-    }
-    switch (panType) {
-      case PanType.bottom:
-      case PanType.bottomleft:
-      case PanType.bottomright:
-        return upToRow;
-      case PanType.left:
-      case PanType.middle:
-      case PanType.right:
-        return (fromRow + ((upToRow - fromRow) / 2)).floor();
-      case PanType.top:
-      case PanType.topleft:
-      case PanType.topright:
-        return fromRow;
-      case PanType.none:
-        return 0;
-    }
+  Selection clear() {
+    return emptySelection;
   }
 
-  int getColOfPanType(PanType panType) {
-    if (isEmpty) {
-      return 0;
+  Selection invert(int columns, int rows) {
+    Set<CellAddress> newSelectedCells = {};
+    for (int row = 0; row < rows; row++) {
+      for (int col = 0; col < columns; col++) {
+        if (!isSelected(col, row)) {
+          newSelectedCells.add(CellAddress(column: col, row: row));
+        }
+      }
     }
-    switch (panType) {
-      case PanType.bottom:
-      case PanType.middle:
-      case PanType.top:
-        return (fromColumn + ((upToColumn - fromColumn) / 2)).floor();
-      case PanType.right:
-      case PanType.bottomright:
-      case PanType.topright:
-        return upToColumn;
-      case PanType.left:
-      case PanType.bottomleft:
-      case PanType.topleft:
-        return fromColumn;
-      case PanType.none:
-        return 0;
-    }
+    return copyWith(selectedCells: newSelectedCells);
   }
+
+  Selection toggleCell(int column, int row) {
+    Set<CellAddress> newSelectedCells = Set.from(selectedCells);
+
+    CellAddress address = CellAddress(column: column, row: row);
+    if (newSelectedCells.contains(address)) {
+      newSelectedCells.remove(address);
+    } else {
+      newSelectedCells.add(address);
+    }
+
+    return Selection(selectedCells: newSelectedCells);
+  }
+
+  Selection toggleColumns(List<int> columns, int numberOfRows) {
+    Set<CellAddress> newSelectedCells = Set.from(selectedCells);
+    bool deselect = newSelectedCells.any((cell) => columns.contains(cell.column));
+    if (deselect) {
+      newSelectedCells.removeWhere((cell) => columns.contains(cell.column));
+    } else {
+      for (int col in columns) {
+        for (int row = 0; row < numberOfRows; row++) {
+          newSelectedCells.add(CellAddress(column: col, row: row));
+        }
+      }
+    }
+    return Selection(selectedCells: newSelectedCells);
+  }
+
+  Selection toggleRows(List<int> rows, int numberOfColumns) {
+    Set<CellAddress> newSelectedCells = Set.from(selectedCells);
+    final bool deselect = newSelectedCells.any((cell) => rows.contains(cell.row));
+    if (deselect) {
+      newSelectedCells.removeWhere((cell) => rows.contains(cell.row));
+    } else {
+      for (int row in rows) {
+        for (int col = 0; col < numberOfColumns; col++) {
+          newSelectedCells.add(CellAddress(column: col, row: row));
+        }
+      }
+    }
+    return Selection(selectedCells: newSelectedCells);
+  }
+
+  Selection selectAll(int numberOfColumns, int numberOfRows) {
+    Set<CellAddress> newSelectedCells = {};
+    for (int col = 0; col < numberOfColumns; col++) {
+      for (int row = 0; row < numberOfRows; row++) {
+        newSelectedCells.add(CellAddress(column: col, row: row));
+      }
+    }
+    return Selection(selectedCells: newSelectedCells);
+  }
+
 }

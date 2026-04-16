@@ -47,8 +47,7 @@ class StitchCellControl extends StatelessWidget {
                     Provider.of<KnittyGriddyModel>(context, listen: false).setStitchColour(stitchCell.row, stitchCell.column, appState.selectedColour!);
                   }
                 } else if (appState.currentTool == Tool.select) {
-                  Provider.of<KnittyGriddyModel>(context, listen: false).selectInRect(
-                    fromRow: stitchCell.row, upToRow: stitchCell.row, fromColumn: stitchCell.column, upToColumn: stitchCell.column);
+                  Provider.of<KnittyGriddyModel>(context, listen: false).toggleCell(stitchCell.column, stitchCell.row);
                 }
               },
               onTapDown: (details) {
@@ -62,10 +61,10 @@ class StitchCellControl extends StatelessWidget {
                 
                 }
               },
-              child: Selector<KnittyGriddyModel, Selection>(
+              child: /*Selector<KnittyGriddyModel, Selection>(
                 selector: (_, model) => model.selection,
                 builder: (context, selection, _) {
-                  return Container(
+                  return*/ Container(
                     color: stitchCell.colour.color,
                     height: stitchCellHeight,
                     width: stitchCellWidth,
@@ -73,8 +72,8 @@ class StitchCellControl extends StatelessWidget {
                         knittingSymbol: stitchCell.stitchDefinition.symbolAt(stitchCell.stitchDefinitionColumn),
                         symbolColor: ColorUtilities.contrastingFromColor(stitchCell.colour.color),
                       )
-                  );
-                }
+//                  );
+//                }
               ),
             ),
           )

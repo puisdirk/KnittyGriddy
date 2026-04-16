@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:knitty_griddy/controls/named_colour.dart';
 import 'package:knitty_griddy/controls/toolbar/add_new_colour_dialog.dart';
 import 'package:knitty_griddy/controls/toolbar/edit_colour_dialog.dart';
+import 'package:knitty_griddy/model/selection.dart';
 import 'package:knitty_griddy/model/app_state.dart';
 import 'package:knitty_griddy/model/knitty_griddy_model.dart';
-import 'package:knitty_griddy/model/selection.dart';
 import 'package:provider/provider.dart';
 
 class ColoursToolbarPanel extends StatelessWidget {
