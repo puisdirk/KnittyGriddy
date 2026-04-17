@@ -37,11 +37,15 @@ class _DeleteRowIndicatorState extends State<DeleteRowIndicator> {
             onExit: (_) => setState(() => visible = false),
             child: SizedBox(
               width: stitchCellWidth, 
-              child: Container(
-                child: visible ? IconButton.outlined(
+              child: Ink(
+                decoration: BoxDecoration(
+                  border: Border.all(color: visible? Colors.red : Colors.grey.withAlpha(40)),
+                  shape: BoxShape.circle,
+                ),
+                child: IconButton(
                   onPressed: () => _deleteRow(context), 
-                  icon: const Icon(Icons.remove, color: Colors.red,)
-                ) : null,
+                  icon: Icon(Icons.remove, color: visible ? Colors.red : Colors.grey.withAlpha(40),)
+                ),
               ),
             ),
           ),
@@ -56,11 +60,15 @@ class _DeleteRowIndicatorState extends State<DeleteRowIndicator> {
             onExit: (_) => setState(() => visible = false),
             child: SizedBox(
               width: stitchCellWidth, 
-              child: Container(
-                child: visible ? IconButton.outlined(
+              child: Ink(
+                decoration: BoxDecoration(
+                  border: Border.all(color: visible ? Colors.red : Colors.grey.withAlpha(40)),
+                  shape: BoxShape.circle,
+                ),
+                child: IconButton(
                   onPressed: () => _deleteRow(context), 
-                  icon: const Icon(Icons.remove, color: Colors.red,)
-                ) : null,
+                  icon: Icon(Icons.remove, color: visible ? Colors.red : Colors.grey.withAlpha(40),)
+                ),
               ),
             ),
           ),

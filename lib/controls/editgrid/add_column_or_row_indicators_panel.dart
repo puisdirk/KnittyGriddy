@@ -27,7 +27,7 @@ class AddColumnOrRowIndicatorsPanel extends StatelessWidget {
         return SizedBox(
           width: (columns * stitchCellWidth) + (4 * columnsAndRowNumbersWidth),
           height: (rows * stitchCellHeight) + (4 * columnsAndRowNumbersHeight),
-          child: appState.currentTool == Tool.select ?
+          child: appState.mouseOption != MouseOption.settings ?
             const Placeholder(color: Colors.transparent,) :
             Stack(
               children: [

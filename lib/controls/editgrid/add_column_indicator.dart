@@ -37,11 +37,15 @@ class _AddColumnIndicatorState extends State<AddColumnIndicator> {
             onExit: (_) => setState(() => visible = false),
             child: SizedBox(
               height: stitchCellHeight, 
-              child: Container(
-                child: visible ? IconButton.outlined(
+              child: Ink(
+                decoration: BoxDecoration(
+                  border: Border.all(color: visible ? Colors.green : Colors.grey.withAlpha(40),),
+                  shape: BoxShape.circle,
+                ),
+                child: IconButton(
                   onPressed: () => _insertColumn(context), 
-                  icon: const Icon(Icons.add, color: Colors.green,)
-                ) : null,
+                  icon: Icon(Icons.add, color: visible ? Colors.green : Colors.grey.withAlpha(40),)
+                ),
               ),
             ),
           ),
@@ -56,11 +60,15 @@ class _AddColumnIndicatorState extends State<AddColumnIndicator> {
             onExit: (_) => setState(() => visible = false),
             child: SizedBox(
               height: stitchCellHeight, 
-              child: Container(
-                child: visible ? IconButton.outlined(
+              child: Ink(
+                decoration: BoxDecoration(
+                  border: Border.all(color: visible ? Colors.green : Colors.grey.withAlpha(40)),
+                  shape: BoxShape.circle,
+                ),
+                child: IconButton(
                   onPressed: () => _insertColumn(context), 
-                  icon: const Icon(Icons.add, color: Colors.green,)
-                ) : null,
+                  icon: Icon(Icons.add, color: visible ? Colors.green : Colors.grey.withAlpha(40)),
+                ),
               ),
             ),
           ),

@@ -95,6 +95,16 @@ class GridOptionsToolbarPanel extends StatelessWidget {
                     }
                   ),
                   const Spacer(),
+                  Ink(
+                    decoration: ShapeDecoration(
+                      color: appState.mouseOption == MouseOption.settings ? Colors.blue.withAlpha(60) : null,
+                      shape: const CircleBorder(),
+                    ),
+                    child: IconButton(
+                      onPressed: () => Provider.of<KnittyGriddyModel>(context, listen: false).setMouseOption(MouseOption.settings), 
+                      icon: const Icon(Icons.settings)
+                    ),
+                  ),
                 ],
               )
             ],

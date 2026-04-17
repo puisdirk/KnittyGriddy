@@ -1,12 +1,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_portal/flutter_portal.dart';
+import 'package:knitty_griddy/controls/editgrid/grid_settings_control.dart';
 import 'package:knitty_griddy/controls/toolbar/knitting_toolbar.dart';
 import 'package:knitty_griddy/controls/maingrid/pattern_control.dart';
 import 'package:knitty_griddy/stitchrepo/font_service.dart';
 import 'package:knitty_griddy/model/knitty_griddy_model.dart';
-import 'package:knitty_griddy/pages/grid_settings_view.dart';
 import 'package:provider/provider.dart';
 
 class PatternPage extends StatefulWidget {
@@ -35,6 +34,8 @@ class _PatternPageState extends State<PatternPage> {
 
   @override
   Widget build(BuildContext context) {
+    FocusScope.of(context).autofocus(_focusNode);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Knitty-Griddy'),
@@ -44,23 +45,6 @@ class _PatternPageState extends State<PatternPage> {
           child: KnittingToolbar(),
         ),
         actions: [
-          PortalTarget(
-            visible: isGridSettingsMenuOpen,
-            anchor: const Aligned(
-              follower: Alignment.topRight, 
-              target: Alignment.bottomRight
-            ),
-            portalFollower: Container(
-              color: Colors.white, 
-              child: GridSettingsView(
-                onClose: () => setState(() => isGridSettingsMenuOpen = false)
-              ),
-            ), 
-            child: IconButton(
-              icon: const Icon(Icons.menu),
-              onPressed: () => setState(() => isGridSettingsMenuOpen = !isGridSettingsMenuOpen),
-            ),
-          ),
           IconButton(
             icon: const Icon(Icons.share),
             onPressed: () async => await FontService.parseFont(),
@@ -83,7 +67,20 @@ class _PatternPageState extends State<PatternPage> {
         child: const Center(
           child: Padding(
             padding: EdgeInsets.all(5.0),
-            child: PatternControl(),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.vertical,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    GridSettingsControl(),
+                    SizedBox(height: 10,),
+                    PatternControl(),
+                  ],
+                ),
+              ),
+            ),
           ),
         ),
       ),
