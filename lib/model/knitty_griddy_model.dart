@@ -12,6 +12,7 @@ import 'package:knitty_griddy/model/stitch_cell.dart';
 import 'package:knitty_griddy/model/undo_redo_manager.dart';
 import 'package:knitty_griddy/stitchrepo/stitch_definition.dart';
 import 'package:knitty_griddy/stitchrepo/stitch_repository.dart';
+import 'package:knitty_griddy/utils/constants.dart';
 
 class KnittyGriddyModel extends ChangeNotifier {
 
@@ -52,6 +53,7 @@ class KnittyGriddyModel extends ChangeNotifier {
   Selection get selection => _model.knittingPattern.selection;
   Set<CellAddress> get outline => _model.knittingPattern.outline;
   KnittingPattern get knittingPattern => _model.knittingPattern;
+  AppState get appState => _model.appState;
 
   Map<String, List<StitchDefinition>> selectStitchDefinitionsPerCategory(String filter) {
     if (filter.isEmpty) {
@@ -73,7 +75,6 @@ class KnittyGriddyModel extends ChangeNotifier {
   bool isColourUsedInPattern(NamedColour colour) =>
     colour.isMainColor || _model.knittingPattern.stitches.any((cell) => cell.colour == colour);
 
-  AppState get appState => _model.appState;
   void appUseStitch(StitchDefinition stitchDefinition) {
     _model = _model.copyWith(
       appState: _model.appState.setSelectedStitchDefinition(stitchDefinition: stitchDefinition)

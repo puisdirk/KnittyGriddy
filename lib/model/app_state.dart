@@ -15,6 +15,7 @@ enum MouseOption {
   singleclick,
   painting,
   selecting,
+  settings,
 }
 
 class AppState {
