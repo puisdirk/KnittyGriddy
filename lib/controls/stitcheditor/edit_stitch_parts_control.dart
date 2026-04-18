@@ -5,9 +5,9 @@ import 'package:knitty_griddy/controls/stitcheditor/stitch_parts_borders.dart';
 import 'package:knitty_griddy/model/knitting_symbol.dart';
 import 'package:knitty_griddy/model/knitting_symbol_part.dart';
 import 'package:knitty_griddy/controls/stitcheditor/add_stitch_column_indicator.dart';
-import 'package:knitty_griddy/stitchrepo/knitting_symbol_control.dart';
-import 'package:knitty_griddy/stitchrepo/knitting_symbol_part_control.dart';
-import 'package:knitty_griddy/stitchrepo/stitch_definition.dart';
+import 'package:knitty_griddy/controls/stitchrepo/knitting_symbol_control.dart';
+import 'package:knitty_griddy/controls/stitchrepo/knitting_symbol_part_control.dart';
+import 'package:knitty_griddy/controls/stitchrepo/stitch_definition.dart';
 import 'package:knitty_griddy/controls/stitcheditor/stitch_paths_selection_marker.dart';
 
 class EditStitchPartsControl extends StatelessWidget {

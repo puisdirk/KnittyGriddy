@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:knitty_griddy/model/cell_address.dart';
 import 'package:knitty_griddy/model/selection.dart';
 import 'package:knitty_griddy/utils/constants.dart';
-import 'package:knitty_griddy/controls/named_colour.dart';
+import 'package:knitty_griddy/model/named_colour.dart';
 import 'package:knitty_griddy/model/pattern_settings.dart';
 import 'package:knitty_griddy/model/stitch_cell.dart';
-import 'package:knitty_griddy/stitchrepo/stitch_definition.dart';
-import 'package:knitty_griddy/stitchrepo/stitch_repository.dart';
+import 'package:knitty_griddy/controls/stitchrepo/stitch_definition.dart';
+import 'package:knitty_griddy/controls/stitchrepo/stitch_repository.dart';
 
 @immutable
 class KnittingPattern {

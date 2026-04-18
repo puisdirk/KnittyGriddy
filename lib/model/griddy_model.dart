@@ -4,7 +4,7 @@ import 'package:knitty_griddy/utils/constants.dart';
 import 'package:knitty_griddy/model/app_state.dart';
 import 'package:knitty_griddy/model/knitting_pattern.dart';
 import 'package:knitty_griddy/model/pattern_settings.dart';
-import 'package:knitty_griddy/stitchrepo/stitch_definition.dart';
+import 'package:knitty_griddy/controls/stitchrepo/stitch_definition.dart';
 
 @immutable
 class GriddyModel {

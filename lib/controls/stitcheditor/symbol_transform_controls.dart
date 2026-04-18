@@ -4,7 +4,7 @@ import 'package:flutter_spinbox/material.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 import 'package:knitty_griddy/controls/stitcheditor/linked_spinbox.dart';
 import 'package:knitty_griddy/utils/math_utitilies.dart';
-import 'package:knitty_griddy/stitchrepo/stitch_definition.dart';
+import 'package:knitty_griddy/controls/stitchrepo/stitch_definition.dart';
 
 class SymbolTransformControls extends StatelessWidget {
   final StitchDefinition stitchDefinition;

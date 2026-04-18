@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:knitty_griddy/controls/editgrid/grid_settings_control.dart';
 import 'package:knitty_griddy/controls/toolbar/knitting_toolbar.dart';
 import 'package:knitty_griddy/controls/maingrid/pattern_control.dart';
-import 'package:knitty_griddy/stitchrepo/font_service.dart';
+import 'package:knitty_griddy/controls/stitchrepo/font_service.dart';
 import 'package:knitty_griddy/model/knitty_griddy_model.dart';
 import 'package:provider/provider.dart';
 

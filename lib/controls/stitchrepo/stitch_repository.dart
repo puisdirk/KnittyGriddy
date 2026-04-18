@@ -6,7 +6,7 @@ import 'package:knitty_griddy/model/basicshapes/knitting_symbol_path.dart';
 import 'package:knitty_griddy/model/basicshapes/knitting_symbol_rectangle.dart';
 import 'package:knitty_griddy/model/basicshapes/knitting_symbol_text.dart';
 import 'package:knitty_griddy/model/knitting_symbol.dart';
-import 'package:knitty_griddy/stitchrepo/stitch_definition.dart';
+import 'package:knitty_griddy/controls/stitchrepo/stitch_definition.dart';
 
 class StitchRepository {
   StitchRepository._();
@@ -22,7 +22,7 @@ class StitchRepository {
             name: 'r1',
             height: 0.3,
             width: 28,
-            translation: Offset(-16, -16),
+            translation: Offset(-18, -18),
             rotation: -0.7853981633974483,
           ), 
           KnittingSymbolRectangle(
@@ -56,7 +56,7 @@ class StitchRepository {
           KnittingSymbolRectangle(
             name: 'r6',
             height: 0.3,
-            translation: Offset(16, 16),
+            translation: Offset(18, 18),
             rotation: -0.7853981633974483,
           ), 
         ],
@@ -1735,6 +1735,7 @@ StitchDefinition(
   ];
 
   static Map<String, List<StitchDefinition>> getDefinitionsPerCategory(List<StitchDefinition> customStitches) {
+    // TODO: this should be set once only when loading a stitches set
     Map<String, List<StitchDefinition>> defs = {};
     for (StitchDefinition def in definitions) {
       if (!defs.containsKey(def.category)) {

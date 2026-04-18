@@ -1,8 +1,8 @@
 import 'package:fitted_scale/fitted_scale.dart';
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/utils/constants.dart';
-import 'package:knitty_griddy/stitchrepo/knitting_symbol_control.dart';
-import 'package:knitty_griddy/stitchrepo/stitch_definition.dart';
+import 'package:knitty_griddy/controls/stitchrepo/knitting_symbol_control.dart';
+import 'package:knitty_griddy/controls/stitchrepo/stitch_definition.dart';
 
 class StitchIcon extends StatelessWidget {
   final StitchDefinition stitchDefinition;

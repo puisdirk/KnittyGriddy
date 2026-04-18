@@ -5,7 +5,7 @@ import 'package:knitty_griddy/utils/math_utitilies.dart';
 import 'package:knitty_griddy/model/knitting_symbol_part.dart';
 import 'package:knitty_griddy/model/knitting_symbol_parts.dart';
 import 'package:knitty_griddy/model/knitty_griddy_model.dart';
-import 'package:knitty_griddy/stitchrepo/stitch_definition.dart';
+import 'package:knitty_griddy/controls/stitchrepo/stitch_definition.dart';
 import 'package:provider/provider.dart';
 
 class StitchPartsChooser extends StatefulWidget {

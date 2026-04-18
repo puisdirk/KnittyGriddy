@@ -4,9 +4,8 @@ import 'package:knitty_griddy/utils/color_utilities.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 import 'package:knitty_griddy/model/app_state.dart';
 import 'package:knitty_griddy/model/knitty_griddy_model.dart';
-import 'package:knitty_griddy/model/selection.dart';
 import 'package:knitty_griddy/model/stitch_cell.dart';
-import 'package:knitty_griddy/stitchrepo/knitting_symbol_control.dart';
+import 'package:knitty_griddy/controls/stitchrepo/knitting_symbol_control.dart';
 import 'package:provider/provider.dart';
 
 class StitchCellControl extends StatelessWidget {
@@ -28,18 +27,18 @@ class StitchCellControl extends StatelessWidget {
           child: MouseRegion(
             cursor: SystemMouseCursors.click,
             onEnter: (event) {
+              // Paint stitches or colours while moving the mouse
               if (appState.mouseOption == MouseOption.painting && event.buttons != 0) {
                 if (appState.currentTool == Tool.stitch && stitchCell.stitchDefinition != appState.selectedStitch) {
                   Provider.of<KnittyGriddyModel>(context, listen: false).setStitch(stitchCell.row, stitchCell.column, appState.selectedStitch!);
                 } else if (appState.currentTool == Tool.colour && stitchCell.colour != appState.selectedColour) {
                   Provider.of<KnittyGriddyModel>(context, listen: false).setStitchColour(stitchCell.row, stitchCell.column, appState.selectedColour!);
                 }
-              } else if (appState.currentTool == Tool.select) {
-                  
               }
             },
             child: GestureDetector(
               onTap: () {
+                // Click to change stitch, colour, or selection
                 if (appState.mouseOption == MouseOption.singleclick) {
                   if (appState.currentTool == Tool.stitch && stitchCell.stitchDefinition != appState.selectedStitch) {
                     Provider.of<KnittyGriddyModel>(context, listen: false).setStitch(stitchCell.row, stitchCell.column, appState.selectedStitch!);
@@ -51,29 +50,23 @@ class StitchCellControl extends StatelessWidget {
                 }
               },
               onTapDown: (details) {
+                // Change initial stitch or colour when painting
                 if (appState.mouseOption == MouseOption.painting) {
                   if (appState.currentTool == Tool.stitch && stitchCell.stitchDefinition != appState.selectedStitch) {
                     Provider.of<KnittyGriddyModel>(context, listen: false).setStitch(stitchCell.row, stitchCell.column, appState.selectedStitch!);
                   } else if (appState.currentTool == Tool.colour && stitchCell.colour != appState.selectedColour) {
                     Provider.of<KnittyGriddyModel>(context, listen: false).setStitchColour(stitchCell.row, stitchCell.column, appState.selectedColour!);
                   }
-                } else if (appState.currentTool == Tool.select) {
-                
                 }
               },
-              child: /*Selector<KnittyGriddyModel, Selection>(
-                selector: (_, model) => model.selection,
-                builder: (context, selection, _) {
-                  return*/ Container(
-                    color: stitchCell.colour.color,
-                    height: stitchCellHeight,
-                    width: stitchCellWidth,
-                      child: KnittingSymbolControl(
-                        knittingSymbol: stitchCell.stitchDefinition.symbolAt(stitchCell.stitchDefinitionColumn),
-                        symbolColor: ColorUtilities.contrastingFromColor(stitchCell.colour.color),
-                      )
-//                  );
-//                }
+              child: Container(
+                color: stitchCell.colour.color,
+                height: stitchCellHeight,
+                width: stitchCellWidth,
+                  child: KnittingSymbolControl(
+                    knittingSymbol: stitchCell.stitchDefinition.symbolAt(stitchCell.stitchDefinitionColumn),
+                    symbolColor: ColorUtilities.contrastingFromColor(stitchCell.colour.color),
+                  )
               ),
             ),
           )

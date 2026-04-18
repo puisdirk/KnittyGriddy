@@ -7,7 +7,7 @@ import 'package:knitty_griddy/model/knitty_griddy_model.dart';
 import 'package:knitty_griddy/model/stitch_cell.dart';
 import 'package:provider/provider.dart';
 
-class StitchesGrid extends StatefulWidget {
+class StitchesGrid extends StatelessWidget {
   final int rows;
   final int columns;
 
@@ -18,11 +18,6 @@ class StitchesGrid extends StatefulWidget {
   });
 
   @override
-  State<StitchesGrid> createState() => _StitchesGridState();
-}
-
-class _StitchesGridState extends State<StitchesGrid> {
-  @override
   Widget build(BuildContext context) {
     return Selector<KnittyGriddyModel, AppState>(
       selector: (_, model) => model.appState,
@@ -31,8 +26,8 @@ class _StitchesGridState extends State<StitchesGrid> {
           selector: (_, model) => model.stitches,
           builder: (context, stitches, _) {
             return SizedBox(
-              width: widget.columns * stitchCellWidth,
-              height: widget.rows * stitchCellHeight,
+              width: columns * stitchCellWidth,
+              height: rows * stitchCellHeight,
               child: Stack(
                 children: [
                   for (StitchCell stitchCell in stitches)
@@ -41,8 +36,8 @@ class _StitchesGridState extends State<StitchesGrid> {
                     ),
                   IgnorePointer(
                     child: CustomPaint(
-                      size: Size(widget.columns * stitchCellWidth, widget.rows * stitchCellHeight),
-                      painter: GridLinesPainter(rows: widget.rows, columns: widget.columns),
+                      size: Size(columns * stitchCellWidth, rows * stitchCellHeight),
+                      painter: GridLinesPainter(rows: rows, columns: columns),
                     ),
                   ),
                 ],

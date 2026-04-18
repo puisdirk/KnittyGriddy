@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 import 'package:knitty_griddy/controls/stitcheditor/edit_stitch_parts_control.dart';
-import 'package:knitty_griddy/stitchrepo/stitch_definition.dart';
+import 'package:knitty_griddy/controls/stitchrepo/stitch_definition.dart';
 
 class StitchPathsSelectionMarker extends StatelessWidget {
   final StitchDefinition stitchDefinition;
@@ -56,7 +56,7 @@ class SelectionMarkerPainter extends CustomPainter {
       // Whole column
       canvas.drawRect(Rect.fromLTWH((selectedColumn! * stitchCellWidth), 0, stitchCellWidth, size.height), ink);
     } else {
-      // Single path
+      // Single part
       canvas.drawRect(Rect.fromLTWH(
         selectedColumn! * stitchCellWidth, 
         size.height - (stitchCellHeight + EditStitchPartsControl.spacer) - ((selectedRow! + 1) * stitchCellHeight),

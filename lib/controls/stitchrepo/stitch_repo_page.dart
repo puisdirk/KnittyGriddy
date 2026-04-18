@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:knitty_griddy/stitchrepo/stitch_chooser.dart';
+import 'package:knitty_griddy/controls/stitchrepo/stitch_chooser.dart';
 
 class StitchRepoPage extends StatelessWidget {
   const StitchRepoPage({super.key});
