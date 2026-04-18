@@ -5,8 +5,8 @@ import 'package:knitty_griddy/controls/stitcheditor/edit_stitch_page.dart';
 import 'package:knitty_griddy/utils/math_utitilies.dart';
 import 'package:knitty_griddy/model/knitting_pattern.dart';
 import 'package:knitty_griddy/model/knitty_griddy_model.dart';
-import 'package:knitty_griddy/stitchrepo/stitch_definition.dart';
-import 'package:knitty_griddy/stitchrepo/stitch_repository.dart';
+import 'package:knitty_griddy/controls/stitchrepo/stitch_definition.dart';
+import 'package:knitty_griddy/controls/stitchrepo/stitch_repository.dart';
 import 'package:provider/provider.dart';
 
 class StitchChooser extends StatefulWidget {
@@ -53,14 +53,14 @@ class _StitchChooserState extends State<StitchChooser> {
         (sd.columns * _iconWidth) + 
         _spacerwidth + 
         MathUtitilies.textSize(sd.name, Theme.of(context).textTheme.bodyMedium!).width + 
-        _iconWidth + 
-        _spacerwidth + _spacerwidth + _spacerwidth;
+        (sd.custom ? _iconWidth : 0) + 
+        _spacerwidth + _spacerwidth + (sd.custom ? _spacerwidth : 0);
 
       cards.add(SizedBox(
         width: cardWidth, 
         height: 50,
         child: Card(
-          color: stitchSelected ? Colors.blue.withAlpha(60) : null,
+          color: stitchSelected ? Colors.blue.withAlpha(60) : stitchInPattern ? Colors.purple.withAlpha(60) : null,
           child: InkWell(
             borderRadius: const BorderRadius.all(Radius.circular(10)),
             splashColor: Colors.blue.withAlpha(30),
@@ -76,15 +76,16 @@ class _StitchChooserState extends State<StitchChooser> {
                     Theme.of(context).textTheme.bodyMedium!
                 ),
                 const Spacer(),
-                IconButton(
-                  iconSize: _iconWidth,
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(builder: (context) => EditStitchPage(stitchDefinition: sd)),
-                    );
-                  },
-                  icon: const Icon(Icons.edit)
-                )
+                if (sd.custom)
+                  IconButton(
+                    iconSize: _iconWidth,
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (context) => EditStitchPage(stitchDefinition: sd)),
+                      );
+                    },
+                    icon: const Icon(Icons.edit)
+                  )
               ],
             ),
           ),
@@ -112,7 +113,18 @@ class _StitchChooserState extends State<StitchChooser> {
             SizedBox(
               width: 500,
               child: TextField(controller: filterController, autofocus: true,),  
-            )
+            ),
+            const Spacer(),
+            OutlinedButton.icon(
+              onPressed: () {
+                StitchDefinition sd = Provider.of<KnittyGriddyModel>(context, listen: false).addCustomStitch();
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => EditStitchPage(stitchDefinition: sd)),
+                );
+              }, 
+              label: const Text('New'),
+              icon: const Icon(Icons.add),
+            ),
           ],
         ),
         const SizedBox(height: 20,),

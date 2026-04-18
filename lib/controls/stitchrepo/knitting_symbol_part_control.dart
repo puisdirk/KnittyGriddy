@@ -60,11 +60,7 @@ class KnittingSymbolPartPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-      canvas.save();
-
       knittingSymbolPart.draw(canvas, size, symbolColor);
-
-      canvas.restore();
   }
 
   @override

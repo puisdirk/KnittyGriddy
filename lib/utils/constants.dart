@@ -1,8 +1,8 @@
 
 import 'package:flutter/material.dart';
-import 'package:knitty_griddy/controls/named_colour.dart';
+import 'package:knitty_griddy/model/named_colour.dart';
 import 'package:knitty_griddy/model/stitch_cell.dart';
-import 'package:knitty_griddy/stitchrepo/stitch_repository.dart';
+import 'package:knitty_griddy/controls/stitchrepo/stitch_repository.dart';
 
 // Warning: also change defaultStitches when changing these
 const int defaultGridRows = 10;

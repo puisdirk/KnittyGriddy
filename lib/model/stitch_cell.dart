@@ -1,9 +1,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/utils/constants.dart';
-import 'package:knitty_griddy/controls/named_colour.dart';
-import 'package:knitty_griddy/stitchrepo/stitch_definition.dart';
-import 'package:knitty_griddy/stitchrepo/stitch_repository.dart';
+import 'package:knitty_griddy/model/named_colour.dart';
+import 'package:knitty_griddy/controls/stitchrepo/stitch_definition.dart';
+import 'package:knitty_griddy/controls/stitchrepo/stitch_repository.dart';
 
 // A stitch cell represents one spot on the grid. 
 // For stitches that span 2 columns, there will be 2 stitch cells, 

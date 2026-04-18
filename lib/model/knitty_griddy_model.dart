@@ -1,8 +1,10 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:knitty_griddy/controls/named_colour.dart';
+import 'package:knitty_griddy/model/named_colour.dart';
 import 'package:knitty_griddy/model/cell_address.dart';
+import 'package:knitty_griddy/model/knitting_symbol.dart';
+import 'package:knitty_griddy/model/knitting_symbol_parts.dart';
 import 'package:knitty_griddy/model/selection.dart';
 import 'package:knitty_griddy/model/app_state.dart';
 import 'package:knitty_griddy/model/griddy_model.dart';
@@ -10,9 +12,9 @@ import 'package:knitty_griddy/model/knitting_pattern.dart';
 import 'package:knitty_griddy/model/pattern_settings.dart';
 import 'package:knitty_griddy/model/stitch_cell.dart';
 import 'package:knitty_griddy/model/undo_redo_manager.dart';
-import 'package:knitty_griddy/stitchrepo/stitch_definition.dart';
-import 'package:knitty_griddy/stitchrepo/stitch_repository.dart';
-import 'package:knitty_griddy/utils/constants.dart';
+import 'package:knitty_griddy/controls/stitchrepo/stitch_definition.dart';
+import 'package:knitty_griddy/controls/stitchrepo/stitch_repository.dart';
+import 'package:material_color_utilities/score/score.dart';
 
 class KnittyGriddyModel extends ChangeNotifier {
 
@@ -584,6 +586,40 @@ class KnittyGriddyModel extends ChangeNotifier {
   }
 
   // *************************** Stitch repo ************************************************
+
+  StitchDefinition addCustomStitch() {
+    StitchDefinition sd = const StitchDefinition(name: '', abbreviation: '', symbols: [KnittingSymbol(name: '', parts: [KnittingSymbolParts.blankPart])], custom: true);
+
+    _model = _model.copyWith(
+      customStitches: [..._model.customStitches, sd]
+    );
+
+    _storeForUndo();
+    notifyListeners();
+
+    return sd;
+  }
+
+  void updateStitchDefinition({
+    required StitchDefinition olddef,
+    required StitchDefinition newdef}
+  ) {
+
+    _model = _model.copyWith(
+      customStitches: _model.customStitches.map((cs) => cs != olddef ? cs : newdef).toList()
+    );
+
+    // the custom stitches are not part of the knittingpattern, so no undo here
+    notifyListeners();
+  } 
+
+  void deleteStitch(StitchDefinition stitchDefinition) {
+    _model = _model.copyWith(
+      customStitches: _model.customStitches.where((sd) => sd != stitchDefinition).toList()
+    );
+
+    notifyListeners();
+  }
 
   void toggleUsedStitch(StitchDefinition definition) {
     final bool wantToRemove = _model.knittingPattern.usedStitches.contains(definition);

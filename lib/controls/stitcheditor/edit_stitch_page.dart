@@ -4,10 +4,12 @@ import 'package:knitty_griddy/controls/stitcheditor/symbol_part_controls.dart';
 import 'package:knitty_griddy/controls/stitcheditor/symbol_transform_controls.dart';
 import 'package:knitty_griddy/model/knitting_symbol.dart';
 import 'package:knitty_griddy/model/knitting_symbol_part.dart';
+import 'package:knitty_griddy/model/knitty_griddy_model.dart';
 import 'package:knitty_griddy/model/undo_redo_manager.dart';
-import 'package:knitty_griddy/stitchrepo/stitch_definition.dart';
+import 'package:knitty_griddy/controls/stitchrepo/stitch_definition.dart';
 import 'package:knitty_griddy/controls/stitcheditor/edit_stitch_parts_control.dart';
-import 'package:knitty_griddy/stitchrepo/stitch_parts_chooser.dart';
+import 'package:knitty_griddy/controls/stitchrepo/stitch_parts_chooser.dart';
+import 'package:provider/provider.dart';
 
 class EditStitchPage extends StatefulWidget {
 
@@ -23,7 +25,7 @@ class EditStitchPage extends StatefulWidget {
 }
 
 class _EditStitchPageState extends State<EditStitchPage> {
-  late StitchDefinition newStitchDefinition;
+  late StitchDefinition stitchDefinition;
 
   late TextEditingController nameController;
   late TextEditingController descriptionController;
@@ -42,16 +44,16 @@ class _EditStitchPageState extends State<EditStitchPage> {
   void initState() {
     _focusNode = FocusNode();
 
-    newStitchDefinition = widget.stitchDefinition.copyWith();
-    _undoRedoManager.store(newStitchDefinition);
+    stitchDefinition = widget.stitchDefinition.copyWith();
+    _undoRedoManager.store(stitchDefinition);
 
-    nameController = TextEditingController(text: newStitchDefinition.name);
+    nameController = TextEditingController(text: stitchDefinition.name);
     nameController.addListener(_stitchNameChanged);
 
-    descriptionController = TextEditingController(text: newStitchDefinition.description);
+    descriptionController = TextEditingController(text: stitchDefinition.description);
     descriptionController.addListener(_stitchDescriptionChanged);
 
-    abbreviationController = TextEditingController(text: newStitchDefinition.abbreviation);
+    abbreviationController = TextEditingController(text: stitchDefinition.abbreviation);
     abbreviationController.addListener(_abbreviationChanged);
 
     super.initState();
@@ -78,9 +80,10 @@ class _EditStitchPageState extends State<EditStitchPage> {
     _setStitchDefinition(stitchDefinition);
   }
 
-  void _setStitchDefinition(StitchDefinition stitchDefinition) {
+  void _setStitchDefinition(StitchDefinition newStitchDefinition) {
+    Provider.of<KnittyGriddyModel>(context, listen: false).updateStitchDefinition(olddef: stitchDefinition, newdef: newStitchDefinition);
     setState(() {
-      newStitchDefinition = stitchDefinition;
+      stitchDefinition = newStitchDefinition;
     });
   }
 
@@ -97,15 +100,15 @@ class _EditStitchPageState extends State<EditStitchPage> {
   }
 
   void _stitchNameChanged() {
-      _storeAndSetStitchDefinition(newStitchDefinition.copyWith(name: nameController.text));
+      _storeAndSetStitchDefinition(stitchDefinition.copyWith(name: nameController.text));
   }
 
   void _stitchDescriptionChanged() {
-      _storeAndSetStitchDefinition(newStitchDefinition.copyWith(description: descriptionController.text));
+      _storeAndSetStitchDefinition(stitchDefinition.copyWith(description: descriptionController.text));
   }
 
   void _abbreviationChanged() {
-    _storeAndSetStitchDefinition(newStitchDefinition.copyWith(abbreviation: abbreviationController.text));
+    _storeAndSetStitchDefinition(stitchDefinition.copyWith(abbreviation: abbreviationController.text));
   }
 
   @override
@@ -117,7 +120,36 @@ class _EditStitchPageState extends State<EditStitchPage> {
         title: const Text('Edit stitch'),
         backgroundColor: Colors.grey.shade300,
         actions: [
-          OutlinedButton(onPressed: () => print(newStitchDefinition), child: const Text('Print'))
+          IconButton.outlined(
+            onPressed: () {
+              // set up the AlertDialog
+              AlertDialog alert = AlertDialog(
+                title: const Text("Are you sure"),
+                content: const Text('Are you sure you want to delete the stitch? This action cannot be undone'),
+                actions: [
+                  TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('No')),
+                  TextButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        Navigator.pop(context);
+                        Provider.of<KnittyGriddyModel>(context, listen: false).deleteStitch(stitchDefinition);
+                      },
+                      child: const Text('Yes')),
+                ],
+              );
+              // show the dialog
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return alert;
+                },
+              );
+            }, 
+            icon: const Icon(Icons.delete)
+          ),
+          OutlinedButton(onPressed: () => print(stitchDefinition), child: const Text('Print'))
         ],
       ),
       body: KeyboardListener(
@@ -178,7 +210,7 @@ class _EditStitchPageState extends State<EditStitchPage> {
                   children: [
                     const SizedBox(width: 24,),
                     EditStitchPartsControl(
-                      stitchDefinition: newStitchDefinition,
+                      stitchDefinition: stitchDefinition,
                       selectedColumn: selectedColumn,
                       selectedRow: selectedRow, 
                       onStitchDefinitionChanged: (newDefinition) => _storeAndSetStitchDefinition(newDefinition),
@@ -198,7 +230,7 @@ class _EditStitchPageState extends State<EditStitchPage> {
                                 onPressed: () async {
                                   List<List<KnittingSymbolPart>> partsPerColumn = await showDialog(context: context, builder: (context) => const StitchPartsChooser());
                                   if (partsPerColumn.isNotEmpty) {
-                                    List<KnittingSymbol> newSymbols = List.from(newStitchDefinition.symbols);
+                                    List<KnittingSymbol> newSymbols = List.from(stitchDefinition.symbols);
                                     for (int idx = 0; idx < partsPerColumn.length; idx++) {
                                       if (newSymbols.length <= idx) {
                                         newSymbols.add(KnittingSymbol(name: '', parts: partsPerColumn[idx]));
@@ -209,7 +241,7 @@ class _EditStitchPageState extends State<EditStitchPage> {
                                       }
                                     }
                                     _storeAndSetStitchDefinition(
-                                      newStitchDefinition.copyWith(
+                                      stitchDefinition.copyWith(
                                         symbols: newSymbols
                                       )
                                     );
@@ -232,13 +264,13 @@ class _EditStitchPageState extends State<EditStitchPage> {
                           const SizedBox(height: 20,),
                           if (selectedColumn != null && selectedRow == null)
                             SymbolTransformControls(
-                              stitchDefinition: newStitchDefinition, 
+                              stitchDefinition: stitchDefinition, 
                               symbolColumn: selectedColumn!, 
                               onChanged: (newDefinition) => _storeAndSetStitchDefinition(newDefinition,),
                             ),
                           if (selectedColumn != null && selectedRow != null)
                             SymbolPartControls(
-                              stitchDefinition: newStitchDefinition,
+                              stitchDefinition: stitchDefinition,
                               symbolPartColumn: selectedColumn!,
                               symbolPartRow: selectedRow!,
                               onChanged: (newDefinition) => _storeAndSetStitchDefinition(newDefinition,),

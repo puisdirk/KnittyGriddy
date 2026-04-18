@@ -4,8 +4,8 @@ import 'package:knitty_griddy/model/selection.dart';
 import 'package:knitty_griddy/utils/math_utitilies.dart';
 import 'package:knitty_griddy/model/app_state.dart';
 import 'package:knitty_griddy/model/knitty_griddy_model.dart';
-import 'package:knitty_griddy/pages/stitch_repo_page.dart';
-import 'package:knitty_griddy/stitchrepo/stitch_definition.dart';
+import 'package:knitty_griddy/controls/stitchrepo/stitch_repo_page.dart';
+import 'package:knitty_griddy/controls/stitchrepo/stitch_definition.dart';
 import 'package:provider/provider.dart';
 
 class StitchesToolbarPanel extends StatelessWidget {
