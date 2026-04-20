@@ -14,7 +14,6 @@ import 'package:knitty_griddy/model/stitch_cell.dart';
 import 'package:knitty_griddy/model/undo_redo_manager.dart';
 import 'package:knitty_griddy/controls/stitchrepo/stitch_definition.dart';
 import 'package:knitty_griddy/controls/stitchrepo/stitch_repository.dart';
-import 'package:material_color_utilities/score/score.dart';
 
 class KnittyGriddyModel extends ChangeNotifier {
 
@@ -50,6 +49,7 @@ class KnittyGriddyModel extends ChangeNotifier {
   PatternSettings get settings => _model.knittingPattern.patternSettings;
   StitchCell stitchCell(int row, int column) => _model.knittingPattern.stitchCell(row, column);
   List<StitchCell> get stitches => _model.knittingPattern.stitches;
+  StitchCell stitchAt(int column, int row) => _model.knittingPattern.stitches.firstWhere((cell) => cell.column == column && cell.row == row);
   List<StitchDefinition> get usedStitches => _model.knittingPattern.usedStitches;
   List<NamedColour> get usedColours => _model.knittingPattern.usedColours;
   Selection get selection => _model.knittingPattern.selection;
@@ -111,9 +111,9 @@ class KnittyGriddyModel extends ChangeNotifier {
 
   // ********************************************* Click and paint *****************************************
 
-  void setStitch(int row, int column, StitchDefinition stitchDefinition, {storeForUndo = true, emitNotification = true}) {
+  void setStitch(int row, int column, StitchDefinition stitchDefinition, {bool storeForUndo = true, bool emitNotification = true}) {
     // Do nothing if there isn't enough room
-    if (stitchDefinition.columns + column - 1 > _model.knittingPattern.patternSettings.columns) {
+    if (stitchDefinition.columns + column > _model.knittingPattern.patternSettings.columns) {
       return;
     }
 
@@ -121,16 +121,17 @@ class KnittyGriddyModel extends ChangeNotifier {
     List<StitchCell> newStitchCells = [];
     for (int columnOffset = 0; columnOffset < stitchDefinition.columns; columnOffset++) {
       newStitchCells.add(
-        _model.knittingPattern.stitches.firstWhere((s) => s.row == row && s.column == column + columnOffset).
-          copyWith(stitchDefinition: stitchDefinition, stitchDefinitionColumn: columnOffset));
+        stitchAt(column + columnOffset, row).copyWith(
+          stitchDefinition: stitchDefinition, stitchDefinitionColumn: columnOffset));
     }
 
     // Calculate which cell need to be cleared
     List<StitchCell> clearedCells = [];
     for (StitchCell newCell in newStitchCells) {
-      // If the cell under the new stitch is a multi-column
-      StitchCell oldCell = _model.knittingPattern.stitches.firstWhere((c) => c.row == newCell.row && c.column == newCell.column);
+      // If the cell under the new stitch is a multi-column stitch, it will be broken
+      StitchCell oldCell = stitchAt(newCell.column, newCell.row);
       if (oldCell.stitchDefinition.columns > 1) {
+        // Clear the broken cells
         int oldCellStart = oldCell.column - (oldCell.stitchDefinitionColumn);
         for (int clearIdx = 0; clearIdx < oldCell.stitchDefinition.columns; clearIdx++) {
           // don't clear if this is already a new cell
@@ -149,8 +150,7 @@ class KnittyGriddyModel extends ChangeNotifier {
     _model = _model.copyWith(
       knittingPattern: _model.knittingPattern.copyWith(
         stitches: _model.knittingPattern.stitches.map((stitch) =>
-          newStitchCells.any((ns) => stitch.row == ns.row && stitch.column == ns.column) ? 
-            newStitchCells.firstWhere((ns) => stitch.row == ns.row && stitch.column == ns.column) : stitch,
+          newStitchCells.firstWhere((ns) => stitch.row == ns.row && stitch.column == ns.column, orElse: () => stitch),
         ).toList(),
       )
     );
@@ -186,14 +186,16 @@ class KnittyGriddyModel extends ChangeNotifier {
     // single-column stitches don't need all these calculations
     if (stitchDefinition.columns < 2) {
       for (CellAddress address in selection.selectedCells) {
-        setStitch(address.row, address.column, stitchDefinition);
+        setStitch(address.row, address.column, stitchDefinition, storeForUndo: false, emitNotification: false);
       }
     } else {
+      // We check for spots row by row
       for (int row = 0; row < _model.knittingPattern.patternSettings.rows; row++) {
         List<CellAddress> addressesOnRow = selection.addressesOnRow(row);
         if (addressesOnRow.isEmpty) {
           continue;
         }
+        // Sort per column to go left to right
         addressesOnRow.sort();
         List<CellAddress> visited = [];
         for (CellAddress address in addressesOnRow) {
@@ -202,9 +204,10 @@ class KnittyGriddyModel extends ChangeNotifier {
           }
           visited.add(address);
 
+          // If there is room, place the stitch, then keep going in this row 
           List<CellAddress> needed = List.generate(stitchDefinition.columns - 1, (idx) => CellAddress(column: address.column + idx + 1, row: row));
           if (selection.selectedCells.containsAll(needed)) {
-            setStitch(row, address.column, stitchDefinition);
+            setStitch(row, address.column, stitchDefinition, storeForUndo: false, emitNotification: false);
             visited.addAll(needed);
           }
         }
@@ -220,8 +223,7 @@ class KnittyGriddyModel extends ChangeNotifier {
       knittingPattern: _model.knittingPattern.copyWith(
         stitches: _model.knittingPattern.stitches.map((stitch) =>
           _model.knittingPattern.selection.isSelected(stitch.column, stitch.row) ?
-            stitch.copyWith(colour: colour) :
-            stitch
+            stitch.copyWith(colour: colour) : stitch
         ).toList()
       )
     );
