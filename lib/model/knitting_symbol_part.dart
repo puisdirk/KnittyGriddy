@@ -37,13 +37,21 @@ abstract class KnittingSymbolPart {
     strokeWidth = strokeWidth?? defaultStrokeWidth;
 
   @override
-  int get hashCode => name.hashCode ^ scale.hashCode ^ translation.hashCode ^ rotation.hashCode ^ filled.hashCode ^ strokeWidth.hashCode;
+  int get hashCode => 
+    name.hashCode ^ 
+    allowStroke.hashCode ^
+    scale.hashCode ^ 
+    translation.hashCode ^ 
+    rotation.hashCode ^ 
+    filled.hashCode ^ 
+    strokeWidth.hashCode;
   
   @override
   bool operator ==(Object other) =>
     identical(this, other) ||
       other is KnittingSymbolPart &&
       name == other.name &&
+      allowStroke == other.allowStroke &&
       scale == other.scale &&
       translation == other.translation &&
       rotation == other.rotation &&

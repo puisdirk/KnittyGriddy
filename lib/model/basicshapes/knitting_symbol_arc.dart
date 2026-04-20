@@ -83,7 +83,11 @@ class KnittingSymbolArc extends KnittingSymbolPart {
   }
 
   @override
-  int get hashCode => super.hashCode ^ height.hashCode ^ width.hashCode ^ startAngle.hashCode ^ sweepAngle.hashCode ^ closed.hashCode;
+  int get hashCode => 
+    super.hashCode ^ 
+    height.hashCode ^ width.hashCode ^ 
+    startAngle.hashCode ^ sweepAngle.hashCode ^ 
+    closed.hashCode;
 
   @override
   bool operator ==(Object other) =>
