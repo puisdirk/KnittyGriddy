@@ -20,4 +20,8 @@ class MathUtitilies {
     return textPainter.size;
   }
 
+  static double distance(Offset p1, Offset p2) {
+    return sqrt(pow(((p2.dx - p1.dx).abs()), 2.0) + pow(((p2.dy - p1.dy).abs()), 2.0));
+  }
+
 }

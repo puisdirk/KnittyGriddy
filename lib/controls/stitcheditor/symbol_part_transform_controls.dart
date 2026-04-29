@@ -149,7 +149,7 @@ class SymbolPartTransformControls extends StatelessWidget {
                     child: SpinBox(
                       min: -360,
                       max: 360,
-                      value: MathUtitilies.toDegrees(stitchDefinition.symbolPartAt(symbolPartColumn, symbolPartRow).rotation),
+                      value: MathUtitilies.toDegrees(stitchDefinition.symbolPartAt(symbolPartColumn, symbolPartRow).rotationRad),
                       onChanged: (value) { onChanged(stitchDefinition.rotateSymbolPart(symbolPartColumn, symbolPartRow, value)); }, 
                     ),
                   ),

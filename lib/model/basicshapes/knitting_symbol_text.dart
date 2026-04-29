@@ -5,6 +5,7 @@ import 'package:knitty_griddy/model/basicshapes/text_entry_control.dart';
 import 'package:knitty_griddy/model/knitting_symbol.dart';
 import 'package:knitty_griddy/model/knitting_symbol_part.dart';
 import 'package:knitty_griddy/controls/stitchrepo/stitch_definition.dart';
+import 'package:knitty_griddy/utils/constants.dart';
 
 class KnittingSymbolText extends KnittingSymbolPart {
 
@@ -25,7 +26,7 @@ class KnittingSymbolText extends KnittingSymbolPart {
     super.strokeWidth,
     super.scale,
     super.translation,
-    super.rotation,
+    super.rotationRad,
   }) : 
     text = text?? _defaultText,
     bold = bold?? _defaultBold,
@@ -40,7 +41,7 @@ class KnittingSymbolText extends KnittingSymbolPart {
     bool? italic,
     Offset? scale, 
     Offset? translation, 
-    double? rotation, 
+    double? rotationRad, 
     bool? filled, 
     double? strokeWidth}) {
     return KnittingSymbolText(
@@ -50,7 +51,7 @@ class KnittingSymbolText extends KnittingSymbolPart {
       italic: italic?? this.italic,
       scale: scale?? this.scale,
       translation: translation?? this.translation,
-      rotation: rotation?? this.rotation,
+      rotationRad: rotationRad?? this.rotationRad,
       filled: filled?? this.filled,
       strokeWidth: strokeWidth?? this.strokeWidth,
     );
@@ -69,7 +70,7 @@ class KnittingSymbolText extends KnittingSymbolPart {
       italic == other.italic &&
       scale == other.scale &&
       translation == other.translation &&
-      rotation == other.rotation &&
+      rotationRad == other.rotationRad &&
       filled == other.filled &&
       strokeWidth == other.strokeWidth;
 
@@ -103,6 +104,17 @@ class KnittingSymbolText extends KnittingSymbolPart {
         (size.height / 2) - (paragraph.height / 2)
       )
     );
+  }
+
+  @override
+  String toSvg(Color symbolColor) {
+    Offset middle = const Offset(stitchCellWidth / 2, stitchCellHeight / 2);
+    String svg = '<text x="${middle.dx}" y="${middle.dy + 8}" text-anchor="middle" ';
+    svg += 'font-family="Roboto" font-size="24" font-weight="${bold ? 'bold' : 'normal'}" font-style="${italic ? 'italic' : 'normal'}" ';
+    svg += 'fill="rgb(${symbolColor.red}, ${symbolColor.green}, ${symbolColor.blue})" fill-opacity="${symbolColor.alpha}" ';
+    svg += '>$text</text>';
+
+    return svg;
   }
 
   @override
@@ -232,8 +244,8 @@ KnittingSymbolText(
       defString += '''translation: Offset(${translation.dx}, ${translation.dy}),''';
     }
     
-    if (rotation != KnittingSymbolPart.defaultRotation) {
-      defString += '''rotation: $rotation,''';
+    if (rotationRad != KnittingSymbolPart.defaultRotationRad) {
+      defString += '''rotation: $rotationRad,''';
     }
 
     if (filled != KnittingSymbolPart.defaultFilled) {

@@ -5,6 +5,7 @@ import 'package:knitty_griddy/controls/editgrid/grid_settings_control.dart';
 import 'package:knitty_griddy/controls/toolbar/knitting_toolbar.dart';
 import 'package:knitty_griddy/controls/maingrid/pattern_control.dart';
 import 'package:knitty_griddy/controls/stitchrepo/font_service.dart';
+import 'package:knitty_griddy/export/export_page.dart';
 import 'package:knitty_griddy/model/knitty_griddy_model.dart';
 import 'package:provider/provider.dart';
 
@@ -46,8 +47,10 @@ class _PatternPageState extends State<PatternPage> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.share),
-            onPressed: () async => await FontService.parseFont(),
+            icon: const Icon(Icons.ios_share),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => const ExportPage())
+            ),
           )
         ],
       ),

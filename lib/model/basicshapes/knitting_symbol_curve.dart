@@ -3,6 +3,7 @@ import 'package:flutter_spinbox/material.dart';
 import 'package:knitty_griddy/model/knitting_symbol.dart';
 import 'package:knitty_griddy/model/knitting_symbol_part.dart';
 import 'package:knitty_griddy/controls/stitchrepo/stitch_definition.dart';
+import 'package:knitty_griddy/utils/constants.dart';
 
 class KnittingSymbolCurve extends KnittingSymbolPart {
 
@@ -24,7 +25,7 @@ class KnittingSymbolCurve extends KnittingSymbolPart {
     double? strokeWidth,
     super.scale,
     super.translation,
-    super.rotation,
+    super.rotationRad,
     double? length,
     double? amplitude,
     double? slant,
@@ -41,7 +42,7 @@ class KnittingSymbolCurve extends KnittingSymbolPart {
     String? name, 
     Offset? scale, 
     Offset? translation, 
-    double? rotation,
+    double? rotationRad,
     bool? filled,
     double? strokeWidth,
     double? length,
@@ -53,7 +54,7 @@ class KnittingSymbolCurve extends KnittingSymbolPart {
       name: name?? this.name,
       scale: scale?? this.scale,
       translation: translation?? this.translation,
-      rotation: rotation?? this.rotation,
+      rotationRad: rotationRad?? this.rotationRad,
       filled: filled?? this.filled,
       strokeWidth: strokeWidth?? this.strokeWidth,
       length: length?? this.length,
@@ -73,7 +74,7 @@ class KnittingSymbolCurve extends KnittingSymbolPart {
       name == other.name &&
       scale == other.scale &&
       translation == other.translation &&
-      rotation == other.rotation &&
+      rotationRad == other.rotationRad &&
       filled == other.filled &&
       strokeWidth == other.strokeWidth &&
       length == other.length &&
@@ -97,6 +98,21 @@ class KnittingSymbolCurve extends KnittingSymbolPart {
         }
       canvas.drawPath(path, ink);
     }
+  }
+
+  @override
+  String toSvg(Color symbolColor) {
+    Offset middle = const Offset(stitchCellWidth / 2, stitchCellHeight / 2);
+    String svg = '<path d="M${middle.dx - (length / 2)},${middle.dy}Q${middle.dx + slant},${middle.dy + amplitude}, ${middle.dx + (length / 2)}, ${middle.dy}${closed ? 'z' : ''}" ';
+
+    if (filled) {
+      svg += 'fill="rgb(${symbolColor.red}, ${symbolColor.green}, ${symbolColor.blue})" fill-opacity="${symbolColor.alpha}" ';
+    } else {
+      svg += 'fill="none" stroke="rgb(${symbolColor.red}, ${symbolColor.green}, ${symbolColor.blue})" stroke-width="$strokeWidth" stroke-opacity="${symbolColor.alpha}" ';
+    }
+
+    svg += '/>';
+    return svg;
   }
 
   @override
@@ -311,8 +327,8 @@ KnittingSymbolCurve(
       defString += '''translation: Offset(${translation.dx}, ${translation.dy}),''';
     }
     
-    if (rotation != KnittingSymbolPart.defaultRotation) {
-      defString += '''rotation: $rotation,''';
+    if (rotationRad != KnittingSymbolPart.defaultRotationRad) {
+      defString += '''rotation: $rotationRad,''';
     }
 
     if (filled != _defaultFilled) {

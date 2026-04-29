@@ -27,11 +27,10 @@ class ColumnAndRowNumbersPanel extends StatelessWidget {
           height: (patternSettings.rows * stitchCellHeight) + (2 * columnsAndRowNumbersHeight),
           child: Stack(
             children: [
-              // TODO: order dependent on settings
               // rows left side
               for (int row = 0; row < leftSideRowIndicators.length; row++)
                 Positioned(
-                  left: 0, top: stitchCellWidth + (row * stitchCellWidth), 
+                  left: 0, top: stitchCellHeight + (row * stitchCellHeight), 
                   child: SizedBox(
                     width: stitchCellWidth, height: stitchCellHeight,
                     child: Center(child: Text(leftSideRowIndicators[row]),),

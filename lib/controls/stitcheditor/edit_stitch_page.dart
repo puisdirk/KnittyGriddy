@@ -191,14 +191,17 @@ class _EditStitchPageState extends State<EditStitchPage> {
                     )
                   ],
                 ),
+                const SizedBox(height: 10,),
                 Row(
                   children: [
                     const Text('Description:'),
                     const SizedBox(width: space,),
                     SizedBox(
                       width: 400,
-                      child: TextField(
+                      child: TextFormField(
                         controller: descriptionController,
+                        maxLines: 3,
+                        keyboardType: TextInputType.multiline,
                       ),
                     )
                   ],

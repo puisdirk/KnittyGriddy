@@ -118,7 +118,7 @@ class SymbolTransformControls extends StatelessWidget {
                       min: -360,
                       max: 360,
                       onChanged: (value) { onChanged(stitchDefinition.rotateSymbol(symbolColumn, value)); }, 
-                      value: MathUtitilies.toDegrees(stitchDefinition.symbolAt(symbolColumn).rotation), 
+                      value: MathUtitilies.toDegrees(stitchDefinition.symbolAt(symbolColumn).rotationRad), 
                     ),
                   ),
                 ),

@@ -8,14 +8,14 @@ abstract class KnittingSymbolPart {
 
   static const Offset defaultScale = Offset(1, 1);
   static const Offset defaultTranslation = Offset.zero;
-  static const double defaultRotation = 0;
+  static const double defaultRotationRad = 0;
   static const bool defaultFilled = true;
   static const double defaultStrokeWidth = 1;
 
   final String name;
   final Offset scale;
   final Offset translation;
-  final double rotation;
+  final double rotationRad;
   final bool filled;
   final double strokeWidth;
   final bool allowStroke;
@@ -25,14 +25,14 @@ abstract class KnittingSymbolPart {
     bool? allowStroke,
     Offset? scale,
     Offset? translation,
-    double? rotation,
+    double? rotationRad,
     bool? filled,
     double? strokeWidth,
   }) : 
     allowStroke = allowStroke?? true,
     scale = scale?? defaultScale, 
     translation = translation?? defaultTranslation, 
-    rotation = rotation?? defaultRotation,
+    rotationRad = rotationRad?? defaultRotationRad,
     filled = filled?? defaultFilled,
     strokeWidth = strokeWidth?? defaultStrokeWidth;
 
@@ -42,7 +42,7 @@ abstract class KnittingSymbolPart {
     allowStroke.hashCode ^
     scale.hashCode ^ 
     translation.hashCode ^ 
-    rotation.hashCode ^ 
+    rotationRad.hashCode ^ 
     filled.hashCode ^ 
     strokeWidth.hashCode;
   
@@ -54,7 +54,7 @@ abstract class KnittingSymbolPart {
       allowStroke == other.allowStroke &&
       scale == other.scale &&
       translation == other.translation &&
-      rotation == other.rotation &&
+      rotationRad == other.rotationRad &&
       filled == other.filled &&
       strokeWidth == other.strokeWidth;
 
@@ -62,7 +62,7 @@ abstract class KnittingSymbolPart {
     String? name,
     Offset? scale,
     Offset? translation,
-    double? rotation,
+    double? rotationRad,
     bool? filled,
     double? strokeWidth,
   });
@@ -77,6 +77,7 @@ abstract class KnittingSymbolPart {
   }
 
   void drawPart(Canvas canvas, Size size, Paint ink);
+  String toSvg(Color symbolColor);
 
   Widget getPartControls(
     StitchDefinition stitchDefinition, 
