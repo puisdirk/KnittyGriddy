@@ -56,37 +56,39 @@ class _StitchChooserState extends State<StitchChooser> {
         (sd.custom ? _iconWidth : 0) + 
         _spacerwidth + _spacerwidth + (sd.custom ? _spacerwidth : 0);
 
-      cards.add(SizedBox(
-        width: cardWidth, 
-        height: 50,
-        child: Card(
-          color: stitchSelected ? Colors.blue.withAlpha(60) : stitchInPattern ? Colors.purple.withAlpha(60) : null,
-          child: InkWell(
-            borderRadius: const BorderRadius.all(Radius.circular(10)),
-            splashColor: Colors.blue.withAlpha(30),
-            onTap: stitchInPattern ? null : () => Provider.of<KnittyGriddyModel>(context, listen: false).toggleUsedStitch(sd),
-            child: Row(
-              children: [
-                const SizedBox(width: _spacerwidth,),
-                StitchIcon(stitchDefinition: sd, iconSize: _iconWidth, iconColor: stitchInPattern || stitchSelected ? Colors.white : null,),
-                const SizedBox(width: _spacerwidth,),
-                Text(sd.name,
-                  style: sd == StitchRepository.noStitch || stitchInPattern || stitchSelected ?
-                    Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.white) : 
-                    Theme.of(context).textTheme.bodyMedium!
-                ),
-                const Spacer(),
-                if (sd.custom)
-                  IconButton(
-                    iconSize: _iconWidth,
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(builder: (context) => EditStitchPage(stitchDefinition: sd)),
-                      );
-                    },
-                    icon: const Icon(Icons.edit)
-                  )
-              ],
+      cards.add(Tooltip(message: sd.description,
+        child: SizedBox(
+          width: cardWidth, 
+          height: 50,
+          child: Card(
+            color: stitchSelected ? Colors.blue.withAlpha(60) : stitchInPattern ? Colors.purple.withAlpha(60) : null,
+            child: InkWell(
+              borderRadius: const BorderRadius.all(Radius.circular(10)),
+              splashColor: Colors.blue.withAlpha(30),
+              onTap: stitchInPattern ? null : () => Provider.of<KnittyGriddyModel>(context, listen: false).toggleUsedStitch(sd),
+              child: Row(
+                children: [
+                  const SizedBox(width: _spacerwidth,),
+                  StitchIcon(stitchDefinition: sd, iconSize: _iconWidth, iconColor: stitchInPattern || stitchSelected ? Colors.white : null,),
+                  const SizedBox(width: _spacerwidth,),
+                  Text(sd.name,
+                    style: sd == StitchRepository.noStitch || stitchInPattern || stitchSelected ?
+                      Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.white) : 
+                      Theme.of(context).textTheme.bodyMedium!
+                  ),
+                  const Spacer(),
+                  if (sd.custom)
+                    IconButton(
+                      iconSize: _iconWidth,
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (context) => EditStitchPage(stitchDefinition: sd)),
+                        );
+                      },
+                      icon: const Icon(Icons.edit)
+                    )
+                ],
+              ),
             ),
           ),
         ),

@@ -120,7 +120,7 @@ class _EditStitchPageState extends State<EditStitchPage> {
         title: const Text('Edit stitch'),
         backgroundColor: Colors.grey.shade300,
         actions: [
-          IconButton.outlined(
+          IconButton(
             onPressed: () {
               // set up the AlertDialog
               AlertDialog alert = AlertDialog(

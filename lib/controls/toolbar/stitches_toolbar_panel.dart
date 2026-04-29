@@ -38,7 +38,7 @@ class StitchesToolbarPanel extends StatelessWidget {
                               (stitchDefinition.columns * _iconSize) + 
                               _spacerwidth + 
                               MathUtitilies.textSize(stitchDefinition.name, Theme.of(context).textTheme.bodyMedium!).width + 
-                              _spacerwidth + _spacerwidth;
+                              _spacerwidth + _spacerwidth + (appState.currentTool == Tool.select ? _iconSize + (2 * _spacerwidth) : 0);
                               
                             return SizedBox(
                               width: cardWidth, height: 50,
@@ -82,6 +82,12 @@ class StitchesToolbarPanel extends StatelessWidget {
                                                 Theme.of(context).textTheme.bodyMedium!
                                           ),
                                           const SizedBox(width: _spacerwidth, ),
+                                          if (appState.currentTool == Tool.select)
+                                            IconButton(
+                                              onPressed: () => Provider.of<KnittyGriddyModel>(context, listen: false).toggleStitchDefinition(stitchDefinition), 
+                                              icon: const Icon(Icons.select_all),
+                                              iconSize: _iconSize,
+                                            )
                                         ],
                                       ),
                                     );
