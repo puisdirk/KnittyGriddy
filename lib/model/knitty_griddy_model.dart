@@ -420,6 +420,45 @@ class KnittyGriddyModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  void toggleStitchDefinition(StitchDefinition stitchDefinition) {
+    if (!_model.knittingPattern.isStitchUsedInPattern(stitchDefinition)) {
+      return;
+    }
+
+    bool selectionContainsStitch = false;
+    Set<CellAddress> affectedAddresses = {};
+
+    for (StitchCell cell in _model.knittingPattern.stitches) {
+      if (cell.stitchDefinition == stitchDefinition) {
+        CellAddress address = CellAddress(column: cell.column, row: cell.row);
+        affectedAddresses.add(address);
+        if (selection.selectedCells.contains(address)) {
+          selectionContainsStitch = true;
+        }
+      }
+    }
+
+    Set<CellAddress> newAddresses = Set.from(selection.selectedCells);
+    if (selectionContainsStitch) {
+      // Remove them from the selection
+      newAddresses.removeAll(affectedAddresses);
+    } else {
+      // Add them to the selection
+      newAddresses.addAll(affectedAddresses);
+    }
+
+    _model = _model.copyWith(
+      knittingPattern: _model.knittingPattern.copyWith(
+        selection: _model.knittingPattern.selection.copyWith(
+          selectedCells: newAddresses
+        )
+      )
+    );
+
+    _storeForUndo();
+    notifyListeners();
+  }
+
   void invertSelection() {
     _model = _model.copyWith(
       knittingPattern: _model.knittingPattern.copyWith(
