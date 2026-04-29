@@ -35,6 +35,7 @@ class SelectionControl extends StatelessWidget {
                           child: Container(
                             decoration: BoxDecoration(
                               color: Colors.yellow.withAlpha(50),
+                              backgroundBlendMode: BlendMode.difference,
                               border: Border(
                                 top: knittingPattern.selection.isSelected(address.column, address.row - 1) ? BorderSide.none : const BorderSide(width: 2, color: Colors.green),
                                 bottom: knittingPattern.selection.isSelected(address.column, address.row + 1) ? BorderSide.none : const BorderSide(width: 2, color: Colors.green),

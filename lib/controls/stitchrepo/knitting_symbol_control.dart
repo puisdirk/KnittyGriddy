@@ -34,7 +34,7 @@ class KnittingSymbolControl extends StatelessWidget {
                 scaleX: knittingSymbol!.scale.dx,
                 scaleY: knittingSymbol!.scale.dy,
                 child: Transform.rotate(
-                  angle: knittingSymbol!.rotation,
+                  angle: knittingSymbol!.rotationRad,
                   child: Stack(
                     children: [
                       for (KnittingSymbolPart part in knittingSymbol!.parts)

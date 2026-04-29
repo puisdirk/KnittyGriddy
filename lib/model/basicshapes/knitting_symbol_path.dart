@@ -17,7 +17,7 @@ class KnittingSymbolPath extends KnittingSymbolPart {
     required this.path,
     super.scale,
     super.translation,
-    super.rotation,
+    super.rotationRad,
     bool? filled,
     super.strokeWidth,
   }) : super(filled: filled?? _defaultFilled);
@@ -28,7 +28,7 @@ class KnittingSymbolPath extends KnittingSymbolPart {
     String? path,
     Offset? scale,
     Offset? translation,
-    double? rotation,
+    double? rotationRad,
     bool? filled,
     double? strokeWidth,
   }) {
@@ -36,7 +36,7 @@ class KnittingSymbolPath extends KnittingSymbolPart {
       name: name?? this.name, 
       path: path?? this.path,
       scale: scale?? this.scale,
-      rotation: rotation?? this.rotation,
+      rotationRad: rotationRad?? this.rotationRad,
       translation: translation?? this.translation,
       filled: filled?? this.filled,
       strokeWidth: strokeWidth?? this.strokeWidth,
@@ -52,7 +52,20 @@ class KnittingSymbolPath extends KnittingSymbolPart {
   }
 
   @override
-  int get hashCode => name.hashCode ^ path.hashCode ^ scale.hashCode ^ translation.hashCode ^ rotation.hashCode;
+  String toSvg(Color symbolColor) {
+    String svg = '<path d="$path" ';
+    if (filled) {
+      svg += 'fill="rgb(${symbolColor.red}, ${symbolColor.green}, ${symbolColor.blue})" fill-opacity="${symbolColor.alpha}" ';
+    } else {
+      svg += 'fill="none" stroke="rgb(${symbolColor.red}, ${symbolColor.green}, ${symbolColor.blue})" stroke-width="$strokeWidth" stroke-opacity="${symbolColor.alpha}" ';
+    }
+
+    svg += '/>';
+    return svg;
+  }
+
+  @override
+  int get hashCode => name.hashCode ^ path.hashCode ^ scale.hashCode ^ translation.hashCode ^ rotationRad.hashCode;
   
   @override
   bool operator ==(Object other) =>
@@ -62,7 +75,7 @@ class KnittingSymbolPath extends KnittingSymbolPart {
       path == other.path &&
       scale == other.scale &&
       translation == other.translation &&
-      rotation == other.rotation;
+      rotationRad == other.rotationRad;
 
     @override
   String toString() {
@@ -79,8 +92,8 @@ KnittingSymbolPath(
       defString += '''translation: Offset(${translation.dx}, ${translation.dy}),''';
     }
     
-    if (rotation != KnittingSymbolPart.defaultRotation) {
-      defString += '''rotation: $rotation,''';
+    if (rotationRad != KnittingSymbolPart.defaultRotationRad) {
+      defString += '''rotation: $rotationRad,''';
     }
 
     if (filled != _defaultFilled) {

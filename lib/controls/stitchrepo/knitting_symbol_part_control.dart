@@ -31,7 +31,7 @@ class KnittingSymbolPartControl extends StatelessWidget {
                 scaleX: knittingSymbolPart.scale.dx,
                 scaleY: knittingSymbolPart.scale.dy,
                 child: Transform.rotate(
-                  angle: knittingSymbolPart.rotation,
+                  angle: knittingSymbolPart.rotationRad,
                   child: CustomPaint(
                     size: const Size(stitchCellWidth, stitchCellHeight),
                     painter: KnittingSymbolPartPainter(

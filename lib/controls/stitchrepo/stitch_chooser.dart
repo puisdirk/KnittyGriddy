@@ -92,10 +92,24 @@ class _StitchChooserState extends State<StitchChooser> {
         ),
       ));
     }
+/*    bool? allInCategorySelected = 
+      stitchesInCategory.value.every((st) => pattern.usedStitches.contains(st)) ? true : 
+        stitchesInCategory.value.any((st) => pattern.usedStitches.contains(st)) ? null : 
+       false;*/
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start, 
       children: [
-        Text(stitchesInCategory.key, style: const TextStyle(fontSize: 18),),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Text(stitchesInCategory.key, style: const TextStyle(fontSize: 18),),
+/*            Checkbox(
+              tristate: true,
+              value: allInCategorySelected, 
+              onChanged: (val) {}
+            )
+*/          ]
+        ),
         Wrap(children: cards,),
         const SizedBox(height: 14,)
       ],

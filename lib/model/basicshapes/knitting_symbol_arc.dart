@@ -1,6 +1,9 @@
 
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_spinbox/material.dart';
+import 'package:knitty_griddy/utils/constants.dart';
 import 'package:knitty_griddy/utils/math_utitilies.dart';
 import 'package:knitty_griddy/model/knitting_symbol.dart';
 import 'package:knitty_griddy/model/knitting_symbol_part.dart';
@@ -31,7 +34,7 @@ class KnittingSymbolArc extends KnittingSymbolPart {
     super.strokeWidth,
     super.scale,
     super.translation,
-    super.rotation,
+    super.rotationRad,
   }) : 
     height = height?? _defaultHeight,
     width = width?? _defaultWidth,
@@ -50,7 +53,7 @@ class KnittingSymbolArc extends KnittingSymbolPart {
     bool? closed,
     Offset? scale, 
     Offset? translation, 
-    double? rotation, 
+    double? rotationRad, 
     bool? filled, 
     double? strokeWidth}) {
     return KnittingSymbolArc(
@@ -62,7 +65,7 @@ class KnittingSymbolArc extends KnittingSymbolPart {
       closed: closed?? this.closed,
       scale: scale?? this.scale,
       translation: translation?? this.translation,
-      rotation: rotation?? this.rotation,
+      rotationRad: rotationRad?? this.rotationRad,
       filled: filled?? this.filled,
       strokeWidth: strokeWidth?? this.strokeWidth,
     );
@@ -83,6 +86,48 @@ class KnittingSymbolArc extends KnittingSymbolPart {
   }
 
   @override
+  String toSvg(Color symbolColor) {
+    Offset middle = const Offset(stitchCellWidth / 2, stitchCellHeight / 2);
+    double rw = width / 2;
+    double rh = height / 2;
+
+    Offset startPoint = Offset(
+      middle.dx + (rw * cos(MathUtitilies.toRadians(startAngle))), 
+      middle.dy + (rh * sin(MathUtitilies.toRadians(startAngle)))
+    );
+    Offset endPoint = Offset(
+      middle.dx + (rw * cos(MathUtitilies.toRadians(startAngle + sweepAngle))), 
+      middle.dy + (rh * sin(MathUtitilies.toRadians(startAngle + sweepAngle)))
+    );
+
+    int largeArcFlag = 1;
+    int sweepArgFlag = 1;
+
+    // The arc won't show up if start and end points are too close
+    if (MathUtitilies.distance(startPoint, endPoint) < 0.000003) {
+      endPoint = startPoint.translate(0, 0.000003);
+      sweepArgFlag = 0;
+    }
+
+    const int xaxisrotation = 0;
+    String svg = '<path d="M${startPoint.dx},${startPoint.dy} A$rw,$rh $xaxisrotation $largeArcFlag $sweepArgFlag ${endPoint.dx},${endPoint.dy} ';
+    if (closed) {
+      svg += 'L${middle.dx},${middle.dy} L${startPoint.dx}, ${startPoint.dy} z';
+    }
+    svg += '" ';
+
+    if (filled) {
+      svg += 'fill="rgb(${symbolColor.red}, ${symbolColor.green}, ${symbolColor.blue})" fill-opacity="${symbolColor.alpha}" ';
+    } else {
+      svg += 'fill="none" stroke="rgb(${symbolColor.red}, ${symbolColor.green}, ${symbolColor.blue})" stroke-width="$strokeWidth" stroke-opacity="${symbolColor.alpha}" ';
+    }
+
+    svg += '/>';
+
+    return svg;
+  }
+
+  @override
   int get hashCode => 
     super.hashCode ^ 
     height.hashCode ^ width.hashCode ^ 
@@ -96,7 +141,7 @@ class KnittingSymbolArc extends KnittingSymbolPart {
       name == other.name &&
       scale == other.scale &&
       translation == other.translation &&
-      rotation == other.rotation &&
+      rotationRad == other.rotationRad &&
       width == other.width &&
       height == other.height &&
       filled == other.filled &&
@@ -359,8 +404,8 @@ KnittingSymbolArc(
       defString += '''translation: Offset(${translation.dx}, ${translation.dy}),''';
     }
     
-    if (rotation != KnittingSymbolPart.defaultRotation) {
-      defString += '''rotation: $rotation,''';
+    if (rotationRad != KnittingSymbolPart.defaultRotationRad) {
+      defString += '''rotation: $rotationRad,''';
     }
 
     if (filled != KnittingSymbolPart.defaultFilled) {

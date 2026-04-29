@@ -72,10 +72,10 @@ class KnittyGriddyModel extends ChangeNotifier {
   }
 
   bool isStitchUsedInPattern(StitchDefinition definition) =>
-    _model.knittingPattern.stitches.any((cell) => cell.stitchDefinition == definition);
+    _model.knittingPattern.isStitchUsedInPattern(definition);
 
   bool isColourUsedInPattern(NamedColour colour) =>
-    colour.isMainColor || _model.knittingPattern.stitches.any((cell) => cell.colour == colour);
+    _model.knittingPattern.isColourUsedInPattern(colour);
 
   void appUseStitch(StitchDefinition stitchDefinition) {
     _model = _model.copyWith(
@@ -651,9 +651,7 @@ class KnittyGriddyModel extends ChangeNotifier {
 
   void pruneUnusedStitches() {
     _model = _model.copyWith(
-      knittingPattern: _model.knittingPattern.copyWith(
-        usedStitches: _model.knittingPattern.usedStitches.where((us) => us == StitchRepository.noStitch || isStitchUsedInPattern(us)).toList()
-      )
+      knittingPattern: _model.knittingPattern.pruneUnusedStitches()
     );
     
     _storeForUndo();
@@ -662,9 +660,7 @@ class KnittyGriddyModel extends ChangeNotifier {
 
   void pruneUnusedColours() {
     _model = _model.copyWith(
-      knittingPattern: _model.knittingPattern.copyWith(
-        usedColours: _model.knittingPattern.usedColours.where((uc) => isColourUsedInPattern(uc)).toList()
-      )
+      knittingPattern: _model.knittingPattern.pruneUnusedColours()
     );
 
     _storeForUndo();

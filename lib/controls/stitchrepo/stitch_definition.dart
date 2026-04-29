@@ -63,7 +63,7 @@ class StitchDefinition {
 
     for (int col = 0; col < columns; col++) {
       if (col == symbolColumn) {
-        newSymbols.add(symbolAt(col).copyWith(rotation: rotationRad));
+        newSymbols.add(symbolAt(col).copyWith(rotationRad: rotationRad));
       } else {
         newSymbols.add(symbolAt(col));
       }
@@ -129,7 +129,7 @@ class StitchDefinition {
         List<KnittingSymbolPart> newParts = [];
         for (int row = 0; row < symbolAt(col).rows; row++) {
           if (row == symbolPartRow) {
-            newParts.add(symbolPartAt(col, row).copyWith(rotation: rotationRad));
+            newParts.add(symbolPartAt(col, row).copyWith(rotationRad: rotationRad));
           } else {
             newParts.add(symbolPartAt(col, row));
           }

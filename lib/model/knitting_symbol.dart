@@ -1,17 +1,19 @@
 import 'package:flutter/painting.dart';
 import 'package:knitty_griddy/model/knitting_symbol_part.dart';
+import 'package:knitty_griddy/utils/constants.dart';
+import 'package:knitty_griddy/utils/math_utitilies.dart';
 
 class KnittingSymbol {
 
   static const Offset _defaultScale = Offset(1, 1);
   static const Offset _defaultTranslation = Offset.zero;
-  static const double _defaultRotation = 0;
+  static const double _defaultRotationRad = 0;
 
   final String name;
   final List<KnittingSymbolPart> parts;
   final Offset scale;
   final Offset translation;
-  final double rotation;
+  final double rotationRad;
 
   int get rows => parts.length;
 
@@ -20,30 +22,42 @@ class KnittingSymbol {
     required this.parts,
     Offset? scale,
     Offset? translation,
-    double? rotation,
+    double? rotationRad,
   }) : 
     scale = scale?? _defaultScale, 
     translation = translation?? _defaultTranslation, 
-    rotation = rotation?? _defaultRotation;
+    rotationRad = rotationRad?? _defaultRotationRad;
 
   KnittingSymbol copyWith({
     String? name,
     List<KnittingSymbolPart>? parts,
     Offset? scale,
     Offset? translation,
-    double? rotation,
+    double? rotationRad,
   }) {
     return KnittingSymbol(
       name: name?? this.name, 
       parts: parts?? this.parts,
       scale: scale?? this.scale,
       translation: translation?? this.translation,
-      rotation: rotation?? this.rotation,
+      rotationRad: rotationRad?? this.rotationRad,
     );
   }
 
+  String toSvg(Color symbolColor) {
+    String svg = '<g class="symbol" transform-origin="${stitchCellWidth / 2} ${stitchCellHeight / 2}" transform="translate(${translation.dx}, ${translation.dy}) scale(${scale.dx}, ${scale.dy}) rotate(${MathUtitilies.toDegrees(rotationRad)})">';
+    for (KnittingSymbolPart part in parts) {
+      svg += '<g class="symbolpart" transform-origin="${stitchCellWidth / 2} ${stitchCellHeight / 2}" transform="translate(${part.translation.dx}, ${part.translation.dy}) scale(${part.scale.dx}, ${part.scale.dy}) rotate(${MathUtitilies.toDegrees(part.rotationRad)})">';
+      svg += part.toSvg(symbolColor);
+      svg += '</g>';
+    }
+    svg += '</g>';
+
+    return svg;
+  }
+
   @override
-  int get hashCode => name.hashCode ^ parts.hashCode ^ scale.hashCode ^ translation.hashCode ^ rotation.hashCode;
+  int get hashCode => name.hashCode ^ parts.hashCode ^ scale.hashCode ^ translation.hashCode ^ rotationRad.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -53,7 +67,7 @@ class KnittingSymbol {
     parts == other.parts &&
     scale == other.scale &&
     translation == other.translation &&
-    rotation == other.rotation;
+    rotationRad == other.rotationRad;
 
   @override
   String toString() {
@@ -74,8 +88,8 @@ KnittingSymbol(
       defString += '''translation: Offset(${translation.dx}, ${translation.dy}),''';
     }
     
-    if (rotation != _defaultRotation) {
-      defString += '''rotation: $rotation,''';
+    if (rotationRad != _defaultRotationRad) {
+      defString += '''rotation: $rotationRad,''';
     }
     
     defString += ''')''';

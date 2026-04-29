@@ -3,6 +3,7 @@ import 'package:flutter_spinbox/material.dart';
 import 'package:knitty_griddy/model/knitting_symbol.dart';
 import 'package:knitty_griddy/model/knitting_symbol_part.dart';
 import 'package:knitty_griddy/controls/stitchrepo/stitch_definition.dart';
+import 'package:knitty_griddy/utils/constants.dart';
 
 class KnittingSymbolRectangle extends KnittingSymbolPart {
 
@@ -35,7 +36,7 @@ class KnittingSymbolRectangle extends KnittingSymbolPart {
     super.strokeWidth,
     super.scale,
     super.translation,
-    super.rotation,
+    super.rotationRad,
   }) : 
     height = height?? _defaultHeight, 
     width = width?? _defaultWidth, 
@@ -51,7 +52,7 @@ class KnittingSymbolRectangle extends KnittingSymbolPart {
     String? name, 
     Offset? scale, 
     Offset? translation, 
-    double? rotation,
+    double? rotationRad,
     double? height,
     double? width,
     bool? rounded,
@@ -66,7 +67,7 @@ class KnittingSymbolRectangle extends KnittingSymbolPart {
       name: name?? this.name,
       scale: scale?? this.scale,
       translation: translation?? this.translation,
-      rotation: rotation?? this.rotation,
+      rotationRad: rotationRad?? this.rotationRad,
       height: height?? this.height,
       width: width?? this.width,
       filled: filled?? this.filled,
@@ -97,6 +98,23 @@ class KnittingSymbolRectangle extends KnittingSymbolPart {
   }
 
   @override
+  String toSvg(Color symbolColor) {
+    String svg = '<rect x="${(stitchCellWidth / 2) - (width / 2)}" y="${(stitchCellHeight / 2) - (height / 2)}" width="$width" height="$height" ';
+    if (filled) {
+      svg += 'fill="rgb(${symbolColor.red}, ${symbolColor.green}, ${symbolColor.blue})" fill-opacity="${symbolColor.alpha}" ';
+    } else {
+      svg += 'fill="none" stroke="rgb(${symbolColor.red}, ${symbolColor.green}, ${symbolColor.blue})" stroke-width="$strokeWidth" stroke-opacity="${symbolColor.alpha}" ';
+    }
+    if (rounded) {
+      // TODO: if the roundings are different on each corner, we'll need a path instead of a rect
+      svg += 'rx="$topLeftRadius" ';
+    }
+    svg += '/>';
+
+    return svg;
+  }
+
+  @override
   int get hashCode => super.hashCode ^ height.hashCode ^ width.hashCode ^ 
     rounded.hashCode ^ topLeftRadius.hashCode ^ topRightRadius.hashCode ^ bottomLeftRadius.hashCode ^ bottomRightRadius.hashCode;
 
@@ -107,7 +125,7 @@ class KnittingSymbolRectangle extends KnittingSymbolPart {
       name == other.name &&
       scale == other.scale &&
       translation == other.translation &&
-      rotation == other.rotation &&
+      rotationRad == other.rotationRad &&
       width == other.width &&
       height == other.height &&
       filled == other.filled &&
@@ -467,8 +485,8 @@ KnittingSymbolRectangle(
       defString += '''translation: Offset(${translation.dx}, ${translation.dy}),''';
     }
     
-    if (rotation != KnittingSymbolPart.defaultRotation) {
-      defString += '''rotation: $rotation,''';
+    if (rotationRad != KnittingSymbolPart.defaultRotationRad) {
+      defString += '''rotation: $rotationRad,''';
     }
 
     if (filled != KnittingSymbolPart.defaultFilled) {

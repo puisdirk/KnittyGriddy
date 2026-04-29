@@ -55,6 +55,31 @@ class KnittingPattern {
 
   NamedColour get mainColour => usedColours.firstWhere((colour) => colour.isMainColor);
 
+  bool isStitchUsedInPattern(StitchDefinition definition) =>
+    stitches.any((cell) => cell.stitchDefinition == definition);
+
+  KnittingPattern pruneUnusedStitches() {
+    return copyWith(
+      usedStitches: usedStitches.where((us) => us == StitchRepository.noStitch || isStitchUsedInPattern(us)).toList()
+    );
+  }
+
+  bool isColourUsedInPattern(NamedColour colour) =>
+    colour.isMainColor || stitches.any((cell) => cell.colour == colour);
+
+  KnittingPattern pruneUnusedColours() {
+    return copyWith(
+      usedColours: usedColours.where((colour) => isColourUsedInPattern(colour)).toList()
+    );
+  }
+
+  KnittingPattern pruneUnusedStitchesAndColours() {
+    return copyWith(
+      usedStitches: usedStitches.where((us) => us == StitchRepository.noStitch || isStitchUsedInPattern(us)).toList(),
+      usedColours: usedColours.where((colour) => isColourUsedInPattern(colour)).toList()
+    );
+  }
+
   @override
   int get hashCode => 
     patternSettings.hashCode ^ stitches.hashCode ^ usedStitches.hashCode ^ usedColours.hashCode ^ 
