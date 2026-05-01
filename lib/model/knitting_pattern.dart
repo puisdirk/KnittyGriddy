@@ -12,6 +12,9 @@ import 'package:knitty_griddy/controls/stitchrepo/stitch_repository.dart';
 @immutable
 class KnittingPattern {
 
+  final String id;
+  final String name;
+  final String description;
   final PatternSettings patternSettings;
   final List<StitchCell> stitches;
   final List<StitchDefinition> usedStitches;
@@ -20,7 +23,10 @@ class KnittingPattern {
   final Set<CellAddress> outline;
 
   const KnittingPattern({
-    required this.patternSettings,
+    required this.id,
+    required this.name,
+    this.description = '',
+    this.patternSettings = const PatternSettings(rows: 10, columns: 10, gridType: GridType.flat),
     this.usedStitches = const[StitchRepository.noStitch, StitchRepository.knit, StitchRepository.purl, ],
     this.usedColours = const[defaultMainColor],
     this.stitches = defaultStitches,
@@ -29,6 +35,9 @@ class KnittingPattern {
   });
 
   KnittingPattern copyWith({
+    String? id,
+    String? name,
+    String? description,
     PatternSettings? patternSettings,
     List<StitchCell>? stitches,
     List<StitchDefinition>? usedStitches,
@@ -37,6 +46,9 @@ class KnittingPattern {
     Set<CellAddress>? outline,
   }) {
     return KnittingPattern(
+      id: id?? this.id,
+      name: name?? this.name,
+      description: description?? this.description,
       patternSettings: patternSettings?? this.patternSettings,
       stitches: stitches?? this.stitches,
       usedStitches: usedStitches?? this.usedStitches,
@@ -82,19 +94,21 @@ class KnittingPattern {
 
   @override
   int get hashCode => 
-    patternSettings.hashCode ^ stitches.hashCode ^ usedStitches.hashCode ^ usedColours.hashCode ^ 
+    id.hashCode ^ name.hashCode ^ description.hashCode ^ patternSettings.hashCode ^ 
+    stitches.hashCode ^ usedStitches.hashCode ^ usedColours.hashCode ^ 
     selection.hashCode ^ outline.hashCode;
     
-      @override
-      bool operator ==(Object other) =>
-        identical(this, other) ||
-          other is KnittingPattern &&
-          patternSettings == other.patternSettings &&
-          stitches == other.stitches &&
-          usedStitches == other.usedStitches &&
-          usedColours == other.usedColours &&
-          selection == other.selection &&
-          outline == other.outline;
-
-  
+  @override
+  bool operator ==(Object other) =>
+    identical(this, other) ||
+      other is KnittingPattern &&
+      id == other.id &&
+      name == other.name &&
+      description == other.description &&
+      patternSettings == other.patternSettings &&
+      stitches == other.stitches &&
+      usedStitches == other.usedStitches &&
+      usedColours == other.usedColours &&
+      selection == other.selection &&
+      outline == other.outline;
 }

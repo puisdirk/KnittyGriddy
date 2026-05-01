@@ -46,6 +46,8 @@ dependencies:
   flutter_dial_knob: ^0.1.1
   flutter_spinbox: ^0.13.1
   fitted_scale: ^1.0.3
+  simple_platform: ^1.0.1
+  id_gen: ^0.7.7
 
 dev_dependencies:
   flutter_test:

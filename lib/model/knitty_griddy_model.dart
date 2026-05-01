@@ -1,10 +1,14 @@
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:id_gen/id_gen.dart';
 import 'package:knitty_griddy/model/named_colour.dart';
 import 'package:knitty_griddy/model/cell_address.dart';
 import 'package:knitty_griddy/model/knitting_symbol.dart';
 import 'package:knitty_griddy/model/knitting_symbol_parts.dart';
+import 'package:knitty_griddy/model/pattern_info.dart';
 import 'package:knitty_griddy/model/selection.dart';
 import 'package:knitty_griddy/model/app_state.dart';
 import 'package:knitty_griddy/model/griddy_model.dart';
@@ -14,17 +18,131 @@ import 'package:knitty_griddy/model/stitch_cell.dart';
 import 'package:knitty_griddy/model/undo_redo_manager.dart';
 import 'package:knitty_griddy/controls/stitchrepo/stitch_definition.dart';
 import 'package:knitty_griddy/controls/stitchrepo/stitch_repository.dart';
+import 'package:knitty_griddy/storage/model_repository.dart';
 
 class KnittyGriddyModel extends ChangeNotifier {
 
+  final ModelRepository _repository;
+
   // The immutable model being accessed throughout the app
   GriddyModel _model;
+  
   final UndoRedoManager<KnittingPattern> _undoRedoManager;
 
-  KnittyGriddyModel() : _model = const GriddyModel(), _undoRedoManager = UndoRedoManager() {
+  GriddyModel? _lastSaved;
+  Future<void> autoSave() async {
+    if (_lastSaved == null) {
+      _lastSaved = _model.copyWith();
+      return;
+    }
+
+    if (_lastSaved != _model) {
+      final GriddyModel oldModel = _lastSaved!.copyWith();
+      _lastSaved = _model.copyWith();
+
+      if (oldModel.patternInfos != _lastSaved!.patternInfos) {
+        await _repository.savePatternInfos(_lastSaved!.patternInfos);
+      }
+
+      if (oldModel.customStitches != _lastSaved!.customStitches) {
+        await _repository.saveCustomstitches(_lastSaved!.customStitches);
+      }
+
+      if (oldModel.knittingPattern != _lastSaved!.knittingPattern) {
+        await _repository.savePattern(_lastSaved!.knittingPattern);
+      }
+    }
+  }
+
+  KnittyGriddyModel({
+    required ModelRepository repository,
+  }) : 
+    _repository = repository, 
+    _model = const GriddyModel(), 
+    _undoRedoManager = UndoRedoManager() {
+    // Initialize the undo-redo manager
     _storeForUndo();
   }
 
+  void loadOnStartup() {
+    _repository.loadPatternInfos().then((List<PatternInfo> patternInfos) {
+      _model = _model.copyWith(
+        patternInfos: patternInfos,
+      );
+      _repository.loadCustomstitches().then((List<StitchDefinition> stitches) {
+        _model = _model.copyWith(
+          customStitches: stitches
+        );
+        notifyListeners();
+      });
+    });
+  }
+
+  Future<void> saveCurrentPattern() async {
+    await _repository.savePattern(_model.knittingPattern);
+  }
+
+  Future<void> _savePatternInfos() async {
+    await _repository.savePatternInfos(_model.patternInfos);
+  }
+
+  Future<void> createNewPattern(String name) async {
+    final String id = const UuidV4Gen().get();
+
+    _model = _model.copyWith(
+      patternInfos: List.from(_model.patternInfos)..add(PatternInfo(id: id, name: name)),
+      knittingPattern: KnittingPattern(id: id, name: name)
+    );
+
+    await autoSave();
+    notifyListeners();
+  }
+
+  void deletePattern(String patternId) {
+    _model = _model.copyWith(
+      patternInfos: _model.patternInfos.where((pi) => pi.id != patternId).toList()
+    );
+
+    _repository.deletePattern(patternId);
+    _savePatternInfos();
+    notifyListeners();
+  }
+
+  Future<void> loadPattern(String patternId) async {
+    return await _repository.loadPattern(patternId).then((KnittingPattern pattern) {
+      _model = _model.copyWith(
+        knittingPattern: pattern,
+      );
+      notifyListeners();
+    });
+  }
+
+  void setPatternName(String name) {
+    _model = _model.copyWith(
+      patternInfos: _model.patternInfos.map((pi) =>
+        pi.id != _model.knittingPattern.id ? pi :
+        pi.copyWith(name: name)
+      ).toList(),
+      knittingPattern: _model.knittingPattern.copyWith(name: name)
+    );
+
+    _storeForUndo();
+    notifyListeners();
+  }
+
+  void setPatternDescription(String description) {
+    _model = _model.copyWith(
+      patternInfos: _model.patternInfos.map((pi) =>
+        pi.id != _model.knittingPattern.id ? pi :
+        pi.copyWith(description: description)
+      ).toList(),
+      knittingPattern: _model.knittingPattern.copyWith(description: description)
+    );
+
+    _storeForUndo();
+    notifyListeners();
+  }
+ 
   void _storeForUndo() {
     _undoRedoManager.store(_model.knittingPattern.copyWith());
   }
@@ -46,6 +164,7 @@ class KnittyGriddyModel extends ChangeNotifier {
     }
   }
 
+  List<PatternInfo> get patternInfos => _model.patternInfos;
   PatternSettings get settings => _model.knittingPattern.patternSettings;
   StitchCell stitchCell(int row, int column) => _model.knittingPattern.stitchCell(row, column);
   List<StitchCell> get stitches => _model.knittingPattern.stitches;
@@ -440,6 +559,45 @@ class KnittyGriddyModel extends ChangeNotifier {
 
     Set<CellAddress> newAddresses = Set.from(selection.selectedCells);
     if (selectionContainsStitch) {
+      // Remove them from the selection
+      newAddresses.removeAll(affectedAddresses);
+    } else {
+      // Add them to the selection
+      newAddresses.addAll(affectedAddresses);
+    }
+
+    _model = _model.copyWith(
+      knittingPattern: _model.knittingPattern.copyWith(
+        selection: _model.knittingPattern.selection.copyWith(
+          selectedCells: newAddresses
+        )
+      )
+    );
+
+    _storeForUndo();
+    notifyListeners();
+  }
+
+  void toggleColour(NamedColour colour) {
+    if (!_model.knittingPattern.isColourUsedInPattern(colour)) {
+      return;
+    }
+
+    bool selectionContainsColour = false;
+    Set<CellAddress> affectedAddresses = {};
+
+    for (StitchCell cell in _model.knittingPattern.stitches) {
+      if (cell.colour == colour) {
+        CellAddress address = CellAddress(column: cell.column, row: cell.row);
+        affectedAddresses.add(address);
+        if (selection.selectedCells.contains(address)) {
+          selectionContainsColour = true;
+        }
+      }
+    }
+
+    Set<CellAddress> newAddresses = Set.from(selection.selectedCells);
+    if (selectionContainsColour) {
       // Remove them from the selection
       newAddresses.removeAll(affectedAddresses);
     } else {

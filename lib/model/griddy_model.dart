@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:knitty_griddy/model/pattern_info.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 import 'package:knitty_griddy/model/app_state.dart';
 import 'package:knitty_griddy/model/knitting_pattern.dart';
@@ -12,24 +13,30 @@ class GriddyModel {
   final KnittingPattern knittingPattern;
   final AppState appState;
   final List<StitchDefinition> customStitches;
+  final List<PatternInfo> patternInfos;
 
   const GriddyModel({
     this.knittingPattern = const KnittingPattern(
+      id: 'default',
+      name: 'default',
       patternSettings: PatternSettings(rows: defaultGridRows, columns: defaultGridColumns, gridType: GridType.flat),
     ),
     this.appState = const AppState(),
     this.customStitches = const[],
+    this.patternInfos = const[],
   });
 
   GriddyModel copyWith({
     KnittingPattern? knittingPattern,
     AppState? appState,
     List<StitchDefinition>? customStitches,
+    List<PatternInfo>? patternInfos,
   }) {
     return GriddyModel(
       knittingPattern: knittingPattern?? this.knittingPattern,
       appState: appState?? this.appState,
       customStitches: customStitches?? this.customStitches,
+      patternInfos: patternInfos?? this.patternInfos,
     );
   }
 

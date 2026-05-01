@@ -2,7 +2,12 @@
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/controls/toolbar/colours_toolbar_panel.dart';
 import 'package:knitty_griddy/controls/toolbar/grid_options_toolbar_panel.dart';
+import 'package:knitty_griddy/controls/toolbar/settings_toolbar_panel.dart';
 import 'package:knitty_griddy/controls/toolbar/stitches_toolbar_panel.dart';
+import 'package:knitty_griddy/model/app_state.dart';
+import 'package:knitty_griddy/model/knitting_pattern.dart';
+import 'package:knitty_griddy/model/knitty_griddy_model.dart';
+import 'package:provider/provider.dart';
 
 class KnittingToolbar extends StatelessWidget {
 
@@ -26,7 +31,20 @@ class KnittingToolbar extends StatelessWidget {
                 const VerticalDivider(indent: 10, endIndent: 10,),
                 SizedBox(
                   height: 200, width: areawidth * 0.60, 
-                  child: const StitchesToolbarPanel(),
+                  child: Selector<KnittyGriddyModel, AppState>(
+                    selector: (_, model) => model.appState,
+                    builder: (context, appState, _) {
+                      if (appState.mouseOption == MouseOption.settings) {
+                        return Selector<KnittyGriddyModel, KnittingPattern>(
+                          selector: (_, model) => model.knittingPattern,
+                          builder: (context, pattern, _) {
+                            return SettingsToolbarPanel(pattern: pattern);
+                          }
+                        );
+                      }
+                      return const StitchesToolbarPanel();
+                    }
+                  ),
                 ),
                 const VerticalDivider(indent: 10, endIndent: 10,),
                 SizedBox(height: 200, width: areawidth * 0.20, 
