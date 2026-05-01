@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:knitty_griddy/controls/editgrid/grid_settings_control.dart';
 import 'package:knitty_griddy/controls/toolbar/knitting_toolbar.dart';
 import 'package:knitty_griddy/controls/maingrid/pattern_control.dart';
-import 'package:knitty_griddy/controls/stitchrepo/font_service.dart';
 import 'package:knitty_griddy/export/export_page.dart';
 import 'package:knitty_griddy/model/knitty_griddy_model.dart';
 import 'package:provider/provider.dart';
@@ -39,7 +38,13 @@ class _PatternPageState extends State<PatternPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Knitty-Griddy'),
+        leading: BackButton(
+          onPressed: () {
+            Provider.of<KnittyGriddyModel>(context, listen: false).saveCurrentPattern();
+            Navigator.maybePop(context);
+          },
+        ),
+        title: const Text('Knitty-Griddy'), // TODO: should show the pattern name here somehow
         backgroundColor: Colors.grey.shade300,
         bottom: const PreferredSize(
           preferredSize: Size(20000, 200), 

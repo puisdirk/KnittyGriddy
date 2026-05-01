@@ -54,7 +54,8 @@ class ColoursToolbarPanel extends StatelessWidget {
                                 child: InkWell(
                                   borderRadius: const BorderRadius.all(Radius.circular(10)),
                                   splashColor: Colors.blue.withAlpha(30),
-                                  onTap: (appState.currentTool == Tool.select && selection.isEmpty) ?
+                                  onTap: ((appState.currentTool == Tool.select && selection.isEmpty) ||
+                                    appState.mouseOption == MouseOption.settings) ?
                                   null :
                                   () {
                                     switch (appState.currentTool) {
@@ -80,22 +81,29 @@ class ColoursToolbarPanel extends StatelessWidget {
                                         height: 30,),
                                       SizedBox(width: spacerWidth,),
                                       Text(_truncateName(colour.name, 25),
-                                        style: (appState.currentTool == Tool.select && selection.isEmpty) ?
+                                        style: ((appState.currentTool == Tool.select && selection.isEmpty) || appState.mouseOption == MouseOption.settings) ?
                                           Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.grey.shade400) :
                                           Theme.of(context).textTheme.bodyMedium!,
                                       ),
                                       const Spacer(),
-                                      IconButton(
-                                        icon: const Icon(Icons.edit), 
-                                        iconSize: iconWidth, 
-                                        onPressed: () => 
-                                          showDialog(
-                                            context: context,
-                                            builder: (context) {
-                                              return EditColourDialog(colour: colour, usedColours: usedColours);
-                                            }
-                                          ),
-                                      ),
+                                      if (appState.currentTool != Tool.select && appState.mouseOption != MouseOption.settings)
+                                        IconButton(
+                                          icon: const Icon(Icons.edit), 
+                                          iconSize: iconWidth, 
+                                          onPressed: () => 
+                                            showDialog(
+                                              context: context,
+                                              builder: (context) {
+                                                return EditColourDialog(colour: colour, usedColours: usedColours);
+                                              }
+                                            ),
+                                        ),
+                                      if (appState.currentTool == Tool.select)
+                                        IconButton(
+                                          onPressed: () => Provider.of<KnittyGriddyModel>(context, listen: false).toggleColour(colour), 
+                                          icon: const Icon(Icons.select_all),
+                                          iconSize: iconWidth,
+                                        ),
                                       SizedBox(width: spacerWidth,),
                                     ],
                                   ),
