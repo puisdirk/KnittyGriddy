@@ -45,6 +45,26 @@ class StitchCell {
     );
   }
 
+  Map<String, Object> toJson() {
+    return {
+      'row': row,
+      'column': column,
+      'stitchdefinition': stitchDefinition.toJson(),
+      'colour': colour.toJson(),
+      'stitchdefinitioncolumn': stitchDefinitionColumn,
+    };
+  }
+
+  static StitchCell fromJson(Map<String, dynamic> json) {
+    return StitchCell(
+      row: json['row'] as int, 
+      column: json['column'] as int, 
+      stitchDefinition: StitchDefinition.fromJson(json['stitchdefinition'] as Map<String, dynamic>), 
+      colour: NamedColour.fromJson(json['colour'] as Map<String, dynamic>),
+      stitchDefinitionColumn: json['stitchdefinitioncolumn'] as int,
+    );
+  }
+
   @override
   int get hashCode => 
     row.hashCode ^ column.hashCode ^ 

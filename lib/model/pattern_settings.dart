@@ -38,6 +38,22 @@ class PatternSettings {
     );
   }
 
+  Map<String, Object> toJson() {
+    return {
+      'rows': rows,
+      'columns': columns,
+      'gridtype': gridType.name
+    };
+  }
+
+  static PatternSettings fromJson(Map<String, dynamic> json) {
+    return PatternSettings(
+      rows: json['rows'] as int, 
+      columns: json['columns'] as int, 
+      gridType: GridType.values.byName(json['gridtype'] as String),
+    );
+  }
+
   @override
   int get hashCode => rows.hashCode ^ columns.hashCode ^ gridType.hashCode;
 

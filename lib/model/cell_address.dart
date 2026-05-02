@@ -7,6 +7,20 @@ class CellAddress implements Comparable<CellAddress> {
     required this.row,
   });
 
+  Map<String, Object> toJson() {
+    return {
+      'column': column,
+      'row': row,
+    };
+  }
+
+  static CellAddress fromJson(Map<String, dynamic> json) {
+    return CellAddress(
+      column: json['column'] as int, 
+      row: json['row'] as int,
+    );
+  }
+
   @override
   int get hashCode => column.hashCode ^ row.hashCode;
 

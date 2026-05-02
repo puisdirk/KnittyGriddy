@@ -82,6 +82,36 @@ class KnittingSymbolCurve extends KnittingSymbolPart {
       slant == other.slant &&
       closed == other.closed;
 
+  @override
+  Map<String, Object> toJson() {
+    return {
+      'name': name,
+      'length': length,
+      'amplitude': amplitude,
+      'slant': slant,
+      'closed': closed,
+      'scale': {'x': scale.dx, 'y': scale.dy},
+      'translation': {'x': translation.dx, 'y': translation.dy},
+      'rotationrad': rotationRad,
+      'filled': filled,
+      'strokewidth': strokeWidth,
+    };
+  }
+
+  static KnittingSymbolCurve fromJson(Map<String, dynamic> json) {
+    return KnittingSymbolCurve(
+      name: json['name'] as String,
+      length: json['length'] as double,
+      amplitude: json['amplitude'] as double,
+      slant: json['slant'] as double,
+      closed: json['closed'] as bool,
+      scale: Offset(json['x'] as double, json['y'] as double),
+      translation: Offset(json['x'] as double, json['y'] as double),
+      rotationRad: json['rotationrad'] as double,
+      filled: json['filled'] as bool,
+      strokeWidth: json['strokewidth'] as double,
+    );
+  }
 
   @override
   void drawPart(Canvas canvas, Size size, Paint ink) {

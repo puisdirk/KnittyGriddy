@@ -17,6 +17,24 @@ class Selection {
     );
   }
 
+  Map<String, Object> toJson() {
+    return {
+      'selectedcells': selectedCells.map((c) => c.toJson()).toList(),
+    };
+  }
+
+  static Selection fromJson(Map<String, dynamic> json) {
+    Set<CellAddress> cells = {};
+    List<Map<String, dynamic>> cellObjects = (json['selectedcells'] as List).map((o) => o as Map<String, dynamic>).toList();
+    for (Map<String, dynamic> cellObject in cellObjects) {
+      cells.add(CellAddress.fromJson(cellObject));
+    }
+
+    return Selection(
+      selectedCells: cells
+    );
+  }
+
   bool isSelected(int column, int row) {
     return selectedCells.contains(CellAddress(column: column, row: row));
   }

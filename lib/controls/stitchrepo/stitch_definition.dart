@@ -57,6 +57,38 @@ class StitchDefinition {
     );
   }
 
+  Map<String, Object> toJson() {
+    return {
+      'name': name, 
+      'abbreviation': abbreviation, 
+      'symbols': symbols.map((s) => s.toJson()).toList(),
+      'category': category,
+      'description': description,
+      'consumes': consumes,
+      'produces': produces,
+      'custom': custom ? 1 : 0,
+    };
+  }
+
+  static StitchDefinition fromJson(Map<String, dynamic> json) {
+    List<KnittingSymbol> symbols = [];
+    List<Map<String, dynamic>> symbolObjects = (json['symbols'] as List).map((o) => o as Map<String, dynamic>).toList();
+    for (Map<String, dynamic> symbolObject in symbolObjects) {
+      symbols.add(KnittingSymbol.fromJson(symbolObject));
+    }
+
+    return StitchDefinition(
+      name: json['name'] as String, 
+      abbreviation: json['abbreviation'] as String, 
+      symbols: symbols,
+      category: json['category'] as String,
+      description: json['description'] as String,
+      consumes: json['consumes'] as int,
+      produces: json['produces'] as int,
+      custom: json['custom'] as int == 1,
+    );
+  }
+
   StitchDefinition rotateSymbol(int symbolColumn, double newrotationDegrees) {
     double rotationRad = MathUtitilies.toRadians(newrotationDegrees);
     List<KnittingSymbol> newSymbols = [];

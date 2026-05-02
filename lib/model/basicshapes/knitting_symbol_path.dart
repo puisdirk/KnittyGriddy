@@ -44,6 +44,31 @@ class KnittingSymbolPath extends KnittingSymbolPart {
   }
 
   @override
+  Map<String, Object> toJson() {
+    return {
+      'name': name,
+      'path': path,
+      'scale': {'x': scale.dx, 'y': scale.dy},
+      'translation': {'x': translation.dx, 'y': translation.dy},
+      'rotationrad': rotationRad,
+      'filled': filled,
+      'strokewidth': strokeWidth,
+    };
+  }
+
+  static KnittingSymbolPath fromJson(Map<String, dynamic> json) {
+    return KnittingSymbolPath(
+      name: json['name'] as String,
+      path: json['path'] as String,
+      scale: Offset(json['x'] as double, json['y'] as double),
+      translation: Offset(json['x'] as double, json['y'] as double),
+      rotationRad: json['rotationrad'] as double,
+      filled: json['filled'] as bool,
+      strokeWidth: json['strokewidth'] as double,
+    );
+  }
+
+  @override
   void drawPart(Canvas canvas, Size size, Paint ink) {
     if (path.isNotEmpty) {
       Path p = parseSvgPathData(path);

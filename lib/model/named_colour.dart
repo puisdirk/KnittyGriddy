@@ -25,6 +25,22 @@ class NamedColour {
     );
   }
 
+  Map<String, Object> toJson() {
+    return {
+      'name': name,
+      'color': {'red': color.red, 'blue': color.blue, 'green': color.green, 'alpha': color.alpha},
+      'ismaincolor': isMainColor ? 1 : 0,
+    };
+  }
+
+  static NamedColour fromJson(Map<String, dynamic> json) {
+    return NamedColour(
+      name: json['name'] as String, 
+      color: Color.fromARGB(json['alpha'] as int, json['red'] as int, json['green'] as int, json['blue'] as int),
+      isMainColor: json['ismaincolor'] as int == 1,
+    );
+  }
+
   @override
   int get hashCode => name.hashCode ^ color.hashCode ^ isMainColor.hashCode;
 

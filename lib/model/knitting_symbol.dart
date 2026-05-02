@@ -1,4 +1,9 @@
 import 'package:flutter/painting.dart';
+import 'package:knitty_griddy/model/basicshapes/knitting_symbol_arc.dart';
+import 'package:knitty_griddy/model/basicshapes/knitting_symbol_curve.dart';
+import 'package:knitty_griddy/model/basicshapes/knitting_symbol_path.dart';
+import 'package:knitty_griddy/model/basicshapes/knitting_symbol_rectangle.dart';
+import 'package:knitty_griddy/model/basicshapes/knitting_symbol_text.dart';
 import 'package:knitty_griddy/model/knitting_symbol_part.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 import 'package:knitty_griddy/utils/math_utitilies.dart';
@@ -41,6 +46,50 @@ class KnittingSymbol {
       scale: scale?? this.scale,
       translation: translation?? this.translation,
       rotationRad: rotationRad?? this.rotationRad,
+    );
+  }
+
+  Map<String, Object> toJson() {
+    return {
+      'name': name,
+      'parts': parts.map((p) => p.toJson()).toList(),
+      'scale': {'x': scale.dx, 'y': scale.dy},
+      'translation': {'x': translation.dx, 'y': translation.dy},
+      'rotationrad': rotationRad,
+    };
+  }
+
+  static KnittingSymbol fromJson(Map<String, dynamic> json) {
+    List<KnittingSymbolPart> parts = [];
+    List<Map<String, dynamic>> partObjects = (json['parts'] as List).map((o) => o as Map<String, dynamic>).toList();
+    for (Map<String, dynamic> partObject in partObjects) {
+      switch (partObject['type'] as String) {
+        case 'arc':
+          parts.add(KnittingSymbolArc.fromJson(partObject));
+          break;
+        case 'curve':
+          parts.add(KnittingSymbolCurve.fromJson(partObject));
+          break;
+        case 'path':
+          parts.add(KnittingSymbolPath.fromJson(partObject));
+          break;
+        case 'rectangle':
+          parts.add(KnittingSymbolRectangle.fromJson(partObject));
+          break;
+        case 'text':
+          parts.add(KnittingSymbolText.fromJson(partObject));
+          break;
+        default:
+          throw Exception('Unknown symbol part type ${partObject['type'] as String}');
+      }
+    }
+
+    return KnittingSymbol(
+      name: json['name'], 
+      parts: parts,
+      scale: Offset(json['scale'].dx as double, json['scale'].dy as double),
+      translation: Offset(json['translation'].dx as double, json['translation'].dy as double),
+      rotationRad: json['rotationrad'] as double,
     );
   }
 
