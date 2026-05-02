@@ -58,6 +58,58 @@ class KnittingPattern {
     );
   }
 
+  Map<String, Object> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'description': description,
+      'patternsettings': patternSettings.toJson(),
+      'stitches': stitches.map((stitch) => stitch.toJson()).toList(),
+      'usedstitches': usedStitches.map((stitch) => stitch.toJson()).toList(),
+      'usedcolours': usedColours.map((colour) => colour.toJson()).toList(),
+      'selection': selection.toJson(),
+      'outline': outline.map((addresss) => addresss.toJson()).toList()
+    };
+  }
+
+  static KnittingPattern fromJson(Map<String, dynamic> json) {
+    List<StitchCell> stitches = [];
+    List<Map<String, dynamic>> stitchObjects = (json['stitches'] as List).map((o) => o as Map<String, dynamic>).toList();
+    for (Map<String, dynamic> stitchObject in stitchObjects) {
+      stitches.add(StitchCell.fromJson(stitchObject));
+    }
+
+    List<StitchDefinition> usedStitches = [];
+    List<Map<String, dynamic>> stitchDefinitionObjects = (json['usedstitches'] as List).map((o) => o as Map<String, dynamic>).toList();
+    for (Map<String, dynamic> stitchDefinitionObject in stitchDefinitionObjects) {
+      usedStitches.add(StitchDefinition.fromJson(stitchDefinitionObject));
+    }
+
+    List<NamedColour> usedColours = [];
+    List<Map<String, dynamic>> colourObjects = (json['usedcolours'] as List).map((o) => o as Map<String, dynamic>).toList();
+    for (Map<String, dynamic> colourObject in colourObjects) {
+      usedColours.add(NamedColour.fromJson(colourObject));
+    }
+
+    Set<CellAddress> outline = {};
+    List<Map<String, dynamic>> addressObjects = (json['outline'] as List).map((o) => o as Map<String, dynamic>).toList();
+    for (Map<String, dynamic> addressObject in addressObjects) {
+      outline.add(CellAddress.fromJson(addressObject));
+    }
+
+    return KnittingPattern(
+      id: json['id'] as String, 
+      name: json['name'] as String,
+      description: json['description'] as String,
+      patternSettings: PatternSettings.fromJson(json['patternsettings'] as Map<String, dynamic>),
+      stitches: stitches,
+      usedStitches: usedStitches,
+      usedColours: usedColours,
+      selection: Selection.fromJson(json['selection'] as Map<String, dynamic>),
+      outline: outline,
+    );
+  }
+
   StitchCell stitchCell(int row, int column) {
     if (stitches.any((cell) => cell.row == row && cell.column == column)) {
       return stitches.firstWhere((cell) => cell.row == row && cell.column == column);

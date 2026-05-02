@@ -81,6 +81,36 @@ class KnittingSymbolRectangle extends KnittingSymbolPart {
   }
 
   @override
+  Map<String, Object> toJson() {
+    return {
+      'name': name,
+      'height': height,
+      'width': width,
+      'rounded': rounded,
+      'topleftradius': topLeftRadius,
+      'toprightradius': topRightRadius,
+      'bottomleftradius': bottomLeftRadius,
+      'bottomrightradius': bottomRightRadius,
+      'scale': {'x': scale.dx, 'y': scale.dy},
+      'translation': {'x': translation.dx, 'y': translation.dy},
+      'rotationrad': rotationRad,
+      'filled': filled,
+      'strokewidth': strokeWidth,
+    };
+  }
+
+  static KnittingSymbolRectangle fromJson(Map<String, dynamic> json) {
+    return KnittingSymbolRectangle(
+      name: json['name'] as String,
+      height: json['height'] as double,
+      width: json['width'] as double,
+      rounded: json['rounded'] as bool,
+      topLeftRadius: json['topleftradius'] as double,
+      topRightRadius: json['toprightradius'] as double,
+    );
+  }
+
+  @override
   void drawPart(Canvas canvas, Size size, Paint ink) {
     canvas.drawRRect(
       RRect.fromRectAndCorners(

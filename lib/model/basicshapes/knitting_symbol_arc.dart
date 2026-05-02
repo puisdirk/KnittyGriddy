@@ -72,6 +72,39 @@ class KnittingSymbolArc extends KnittingSymbolPart {
   }
 
   @override
+  Map<String, Object> toJson() {
+    return {
+      'name': name,
+      'height': height,
+      'width': width,
+      'startangle': startAngle,
+      'sweepangle': sweepAngle,
+      'closed': closed,
+      'scale': {'x': scale.dx, 'y': scale.dy},
+      'translation': {'x': translation.dx, 'y': translation.dy},
+      'rotationrad': rotationRad,
+      'filled': filled,
+      'strokewidth': strokeWidth,
+    };
+  }
+
+  static KnittingSymbolArc fromJson(Map<String, dynamic> json) {
+    return KnittingSymbolArc(
+      name: json['name'] as String,
+      height: json['height'] as double,
+      width: json['width'] as double,
+      startAngle: json['startangle'] as double,
+      sweepAngle: json['sweepangle'] as double,
+      closed: json['closed'] as bool,
+      scale: Offset(json['x'] as double, json['y'] as double),
+      translation: Offset(json['x'] as double, json['y'] as double),
+      rotationRad: json['rotationrad'] as double,
+      filled: json['filled'] as bool,
+      strokeWidth: json['strokewidth'] as double,
+    );
+  }
+
+  @override
   void drawPart(Canvas canvas, Size size, Paint ink) {
     canvas.drawArc(
       Rect.fromCenter(

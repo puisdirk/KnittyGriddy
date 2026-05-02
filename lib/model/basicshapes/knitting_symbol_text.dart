@@ -75,6 +75,35 @@ class KnittingSymbolText extends KnittingSymbolPart {
       strokeWidth == other.strokeWidth;
 
   @override
+  Map<String, Object> toJson() {
+    return {
+      'name': name,
+      'text': text,
+      'bold': bold,
+      'italic': italic,
+      'scale': {'x': scale.dx, 'y': scale.dy},
+      'translation': {'x': translation.dx, 'y': translation.dy},
+      'rotationrad': rotationRad,
+      'filled': filled,
+      'strokewidth': strokeWidth,
+    };
+  }
+
+  static KnittingSymbolText fromJson(Map<String, dynamic> json) {
+    return KnittingSymbolText(
+      name: json['name'] as String,
+      text: json['text'] as String,
+      bold: json['bold'] as bool,
+      italic: json['italic'] as bool,
+      scale: Offset(json['x'] as double, json['y'] as double),
+      translation: Offset(json['x'] as double, json['y'] as double),
+      rotationRad: json['rotationrad'] as double,
+      filled: json['filled'] as bool,
+      strokeWidth: json['strokewidth'] as double,
+    );
+  }
+
+  @override
   void drawPart(Canvas canvas, Size size, Paint ink) {
     TextStyle style = TextStyle(
       color: ink.color,// Colors.black,
