@@ -7,6 +7,8 @@ import 'package:knitty_griddy/model/knitting_symbol_part.dart';
 import 'package:knitty_griddy/controls/stitchrepo/stitch_definition.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 
+const String knittingSymbolTextType = 'text';
+
 class KnittingSymbolText extends KnittingSymbolPart {
 
   static const String _defaultText = 'T';
@@ -77,6 +79,7 @@ class KnittingSymbolText extends KnittingSymbolPart {
   @override
   Map<String, Object> toJson() {
     return {
+      'type':knittingSymbolTextType,
       'name': name,
       'text': text,
       'bold': bold,
@@ -95,8 +98,8 @@ class KnittingSymbolText extends KnittingSymbolPart {
       text: json['text'] as String,
       bold: json['bold'] as bool,
       italic: json['italic'] as bool,
-      scale: Offset(json['x'] as double, json['y'] as double),
-      translation: Offset(json['x'] as double, json['y'] as double),
+      scale: Offset(json['scale']['x'] as double, json['scale']['y'] as double),
+      translation: Offset(json['translation']['x'] as double, json['translation']['y'] as double),
       rotationRad: json['rotationrad'] as double,
       filled: json['filled'] as bool,
       strokeWidth: json['strokewidth'] as double,

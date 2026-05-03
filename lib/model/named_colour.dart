@@ -29,15 +29,15 @@ class NamedColour {
     return {
       'name': name,
       'color': {'red': color.red, 'blue': color.blue, 'green': color.green, 'alpha': color.alpha},
-      'ismaincolor': isMainColor ? 1 : 0,
+      'ismaincolor': isMainColor,
     };
   }
 
   static NamedColour fromJson(Map<String, dynamic> json) {
     return NamedColour(
       name: json['name'] as String, 
-      color: Color.fromARGB(json['alpha'] as int, json['red'] as int, json['green'] as int, json['blue'] as int),
-      isMainColor: json['ismaincolor'] as int == 1,
+      color: Color.fromARGB(json['color']['alpha'] as int, json['color']['red'] as int, json['color']['green'] as int, json['color']['blue'] as int),
+      isMainColor: json['ismaincolor'] as bool,
     );
   }
 

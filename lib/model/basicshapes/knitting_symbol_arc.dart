@@ -9,6 +9,8 @@ import 'package:knitty_griddy/model/knitting_symbol.dart';
 import 'package:knitty_griddy/model/knitting_symbol_part.dart';
 import 'package:knitty_griddy/controls/stitchrepo/stitch_definition.dart';
 
+const String knittingSymbolArcType = 'arc';
+
 class KnittingSymbolArc extends KnittingSymbolPart {
   
   static const double _defaultHeight = 10;
@@ -74,6 +76,7 @@ class KnittingSymbolArc extends KnittingSymbolPart {
   @override
   Map<String, Object> toJson() {
     return {
+      'type': knittingSymbolArcType,
       'name': name,
       'height': height,
       'width': width,
@@ -96,8 +99,8 @@ class KnittingSymbolArc extends KnittingSymbolPart {
       startAngle: json['startangle'] as double,
       sweepAngle: json['sweepangle'] as double,
       closed: json['closed'] as bool,
-      scale: Offset(json['x'] as double, json['y'] as double),
-      translation: Offset(json['x'] as double, json['y'] as double),
+      scale: Offset(json['scale']['x'] as double, json['scale']['y'] as double),
+      translation: Offset(json['translation']['x'] as double, json['translation']['y'] as double),
       rotationRad: json['rotationrad'] as double,
       filled: json['filled'] as bool,
       strokeWidth: json['strokewidth'] as double,

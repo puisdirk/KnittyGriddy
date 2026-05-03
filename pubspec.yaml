@@ -48,6 +48,8 @@ dependencies:
   fitted_scale: ^1.0.3
   simple_platform: ^1.0.1
   id_gen: ^0.7.7
+  path_provider: ^2.1.5
+  path: ^1.9.1
 
 dev_dependencies:
   flutter_test:

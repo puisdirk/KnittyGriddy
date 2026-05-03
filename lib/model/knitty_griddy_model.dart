@@ -109,12 +109,11 @@ class KnittyGriddyModel extends ChangeNotifier {
   }
 
   Future<void> loadPattern(String patternId) async {
-    return await _repository.loadPattern(patternId).then((KnittingPattern pattern) {
-      _model = _model.copyWith(
-        knittingPattern: pattern,
-      );
-      notifyListeners();
-    });
+    KnittingPattern pattern = await _repository.loadPattern(patternId);
+    _model = _model.copyWith(
+      knittingPattern: pattern,
+    );
+    notifyListeners();
   }
 
   void setPatternName(String name) {

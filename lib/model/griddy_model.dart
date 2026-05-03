@@ -1,10 +1,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/model/pattern_info.dart';
-import 'package:knitty_griddy/utils/constants.dart';
 import 'package:knitty_griddy/model/app_state.dart';
 import 'package:knitty_griddy/model/knitting_pattern.dart';
-import 'package:knitty_griddy/model/pattern_settings.dart';
 import 'package:knitty_griddy/controls/stitchrepo/stitch_definition.dart';
 
 @immutable
@@ -16,11 +14,7 @@ class GriddyModel {
   final List<PatternInfo> patternInfos;
 
   const GriddyModel({
-    this.knittingPattern = const KnittingPattern(
-      id: 'default',
-      name: 'default',
-      patternSettings: PatternSettings(rows: defaultGridRows, columns: defaultGridColumns, gridType: GridType.flat),
-    ),
+    this.knittingPattern = placeholderPattern,
     this.appState = const AppState(),
     this.customStitches = const[],
     this.patternInfos = const[],
