@@ -9,6 +9,13 @@ import 'package:knitty_griddy/model/stitch_cell.dart';
 import 'package:knitty_griddy/controls/stitchrepo/stitch_definition.dart';
 import 'package:knitty_griddy/controls/stitchrepo/stitch_repository.dart';
 
+const String placeholderPatternId = '_placeholder_pattern_id_';
+const KnittingPattern placeholderPattern = KnittingPattern(
+  id: placeholderPatternId,
+  name: placeholderPatternId,
+  patternSettings: PatternSettings(rows: defaultGridRows, columns: defaultGridColumns, gridType: GridType.flat),
+);
+
 @immutable
 class KnittingPattern {
 

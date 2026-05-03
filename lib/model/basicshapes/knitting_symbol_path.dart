@@ -6,6 +6,8 @@ import 'package:knitty_griddy/model/knitting_symbol_part.dart';
 import 'package:knitty_griddy/controls/stitchrepo/stitch_definition.dart';
 import 'package:path_drawing/path_drawing.dart';
 
+const String knittingSymbolPathType = 'path';
+
 class KnittingSymbolPath extends KnittingSymbolPart {
 
   static const bool _defaultFilled = false;
@@ -46,6 +48,7 @@ class KnittingSymbolPath extends KnittingSymbolPart {
   @override
   Map<String, Object> toJson() {
     return {
+      'type': knittingSymbolPathType,
       'name': name,
       'path': path,
       'scale': {'x': scale.dx, 'y': scale.dy},
@@ -60,8 +63,8 @@ class KnittingSymbolPath extends KnittingSymbolPart {
     return KnittingSymbolPath(
       name: json['name'] as String,
       path: json['path'] as String,
-      scale: Offset(json['x'] as double, json['y'] as double),
-      translation: Offset(json['x'] as double, json['y'] as double),
+      scale: Offset(json['scale']['x'] as double, json['scale']['y'] as double),
+      translation: Offset(json['translation']['x'] as double, json['translation']['y'] as double),
       rotationRad: json['rotationrad'] as double,
       filled: json['filled'] as bool,
       strokeWidth: json['strokewidth'] as double,

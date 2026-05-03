@@ -5,6 +5,8 @@ import 'package:knitty_griddy/model/knitting_symbol_part.dart';
 import 'package:knitty_griddy/controls/stitchrepo/stitch_definition.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 
+const String knittingSymbolCurveType = 'curve';
+
 class KnittingSymbolCurve extends KnittingSymbolPart {
 
   static const double _defaultLength = 20;
@@ -85,6 +87,7 @@ class KnittingSymbolCurve extends KnittingSymbolPart {
   @override
   Map<String, Object> toJson() {
     return {
+      'type': knittingSymbolCurveType,
       'name': name,
       'length': length,
       'amplitude': amplitude,
@@ -105,8 +108,8 @@ class KnittingSymbolCurve extends KnittingSymbolPart {
       amplitude: json['amplitude'] as double,
       slant: json['slant'] as double,
       closed: json['closed'] as bool,
-      scale: Offset(json['x'] as double, json['y'] as double),
-      translation: Offset(json['x'] as double, json['y'] as double),
+      scale: Offset(json['scale']['x'] as double, json['scale']['y'] as double),
+      translation: Offset(json['translation']['x'] as double, json['translation']['y'] as double),
       rotationRad: json['rotationrad'] as double,
       filled: json['filled'] as bool,
       strokeWidth: json['strokewidth'] as double,

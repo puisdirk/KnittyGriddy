@@ -9,7 +9,7 @@ import 'package:knitty_griddy/utils/app_platform_ext.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  final ModelRepository repo = AppPlatformExt.isWeb ? InMemoryModelRepository() : AppPlatformExt.isDesktop ? const JsonFilesModelRepository() : const NoOpModelRepository();
+  final ModelRepository repo = AppPlatformExt.isWeb ? InMemoryModelRepository() : AppPlatformExt.isDesktop ?  JsonFilesModelRepository() : const NoOpModelRepository();
 
   runApp(
     KnittyGriddyApp(

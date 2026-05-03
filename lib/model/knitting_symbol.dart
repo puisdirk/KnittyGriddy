@@ -64,19 +64,19 @@ class KnittingSymbol {
     List<Map<String, dynamic>> partObjects = (json['parts'] as List).map((o) => o as Map<String, dynamic>).toList();
     for (Map<String, dynamic> partObject in partObjects) {
       switch (partObject['type'] as String) {
-        case 'arc':
+        case knittingSymbolArcType:
           parts.add(KnittingSymbolArc.fromJson(partObject));
           break;
-        case 'curve':
+        case knittingSymbolCurveType:
           parts.add(KnittingSymbolCurve.fromJson(partObject));
           break;
-        case 'path':
+        case knittingSymbolPathType:
           parts.add(KnittingSymbolPath.fromJson(partObject));
           break;
-        case 'rectangle':
+        case knittingSymbolRectangleType:
           parts.add(KnittingSymbolRectangle.fromJson(partObject));
           break;
-        case 'text':
+        case knittingSymbolTextType:
           parts.add(KnittingSymbolText.fromJson(partObject));
           break;
         default:
@@ -87,8 +87,8 @@ class KnittingSymbol {
     return KnittingSymbol(
       name: json['name'], 
       parts: parts,
-      scale: Offset(json['scale'].dx as double, json['scale'].dy as double),
-      translation: Offset(json['translation'].dx as double, json['translation'].dy as double),
+      scale: Offset(json['scale']['x'] as double, json['scale']['y'] as double),
+      translation: Offset(json['translation']['x'] as double, json['translation']['y'] as double),
       rotationRad: json['rotationrad'] as double,
     );
   }
