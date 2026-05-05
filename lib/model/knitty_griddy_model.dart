@@ -73,6 +73,9 @@ class KnittyGriddyModel extends ChangeNotifier {
         _model = _model.copyWith(
           customStitches: stitches
         );
+
+        StitchRepository.setCustomStitches(_model.customStitches);
+
         notifyListeners();
       });
     });
@@ -177,11 +180,11 @@ class KnittyGriddyModel extends ChangeNotifier {
 
   Map<String, List<StitchDefinition>> selectStitchDefinitionsPerCategory(String filter) {
     if (filter.isEmpty) {
-      return StitchRepository.getDefinitionsPerCategory(_model.customStitches);
+      return StitchRepository.getDefinitionsPerCategory();
     }
 
     Map<String, List<StitchDefinition>> filtered = {};
-    StitchRepository.getDefinitionsPerCategory(_model.customStitches).forEach((key, value) {
+    StitchRepository.getDefinitionsPerCategory().forEach((key, value) {
       if (value.any((sd) => sd.passesFilter(filter))) {
         filtered[key] = value.where((sd) => sd.passesFilter(filter)).toList();
       }
@@ -240,7 +243,7 @@ class KnittyGriddyModel extends ChangeNotifier {
     for (int columnOffset = 0; columnOffset < stitchDefinition.columns; columnOffset++) {
       newStitchCells.add(
         stitchAt(column + columnOffset, row).copyWith(
-          stitchDefinition: stitchDefinition, stitchDefinitionColumn: columnOffset));
+          stitchDefinitionId: stitchDefinition.id, stitchDefinitionColumn: columnOffset));
     }
 
     // Calculate which cell need to be cleared
@@ -248,13 +251,14 @@ class KnittyGriddyModel extends ChangeNotifier {
     for (StitchCell newCell in newStitchCells) {
       // If the cell under the new stitch is a multi-column stitch, it will be broken
       StitchCell oldCell = stitchAt(newCell.column, newCell.row);
-      if (oldCell.stitchDefinition.columns > 1) {
+      StitchDefinition oldDef = StitchRepository.definitionById(oldCell.stitchDefinitionId);
+      if (oldDef.columns > 1) {
         // Clear the broken cells
         int oldCellStart = oldCell.column - (oldCell.stitchDefinitionColumn);
-        for (int clearIdx = 0; clearIdx < oldCell.stitchDefinition.columns; clearIdx++) {
+        for (int clearIdx = 0; clearIdx < oldDef.columns; clearIdx++) {
           // don't clear if this is already a new cell
           if (!newStitchCells.any((c) => c.row == oldCell.row && c.column == oldCellStart + clearIdx)) {
-            clearedCells.add(StitchCell(row: oldCell.row, column: oldCellStart + clearIdx, stitchDefinition: StitchRepository.noStitch, colour: oldCell.colour));
+            clearedCells.add(StitchCell(row: oldCell.row, column: oldCellStart + clearIdx, stitchDefinitionId: StitchRepository.noStitch.id, colour: oldCell.colour));
           }
         }
       }
@@ -355,9 +359,9 @@ class KnittyGriddyModel extends ChangeNotifier {
   void insertColumn(int beforeColumn) {
     // Find multi-column stitches that will get broken
     List<StitchCell> brokenStitches = _model.knittingPattern.stitches.where((stitch) =>
-      stitch.stitchDefinition.columns > 1 && 
+      StitchRepository.definitionById(stitch.stitchDefinitionId).columns > 1 && 
       beforeColumn > stitch.column - (stitch.stitchDefinitionColumn - 1) && 
-      beforeColumn < (stitch.column - (stitch.stitchDefinitionColumn - 1)) + stitch.stitchDefinition.columns
+      beforeColumn < (stitch.column - (stitch.stitchDefinitionColumn - 1)) + StitchRepository.definitionById(stitch.stitchDefinitionId).columns
     ).toList();
 
     // Clear these broken stitches
@@ -365,7 +369,7 @@ class KnittyGriddyModel extends ChangeNotifier {
       knittingPattern: _model.knittingPattern.copyWith(
         stitches: _model.knittingPattern.stitches.map((stitch) => 
           brokenStitches.contains(stitch) ? stitch.copyWith(
-            stitchDefinition: StitchRepository.noStitch, stitchDefinitionColumn: 1) : stitch
+            stitchDefinitionId: StitchRepository.noStitch.id, stitchDefinitionColumn: 1) : stitch
         ).toList()
       )
     );
@@ -393,7 +397,7 @@ class KnittyGriddyModel extends ChangeNotifier {
         StitchCell(
           row: idx, 
           column: beforeColumn, 
-          stitchDefinition: StitchRepository.noStitch, 
+          stitchDefinitionId: StitchRepository.noStitch.id, 
           colour: _model.knittingPattern.mainColour
         )
     ));
@@ -427,7 +431,7 @@ class KnittyGriddyModel extends ChangeNotifier {
           StitchCell(
             row: beforeRow, 
             column: idx, 
-            stitchDefinition: StitchRepository.noStitch, 
+            stitchDefinitionId: StitchRepository.noStitch.id, 
             colour: _model.knittingPattern.mainColour
           )
       )
@@ -442,9 +446,9 @@ class KnittyGriddyModel extends ChangeNotifier {
   void deleteColumn(int column) {
     // Find multi-column stitches that will get broken
     List<StitchCell> brokenStitches = _model.knittingPattern.stitches.where((stitch) =>
-      stitch.stitchDefinition.columns > 1 && 
+      StitchRepository.definitionById(stitch.stitchDefinitionId).columns > 1 && 
       column >= stitch.column - (stitch.stitchDefinitionColumn - 1) && 
-      column < (stitch.column - (stitch.stitchDefinitionColumn - 1)) + stitch.stitchDefinition.columns
+      column < (stitch.column - (stitch.stitchDefinitionColumn - 1)) + StitchRepository.definitionById(stitch.stitchDefinitionId).columns
     ).toList();
 
     // Clear these broken stitches
@@ -452,7 +456,7 @@ class KnittyGriddyModel extends ChangeNotifier {
       knittingPattern: _model.knittingPattern.copyWith(
         stitches: _model.knittingPattern.stitches.map((stitch) => 
           brokenStitches.contains(stitch) ? stitch.copyWith(
-            stitchDefinition: StitchRepository.noStitch, stitchDefinitionColumn: 1) : stitch
+            stitchDefinitionId: StitchRepository.noStitch.id, stitchDefinitionColumn: 1) : stitch
         ).toList()
       )
     );
@@ -547,7 +551,7 @@ class KnittyGriddyModel extends ChangeNotifier {
     Set<CellAddress> affectedAddresses = {};
 
     for (StitchCell cell in _model.knittingPattern.stitches) {
-      if (cell.stitchDefinition == stitchDefinition) {
+      if (cell.stitchDefinitionId == stitchDefinition.id) {
         CellAddress address = CellAddress(column: cell.column, row: cell.row);
         affectedAddresses.add(address);
         if (selection.selectedCells.contains(address)) {
@@ -786,11 +790,13 @@ class KnittyGriddyModel extends ChangeNotifier {
   // *************************** Stitch repo ************************************************
 
   StitchDefinition addCustomStitch() {
-    StitchDefinition sd = const StitchDefinition(name: '', abbreviation: '', symbols: [KnittingSymbol(name: '', parts: [KnittingSymbolParts.blankPart])], custom: true);
+    StitchDefinition sd = StitchDefinition(id: const UuidV4Gen().get(), name: '', abbreviation: '', symbols: const [KnittingSymbol(name: '', parts: [KnittingSymbolParts.blankPart])], custom: true);
 
     _model = _model.copyWith(
       customStitches: [..._model.customStitches, sd]
     );
+
+    StitchRepository.setCustomStitches(_model.customStitches);
 
     _storeForUndo();
     notifyListeners();
@@ -807,6 +813,8 @@ class KnittyGriddyModel extends ChangeNotifier {
       customStitches: _model.customStitches.map((cs) => cs != olddef ? cs : newdef).toList()
     );
 
+    StitchRepository.setCustomStitches(_model.customStitches);
+
     // the custom stitches are not part of the knittingpattern, so no undo here
     notifyListeners();
   } 
@@ -815,6 +823,8 @@ class KnittyGriddyModel extends ChangeNotifier {
     _model = _model.copyWith(
       customStitches: _model.customStitches.where((sd) => sd != stitchDefinition).toList()
     );
+
+    StitchRepository.setCustomStitches(_model.customStitches);
 
     notifyListeners();
   }
