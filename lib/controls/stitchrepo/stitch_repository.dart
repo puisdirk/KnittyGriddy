@@ -11,7 +11,17 @@ import 'package:knitty_griddy/controls/stitchrepo/stitch_definition.dart';
 class StitchRepository {
   StitchRepository._();
 
+  // Convenience copy of the customstitches in the model
+  static List<StitchDefinition> _customStitches = [];
+  static void setCustomStitches(List<StitchDefinition> customStitches) {
+    _customStitches = List.from(customStitches);
+  }
+  static List<StitchDefinition> get customStitches => List.from(_customStitches);
+
+  static const String noStitchId = '184026cb-4cf2-4d70-959d-90acb2e7182b';
+
   static const StitchDefinition noStitch = StitchDefinition(
+    id: noStitchId,
     name: 'No stitch',
     abbreviation: '',
     symbols: [
@@ -66,6 +76,7 @@ class StitchRepository {
   );
   
   static const StitchDefinition knit = StitchDefinition(
+    id: '323aef80-0205-4479-b6bc-70b31e931c7a',
     name: 'Knit', 
     abbreviation: 'k', 
     symbols: [
@@ -84,6 +95,7 @@ class StitchRepository {
   );
 
   static const StitchDefinition purl = StitchDefinition(
+    id: 'dce04020-2ba0-4c18-bb4e-4128f445d341',
     name: 'Purl',
     abbreviation: 'p',
     symbols: [
@@ -106,6 +118,7 @@ class StitchRepository {
     noStitch, knit, 
 
     StitchDefinition(
+      id: 'dacf321a-af4f-4914-84d4-ab0dad37001c',
       name: 'Knit',
       abbreviation: 'k',
       symbols: [
@@ -119,6 +132,7 @@ class StitchRepository {
     purl,
 
     StitchDefinition(
+      id: '9176acea-1a2c-4941-ab6f-09ca3c35adea',
       name: 'Purl',
       abbreviation: 'p',
       symbols: [
@@ -135,6 +149,7 @@ class StitchRepository {
     ),
 
     StitchDefinition(
+      id: 'e0952df8-8d5d-4b12-8e15-b1e9c774c854',
       name: 'Slip 1',
       abbreviation: 'Sl1',
       symbols: [
@@ -168,6 +183,7 @@ class StitchRepository {
     ),
 
     StitchDefinition(
+      id: '16ad6af6-91e5-4dca-b80f-ad32a3e4142d',
       name: 'Slip 1 wyb',
       abbreviation: 'Sl1wyb',
       symbols: [
@@ -205,6 +221,7 @@ class StitchRepository {
       category: 'General',
     ),
     StitchDefinition(
+      id: '1168501d-40d8-4a95-b43e-c82faab7ccea',
       name: 'KTBL',
       abbreviation: 'ktbl',
       symbols: [
@@ -229,6 +246,7 @@ class StitchRepository {
       category: 'General',
     ),
     StitchDefinition(
+      id: '0679be71-096e-4c06-b88a-ac665922ec13',
       name: 'KTBL',
       abbreviation: 'ktbl',
       symbols: [
@@ -258,6 +276,7 @@ class StitchRepository {
       category: 'General',
     ),
     StitchDefinition(
+      id: '41f494fc-3abf-493f-a979-c5f26c59bbf6',
       name: 'Cast on',
       abbreviation: 'CO',
       symbols: [
@@ -296,6 +315,7 @@ class StitchRepository {
       category: 'General',
     ),
     StitchDefinition(
+      id: 'c8ec2cbd-6c9b-44ae-9afc-d014ad62325a',
       name: 'Bind off',
       abbreviation: 'BO',
       symbols: [
@@ -322,6 +342,7 @@ class StitchRepository {
     /*********************** DECREASES ************************/
 
     StitchDefinition(
+      id: '04a26e4a-bb77-4435-ac26-7f54119d2558',
       name: 'K2tog', 
       abbreviation: 'k2tog', 
       symbols: [
@@ -340,6 +361,7 @@ class StitchRepository {
       category: 'Decrease',
     ),
     StitchDefinition(
+      id: 'feb6b120-a184-4171-87e5-0eef97a755ae',
       name: 'K3tog', 
       abbreviation: 'k3tog', 
       symbols: [
@@ -365,6 +387,7 @@ class StitchRepository {
       category: 'Decrease',
     ),
     StitchDefinition(
+      id: '8e2f5d50-3a7b-462b-8a35-c5f3ec9a2b2e',
       name: 'K3tog',
       abbreviation: 'k3tog',
       symbols: [
@@ -397,6 +420,7 @@ class StitchRepository {
     ),
 
     StitchDefinition(
+      id: 'd4e68fad-547d-4c4f-81e7-dafcb3747743',
       name: 'P2tog', 
       abbreviation: 'p2tog', 
       symbols: [
@@ -423,6 +447,7 @@ class StitchRepository {
       category: 'Decrease',
     ),
     StitchDefinition(
+      id: '45b7855c-be58-42ee-b3c9-15cca0e19a91',
       name: 'P3tog', 
       abbreviation: 'p3tog', 
       symbols: [
@@ -454,6 +479,7 @@ class StitchRepository {
       category: 'Decrease',
     ),
     StitchDefinition(
+      id: '02e02869-ec36-4f0c-9172-1ce3cabbbcbf',
       name: 'P3tog',
       abbreviation: 'p3tog',
       symbols: [
@@ -492,6 +518,7 @@ class StitchRepository {
     ),
 
     StitchDefinition(
+      id: '8d0b7ae8-d3c6-4020-81a1-eaae27fb6fa8',
       name: 'SSK', 
       abbreviation: 'ssk', 
       symbols: [
@@ -511,6 +538,7 @@ class StitchRepository {
       category: 'Decrease',
     ),
     StitchDefinition(
+      id: '6f4e4eaa-6762-411e-b73c-99ab2010f512',
       name: 'SSP', 
       abbreviation: 'ssp', 
       symbols: [
@@ -536,6 +564,7 @@ class StitchRepository {
       category: 'Decrease',
     ),
     StitchDefinition(
+      id: '83f54093-ccb1-4ec3-8eca-000050231a8f',
       name: 'SK2P',
       abbreviation: 'sk2p',
       symbols: [
@@ -568,6 +597,7 @@ class StitchRepository {
       category: 'Decrease',
     ),
     StitchDefinition(
+      id: '6b8dd2bb-32a0-4e40-b2ff-3fb65f3df71c',
       name: 'SSSP',
       abbreviation: 'sssp',
       symbols: [
@@ -607,6 +637,7 @@ class StitchRepository {
     ),
 
     StitchDefinition(
+      id: '574bb150-5787-4a84-8427-3c13fe0b08e4',
       name: 'Dec 5-to-1',
       abbreviation: 'dec5to1',
       symbols: [
@@ -649,6 +680,7 @@ class StitchRepository {
     ),
 
     StitchDefinition(
+      id: '4be354d8-1966-4144-b404-dfeebb8e0824',
       name: 'Dec 4-to-1',
       abbreviation: 'dec4to1',
       symbols: [
@@ -691,6 +723,7 @@ class StitchRepository {
     ),
 
     StitchDefinition(
+      id: '6884ed18-2542-4457-9796-7d34c7c88fc0',
       name: 'Dec 4-to-1 L',
       abbreviation: 'dec4to1l',
       symbols: [
@@ -723,6 +756,7 @@ class StitchRepository {
       category: 'Decrease',
     ),
     StitchDefinition(
+      id: 'c2dd16cc-e97a-4d33-bd5f-4828fc876acd',
       name: 'Dec 4-to-1 R',
       abbreviation: 'dec4to1r',
       symbols: [
@@ -762,6 +796,7 @@ class StitchRepository {
     //*************************** INCREASES *****************************/
 
     StitchDefinition(
+      id: '8f4eb492-bf33-412b-b624-fbac757dc7cd',
       name: 'S2KP2',
       abbreviation: 's2kp2',
       symbols: [
@@ -801,6 +836,7 @@ class StitchRepository {
     ),
 
     StitchDefinition(
+      id: 'cb193481-4a5d-4322-8e1c-d45cdf978f9e',
       name: 'YO', 
       abbreviation: 'yo', 
       symbols: [
@@ -822,6 +858,7 @@ class StitchRepository {
     ),
 
     StitchDefinition(
+      id: '5d7df207-afc0-4a1b-befc-f9da29492922',
       name: 'K1FB',
       abbreviation: 'k1fb',
       symbols: [
@@ -847,6 +884,7 @@ class StitchRepository {
     ),
 
     StitchDefinition(
+      id: 'f2a94def-b85b-41a3-9fbf-17cf3a2e7dd7',
       name: 'M1',
       abbreviation: 'M1',
       symbols: [
@@ -863,6 +901,7 @@ class StitchRepository {
       category: 'Increase',
     ),
     StitchDefinition(
+      id: 'c6ee0546-002a-4229-b914-913f0c50f2ee',
       name: 'M1L',
       abbreviation: 'ML',
       symbols: [
@@ -879,6 +918,7 @@ class StitchRepository {
       category: 'Increase',
     ),
     StitchDefinition(
+      id: '119d9898-0a27-43cd-86b1-5b62a0dcd279',
       name: 'M1R',
       abbreviation: 'MR',
       symbols: [
@@ -896,6 +936,7 @@ class StitchRepository {
     ),
 
     StitchDefinition(
+      id: '3fb85996-212b-44e5-a7d5-ca3681c9fbfc',
       name: 'M1R lifted',
       abbreviation: 'M1Rl',
       symbols: [
@@ -927,6 +968,7 @@ class StitchRepository {
     ),
 
     StitchDefinition(
+      id: '26300080-ec29-447f-a9ad-0035fca3bd0f',
       name: 'M1L lifted',
       abbreviation: 'M1Ll',
       symbols: [
@@ -960,6 +1002,7 @@ class StitchRepository {
     ),
 
     StitchDefinition(
+      id: '9dace639-99f5-4384-b060-42cda86d93d5',
       name: 'Inc 1-to-3',
       abbreviation: 'inc1to3',
       symbols: [
@@ -997,6 +1040,7 @@ class StitchRepository {
       category: 'Increase',
     ),
     StitchDefinition(
+      id: '8fc836b4-aa12-4e83-908a-9c76357ec82a',
       name: 'Inc 1-to-4',
       abbreviation: 'inc1to4',
       symbols: [
@@ -1036,6 +1080,7 @@ class StitchRepository {
       category: 'Increase',
     ),
     StitchDefinition(
+      id: 'aa3ec765-57ab-46c1-b1e7-bdf0176b2386',
       name: 'Inc 1-to-5',
       abbreviation: 'inc1to5',
       symbols: [
@@ -1078,6 +1123,7 @@ class StitchRepository {
     /********************** Decorative **********************/
 
     StitchDefinition(
+      id: '3b0fe065-72c4-4deb-befe-4e27fe5fa357',
       name: 'Bobble',
       abbreviation: 'bobble',
       symbols: [
@@ -1098,6 +1144,7 @@ class StitchRepository {
     /********************** Elongated **********************/
 
     StitchDefinition(
+      id: 'dfc3ff3d-9ea7-4999-83fd-9dcc4bc61bf0',
       name: 'K1Wrap2',
       abbreviation: 'k1wrap2',
       symbols: [
@@ -1118,6 +1165,7 @@ class StitchRepository {
     /******************** Cables version 1 ***************/
 
     StitchDefinition(
+      id: '2493660d-820a-4a25-a01f-7056ca3794d5',
   name: '1/1 LC (LT)',
   abbreviation: '1/1lc',
   symbols: [KnittingSymbol(
@@ -1136,6 +1184,7 @@ class StitchRepository {
   description: 'sl 1 st onto cn, hold in front, k1, k1 from cn \nOR with right needle behind left needle, knit 2nd st tbl, knit first st, \ndrop both sts from left needle',),
 
     StitchDefinition(
+      id: '820e5952-6f3e-454d-8cbb-28dbd77e875b',
   name: '1/1 RC (RT)',
   abbreviation: '1/1rc',
   symbols: [KnittingSymbol(
@@ -1154,6 +1203,7 @@ class StitchRepository {
   description: 'sl 1 st onto cn, hold in back, k1, k1 from cn \nOR k2tog but do not drop sts from left needle, k1, \ndrop both sts from left needle',),
 
     StitchDefinition(
+      id: '11b17e56-fbca-4458-8ee2-de8e913b9c73',
   name: '1/1 LPC',
   abbreviation: '1/1lpc',
   symbols: [KnittingSymbol(
@@ -1174,6 +1224,7 @@ class StitchRepository {
   description: 'sl 1 st onto cn, hold in front, p1, k1 from cn',),
 
     StitchDefinition(
+      id: '1e62dc84-51a8-4c8e-b289-9a0e7d931e88',
   name: '1/1 RPC',
   abbreviation: '1/1rpc',
   symbols: [KnittingSymbol(
@@ -1194,6 +1245,7 @@ class StitchRepository {
   description: 'sl 1 st onto cn, hold in back, k1, p1 from cn',),
 
 StitchDefinition(
+  id: 'f46947bf-11de-4711-a194-ff139d45180a',
   name: '2/1 LC',
   abbreviation: '2/1lc',
   symbols: [KnittingSymbol(
@@ -1216,6 +1268,7 @@ StitchDefinition(
   description: 'sl 2 sts onto cn, hold in front, k1, k2 from cn',),
 
 StitchDefinition(
+  id: '6958d3fb-e5d9-4538-98e5-59882c688512',
   name: '2/1 RC',
   abbreviation: '2/1rc',
   symbols: [KnittingSymbol(
@@ -1238,6 +1291,7 @@ StitchDefinition(
   description: 'sl 1 st onto cn, hold in back, k2, k1 from cn',),
 
 StitchDefinition(
+  id: '830fa416-9c07-4d42-b6e3-73999ca23f5f',
   name: '2/1 LPC',
   abbreviation: '2/1lpc',
   symbols: [KnittingSymbol(
@@ -1264,6 +1318,7 @@ StitchDefinition(
   description: 'sl 2 sts onto cn, hold in front, p1, k2 from cn',),
 
 StitchDefinition(
+  id: 'd5c72b0f-00b2-474c-ba47-ce64588cfb1b',
   name: '2/1 RPC',
   abbreviation: '2/1rpc',
   symbols: [KnittingSymbol(
@@ -1290,6 +1345,7 @@ StitchDefinition(
   description: 'sl 1 st onto cn, hold in back, k2, p1 from cn',),
 
 StitchDefinition(
+  id: 'fca950ae-b86c-4b96-9604-7ca801810110',
   name: '2/2 LC',
   abbreviation: '2/2lc',
   symbols: [KnittingSymbol(
@@ -1318,6 +1374,7 @@ StitchDefinition(
   description: 'sl 2 sts onto cn, hold in front, k2, k2 from cn',),
 
 StitchDefinition(
+  id: '78b3a0da-51cb-4449-84cb-6f2efe80e8ea',
   name: '2/2 RC',
   abbreviation: '2/2rc',
   symbols: [KnittingSymbol(
@@ -1346,6 +1403,7 @@ StitchDefinition(
   description: 'sl 2 sts onto cn, hold in back, k2, k2 from cn',),
 
 StitchDefinition(
+  id: '4f1bb1a0-3785-4346-a5a9-73a363a337e0',
   name: '2/2 LPC',
   abbreviation: '2/2lpc',
   symbols: [KnittingSymbol(
@@ -1378,6 +1436,7 @@ StitchDefinition(
   description: 'sl 2 sts onto cn, hold in front, k2, p2 from cn',),
 
 StitchDefinition(
+  id: '6cfc33e2-c01d-4014-b560-4e7da9904259',
   name: '2/2 RPC',
   abbreviation: '2/2rpc',
   symbols: [KnittingSymbol(
@@ -1410,6 +1469,7 @@ StitchDefinition(
   description: 'sl 2 sts onto cn, hold in back, k2, p2 from cn',),
 
 StitchDefinition(
+  id: '1cf04560-ec9d-4804-87c1-761ea1b305de',
   name: '2/1/2 LPC',
   abbreviation: '212lpc',
   symbols: [KnittingSymbol(
@@ -1444,6 +1504,7 @@ StitchDefinition(
   description: 'sl 2 sts onto first cn and hold in front, sl 1 st onto 2nd cn and hold in back, \nk2, p1 from 2nd cn, k2 from first cn',),
 
     StitchDefinition(
+      id: 'bbd486b5-4274-4782-bbd5-f7b4048623ac',
       name: '2/1/2 RPC',
       abbreviation: '212rpc',
       symbols: [
@@ -1500,6 +1561,7 @@ StitchDefinition(
     /*********************** Cables v2 **********************/
     
     StitchDefinition(
+      id: '7e7b962e-d536-41db-b833-f23b161ae297',
   name: '2-st LC (LT)',
   abbreviation: '2lc',
   symbols: [KnittingSymbol(
@@ -1514,6 +1576,7 @@ StitchDefinition(
   description: 'Sl 1 st to cn and hold to front, k1, k1 from cn \nOR with right needle behind left needle, knit 2nd st tbl, knit first st, \ndrop both sts from left needle',),
     
     StitchDefinition(
+      id: '10c8aae3-649d-45db-a2d9-fb71d99611b6',
   name: '2-st RC (RT)',
   abbreviation: '2rc',
   symbols: [KnittingSymbol(
@@ -1527,6 +1590,7 @@ StitchDefinition(
   name: 'rectangle',height: 3,width: 43.8,translation: Offset(-1.1, -8.6),rotationRad: -0.4188790204786391,), ],), ],category: 'Cables v2',description: 'Sl 1 st to cn and hold to back, k1, k1 from cn \nOR k2tog but do not drop sts from left needle, k1, \ndrop both sts from left needle',),
 
 StitchDefinition(
+  id: '1dcd13ed-8302-4932-96f5-6757ed68fff8',
   name: '2-st LPC',
   abbreviation: '2lpc',
   symbols: [KnittingSymbol(
@@ -1542,6 +1606,7 @@ StitchDefinition(
   description: 'Sl 1 st to cn and hold to front, k1, p1 from cn',),
 
 StitchDefinition(
+  id: '78866ac8-c32a-43f2-ab44-390255910c05',
   name: '2-st RPC',
   abbreviation: '2rpc',
   symbols: [KnittingSymbol(
@@ -1557,6 +1622,7 @@ StitchDefinition(
   description: 'Sl 1 st to cn and hold to back, k1, p1 from cn',),
 
 StitchDefinition(
+  id: '94e210e8-ef2e-45a6-90b0-739a2ec1c5cd',
   name: '3-st LC',
   abbreviation: '3lc',
   symbols: [KnittingSymbol(
@@ -1575,6 +1641,7 @@ StitchDefinition(
   description: 'Sl 1 st to cn and hold to front, k2, k1 from cn',),
 
 StitchDefinition(
+  id: 'ce508e41-e486-4a9c-8625-470494aaad71',
   name: '3-st RC',
   abbreviation: '3rc',
   symbols: [KnittingSymbol(
@@ -1593,6 +1660,7 @@ StitchDefinition(
   description: 'Sl 1 st to cn and hold to back, k2, k1 from cn',),
 
 StitchDefinition(
+  id: '16bcc97c-7975-4459-b7fa-dd11ce60c047',
   name: '3-st LPC',
   abbreviation: '3lpc',
   symbols: [KnittingSymbol(
@@ -1612,6 +1680,7 @@ StitchDefinition(
   description: 'Sl 1 st to cn, hold to front, k2, p1 from cn',),
 
 StitchDefinition(
+  id: 'da985f13-94b8-4f67-9ab9-3e96ecd89f55',
   name: '3-st RPC',
   abbreviation: '3rpc',
   symbols: [KnittingSymbol(
@@ -1631,6 +1700,7 @@ StitchDefinition(
   description: 'Sl 1 st to cn, hold to back, k2, p1 from cn',),
 
 StitchDefinition(
+  id: '4e609c72-7da7-47e9-95ed-5924aadc9554',
   name: '4-st LC',
   abbreviation: '4lc',
   symbols: [KnittingSymbol(
@@ -1655,6 +1725,7 @@ StitchDefinition(
   description: 'Sl 2 sts to cn and hold to front, k2, k2 from cn',),
 
 StitchDefinition(
+  id: 'caba3e0f-fd8c-41d9-9718-751a0aa4bc88',
   name: '4-st RC',
   abbreviation: '4rc',
   symbols: [KnittingSymbol(
@@ -1679,6 +1750,7 @@ StitchDefinition(
   description: 'Sl 2 sts to cn and hold to back, k2, k2 from cn',),
 
 StitchDefinition(
+  id: '102bcabb-c337-47b2-b233-3561a5b8df98',
   name: '4-st LPC',
   abbreviation: '4lpc',
   symbols: [KnittingSymbol(
@@ -1705,6 +1777,7 @@ StitchDefinition(
   description: 'Sl 2 sts to cn and hold to front, p2, k2 from cn',),
 
 StitchDefinition(
+  id: 'bcddd392-7a66-4258-bb33-ce13ae92264d',
   name: '4-st RPC',
   abbreviation: '4rpc',
   symbols: [KnittingSymbol(
@@ -1731,6 +1804,7 @@ StitchDefinition(
   description: 'Sl 2 sts to cn and hold to back, k2, p2 from cn',),
 
 StitchDefinition(
+  id: 'd96ab4c3-1804-4fc8-9ad3-d70ed7f486fd',
   name: '5-st LPC',
   abbreviation: '5lpc',
   symbols: [KnittingSymbol(
@@ -1759,6 +1833,7 @@ StitchDefinition(
   description: 'Sl 2 sts to cn, hold to front, sl 1 st to second cn, hold to back, \nk2, p1 from back cn, k2 from front cn',),
 
 StitchDefinition(
+  id: 'ffd39649-1c31-48eb-81f5-5b6ac56c665d',
   name: '5-st RPC',
   abbreviation: '5rpc',
   symbols: [KnittingSymbol(
@@ -1789,7 +1864,7 @@ StitchDefinition(
 
   ];
 
-  static Map<String, List<StitchDefinition>> getDefinitionsPerCategory(List<StitchDefinition> customStitches) {
+  static Map<String, List<StitchDefinition>> getDefinitionsPerCategory() {
     // TODO: this should be set once only when loading a stitches set
     Map<String, List<StitchDefinition>> defs = {};
     for (StitchDefinition def in definitions) {
@@ -1799,10 +1874,17 @@ StitchDefinition(
       defs[def.category]!.add(def);
     }
 
-    if (customStitches.isNotEmpty) {
-      defs['Custom'] = [... customStitches];
+    if (_customStitches.isNotEmpty) {
+      defs['Custom'] = [... _customStitches];
     }
 
     return defs;
+  }
+
+  static StitchDefinition definitionById(String id) {
+    return definitions.firstWhere(
+      (def) => def.id == id, 
+      orElse: () => _customStitches.firstWhere(
+        (cs) => cs.id == id, orElse: () => noStitch));
   }
 }

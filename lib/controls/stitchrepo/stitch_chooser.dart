@@ -46,7 +46,7 @@ class _StitchChooserState extends State<StitchChooser> {
   Widget createCategory(KnittingPattern pattern, MapEntry<String, List<StitchDefinition>> stitchesInCategory) {
     List<Widget> cards = [];
     for (StitchDefinition sd in stitchesInCategory.value) {
-      bool stitchInPattern = pattern.stitches.any((cell) => cell.stitchDefinition == sd);
+      bool stitchInPattern = pattern.stitches.any((cell) => cell.stitchDefinitionId == sd.id);
       bool stitchSelected = pattern.usedStitches.contains(sd);
       double cardWidth = 
         _spacerwidth + 
@@ -61,7 +61,7 @@ class _StitchChooserState extends State<StitchChooser> {
           width: cardWidth, 
           height: 50,
           child: Card(
-            color: stitchSelected ? Colors.blue.withAlpha(60) : stitchInPattern ? Colors.purple.withAlpha(60) : null,
+            color: stitchSelected ? Colors.blue.withAlpha(60) : stitchInPattern ? Colors.purple.shade100.withAlpha(60) : null,
             child: InkWell(
               borderRadius: const BorderRadius.all(Radius.circular(10)),
               splashColor: Colors.blue.withAlpha(30),
@@ -72,7 +72,7 @@ class _StitchChooserState extends State<StitchChooser> {
                   StitchIcon(stitchDefinition: sd, iconSize: _iconWidth, iconColor: stitchInPattern || stitchSelected ? Colors.white : null,),
                   const SizedBox(width: _spacerwidth,),
                   Text(sd.name,
-                    style: sd == StitchRepository.noStitch || stitchInPattern || stitchSelected ?
+                    style: stitchInPattern || stitchSelected ?
                       Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.white) : 
                       Theme.of(context).textTheme.bodyMedium!
                   ),

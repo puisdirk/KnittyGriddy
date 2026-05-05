@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:knitty_griddy/controls/stitchrepo/stitch_repository.dart';
 import 'package:knitty_griddy/utils/color_utilities.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 import 'package:knitty_griddy/model/knitty_griddy_model.dart';
@@ -46,7 +47,7 @@ class StitchCellControl extends StatelessWidget {
                 height: stitchCellHeight,
                 width: stitchCellWidth,
                   child: KnittingSymbolControl(
-                    knittingSymbol: stitchCell.stitchDefinition.symbolAt(stitchCell.stitchDefinitionColumn),
+                    knittingSymbol: StitchRepository.definitionById(stitchCell.stitchDefinitionId).symbolAt(stitchCell.stitchDefinitionColumn),
                     symbolColor: ColorUtilities.contrastingFromColor(stitchCell.colour.color),
                   )
               ),

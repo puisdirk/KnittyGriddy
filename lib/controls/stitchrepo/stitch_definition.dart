@@ -7,6 +7,7 @@ import 'package:knitty_griddy/model/knitting_symbol_parts.dart';
 
 @immutable
 class StitchDefinition {
+  final String id;
   final String name;
   final String abbreviation;
   // Note: each entry is a part (column). Within each part, we allow overlaying 
@@ -20,6 +21,7 @@ class StitchDefinition {
   final bool custom;
 
   const StitchDefinition({
+    required this.id,
     required this.name,
     required this.abbreviation,
     required this.symbols,
@@ -46,6 +48,7 @@ class StitchDefinition {
     bool? custom,
   }) {
     return StitchDefinition(
+      id: id,
       name: name?? this.name, 
       abbreviation: abbreviation?? this.abbreviation, 
       symbols: symbols?? this.symbols,
@@ -59,6 +62,7 @@ class StitchDefinition {
 
   Map<String, Object> toJson() {
     return {
+      'id': id,
       'name': name, 
       'abbreviation': abbreviation, 
       'symbols': symbols.map((s) => s.toJson()).toList(),
@@ -78,6 +82,7 @@ class StitchDefinition {
     }
 
     return StitchDefinition(
+      id: json['id'] as String,
       name: json['name'] as String, 
       abbreviation: json['abbreviation'] as String, 
       symbols: symbols,

@@ -13,33 +13,33 @@ class StitchCell {
 
   final int row;
   final int column;
-  final StitchDefinition stitchDefinition;
+  final String stitchDefinitionId;
   final int stitchDefinitionColumn;
   final NamedColour colour;
 
   const StitchCell({
     required this.row,
     required this.column,
-    required this.stitchDefinition,
+    required this.stitchDefinitionId,
     required this.colour,
     this.stitchDefinitionColumn = 0,
   });
 
   factory StitchCell.empty(int row, int column) {
-    return StitchCell(row: row, column: column, stitchDefinition: StitchRepository.noStitch, colour: defaultMainColor);
+    return StitchCell(row: row, column: column, stitchDefinitionId: StitchRepository.noStitch.id, colour: defaultMainColor);
   }
 
   StitchCell copyWith({
     int? row,
     int? column,
-    StitchDefinition? stitchDefinition,
+    String? stitchDefinitionId,
     NamedColour? colour,
     int? stitchDefinitionColumn,
   }) {
     return StitchCell(
       row: row?? this.row, 
       column: column?? this.column, 
-      stitchDefinition: stitchDefinition?? this.stitchDefinition,
+      stitchDefinitionId: stitchDefinitionId?? this.stitchDefinitionId,
       colour: colour?? this.colour,
       stitchDefinitionColumn: stitchDefinitionColumn?? this.stitchDefinitionColumn,
     );
@@ -49,7 +49,7 @@ class StitchCell {
     return {
       'row': row,
       'column': column,
-      'stitchdefinition': stitchDefinition.toJson(),
+      'stitchdefinitionId': stitchDefinitionId,
       'colour': colour.toJson(),
       'stitchdefinitioncolumn': stitchDefinitionColumn,
     };
@@ -59,7 +59,7 @@ class StitchCell {
     return StitchCell(
       row: json['row'] as int, 
       column: json['column'] as int, 
-      stitchDefinition: StitchDefinition.fromJson(json['stitchdefinition'] as Map<String, dynamic>), 
+      stitchDefinitionId: json['stitchdefinitionId'] as String, 
       colour: NamedColour.fromJson(json['colour'] as Map<String, dynamic>),
       stitchDefinitionColumn: json['stitchdefinitioncolumn'] as int,
     );
@@ -68,7 +68,7 @@ class StitchCell {
   @override
   int get hashCode => 
     row.hashCode ^ column.hashCode ^ 
-    stitchDefinition.hashCode ^ 
+    stitchDefinitionId.hashCode ^ 
     colour.hashCode ^
     stitchDefinitionColumn.hashCode;
 
@@ -78,7 +78,7 @@ class StitchCell {
     other is StitchCell &&
     row == other.row &&
     column == other.column &&
-    stitchDefinition == other.stitchDefinition &&
+    stitchDefinitionId == other.stitchDefinitionId &&
     colour == other.colour &&
     stitchDefinitionColumn == other.stitchDefinitionColumn;
   

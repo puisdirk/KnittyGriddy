@@ -33,7 +33,7 @@ class StitchesGrid extends StatelessWidget {
 
                 // Paint stitches or colours while moving the mouse
                 if (appState.mouseOption == MouseOption.painting) {
-                  if (appState.currentTool == Tool.stitch && stitchCell.stitchDefinition != appState.selectedStitch) {
+                  if (appState.currentTool == Tool.stitch && stitchCell.stitchDefinitionId != appState.selectedStitch?.id) {
                     Provider.of<KnittyGriddyModel>(context, listen: false).setStitch(stitchCell.row, stitchCell.column, appState.selectedStitch!);
                   } else if (appState.currentTool == Tool.colour && stitchCell.colour != appState.selectedColour) {
                     Provider.of<KnittyGriddyModel>(context, listen: false).setStitchColour(stitchCell.row, stitchCell.column, appState.selectedColour!);
@@ -45,7 +45,7 @@ class StitchesGrid extends StatelessWidget {
 
                 // Click to change stitch, colour, or selection
                 if (appState.mouseOption == MouseOption.singleclick) {
-                  if (appState.currentTool == Tool.stitch && stitchCell.stitchDefinition != appState.selectedStitch) {
+                  if (appState.currentTool == Tool.stitch && stitchCell.stitchDefinitionId != appState.selectedStitch?.id) {
                     Provider.of<KnittyGriddyModel>(context, listen: false).setStitch(stitchCell.row, stitchCell.column, appState.selectedStitch!);
                   } else if (appState.currentTool == Tool.colour && stitchCell.colour != appState.selectedColour) {
                     Provider.of<KnittyGriddyModel>(context, listen: false).setStitchColour(stitchCell.row, stitchCell.column, appState.selectedColour!);
@@ -59,7 +59,7 @@ class StitchesGrid extends StatelessWidget {
 
                 // Change initial stitch or colour when painting
                 if (appState.mouseOption == MouseOption.painting) {
-                  if (appState.currentTool == Tool.stitch && stitchCell.stitchDefinition != appState.selectedStitch) {
+                  if (appState.currentTool == Tool.stitch && stitchCell.stitchDefinitionId != appState.selectedStitch?.id) {
                     Provider.of<KnittyGriddyModel>(context, listen: false).setStitch(stitchCell.row, stitchCell.column, appState.selectedStitch!);
                   } else if (appState.currentTool == Tool.colour && stitchCell.colour != appState.selectedColour) {
                     Provider.of<KnittyGriddyModel>(context, listen: false).setStitchColour(stitchCell.row, stitchCell.column, appState.selectedColour!);

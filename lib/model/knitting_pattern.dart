@@ -127,7 +127,7 @@ class KnittingPattern {
   NamedColour get mainColour => usedColours.firstWhere((colour) => colour.isMainColor);
 
   bool isStitchUsedInPattern(StitchDefinition definition) =>
-    stitches.any((cell) => cell.stitchDefinition == definition);
+    stitches.any((cell) => cell.stitchDefinitionId == definition.id);
 
   KnittingPattern pruneUnusedStitches() {
     return copyWith(
