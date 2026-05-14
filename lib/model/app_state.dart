@@ -1,4 +1,5 @@
 
+import 'package:knitty_griddy/controls/stitchrepo/basic_stitches_set.dart';
 import 'package:knitty_griddy/model/named_colour.dart';
 import 'package:knitty_griddy/controls/stitchrepo/stitch_definition.dart';
 import 'package:knitty_griddy/controls/stitchrepo/stitch_repository.dart';
@@ -30,7 +31,7 @@ class AppState {
   final MouseOption mouseOption;
 
   const AppState({
-    this.selectedStitch = StitchRepository.noStitch,
+    this.selectedStitch = BasicStitchesSet.noStitch,
     this.selectedColour,
     this.mouseOption = MouseOption.singleclick,
   });

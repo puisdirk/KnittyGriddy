@@ -2,9 +2,11 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 
 import 'package:knitty_griddy/controls/stitchrepo/stitch_definition.dart';
+import 'package:knitty_griddy/controls/stitchrepo/stitches_set.dart';
 import 'package:knitty_griddy/model/knitting_pattern.dart';
 import 'package:knitty_griddy/model/pattern_info.dart';
 import 'package:knitty_griddy/storage/model_repository.dart';
@@ -67,7 +69,7 @@ class JsonFilesModelRepository implements ModelRepository {
           }
         }
       } catch (e) {
-        debugPrint('$e');
+        debugPrint('Error while loading patternInfos: $e');
       }
     }
 
@@ -84,7 +86,7 @@ class JsonFilesModelRepository implements ModelRepository {
       File infosFile =  File(p.join(appDirectoryPath!, 'patternInfos.json'));
       infosFile.writeAsStringSync(jsonString);
     } catch (e) {
-      debugPrint('$e');
+      debugPrint('Error while saving patternInfos: $e');
     }
   }
   
@@ -120,7 +122,7 @@ class JsonFilesModelRepository implements ModelRepository {
       File patternFile = File(p.join(appDirectoryPath!, '${pattern.id}.json'));
       patternFile.writeAsStringSync(jsonString);
     } catch (e) {
-      debugPrint('$e');
+      debugPrint('Error in savePattern: $e');
     }
   }
   
@@ -134,47 +136,86 @@ class JsonFilesModelRepository implements ModelRepository {
   }
 
   @override
-  Future<List<StitchDefinition>> loadCustomstitches() async {
+  Future<List<StitchesSet>> loadStitchSets() async {
     await _initAppDirectoryPath();
 
-    List<StitchDefinition> stitches = [];
+    List<StitchesSet> sets = [];
 
-    File customStitchesFile = File(p.join(appDirectoryPath!, 'customstitches.json'));
+    File stitchSetsFile = File(p.join(appDirectoryPath!, 'stitchSets.json'));
 
-    if (customStitchesFile.existsSync()) {
-      String jsonContents = customStitchesFile.readAsStringSync();
+    if (stitchSetsFile.existsSync()) {
+      String jsonContents = stitchSetsFile.readAsStringSync();
 
       try {
         Map<String, dynamic> jsonObject = jsonDecode(jsonContents);
 
-        if (jsonObject.containsKey('customstitches')) {
-          List<Map<String, dynamic>> stitchObjects = 
-            (jsonObject['customstitches'] as List).map((e) => e as Map<String, dynamic>).toList();
-          for (Map<String, dynamic> stitchObject in stitchObjects) {
-            stitches.add(StitchDefinition.fromJson(stitchObject));
+        if (jsonObject.containsKey('stitchSets')) {
+          List<Map<String, dynamic>> stitchSetObjects = 
+            (jsonObject['stitchSets'] as List).map((s) => s as Map<String, dynamic>).toList();
+          for (Map<String, dynamic> stitchSetObject in stitchSetObjects) {
+            sets.add(StitchesSet.fromJson(stitchSetObject));
           }
         }
-      } catch(e) {
-        debugPrint('$e');
+      } catch (e) {
+        debugPrint('Error while loading custom stitch sets: $e');
       }
     }
 
-    return stitches;
+    return sets;
   }
-  
+
   @override
-  Future<void> saveCustomstitches(List<StitchDefinition> stitches) async {
+  Future<void> saveStitchSets(List<StitchesSet> stitchSets) async {
     await _initAppDirectoryPath();
 
-    Map<String, Object> jsonObject = {'customstitches': stitches.map((s) => s.toJson()).toList()};
-
+    Map<String, Object> jsonObject = {'stitchSets': stitchSets.map((s) => s.toJson()).toList()};
     try {
       String jsonString = codec.encode(jsonObject);
-      File customStitchesFile = File(p.join(appDirectoryPath!, 'customstitches.json'));
-      customStitchesFile.writeAsStringSync(jsonString);
+      File stitchSetsFile = File(p.join(appDirectoryPath!, 'stitchSets.json'));
+      stitchSetsFile.writeAsStringSync(jsonString);
     } catch (e) {
-      debugPrint('$e');
+      debugPrint('Error while saving stitch sets: $e');
     }
+  }
+
+  @override
+  Future<void> exportStitchesSet(StitchesSet stitchSet) async {
+    Map<String, Object> jsonObject = stitchSet.toJson();
+
+    try {
+      String jsonString = jsonEncode(jsonObject);
+
+      await FilePicker.platform.saveFile(
+        dialogTitle: 'Where do you want to store the output?',
+        fileName: '${stitchSet.name}.sts',
+        bytes: utf8.encode(jsonString),
+      );
+    } catch(e) {
+      debugPrint('Error while exporting StitchesSet: $e');
+    }
+  }
+
+  @override
+  Future<StitchesSet?> importStitchesSet() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      dialogTitle: 'Load a stitches set (sts)',
+      allowMultiple: false,
+      allowedExtensions: ['sts'],
+      withData: true,
+    );
+
+    if (result != null && result.files.isNotEmpty) {
+      try {
+        String jsonString = utf8.decode(result.files.first.bytes!);
+        Map<String, dynamic> jsonObject = jsonDecode(jsonString);
+        StitchesSet stitchSet = StitchesSet.fromJson(jsonObject);
+        return stitchSet;
+      } catch (e) {
+        debugPrint('Error while importing stitches set: $e');
+      }
+    }
+
+    return null;
   }
 
 }

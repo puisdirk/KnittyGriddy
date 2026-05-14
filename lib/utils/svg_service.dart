@@ -22,7 +22,7 @@ class SvgService {
     for (StitchCell cell in pattern.stitches) {
       gridCellsGroup += '<g class="stitchcell" transform="translate(${cell.column * stitchCellWidth}, ${cell.row * stitchCellHeight})" clip-path="url(#stitchclippath)">';
       gridCellsGroup += '<rect x="0" y="0" width="$stitchCellWidth" height="$stitchCellHeight" fill="rgb(${cell.colour.color.red}, ${cell.colour.color.green}, ${cell.colour.color.blue}" fill-opacity="${cell.colour.color.alpha / 255}"/>';
-      gridCellsGroup += StitchRepository.definitionById(cell.stitchDefinitionId).symbolAt(cell.stitchDefinitionColumn).toSvg(ColorUtilities.contrastingFromColor(cell.colour.color));
+      gridCellsGroup += StitchRepository.getStitchDefinitionById(cell.stitchDefinitionId).symbolAt(cell.stitchDefinitionColumn).toSvg(ColorUtilities.contrastingFromColor(cell.colour.color));
       gridCellsGroup += '</g>';
     }
     gridCellsGroup += '</g>';

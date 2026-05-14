@@ -18,7 +18,6 @@ class StitchDefinition {
   final String description;
   final int consumes;
   final int produces;
-  final bool custom;
 
   const StitchDefinition({
     required this.id,
@@ -29,15 +28,14 @@ class StitchDefinition {
     String? description,
     int? consumes,
     int? produces,
-    bool? custom,
   }) : 
     category = category?? '', 
     description = description?? '',
     consumes = consumes?? 1,
-    produces = produces?? 1,
-    custom = custom?? false;
+    produces = produces?? 1;
 
   StitchDefinition copyWith({
+    String? id,
     String? name,
     String? abbreviation,
     List<KnittingSymbol>? symbols,
@@ -45,10 +43,9 @@ class StitchDefinition {
     String? description,
     int? consumes,
     int? produces,
-    bool? custom,
   }) {
     return StitchDefinition(
-      id: id,
+      id: id?? this.id,
       name: name?? this.name, 
       abbreviation: abbreviation?? this.abbreviation, 
       symbols: symbols?? this.symbols,
@@ -56,7 +53,6 @@ class StitchDefinition {
       description: description?? this.description,
       consumes: consumes?? this.consumes,
       produces: produces?? this.produces,
-      custom: custom?? this.custom,
     );
   }
 
@@ -70,7 +66,6 @@ class StitchDefinition {
       'description': description,
       'consumes': consumes,
       'produces': produces,
-      'custom': custom ? 1 : 0,
     };
   }
 
@@ -90,7 +85,6 @@ class StitchDefinition {
       description: json['description'] as String,
       consumes: json['consumes'] as int,
       produces: json['produces'] as int,
-      custom: json['custom'] as int == 1,
     );
   }
 
@@ -284,21 +278,21 @@ class StitchDefinition {
     category.toLowerCase().contains(filter.toLowerCase()) || description.toLowerCase().contains(filter.toLowerCase());
 
   @override
-  int get hashCode => name.hashCode ^ abbreviation.hashCode ^ symbols.hashCode ^ 
-    category.hashCode ^ description.hashCode ^ consumes.hashCode ^ produces.hashCode ^ custom.hashCode;
+  int get hashCode => name.hashCode ^ abbreviation.hashCode ^ symbols.hashCode ^
+    category.hashCode ^ description.hashCode ^ consumes.hashCode ^ produces.hashCode;
 
   @override
   bool operator ==(Object other) =>
     identical(this, other) ||
       other is StitchDefinition &&
+      runtimeType == other.runtimeType &&
       name == other.name &&
       abbreviation == other.abbreviation &&
       symbols == other.symbols &&
       category == other.category &&
       description == other.description &&
       consumes == other.consumes &&
-      produces == other.produces &&
-      custom == other.custom;
+      produces == other.produces;
 
   @override
   String toString() {
@@ -310,7 +304,7 @@ class StitchDefinition {
 StitchDefinition(
   name: '$name',
   abbreviation: '$abbreviation',
-  symbols: [$symbolsString],''';
+  symbols: [$symbolsString]''';
 
     if (category.isNotEmpty) {
       defString += '''category: '$category',''';
@@ -328,10 +322,6 @@ StitchDefinition(
       defString += '''produces: $produces,''';
     }
     
-    if (custom == true) {
-      defString += '''custom: true,''';
-    }
-
     defString += ''')''';
 
     return defString;

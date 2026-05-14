@@ -6,7 +6,6 @@ import 'package:knitty_griddy/utils/math_utitilies.dart';
 import 'package:knitty_griddy/model/knitting_pattern.dart';
 import 'package:knitty_griddy/model/knitty_griddy_model.dart';
 import 'package:knitty_griddy/controls/stitchrepo/stitch_definition.dart';
-import 'package:knitty_griddy/controls/stitchrepo/stitch_repository.dart';
 import 'package:provider/provider.dart';
 
 class StitchChooser extends StatefulWidget {
@@ -53,8 +52,8 @@ class _StitchChooserState extends State<StitchChooser> {
         (sd.columns * _iconWidth) + 
         _spacerwidth + 
         MathUtitilies.textSize(sd.name, Theme.of(context).textTheme.bodyMedium!).width + 
-        (sd.custom ? _iconWidth : 0) + 
-        _spacerwidth + _spacerwidth + (sd.custom ? _spacerwidth : 0);
+        _iconWidth + 
+        _spacerwidth + _spacerwidth + _spacerwidth;
 
       cards.add(Tooltip(message: sd.description,
         child: SizedBox(
@@ -77,7 +76,6 @@ class _StitchChooserState extends State<StitchChooser> {
                       Theme.of(context).textTheme.bodyMedium!
                   ),
                   const Spacer(),
-                  if (sd.custom)
                     IconButton(
                       iconSize: _iconWidth,
                       onPressed: () {
@@ -133,10 +131,10 @@ class _StitchChooserState extends State<StitchChooser> {
             const Spacer(),
             OutlinedButton.icon(
               onPressed: () {
-                StitchDefinition sd = Provider.of<KnittyGriddyModel>(context, listen: false).addCustomStitch();
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => EditStitchPage(stitchDefinition: sd)),
-                );
+//                StitchDefinition sd = Provider.of<KnittyGriddyModel>(context, listen: false).addStitch(category: '', stitchSetName: '');
+//                Navigator.of(context).push(
+//                  MaterialPageRoute(builder: (context) => EditStitchPage(stitchDefinition: sd)),
+//                );
               }, 
               label: const Text('New'),
               icon: const Icon(Icons.add),

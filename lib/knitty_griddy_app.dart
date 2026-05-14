@@ -22,7 +22,7 @@ class KnittyGriddyApp extends StatelessWidget {
     return ChangeNotifierProvider<KnittyGriddyModel>(
       create: (_) => KnittyGriddyModel(repository: repository)..loadOnStartup(),
       builder: (context, child) {
-        final Timer _autoSaveTimer = Timer.periodic(const Duration(seconds: 10), 
+        Timer.periodic(const Duration(seconds: 20), 
           (timer) async => await Provider.of<KnittyGriddyModel>(context, listen: false).autoSave()
         );
 
