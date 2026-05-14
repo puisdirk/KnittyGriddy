@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/controls/maingrid/pattern_page.dart';
 import 'package:knitty_griddy/controls/pattern_chooser/pattern_card.dart';
+import 'package:knitty_griddy/controls/pattern_chooser/stitch_repository_page.dart';
 import 'package:knitty_griddy/model/knitty_griddy_model.dart';
 import 'package:knitty_griddy/model/pattern_info.dart';
 import 'package:provider/provider.dart';
@@ -53,6 +54,14 @@ class _PatternChooserPageState extends State<PatternChooserPage> {
       appBar: AppBar(
         title: const Text('Knitty-Griddy'),
         backgroundColor: Colors.grey.shade300,
+        actions: [
+          OutlinedButton(
+            onPressed: () => Navigator.push(
+              context, MaterialPageRoute(
+                builder: (context) => const StitchRepositoryPage(),)),
+            child: const Text('Stitch Repository'),
+          )
+        ],
       ),
       body: Center(
         child: Padding(

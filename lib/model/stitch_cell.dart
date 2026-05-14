@@ -1,9 +1,8 @@
 
 import 'package:flutter/material.dart';
+import 'package:knitty_griddy/controls/stitchrepo/basic_stitches_set.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 import 'package:knitty_griddy/model/named_colour.dart';
-import 'package:knitty_griddy/controls/stitchrepo/stitch_definition.dart';
-import 'package:knitty_griddy/controls/stitchrepo/stitch_repository.dart';
 
 // A stitch cell represents one spot on the grid. 
 // For stitches that span 2 columns, there will be 2 stitch cells, 
@@ -26,7 +25,7 @@ class StitchCell {
   });
 
   factory StitchCell.empty(int row, int column) {
-    return StitchCell(row: row, column: column, stitchDefinitionId: StitchRepository.noStitch.id, colour: defaultMainColor);
+    return StitchCell(row: row, column: column, stitchDefinitionId: BasicStitchesSet.noStitch.id, colour: defaultMainColor);
   }
 
   StitchCell copyWith({

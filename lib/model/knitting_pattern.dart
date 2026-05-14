@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:knitty_griddy/controls/stitchrepo/basic_stitches_set.dart';
 import 'package:knitty_griddy/model/cell_address.dart';
 import 'package:knitty_griddy/model/selection.dart';
 import 'package:knitty_griddy/utils/constants.dart';
@@ -34,7 +35,7 @@ class KnittingPattern {
     required this.name,
     this.description = '',
     this.patternSettings = const PatternSettings(rows: 10, columns: 10, gridType: GridType.flat),
-    this.usedStitches = const[StitchRepository.noStitch, StitchRepository.knit, StitchRepository.purl, ],
+    this.usedStitches = const[BasicStitchesSet.noStitch, BasicStitchesSet.knit, BasicStitchesSet.purl, ],
     this.usedColours = const[defaultMainColor],
     this.stitches = defaultStitches,
     this.selection = emptySelection,
@@ -131,7 +132,7 @@ class KnittingPattern {
 
   KnittingPattern pruneUnusedStitches() {
     return copyWith(
-      usedStitches: usedStitches.where((us) => us == StitchRepository.noStitch || isStitchUsedInPattern(us)).toList()
+      usedStitches: usedStitches.where((us) => us == BasicStitchesSet.noStitch || isStitchUsedInPattern(us)).toList()
     );
   }
 
@@ -146,7 +147,7 @@ class KnittingPattern {
 
   KnittingPattern pruneUnusedStitchesAndColours() {
     return copyWith(
-      usedStitches: usedStitches.where((us) => us == StitchRepository.noStitch || isStitchUsedInPattern(us)).toList(),
+      usedStitches: usedStitches.where((us) => us == BasicStitchesSet.noStitch || isStitchUsedInPattern(us)).toList(),
       usedColours: usedColours.where((colour) => isColourUsedInPattern(colour)).toList()
     );
   }

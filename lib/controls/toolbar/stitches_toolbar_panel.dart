@@ -63,7 +63,6 @@ class StitchesToolbarPanel extends StatelessWidget {
                                           case Tool.select:
                                             Provider.of<KnittyGriddyModel>(context, listen: false).fillSelectionWithStitch(stitchDefinition);
                                             break;
-                                          default:
                                         }
                                       },
                                       child: Row(

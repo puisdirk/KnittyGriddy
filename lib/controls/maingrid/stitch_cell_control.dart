@@ -47,7 +47,7 @@ class StitchCellControl extends StatelessWidget {
                 height: stitchCellHeight,
                 width: stitchCellWidth,
                   child: KnittingSymbolControl(
-                    knittingSymbol: StitchRepository.definitionById(stitchCell.stitchDefinitionId).symbolAt(stitchCell.stitchDefinitionColumn),
+                    knittingSymbol: StitchRepository.getStitchDefinitionById(stitchCell.stitchDefinitionId).symbolAt(stitchCell.stitchDefinitionColumn),
                     symbolColor: ColorUtilities.contrastingFromColor(stitchCell.colour.color),
                   )
               ),

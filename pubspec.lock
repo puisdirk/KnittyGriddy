@@ -256,6 +256,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.3"
+  grouped_scroll_view:
+    dependency: "direct main"
+    description:
+      name: grouped_scroll_view
+      sha256: "6584f29c9f19f24b6f92dca15c18f5c0892e416080c61ab2689e1410e734677f"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.4"
   http_multi_server:
     dependency: transitive
     description:
@@ -360,6 +368,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.13.0"
+  material_symbols_icons:
+    dependency: "direct main"
+    description:
+      name: material_symbols_icons
+      sha256: "10a74aaa9e566c92f8aa14809d2dd78156fb93743348ebffec0345c38eb35706"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.2928.1"
   meta:
     dependency: transitive
     description:
@@ -573,6 +589,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  sliver_tools:
+    dependency: transitive
+    description:
+      name: sliver_tools
+      sha256: eae28220badfb9d0559207badcbbc9ad5331aac829a88cb0964d330d2a4636a6
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.12"
   source_map_stack_trace:
     dependency: transitive
     description:

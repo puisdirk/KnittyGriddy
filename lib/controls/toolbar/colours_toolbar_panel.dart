@@ -66,7 +66,6 @@ class ColoursToolbarPanel extends StatelessWidget {
                                       case Tool.select:
                                         Provider.of<KnittyGriddyModel>(context, listen: false).fillSelectionWithColor(colour);
                                         break;
-                                      default:
                                     }
                                   },
                                   child: Row(

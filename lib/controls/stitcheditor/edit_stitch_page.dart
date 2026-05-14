@@ -30,6 +30,7 @@ class _EditStitchPageState extends State<EditStitchPage> {
   late TextEditingController nameController;
   late TextEditingController descriptionController;
   late TextEditingController abbreviationController;
+  late TextEditingController categoryController;
   late FocusNode _focusNode;
 
 
@@ -56,6 +57,9 @@ class _EditStitchPageState extends State<EditStitchPage> {
     abbreviationController = TextEditingController(text: stitchDefinition.abbreviation);
     abbreviationController.addListener(_abbreviationChanged);
 
+    categoryController = TextEditingController(text: stitchDefinition.category);
+    categoryController.addListener(_categoryChanged);
+
     super.initState();
   }
 
@@ -71,6 +75,9 @@ class _EditStitchPageState extends State<EditStitchPage> {
 
     abbreviationController.removeListener(_abbreviationChanged);
     abbreviationController.dispose();
+
+    categoryController.removeListener(_categoryChanged);
+    categoryController.dispose();
 
     super.dispose();
   }
@@ -109,6 +116,10 @@ class _EditStitchPageState extends State<EditStitchPage> {
 
   void _abbreviationChanged() {
     _storeAndSetStitchDefinition(stitchDefinition.copyWith(abbreviation: abbreviationController.text));
+  }
+
+  void _categoryChanged() {
+    _storeAndSetStitchDefinition(stitchDefinition.copyWith(category: categoryController.text));
   }
 
   @override
@@ -188,7 +199,16 @@ class _EditStitchPageState extends State<EditStitchPage> {
                       child: TextField(
                         controller: abbreviationController,
                       ),
-                    )
+                    ),
+                    const SizedBox(width: space * 2,),
+                    const Text('Category:'),
+                    const SizedBox(width: space,),
+                    SizedBox(
+                      width: 200,
+                      child: TextField(
+                        controller: categoryController,
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 10,),
