@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/controls/stitch_icon.dart';
 import 'package:knitty_griddy/controls/stitch_part_icon.dart';
+import 'package:knitty_griddy/controls/stitchrepo/stitch_set.dart';
 import 'package:knitty_griddy/utils/math_utitilies.dart';
 import 'package:knitty_griddy/model/knitting_symbol_part.dart';
 import 'package:knitty_griddy/model/knitting_symbol_parts.dart';
@@ -114,15 +115,16 @@ class _StitchPartsChooserState extends State<StitchPartsChooser> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Basic symbols'),
+        const Center(child: Text('Basic symbols')),
+        const SizedBox(height: 10,),
         Wrap(children: cards,),
       ],
     );
   }
 
-  Widget createCategory(MapEntry<String, List<StitchDefinition>> entry) {
+  Widget createCategory(String category, List<StitchDefinition> stitchesInCategory) {
     List<Widget> cards = [];
-    for (StitchDefinition sd in entry.value) {
+    for (StitchDefinition sd in stitchesInCategory) {
       bool stitchSelected = _selectedStitches.contains(sd);
 
       double cardWidth =
@@ -157,7 +159,8 @@ class _StitchPartsChooserState extends State<StitchPartsChooser> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start, 
       children: [
-        Text(entry.key), 
+        const SizedBox(height: 10,),
+        Text(category), 
         Wrap(children: cards,)
       ],
     );
@@ -167,20 +170,38 @@ class _StitchPartsChooserState extends State<StitchPartsChooser> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Select paths'),
+      title: const Text('Select shapes'),
       content: SizedBox(
         width: 600,
         height: 400,
-        child: Selector<KnittyGriddyModel, Map<String, List<StitchDefinition>>>(
-          selector: (_, model) => model.selectStitchDefinitionsPerCategory(''),
-          builder: (context, stitchDefinitions, _) {
-           return ListView(
+        child: Selector<KnittyGriddyModel, List<StitchSet>>(
+          selector: (_, model) => model.filteredStitchSets(''),
+          builder: (context, stitchSets, _) {
+           return DefaultTabController(
+            length: stitchSets.length,
+            child: Column(
               children: [
                 createStandardPartsCategory(),
-                for (MapEntry<String, List<StitchDefinition>> entry in stitchDefinitions.entries)
-                  createCategory(entry),
+                TabBar(tabs: [
+                  for (StitchSet stitchSet in stitchSets)
+                    Tab(text: stitchSet.name,)
+                ]),
+                Expanded(
+                  child: TabBarView(
+                    children: [
+                      for (StitchSet stitchSet in stitchSets)
+                        ListView(
+                          children: [
+                            for (String category in Set.from(stitchSet.definitions.map((d) => d.category)))
+                              createCategory(category, stitchSet.definitions.where((d) => d.category == category).toList())
+                          ],
+                        )
+                    ]
+                  )
+                )
               ],
-            );
+             ),
+           );
           }
         ),
       ),

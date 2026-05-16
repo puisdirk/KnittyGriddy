@@ -1,4 +1,5 @@
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/controls/stitchrepo/basic_stitches_set.dart';
 import 'package:knitty_griddy/model/cell_address.dart';
@@ -8,7 +9,6 @@ import 'package:knitty_griddy/model/named_colour.dart';
 import 'package:knitty_griddy/model/pattern_settings.dart';
 import 'package:knitty_griddy/model/stitch_cell.dart';
 import 'package:knitty_griddy/controls/stitchrepo/stitch_definition.dart';
-import 'package:knitty_griddy/controls/stitchrepo/stitch_repository.dart';
 
 const String placeholderPatternId = '_placeholder_pattern_id_';
 const KnittingPattern placeholderPattern = KnittingPattern(
@@ -166,9 +166,9 @@ class KnittingPattern {
       name == other.name &&
       description == other.description &&
       patternSettings == other.patternSettings &&
-      stitches == other.stitches &&
-      usedStitches == other.usedStitches &&
-      usedColours == other.usedColours &&
+      listEquals(stitches, other.stitches) &&
+      listEquals(usedStitches, other.usedStitches) &&
+      listEquals(usedColours, other.usedColours) &&
       selection == other.selection &&
-      outline == other.outline;
+      setEquals(outline, other.outline);
 }

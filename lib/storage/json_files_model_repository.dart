@@ -5,8 +5,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 
-import 'package:knitty_griddy/controls/stitchrepo/stitch_definition.dart';
-import 'package:knitty_griddy/controls/stitchrepo/stitches_set.dart';
+import 'package:knitty_griddy/controls/stitchrepo/stitch_set.dart';
 import 'package:knitty_griddy/model/knitting_pattern.dart';
 import 'package:knitty_griddy/model/pattern_info.dart';
 import 'package:knitty_griddy/storage/model_repository.dart';
@@ -136,10 +135,10 @@ class JsonFilesModelRepository implements ModelRepository {
   }
 
   @override
-  Future<List<StitchesSet>> loadStitchSets() async {
+  Future<List<StitchSet>> loadStitchSets() async {
     await _initAppDirectoryPath();
 
-    List<StitchesSet> sets = [];
+    List<StitchSet> sets = [];
 
     File stitchSetsFile = File(p.join(appDirectoryPath!, 'stitchSets.json'));
 
@@ -153,7 +152,7 @@ class JsonFilesModelRepository implements ModelRepository {
           List<Map<String, dynamic>> stitchSetObjects = 
             (jsonObject['stitchSets'] as List).map((s) => s as Map<String, dynamic>).toList();
           for (Map<String, dynamic> stitchSetObject in stitchSetObjects) {
-            sets.add(StitchesSet.fromJson(stitchSetObject));
+            sets.add(StitchSet.fromJson(stitchSetObject));
           }
         }
       } catch (e) {
@@ -165,7 +164,7 @@ class JsonFilesModelRepository implements ModelRepository {
   }
 
   @override
-  Future<void> saveStitchSets(List<StitchesSet> stitchSets) async {
+  Future<void> saveStitchSets(List<StitchSet> stitchSets) async {
     await _initAppDirectoryPath();
 
     Map<String, Object> jsonObject = {'stitchSets': stitchSets.map((s) => s.toJson()).toList()};
@@ -179,7 +178,7 @@ class JsonFilesModelRepository implements ModelRepository {
   }
 
   @override
-  Future<void> exportStitchesSet(StitchesSet stitchSet) async {
+  Future<void> exportStitchesSet(StitchSet stitchSet) async {
     Map<String, Object> jsonObject = stitchSet.toJson();
 
     try {
@@ -196,7 +195,7 @@ class JsonFilesModelRepository implements ModelRepository {
   }
 
   @override
-  Future<StitchesSet?> importStitchesSet() async {
+  Future<StitchSet?> importStitchesSet() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       dialogTitle: 'Load a stitches set (sts)',
       allowMultiple: false,
@@ -208,7 +207,7 @@ class JsonFilesModelRepository implements ModelRepository {
       try {
         String jsonString = utf8.decode(result.files.first.bytes!);
         Map<String, dynamic> jsonObject = jsonDecode(jsonString);
-        StitchesSet stitchSet = StitchesSet.fromJson(jsonObject);
+        StitchSet stitchSet = StitchSet.fromJson(jsonObject);
         return stitchSet;
       } catch (e) {
         debugPrint('Error while importing stitches set: $e');
@@ -218,4 +217,44 @@ class JsonFilesModelRepository implements ModelRepository {
     return null;
   }
 
+  @override
+  Future<KnittingPattern?> importPattern() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      dialogTitle: 'Load a pattern',
+      allowMultiple: false,
+      allowedExtensions: ['kgp'],
+      withData: true,
+    );
+
+    if (result != null && result.files.isNotEmpty) {
+      try {
+        String jsonString = utf8.decode(result.files.first.bytes!);
+        Map<String, dynamic> jsonObject = jsonDecode(jsonString);
+        KnittingPattern pattern = KnittingPattern.fromJson(jsonObject);
+        return pattern;
+      } catch (e) {
+        debugPrint('Error while importing pattern: $e');
+      }
+    }
+
+    return null;
+  }
+
+  @override
+  Future<void> exportPattern(KnittingPattern pattern) async {
+    Map<String, Object> jsonObject = pattern.toJson();
+
+    try {
+      String jsonString = jsonEncode(jsonObject);
+
+      await FilePicker.platform.saveFile(
+        dialogTitle: 'Where do you want to store the output?',
+        fileName: '${pattern.name}.kgp',
+        bytes: utf8.encode(jsonString),
+      );
+    } catch(e) {
+      debugPrint('Error while exporting pattern: $e');
+    }
+
+  }
 }

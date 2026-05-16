@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:knitty_griddy/controls/maingrid/pattern_page.dart';
 import 'package:knitty_griddy/model/knitty_griddy_model.dart';
 import 'package:knitty_griddy/model/pattern_info.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
 class PatternCard extends StatelessWidget {

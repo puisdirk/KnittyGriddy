@@ -1,5 +1,5 @@
 
-import 'package:knitty_griddy/controls/stitchrepo/stitches_set.dart';
+import 'package:knitty_griddy/controls/stitchrepo/stitch_set.dart';
 import 'package:knitty_griddy/model/knitting_pattern.dart';
 import 'package:knitty_griddy/model/pattern_info.dart';
 import 'package:knitty_griddy/model/pattern_settings.dart';
@@ -32,20 +32,29 @@ class NoOpModelRepository implements ModelRepository {
   }
 
   @override
-  Future<List<StitchesSet>> loadStitchSets() async {
+  Future<List<StitchSet>> loadStitchSets() async {
     return [];
   }
 
   @override
-  Future<void> saveStitchSets(List<StitchesSet> stitchSets) async {
+  Future<void> saveStitchSets(List<StitchSet> stitchSets) async {
   }
 
   @override
-  Future<void> exportStitchesSet(StitchesSet stitchSet) async {
+  Future<void> exportStitchesSet(StitchSet stitchSet) async {
   }
   
   @override
-  Future<StitchesSet?> importStitchesSet() async {
+  Future<StitchSet?> importStitchesSet() async {
     return null;
+  }
+  
+  @override
+  Future<KnittingPattern?> importPattern() async {
+    return null;
+  }
+  
+  @override
+  Future<void> exportPattern(KnittingPattern pattern) async {
   }
 }

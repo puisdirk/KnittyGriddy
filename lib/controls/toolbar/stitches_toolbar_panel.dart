@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/controls/stitch_icon.dart';
+import 'package:knitty_griddy/controls/stitchrepo/stitch_chooser.dart';
 import 'package:knitty_griddy/model/selection.dart';
 import 'package:knitty_griddy/utils/math_utitilies.dart';
 import 'package:knitty_griddy/model/app_state.dart';
@@ -108,9 +109,10 @@ class StitchesToolbarPanel extends StatelessWidget {
                   children: [
                     IconButton.outlined(
                       onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(builder: (context) => const StitchRepoPage())
-                        );
+//                        Navigator.of(context).push(
+//                          MaterialPageRoute(builder: (context) => const StitchRepoPage())
+//                        );
+                        showDialog(context: context, builder: (context) => const StitchChooser(),);
                       }, 
                       icon: const Icon(Icons.add)
                     ),

@@ -6,6 +6,7 @@ class ExportToolbar extends StatelessWidget {
   final ExportSettings exportSetting;
   final Function(ExportSettings newSettings) settingsChanged;
 
+  final Function() exportToPattern;
   final Function() exportToPNG;
   final Function() exportToSVG;
 
@@ -13,6 +14,7 @@ class ExportToolbar extends StatelessWidget {
     required this.height,
     required this.exportSetting,
     required this.settingsChanged,
+    required this.exportToPattern,
     required this.exportToPNG,
     required this.exportToSVG,
     super.key}
@@ -120,6 +122,11 @@ class ExportToolbar extends StatelessWidget {
                   alignment: Alignment.centerRight,
                   child: Text('Export'),
                 ),
+              ),
+              const SizedBox(width: 10,),
+              OutlinedButton(
+                onPressed: exportToPattern, 
+                child: const Text('Pattern')
               ),
               const SizedBox(width: 10,),
               OutlinedButton(

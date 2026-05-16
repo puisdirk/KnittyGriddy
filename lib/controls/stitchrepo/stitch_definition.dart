@@ -1,4 +1,5 @@
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/utils/math_utitilies.dart';
 import 'package:knitty_griddy/model/knitting_symbol.dart';
@@ -278,7 +279,7 @@ class StitchDefinition {
     category.toLowerCase().contains(filter.toLowerCase()) || description.toLowerCase().contains(filter.toLowerCase());
 
   @override
-  int get hashCode => name.hashCode ^ abbreviation.hashCode ^ symbols.hashCode ^
+  int get hashCode => id.hashCode ^ name.hashCode ^ abbreviation.hashCode ^ symbols.hashCode ^
     category.hashCode ^ description.hashCode ^ consumes.hashCode ^ produces.hashCode;
 
   @override
@@ -286,13 +287,25 @@ class StitchDefinition {
     identical(this, other) ||
       other is StitchDefinition &&
       runtimeType == other.runtimeType &&
+      id == other.id &&
+      name == other.name &&
+      abbreviation == other.abbreviation &&
+      listEquals(symbols, other.symbols) &&
+      category == other.category &&
+      description == other.description &&
+      consumes == other.consumes &&
+      produces == other.produces;
+
+  bool sameContentAs(StitchDefinition other) {
+    return this == other ||
       name == other.name &&
       abbreviation == other.abbreviation &&
       symbols == other.symbols &&
       category == other.category &&
       description == other.description &&
       consumes == other.consumes &&
-      produces == other.produces;
+      produces == other.produces;      
+  }
 
   @override
   String toString() {

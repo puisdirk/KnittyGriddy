@@ -5,6 +5,7 @@ import 'package:knitty_griddy/controls/pattern_chooser/pattern_card.dart';
 import 'package:knitty_griddy/controls/pattern_chooser/stitch_repository_page.dart';
 import 'package:knitty_griddy/model/knitty_griddy_model.dart';
 import 'package:knitty_griddy/model/pattern_info.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
 class PatternChooserPage extends StatefulWidget {
@@ -55,12 +56,22 @@ class _PatternChooserPageState extends State<PatternChooserPage> {
         title: const Text('Knitty-Griddy'),
         backgroundColor: Colors.grey.shade300,
         actions: [
-          OutlinedButton(
+          OutlinedButton.icon(
+            onPressed: () {
+              Provider.of<KnittyGriddyModel>(context, listen: false).importPattern();
+            }, 
+            label: const Text('Import Pattern'),
+            icon: const Icon(Symbols.download, weight: 700,),
+          ),
+          const SizedBox(width: 10,),
+          OutlinedButton.icon(
             onPressed: () => Navigator.push(
               context, MaterialPageRoute(
                 builder: (context) => const StitchRepositoryPage(),)),
-            child: const Text('Stitch Repository'),
-          )
+            label: const Text('Stitches'),
+            icon: const Icon(Symbols.auto_stories, weight: 700,),
+          ),
+          const SizedBox(width: 10,)
         ],
       ),
       body: Center(

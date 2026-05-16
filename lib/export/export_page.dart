@@ -38,6 +38,7 @@ class _ExportPageState extends State<ExportPage> {
             height: toolbarHeight, 
             exportSetting: exportSettings,
             settingsChanged: (newSettings) => setState(() => exportSettings = newSettings),
+            exportToPattern: () => Provider.of<KnittyGriddyModel>(context, listen: false).exportPattern(),
             exportToPNG: () async {
               RenderRepaintBoundary drawingBoundary = drawingBoundaryKey.currentContext!.findRenderObject()! as RenderRepaintBoundary;
                 ui.Image image = await drawingBoundary.toImage(pixelRatio: 3);
@@ -71,7 +72,7 @@ class _ExportPageState extends State<ExportPage> {
       ),
       body: RepaintBoundary(
         key: drawingBoundaryKey, 
-        child: Padding(                       //ExportPreview(exportSetting: exportSettings,)
+        child: Padding(
           padding: const EdgeInsets.all(20.0),
           child: FittedBox(
             child: exportSettings.showLegend == false ?
