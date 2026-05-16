@@ -1,11 +1,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/controls/stitch_icon.dart';
-import 'package:knitty_griddy/controls/stitcheditor/edit_stitch_page.dart';
+import 'package:knitty_griddy/controls/stitchrepo/stitch_set.dart';
 import 'package:knitty_griddy/utils/math_utitilies.dart';
 import 'package:knitty_griddy/model/knitting_pattern.dart';
 import 'package:knitty_griddy/model/knitty_griddy_model.dart';
 import 'package:knitty_griddy/controls/stitchrepo/stitch_definition.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
 class StitchChooser extends StatefulWidget {
@@ -42,9 +43,9 @@ class _StitchChooserState extends State<StitchChooser> {
   static const double _spacerwidth = 12;
   static const double _iconWidth = 16;
 
-  Widget createCategory(KnittingPattern pattern, MapEntry<String, List<StitchDefinition>> stitchesInCategory) {
+  Widget createCategory(KnittingPattern pattern, String category, List<StitchDefinition> stitchesInCategory) {
     List<Widget> cards = [];
-    for (StitchDefinition sd in stitchesInCategory.value) {
+    for (StitchDefinition sd in stitchesInCategory) {
       bool stitchInPattern = pattern.stitches.any((cell) => cell.stitchDefinitionId == sd.id);
       bool stitchSelected = pattern.usedStitches.contains(sd);
       double cardWidth = 
@@ -52,114 +53,109 @@ class _StitchChooserState extends State<StitchChooser> {
         (sd.columns * _iconWidth) + 
         _spacerwidth + 
         MathUtitilies.textSize(sd.name, Theme.of(context).textTheme.bodyMedium!).width + 
-        _iconWidth + 
-        _spacerwidth + _spacerwidth + _spacerwidth;
+        _spacerwidth + _spacerwidth;
 
-      cards.add(Tooltip(message: sd.description,
-        child: SizedBox(
-          width: cardWidth, 
-          height: 50,
-          child: Card(
-            color: stitchSelected ? Colors.blue.withAlpha(60) : stitchInPattern ? Colors.purple.shade100.withAlpha(60) : null,
-            child: InkWell(
-              borderRadius: const BorderRadius.all(Radius.circular(10)),
-              splashColor: Colors.blue.withAlpha(30),
-              onTap: stitchInPattern ? null : () => Provider.of<KnittyGriddyModel>(context, listen: false).toggleUsedStitch(sd),
-              child: Row(
-                children: [
-                  const SizedBox(width: _spacerwidth,),
-                  StitchIcon(stitchDefinition: sd, iconSize: _iconWidth, iconColor: stitchInPattern || stitchSelected ? Colors.white : null,),
-                  const SizedBox(width: _spacerwidth,),
-                  Text(sd.name,
-                    style: stitchInPattern || stitchSelected ?
-                      Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.white) : 
-                      Theme.of(context).textTheme.bodyMedium!
-                  ),
-                  const Spacer(),
-                    IconButton(
-                      iconSize: _iconWidth,
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(builder: (context) => EditStitchPage(stitchDefinition: sd)),
-                        );
-                      },
-                      icon: const Icon(Icons.edit)
-                    )
-                ],
-              ),
+      cards.add(SizedBox(
+        width: cardWidth, 
+        height: 50,
+        child: Card(
+          color: stitchInPattern ? Colors.purple.shade100.withAlpha(60) : stitchSelected ? Colors.blue.withAlpha(60) : null,
+          child: InkWell(
+            borderRadius: const BorderRadius.all(Radius.circular(10)),
+            splashColor: Colors.blue.withAlpha(30),
+            onTap: stitchInPattern ? null : () => Provider.of<KnittyGriddyModel>(context, listen: false).toggleUsedStitch(sd),
+            child: Row(
+              children: [
+                const SizedBox(width: _spacerwidth,),
+                StitchIcon(stitchDefinition: sd, iconSize: _iconWidth, iconColor: stitchInPattern || stitchSelected ? Colors.white : null,),
+                const SizedBox(width: _spacerwidth,),
+                Text(sd.name,
+                  style: stitchInPattern || stitchSelected ?
+                    Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.white) : 
+                    Theme.of(context).textTheme.bodyMedium!
+                ),
+              ],
             ),
           ),
         ),
       ));
     }
-/*    bool? allInCategorySelected = 
-      stitchesInCategory.value.every((st) => pattern.usedStitches.contains(st)) ? true : 
-        stitchesInCategory.value.any((st) => pattern.usedStitches.contains(st)) ? null : 
-       false;*/
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start, 
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Text(stitchesInCategory.key, style: const TextStyle(fontSize: 18),),
-/*            Checkbox(
-              tristate: true,
-              value: allInCategorySelected, 
-              onChanged: (val) {}
-            )
-*/          ]
-        ),
+        const SizedBox(height: 10,),
+        Text(category),
         Wrap(children: cards,),
-        const SizedBox(height: 14,)
       ],
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Row(
+    return AlertDialog(
+      title: const Text('Add or remove stitches'),
+      content: SizedBox(
+        width: 600,
+        height: 400,
+        child: Column(
           children: [
-            const Text('Filter:'),
-            const SizedBox(width: 20,),
-            SizedBox(
-              width: 500,
-              child: TextField(controller: filterController, autofocus: true,),  
+            Row(
+              children: [
+                const Text('Filter:'),
+                const SizedBox(width: 20,),
+                SizedBox(
+                  width: 500,
+                  child: TextField(controller: filterController, autofocus: true,),  
+                ),
+              ],
             ),
-            const Spacer(),
-            OutlinedButton.icon(
-              onPressed: () {
-//                StitchDefinition sd = Provider.of<KnittyGriddyModel>(context, listen: false).addStitch(category: '', stitchSetName: '');
-//                Navigator.of(context).push(
-//                  MaterialPageRoute(builder: (context) => EditStitchPage(stitchDefinition: sd)),
-//                );
-              }, 
-              label: const Text('New'),
-              icon: const Icon(Icons.add),
+            const SizedBox(height: 20,),
+            Expanded(
+              child: Selector<KnittyGriddyModel, List<StitchSet>>(
+                selector: (_, model) => model.filteredStitchSets(filterText),
+                builder: (context, stitchSets, _) {
+                  return Selector<KnittyGriddyModel, KnittingPattern>(
+                    selector: (_, model) => model.knittingPattern,
+                    builder: (context, pattern, _) {
+                      return DefaultTabController(
+                        length: stitchSets.length,
+                        child: Column(
+                          children: [
+                            TabBar(tabs: [
+                              for (StitchSet stitchSet in stitchSets)
+                                Tab(text: stitchSet.name,)
+                            ]),
+                            Expanded(
+                              child: TabBarView(
+                                children: [
+                                  for (StitchSet stitchSet in stitchSets)
+                                    ListView(
+                                      children: [
+                                        for (String category in Set.from(stitchSet.definitions.map((d) => d.category)))
+                                          createCategory(pattern, category, stitchSet.definitions.where((d) => d.category == category).toList()),
+                                      ],
+                                    ),
+                                ]
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+                  );
+                }
+              ),
             ),
           ],
         ),
-        const SizedBox(height: 20,),
-        Selector<KnittyGriddyModel, Map<String, List<StitchDefinition>>>(
-          selector: (_, model) => model.selectStitchDefinitionsPerCategory(filterText),
-          builder: (context, filteredStitches, _) {
-            return Selector<KnittyGriddyModel, KnittingPattern>(
-              selector: (_, model) => model.knittingPattern,
-              builder: (context, pattern, _) {
-                return Expanded(
-                  child: ListView(
-                    children: [
-                      for (MapEntry<String, List<StitchDefinition>> entry in filteredStitches.entries)
-                        createCategory(pattern, entry),
-                    ],
-                  ),
-                );
-              }
-            );
-          }
-        ),
+      ),
+      actions: [
+        ElevatedButton.icon(
+          onPressed: () => Navigator.of(context).pop(), 
+          label: const Text('close'),
+          icon: const Icon(Symbols.close_small, weight: 700,),
+        )
       ],
     );
   }

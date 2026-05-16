@@ -1,5 +1,5 @@
 import 'package:flutter/cupertino.dart';
-import 'package:knitty_griddy/controls/stitchrepo/stitches_set.dart';
+import 'package:knitty_griddy/controls/stitchrepo/stitch_set.dart';
 import 'package:knitty_griddy/model/griddy_model.dart';
 import 'package:knitty_griddy/model/knitting_pattern.dart';
 import 'package:knitty_griddy/model/pattern_info.dart';
@@ -8,7 +8,7 @@ import 'package:knitty_griddy/model/pattern_info.dart';
 class KnittyGriddySaveModel {
   final KnittingPattern knittingPattern;
   final List<PatternInfo> patternInfos;
-  final List<StitchesSet> stitchSets;
+  final List<StitchSet> stitchSets;
 
   const KnittyGriddySaveModel({
     required this.knittingPattern,
@@ -18,7 +18,7 @@ class KnittyGriddySaveModel {
 
   KnittyGriddySaveModel copyWith({
     GriddyModel? griddyModel,
-    List<StitchesSet>? stitchSets,
+    List<StitchSet>? stitchSets,
   }) {
     return KnittyGriddySaveModel(
       knittingPattern: griddyModel?.knittingPattern?? knittingPattern, 

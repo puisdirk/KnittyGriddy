@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/controls/pattern_chooser/stitch_set_name_control.dart';
-import 'package:knitty_griddy/controls/pattern_chooser/stitches_set_panel.dart';
+import 'package:knitty_griddy/controls/pattern_chooser/stitch_set_panel.dart';
+import 'package:knitty_griddy/controls/stitchrepo/basic_stitches_set.dart';
 import 'package:knitty_griddy/controls/stitchrepo/stitch_repository.dart';
-import 'package:knitty_griddy/controls/stitchrepo/stitches_set.dart';
+import 'package:knitty_griddy/controls/stitchrepo/stitch_set.dart';
 import 'package:knitty_griddy/model/knitty_griddy_model.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
@@ -18,6 +19,7 @@ class _StitchRepositoryPageState extends State<StitchRepositoryPage> with Ticker
   String _filterText = '';
   late TextEditingController _filterController;
   late TabController _tabController;
+  int tabIdx = 0;
 
   void _filterChanged() {
     setState(() => _filterText = _filterController.text);
@@ -51,10 +53,13 @@ class _StitchRepositoryPageState extends State<StitchRepositoryPage> with Ticker
 
   @override
   Widget build(BuildContext context) {
-    return Selector<KnittyGriddyModel, List<StitchesSet>>(
+    return Selector<KnittyGriddyModel, List<StitchSet>>(
       selector: (_, model) => model.filteredStitchSets(_filterText),
       builder: (context, filteredStitchSets, _) {
         _tabController = TabController(length: filteredStitchSets.length, vsync: this);
+        if (tabIdx >= 0 && tabIdx < filteredStitchSets.length) {
+          _tabController.index = tabIdx;
+        }
         return Scaffold(
           appBar: AppBar(
             title: const Text('Stitch Repository'),
@@ -73,17 +78,40 @@ class _StitchRepositoryPageState extends State<StitchRepositoryPage> with Ticker
                         child: TextField(controller: _filterController, autofocus: true,),
                       ),
                       const Spacer(),
+                      if (!StitchRepository.hasStitchSet(BasicStitchesSet.basicStitchSetId))
+                      OutlinedButton.icon(
+                        onPressed: () {
+                          Provider.of<KnittyGriddyModel>(context, listen: false).restoreBasicStitchSet();
+                          int newTabIdx = StitchRepository.indexOfSet(BasicStitchesSet.basicStitchSetId);
+                          setState(() => tabIdx = newTabIdx);
+                        },
+                        label: const Text('Restore Basic Set'),
+                        icon: const Icon(Symbols.refresh, weight: 700,),
+                      ),
+                      const SizedBox(width: 10,),
                       OutlinedButton.icon(
                         onPressed: () async {
-                          await Provider.of<KnittyGriddyModel>(context, listen: false).importStitchesSet();
+                          String? id = await Provider.of<KnittyGriddyModel>(context, listen: false).importStitchesSet();
+                          if (id != null) {
+                            int newTabIdx = StitchRepository.indexOfSet(id);
+                            if (newTabIdx != -1) {
+                              setState(() => tabIdx = newTabIdx);
+                            }
+                          }
                         }, 
-                        label: const Text('Import set'),
+                        label: const Text('Import Set'),
                         icon: const Icon(Symbols.download, weight: 700,),
                       ),
                       const SizedBox(width: 10,),
                       OutlinedButton.icon(
-                        onPressed: () => Provider.of<KnittyGriddyModel>(context, listen: false).createStitchSet('Untitled', []),
-                        label: const Text('New set'),
+                        onPressed: () {
+                          String id = Provider.of<KnittyGriddyModel>(context, listen: false).createStitchSet('Untitled', []);
+                          int newTabIdx = StitchRepository.indexOfSet(id);
+                          if (newTabIdx != -1) {
+                            setState(() => tabIdx = newTabIdx);
+                          }
+                        },
+                        label: const Text('New Set'),
                         icon: const Icon(Symbols.create_new_folder, weight: 700,),
                       ),
                       const SizedBox(width: 10,)
@@ -93,7 +121,7 @@ class _StitchRepositoryPageState extends State<StitchRepositoryPage> with Ticker
                   TabBar(
                     controller: _tabController,
                     tabs: [
-                      for (StitchesSet stitchSet in filteredStitchSets)
+                      for (StitchSet stitchSet in filteredStitchSets)
                         Tab(
                           child: StitchSetNameControl(stitchSet: stitchSet),
                           ),
@@ -109,8 +137,8 @@ class _StitchRepositoryPageState extends State<StitchRepositoryPage> with Ticker
               child:TabBarView(
                 controller: _tabController,
                 children: [
-                  for (StitchesSet stitchSet in filteredStitchSets)
-                    StitchesSetPanel(stitchSet: stitchSet),
+                  for (StitchSet stitchSet in filteredStitchSets)
+                    StitchSetPanel(stitchSet: stitchSet),
                 ]
               ),
             )

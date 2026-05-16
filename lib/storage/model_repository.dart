@@ -1,5 +1,5 @@
 
-import 'package:knitty_griddy/controls/stitchrepo/stitches_set.dart';
+import 'package:knitty_griddy/controls/stitchrepo/stitch_set.dart';
 import 'package:knitty_griddy/model/knitting_pattern.dart';
 import 'package:knitty_griddy/model/pattern_info.dart';
 
@@ -12,9 +12,12 @@ abstract class ModelRepository {
   Future<void> savePattern(KnittingPattern pattern);
   Future<void> deletePattern(String patternId);
 
-  Future<List<StitchesSet>> loadStitchSets();
-  Future<void> saveStitchSets(List<StitchesSet> stitchSets);
+  Future<void> exportPattern(KnittingPattern pattern);
+  Future<KnittingPattern?> importPattern();
 
-  Future<void> exportStitchesSet(StitchesSet stitchSet);
-  Future<StitchesSet?> importStitchesSet();
+  Future<List<StitchSet>> loadStitchSets();
+  Future<void> saveStitchSets(List<StitchSet> stitchSets);
+
+  Future<void> exportStitchesSet(StitchSet stitchSet);
+  Future<StitchSet?> importStitchesSet();
 }

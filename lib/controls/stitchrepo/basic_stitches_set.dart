@@ -2,7 +2,7 @@
 import 'dart:ui';
 
 import 'package:knitty_griddy/controls/stitchrepo/stitch_definition.dart';
-import 'package:knitty_griddy/controls/stitchrepo/stitches_set.dart';
+import 'package:knitty_griddy/controls/stitchrepo/stitch_set.dart';
 import 'package:knitty_griddy/model/basicshapes/knitting_symbol_arc.dart';
 import 'package:knitty_griddy/model/basicshapes/knitting_symbol_curve.dart';
 import 'package:knitty_griddy/model/basicshapes/knitting_symbol_path.dart';
@@ -10,7 +10,7 @@ import 'package:knitty_griddy/model/basicshapes/knitting_symbol_rectangle.dart';
 import 'package:knitty_griddy/model/basicshapes/knitting_symbol_text.dart';
 import 'package:knitty_griddy/model/knitting_symbol.dart';
 
-class BasicStitchesSet extends StitchesSet {
+class BasicStitchesSet extends StitchSet {
 
   static const String basicStitchSetId = '7146003f-6dfb-4a4e-bfd5-aca61137ee83';
   static const String noStitchId = '184026cb-4cf2-4d70-959d-90acb2e7182b';

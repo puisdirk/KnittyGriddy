@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:id_gen/id_gen.dart';
 import 'package:knitty_griddy/controls/stitchrepo/basic_stitches_set.dart';
-import 'package:knitty_griddy/controls/stitchrepo/stitches_set.dart';
+import 'package:knitty_griddy/controls/stitchrepo/stitch_set.dart';
 import 'package:knitty_griddy/model/knitty_griddy_save_model.dart';
 import 'package:knitty_griddy/model/named_colour.dart';
 import 'package:knitty_griddy/model/cell_address.dart';
@@ -82,7 +82,7 @@ class KnittyGriddyModel extends ChangeNotifier {
       _model = _model.copyWith(
         patternInfos: patternInfos,
       );
-      _repository.loadStitchSets().then((List<StitchesSet> stitchSets) {
+      _repository.loadStitchSets().then((List<StitchSet> stitchSets) {
         StitchRepository.loadInitialStitchSets(stitchSets);
         notifyListeners();
       });
@@ -109,6 +109,22 @@ class KnittyGriddyModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> exportPattern() async {
+    await _repository.exportPattern(_model.knittingPattern);
+  }
+
+  Future<void> importPattern() async {
+    KnittingPattern? pattern = await _repository.importPattern();
+    if (pattern != null && !patternInfos.any((pi) => pi.id == pattern.id)) {
+      await _repository.savePattern(pattern);
+      _model = _model.copyWith(
+        patternInfos: [..._model.patternInfos, PatternInfo(id: pattern.id, name: pattern.name, description: pattern.description)],
+      );
+      _savePatternInfos();
+      notifyListeners();
+    }
+  }
+
   void deletePattern(String patternId) {
     _model = _model.copyWith(
       patternInfos: _model.patternInfos.where((pi) => pi.id != patternId).toList()
@@ -121,6 +137,21 @@ class KnittyGriddyModel extends ChangeNotifier {
 
   Future<void> loadPattern(String patternId) async {
     KnittingPattern pattern = await _repository.loadPattern(patternId);
+    // Import unknown stitches
+    for (StitchDefinition def in pattern.usedStitches) {
+      if (!StitchRepository.hasStitch(def)) {
+        StitchDefinition? sameStitchContent = StitchRepository.getStitchDefinitionByContent(def);
+        if (sameStitchContent != null) {
+          // We have a stitchdefinition in the repo that is the same except for the id. So use that
+          pattern = pattern.copyWith(
+            usedStitches: pattern.usedStitches.map((us) => us != def ? def : sameStitchContent).toList(),
+            stitches: pattern.stitches.map((sc) => sc.stitchDefinitionId != def.id ? sc : sc.copyWith(stitchDefinitionId: sameStitchContent.id)).toList()
+          );
+        } else {
+          StitchRepository.addStitchToImportedSet(def);
+        }
+      }
+    }
     _model = _model.copyWith(
       knittingPattern: pattern,
     );
@@ -186,7 +217,7 @@ class KnittyGriddyModel extends ChangeNotifier {
   KnittingPattern get knittingPattern => _model.knittingPattern;
   AppState get appState => _model.appState;
 
-  List<StitchesSet> filteredStitchSets(String filter) {
+  List<StitchSet> filteredStitchSets(String filter) {
     return StitchRepository.filteredStitchSets(filter);
   }
 
@@ -204,9 +235,10 @@ class KnittyGriddyModel extends ChangeNotifier {
     return filtered;
   }
 
-  void createStitchSet(String name, List<StitchDefinition> stitches) {
-    StitchRepository.createStitchSet(name, stitches);
+  String createStitchSet(String name, List<StitchDefinition> stitches) {
+    String id = StitchRepository.createStitchSet(name, stitches);
     notifyListeners();
+    return id;
   }
 
   void renameStitchSet(String id, String newName) {
@@ -214,19 +246,26 @@ class KnittyGriddyModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> exportStitchesSet(StitchesSet stitchSet) async {
+  Future<void> exportStitchesSet(StitchSet stitchSet) async {
     await _repository.exportStitchesSet(stitchSet);
   }
 
-  Future<void> importStitchesSet() async {
-    StitchesSet? importedSet = await _repository.importStitchesSet();
+  Future<String?> importStitchesSet() async {
+    StitchSet? importedSet = await _repository.importStitchesSet();
 
     if (importedSet != null) {
       if (!StitchRepository.hasStitchSet(importedSet.id)) {
         StitchRepository.addStitchSet(importedSet);
         notifyListeners();
       }
+      return importedSet.id;
     }
+    return null;
+  }
+
+  void restoreBasicStitchSet() {
+    StitchRepository.restoreBasicStitchSet();
+    notifyListeners();
   }
 
   void deleteStitchSet(String id) {
@@ -873,6 +912,11 @@ class KnittyGriddyModel extends ChangeNotifier {
     required String targetSetId}) {
     StitchRepository.moveStitchToSet(stitchDefinition, sourceSetId, targetSetId);
 
+    notifyListeners();
+  }
+
+  void addStitchToSet({required StitchSet targetStitchSet, required StitchDefinition stitchDefinition}) {
+    StitchRepository.addStitchToSet(stitchDefinition, targetStitchSet.id);
     notifyListeners();
   }
 

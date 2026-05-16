@@ -1,11 +1,12 @@
 import 'package:id_gen/id_gen.dart';
 import 'package:knitty_griddy/controls/stitchrepo/basic_stitches_set.dart';
+import 'package:knitty_griddy/controls/stitchrepo/imported_stitches_set.dart';
 import 'package:knitty_griddy/controls/stitchrepo/stitch_definition.dart';
-import 'package:knitty_griddy/controls/stitchrepo/stitches_set.dart';
+import 'package:knitty_griddy/controls/stitchrepo/stitch_set.dart';
 
 class StitchRepository {
 
-  List<StitchesSet> sets = [
+  List<StitchSet> sets = [
   ];
 
   StitchRepository._();
@@ -19,18 +20,26 @@ class StitchRepository {
     return instance.sets[index].name;
   }
 
+  static int indexOfSet(String stitchSetId) {
+    return instance.sets.indexWhere((s) => s.id == stitchSetId);
+  }
+
   static void renameStitchSet(String id, String newName) {
     instance.sets = instance.sets.map((stitchSet) => stitchSet.id != id ? stitchSet : stitchSet.copyWith(
       name: newName
     )).toList();
   }
 
-  static void loadInitialStitchSets(List<StitchesSet> stitchSets) {
+  static void loadInitialStitchSets(List<StitchSet> stitchSets) {
     if (stitchSets.isEmpty) {
       instance.sets = [BasicStitchesSet()];
     } else {
       instance.sets = List.from(stitchSets);
     }
+  }
+
+  static void restoreBasicStitchSet() {
+    instance.sets = [BasicStitchesSet(), ...instance.sets];
   }
 
   static void addStitchToSet(StitchDefinition def, String stitchSetId) {
@@ -39,8 +48,20 @@ class StitchRepository {
     )).toList();
   }
 
-  static void createStitchSet(String name, List<StitchDefinition> stitches) {
-    instance.sets =[...instance.sets, StitchesSet(id: const UuidV4Gen().get(), name: name, stitchDefinitions: stitches)];
+  static void addStitchToImportedSet(StitchDefinition def) {
+    if (instance.sets.any((s) => s.id == ImportedStitchesSet.importedStitchesSetId)) {
+      instance.sets = instance.sets.map((s) => s.id != ImportedStitchesSet.importedStitchesSetId ? s : s.copyWith(
+        stitchDefinitions: [...s.definitions, def]
+      )).toList();
+    } else {
+      instance.sets = [...instance.sets, const ImportedStitchesSet().copyWith(stitchDefinitions: [def])];
+    }
+  }
+
+  static String createStitchSet(String name, List<StitchDefinition> stitches) {
+    String newId = const UuidV4Gen().get();
+    instance.sets =[...instance.sets, StitchSet(id: newId, name: name, stitchDefinitions: stitches)];
+    return newId;
   }
 
   static void moveStitchToSet(StitchDefinition def, String sourceSetId, String targetSetId) {
@@ -68,7 +89,7 @@ class StitchRepository {
     return instance.sets.any((s) => s.id == id);
   }
 
-  static void addStitchSet(StitchesSet stitchSet) {
+  static void addStitchSet(StitchSet stitchSet) {
     instance.sets = [...instance.sets, stitchSet];
   }
 
@@ -88,9 +109,9 @@ class StitchRepository {
     )).toList();
   }
 
-  static List<StitchesSet> filteredStitchSets(String filter) {
-    List<StitchesSet> result = [];
-    for (StitchesSet stsSet in instance.sets) {
+  static List<StitchSet> filteredStitchSets(String filter) {
+    List<StitchSet> result = [];
+    for (StitchSet stsSet in instance.sets) {
       result.add(stsSet.copyWith(
         stitchDefinitions: stsSet.definitions.where((sd) => sd.passesFilter(filter)).toList()
       ));
@@ -102,7 +123,7 @@ class StitchRepository {
     // TODO: this should be set once only when loading a stitches set
     // but I think it will disappear by then
     Map<String, List<StitchDefinition>> defs = {};
-    for (StitchesSet stsSet in instance.sets) {
+    for (StitchSet stsSet in instance.sets) {
       for (StitchDefinition def in stsSet.definitions) {
         if (!defs.containsKey(def.category)) {
           defs[def.category] = [];
@@ -116,7 +137,7 @@ class StitchRepository {
 
   static StitchDefinition getStitchDefinitionById(String id) {
     StitchDefinition? def;
-    for (StitchesSet stsSet in instance.sets) {
+    for (StitchSet stsSet in instance.sets) {
       def = stsSet.stitchDefinitionById(id);
       if (def != null) {
         return def;
@@ -125,4 +146,18 @@ class StitchRepository {
 
     return BasicStitchesSet.noStitch;
   }
+
+  static bool hasStitch(StitchDefinition def) {
+    return instance.sets.any((s) => s.definitions.any((d) => d == def));
+  }
+
+  static StitchDefinition? getStitchDefinitionByContent(StitchDefinition def) {
+    for (StitchSet stitchSet in instance.sets) {
+      if (stitchSet.definitions.any((s) => s.sameContentAs(def))) {
+        return stitchSet.definitions.firstWhere((s) => s.sameContentAs(def));
+      }
+    }
+    return null;
+  }
+
 }

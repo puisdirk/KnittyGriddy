@@ -4,11 +4,13 @@ import 'package:knitty_griddy/controls/stitcheditor/symbol_part_controls.dart';
 import 'package:knitty_griddy/controls/stitcheditor/symbol_transform_controls.dart';
 import 'package:knitty_griddy/model/knitting_symbol.dart';
 import 'package:knitty_griddy/model/knitting_symbol_part.dart';
+import 'package:knitty_griddy/model/knitting_symbol_parts.dart';
 import 'package:knitty_griddy/model/knitty_griddy_model.dart';
 import 'package:knitty_griddy/model/undo_redo_manager.dart';
 import 'package:knitty_griddy/controls/stitchrepo/stitch_definition.dart';
 import 'package:knitty_griddy/controls/stitcheditor/edit_stitch_parts_control.dart';
 import 'package:knitty_griddy/controls/stitchrepo/stitch_parts_chooser.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
 class EditStitchPage extends StatefulWidget {
@@ -160,7 +162,6 @@ class _EditStitchPageState extends State<EditStitchPage> {
             }, 
             icon: const Icon(Icons.delete)
           ),
-          OutlinedButton(onPressed: () => print(stitchDefinition), child: const Text('Print'))
         ],
       ),
       body: KeyboardListener(
@@ -248,12 +249,20 @@ class _EditStitchPageState extends State<EditStitchPage> {
                         children: [
                           Row(
                             children: [
-                              OutlinedButton(
-                                child: const Text('Add shapes'),
+                              OutlinedButton.icon(
+                                label: const Text('Add shapes'),
+                                icon: const Icon(Symbols.category),
                                 onPressed: () async {
-                                  List<List<KnittingSymbolPart>> partsPerColumn = await showDialog(context: context, builder: (context) => const StitchPartsChooser());
+                                  List<List<KnittingSymbolPart>> partsPerColumn = 
+                                    await showDialog(context: context, builder: (context) => const StitchPartsChooser());
                                   if (partsPerColumn.isNotEmpty) {
                                     List<KnittingSymbol> newSymbols = List.from(stitchDefinition.symbols);
+                                    // If there's just one blank in the existing parts, remove it
+                                    if (newSymbols.length == 1 && 
+                                      newSymbols.first.parts.length == 1 && 
+                                      newSymbols.first.parts.first == KnittingSymbolParts.blankPart) {
+                                      newSymbols = [];
+                                    }
                                     for (int idx = 0; idx < partsPerColumn.length; idx++) {
                                       if (newSymbols.length <= idx) {
                                         newSymbols.add(KnittingSymbol(name: '', parts: partsPerColumn[idx]));

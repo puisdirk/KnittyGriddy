@@ -2,7 +2,6 @@
 import 'package:knitty_griddy/controls/stitchrepo/basic_stitches_set.dart';
 import 'package:knitty_griddy/model/named_colour.dart';
 import 'package:knitty_griddy/controls/stitchrepo/stitch_definition.dart';
-import 'package:knitty_griddy/controls/stitchrepo/stitch_repository.dart';
 
 // The current tool is derived from the mouse option and the currently selected stitch or colour
 enum Tool {

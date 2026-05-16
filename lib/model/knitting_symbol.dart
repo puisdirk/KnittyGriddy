@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:knitty_griddy/model/basicshapes/knitting_symbol_arc.dart';
 import 'package:knitty_griddy/model/basicshapes/knitting_symbol_curve.dart';
@@ -113,7 +114,7 @@ class KnittingSymbol {
     identical(this, other) ||
     other is KnittingSymbol &&
     name == other.name &&
-    parts == other.parts &&
+    listEquals(parts, other.parts) &&
     scale == other.scale &&
     translation == other.translation &&
     rotationRad == other.rotationRad;
