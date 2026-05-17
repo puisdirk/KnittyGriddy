@@ -377,4 +377,7 @@ KnittingSymbolCurve(
     return defString;
   }
 
+  @override
+  String get partType => 'Curve';
+
 }

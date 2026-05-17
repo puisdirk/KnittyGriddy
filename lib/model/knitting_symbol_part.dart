@@ -80,6 +80,7 @@ abstract class KnittingSymbolPart {
 
   void drawPart(Canvas canvas, Size size, Paint ink);
   String toSvg(Color symbolColor);
+  String get partType;
 
   Widget getPartControls(
     StitchDefinition stitchDefinition, 
@@ -94,6 +95,16 @@ abstract class KnittingSymbolPart {
     Function(StitchDefinition newDefinition) onChanged) {
       return Column(
         children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                stitchDefinition.symbolPartAt(partColumn, partRow).partType, 
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              )
+            ],
+          ),
+          const SizedBox(height: 10,),
           SymbolPartTransformControls(
             stitchDefinition: stitchDefinition, 
             symbolPartColumn: partColumn, 

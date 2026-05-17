@@ -457,5 +457,8 @@ KnittingSymbolArc(
     return defString;
 
   }
+  
+  @override
+  String get partType => 'Arc';
 
 }

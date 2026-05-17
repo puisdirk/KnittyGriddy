@@ -22,6 +22,11 @@ class SymbolTransformControls extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
+        const Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [Text('Symbol', style: TextStyle(fontWeight: FontWeight.bold),)],
+        ),
+        const SizedBox(height: 10,),
         Row(
           children: [
             const SizedBox(
