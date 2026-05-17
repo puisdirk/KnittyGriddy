@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:knitty_griddy/model/basicshapes/stateless_text_entry_control.dart';
 import 'package:knitty_griddy/model/basicshapes/text_entry_control.dart';
 import 'package:knitty_griddy/model/knitting_symbol.dart';
 import 'package:knitty_griddy/model/knitting_symbol_part.dart';
@@ -151,7 +152,7 @@ KnittingSymbolPath(
               ),
             ),
             const SizedBox(width: 10,),
-            TextEntryControl(
+            StatelessTextEntryControl(
               initialText: path,
               width: 400,
               maxlines: 10,
@@ -184,4 +185,7 @@ KnittingSymbolPath(
       ]
     );
   }
+
+  @override
+  String get partType => 'Path';
 }

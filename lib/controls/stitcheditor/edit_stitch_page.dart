@@ -228,6 +228,8 @@ class _EditStitchPageState extends State<EditStitchPage> {
                   ],
                 ),
                 const SizedBox(height: 20,),
+                const Divider(height: 3,),
+                const SizedBox(height: 20,),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,

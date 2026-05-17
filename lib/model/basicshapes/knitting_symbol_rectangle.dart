@@ -139,17 +139,58 @@ class KnittingSymbolRectangle extends KnittingSymbolPart {
 
   @override
   String toSvg(Color symbolColor) {
-    String svg = '<rect x="${(stitchCellWidth / 2) - (width / 2)}" y="${(stitchCellHeight / 2) - (height / 2)}" width="$width" height="$height" ';
-    if (filled) {
-      svg += 'fill="rgb(${symbolColor.red}, ${symbolColor.green}, ${symbolColor.blue})" fill-opacity="${symbolColor.alpha}" ';
+    String svg = '';
+
+    if (rounded &&
+        (topLeftRadius != topRightRadius ||
+         topRightRadius != bottomLeftRadius ||
+         bottomLeftRadius != bottomRightRadius)) {
+      // We can't express this with an SVG rect. We use a path instead
+      double left = (stitchCellWidth / 2) - (width / 2);
+      double top = (stitchCellHeight / 2) - (height / 2);
+      double right = (stitchCellWidth / 2) + (width / 2);
+      double bottom = (stitchCellHeight / 2) + (height / 2);
+
+      String largeArc = '0';
+      String sweep = '1'; 
+
+      String path = 'M${left + topLeftRadius},$top';
+      path += ' H${right - topRightRadius}';
+      if (topRightRadius > 0) {
+        path += ' A$topRightRadius,$topRightRadius 0 $largeArc,$sweep $right,${top + topRightRadius}';
+      }
+      path += ' V${bottom - bottomRightRadius}';
+      if (bottomRightRadius > 0) {
+        path += ' A$bottomRightRadius,$bottomRightRadius 0 0,1 ${right - bottomRightRadius},$bottom';
+      }
+      path += ' H${left + bottomLeftRadius}';
+      if (bottomLeftRadius > 0) {
+        path += ' A$bottomLeftRadius,$bottomLeftRadius 0 $largeArc,$sweep $left,${bottom - bottomLeftRadius}';
+      }
+      path += ' V${top + topLeftRadius}';
+      if (topLeftRadius > 0) {
+        path += ' A$topLeftRadius,$topLeftRadius 0 0,1 ${left + topLeftRadius},$top';
+      }
+//-----
+/*
+      path = 'M${left + topLeftRadius},$top';
+      path += ' H${right - topRightRadius}';
+      path += ' V${bottom - bottomRightRadius}';
+*/
+//-----
+      svg = '<path d="$path"/>';
     } else {
-      svg += 'fill="none" stroke="rgb(${symbolColor.red}, ${symbolColor.green}, ${symbolColor.blue})" stroke-width="$strokeWidth" stroke-opacity="${symbolColor.alpha}" ';
+      svg = '<rect x="${(stitchCellWidth / 2) - (width / 2)}" y="${(stitchCellHeight / 2) - (height / 2)}" width="$width" height="$height" ';
+      if (filled) {
+        svg += 'fill="rgb(${symbolColor.red}, ${symbolColor.green}, ${symbolColor.blue})" fill-opacity="${symbolColor.alpha}" ';
+      } else {
+        svg += 'fill="none" stroke="rgb(${symbolColor.red}, ${symbolColor.green}, ${symbolColor.blue})" stroke-width="$strokeWidth" stroke-opacity="${symbolColor.alpha}" ';
+      }
+      if (rounded) {
+        svg += 'rx="$topLeftRadius" ';
+      }
+      svg += '/>';
     }
-    if (rounded) {
-      // TODO: if the roundings are different on each corner, we'll need a path instead of a rect
-      svg += 'rx="$topLeftRadius" ';
-    }
-    svg += '/>';
 
     return svg;
   }
@@ -541,4 +582,7 @@ KnittingSymbolRectangle(
 
     return defString;
   }
+
+  @override
+  String get partType => 'Rectangle';
 }

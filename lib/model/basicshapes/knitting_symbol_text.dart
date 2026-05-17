@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:knitty_griddy/model/basicshapes/stateless_text_entry_control.dart';
 import 'package:knitty_griddy/model/basicshapes/text_entry_control.dart';
 import 'package:knitty_griddy/model/knitting_symbol.dart';
 import 'package:knitty_griddy/model/knitting_symbol_part.dart';
@@ -166,7 +167,7 @@ class KnittingSymbolText extends KnittingSymbolPart {
               ),
             ),
             const SizedBox(width: 10,),
-            TextEntryControl(
+            StatelessTextEntryControl(
               initialText: text,
               width: 250,
               onChanged: (String newText) {
@@ -292,4 +293,7 @@ KnittingSymbolText(
 
     return defString;
   }
+
+  @override
+  String get partType => 'Text';
 }
