@@ -1,19 +1,19 @@
 
-import 'package:knitty_griddy/controls/stitchrepo/stitch_set.dart';
-import 'package:knitty_griddy/model/knitting_pattern.dart';
-import 'package:knitty_griddy/model/pattern_info.dart';
+import 'package:knitty_griddy/charts/stitchrepo/stitch_set.dart';
+import 'package:knitty_griddy/model/knitting_chart.dart';
+import 'package:knitty_griddy/model/chart_info.dart';
 
 abstract class ModelRepository {
 
-  Future<List<PatternInfo>> loadPatternInfos();
-  Future<void> savePatternInfos(List<PatternInfo> patternInfos);
+  Future<List<ChartInfo>> loadChartInfos();
+  Future<void> saveChartInfos(List<ChartInfo> chartInfos);
 
-  Future<KnittingPattern> loadPattern(String patternId);
-  Future<void> savePattern(KnittingPattern pattern);
-  Future<void> deletePattern(String patternId);
+  Future<KnittingChart> loadChart(String chartId);
+  Future<void> saveChart(KnittingChart chart);
+  Future<void> deleteChart(String chartId);
 
-  Future<void> exportPattern(KnittingPattern pattern);
-  Future<KnittingPattern?> importPattern();
+  Future<void> exportChart(KnittingChart chart);
+  Future<KnittingChart?> importChart();
 
   Future<List<StitchSet>> loadStitchSets();
   Future<void> saveStitchSets(List<StitchSet> stitchSets);

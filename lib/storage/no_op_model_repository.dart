@@ -1,8 +1,8 @@
 
-import 'package:knitty_griddy/controls/stitchrepo/stitch_set.dart';
-import 'package:knitty_griddy/model/knitting_pattern.dart';
-import 'package:knitty_griddy/model/pattern_info.dart';
-import 'package:knitty_griddy/model/pattern_settings.dart';
+import 'package:knitty_griddy/charts/stitchrepo/stitch_set.dart';
+import 'package:knitty_griddy/model/knitting_chart.dart';
+import 'package:knitty_griddy/model/chart_info.dart';
+import 'package:knitty_griddy/model/chart_settings.dart';
 import 'package:knitty_griddy/storage/model_repository.dart';
 
 class NoOpModelRepository implements ModelRepository {
@@ -10,25 +10,25 @@ class NoOpModelRepository implements ModelRepository {
   const NoOpModelRepository();
 
   @override
-  Future<List<PatternInfo>> loadPatternInfos() async {
+  Future<List<ChartInfo>> loadChartInfos() async {
     return [];
   }
 
     @override
-  Future<KnittingPattern> loadPattern(String patternId) async {
-    return const KnittingPattern(id: 'default', name: 'default', patternSettings: PatternSettings(rows: 10, columns: 10, gridType: GridType.flat));
+  Future<KnittingChart> loadChart(String chartId) async {
+    return const KnittingChart(id: 'default', name: 'default', chartSettings: ChartSettings(rows: 10, columns: 10, gridType: GridType.flat));
   }
 
   @override
-  Future<void> savePattern(KnittingPattern pattern) async {
+  Future<void> saveChart(KnittingChart chart) async {
   }
   
   @override
-  Future<void> savePatternInfos(List<PatternInfo> patternInfos) async {
+  Future<void> saveChartInfos(List<ChartInfo> chartInfos) async {
   }
 
   @override
-  Future<void> deletePattern(String patternId) async {
+  Future<void> deleteChart(String chartId) async {
   }
 
   @override
@@ -50,11 +50,11 @@ class NoOpModelRepository implements ModelRepository {
   }
   
   @override
-  Future<KnittingPattern?> importPattern() async {
+  Future<KnittingChart?> importChart() async {
     return null;
   }
   
   @override
-  Future<void> exportPattern(KnittingPattern pattern) async {
+  Future<void> exportChart(KnittingChart chart) async {
   }
 }

@@ -3,43 +3,43 @@ import 'dart:convert';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:knitty_griddy/controls/stitchrepo/stitch_set.dart';
-import 'package:knitty_griddy/model/knitting_pattern.dart';
-import 'package:knitty_griddy/model/pattern_info.dart';
+import 'package:knitty_griddy/charts/stitchrepo/stitch_set.dart';
+import 'package:knitty_griddy/model/knitting_chart.dart';
+import 'package:knitty_griddy/model/chart_info.dart';
 import 'package:knitty_griddy/storage/model_repository.dart';
 
 class InMemoryModelRepository implements ModelRepository {
-  List<KnittingPattern> patterns = [];
-  List<PatternInfo> patternInfos = [];
+  List<KnittingChart> charts = [];
+  List<ChartInfo> chartInfos = [];
   List<StitchSet> stitchSets = [];
 
   @override
-  Future<void> deletePattern(String patternId) async {
-    patternInfos = patternInfos.where((p) => p.id != patternId).toList();
+  Future<void> deleteChart(String chartId) async {
+    chartInfos = chartInfos.where((p) => p.id != chartId).toList();
   }
 
   @override
-  Future<KnittingPattern> loadPattern(String patternId) async {
-    return patterns.firstWhere((p) => p.id == patternId);
+  Future<KnittingChart> loadChart(String chartId) async {
+    return charts.firstWhere((p) => p.id == chartId);
   }
 
   @override
-  Future<List<PatternInfo>> loadPatternInfos() async {
-    return patternInfos;
+  Future<List<ChartInfo>> loadChartInfos() async {
+    return chartInfos;
   }
 
   @override
-  Future<void> savePattern(KnittingPattern pattern) async {
-    if (patterns.any((p) => p.id == pattern.id)) {
-      patterns = patterns.map((p) => p.id == pattern.id ? pattern : p).toList();
+  Future<void> saveChart(KnittingChart chart) async {
+    if (charts.any((p) => p.id == chart.id)) {
+      charts = charts.map((p) => p.id == chart.id ? chart : p).toList();
     } else {
-      patterns.add(pattern);
+      charts.add(chart);
     }
   }
 
   @override
-  Future<void> savePatternInfos(List<PatternInfo> patternInfos) async {
-    patternInfos = patternInfos;
+  Future<void> saveChartInfos(List<ChartInfo> chartInfos) async {
+    chartInfos = chartInfos;
   }
 
   @override
@@ -94,24 +94,24 @@ class InMemoryModelRepository implements ModelRepository {
   }
 
   @override
-  Future<void> exportPattern(KnittingPattern pattern) async {
-    Map<String, Object> jsonObject = pattern.toJson();
+  Future<void> exportChart(KnittingChart chart) async {
+    Map<String, Object> jsonObject = chart.toJson();
     try {
       String jsonString = jsonEncode(jsonObject);
       await FilePicker.platform.saveFile(
         dialogTitle: 'Where do you want to store the output?',
-        fileName: '${pattern.name}.kgp',
+        fileName: '${chart.name}.kgp',
         bytes: utf8.encode(jsonString),
       );
     } catch (e) {
-      debugPrint('Error while exporting pattern: $e');
+      debugPrint('Error while exporting chart: $e');
     }
   }
 
   @override
-  Future<KnittingPattern?> importPattern() async {
+  Future<KnittingChart?> importChart() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
-      dialogTitle: 'Load a pattern (kgp)',
+      dialogTitle: 'Load a chart (kgc)',
       allowMultiple: false,
       withData: true,
     );
@@ -120,10 +120,10 @@ class InMemoryModelRepository implements ModelRepository {
       try {
         String jsonString = utf8.decode(result.files.first.bytes!);
         Map<String, dynamic> jsonObject = jsonDecode(jsonString);
-        KnittingPattern pattern = KnittingPattern.fromJson(jsonObject);
-        return pattern;
+        KnittingChart chart = KnittingChart.fromJson(jsonObject);
+        return chart;
       } catch (e) {
-        debugPrint('Error while importing pattern: $e');
+        debugPrint('Error while importing chart: $e');
       }
     }
 
