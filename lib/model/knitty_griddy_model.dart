@@ -4,62 +4,62 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:id_gen/id_gen.dart';
-import 'package:knitty_griddy/controls/stitchrepo/basic_stitches_set.dart';
-import 'package:knitty_griddy/controls/stitchrepo/stitch_set.dart';
-import 'package:knitty_griddy/model/knitty_griddy_save_model.dart';
+import 'package:knitty_griddy/charts/stitchrepo/basic_stitches_set.dart';
+import 'package:knitty_griddy/charts/stitchrepo/stitch_set.dart';
+import 'package:knitty_griddy/model/charts_save_model.dart';
 import 'package:knitty_griddy/model/named_colour.dart';
 import 'package:knitty_griddy/model/cell_address.dart';
 import 'package:knitty_griddy/model/knitting_symbol.dart';
 import 'package:knitty_griddy/model/knitting_symbol_parts.dart';
-import 'package:knitty_griddy/model/pattern_info.dart';
+import 'package:knitty_griddy/model/chart_info.dart';
 import 'package:knitty_griddy/model/selection.dart';
 import 'package:knitty_griddy/model/app_state.dart';
-import 'package:knitty_griddy/model/griddy_model.dart';
-import 'package:knitty_griddy/model/knitting_pattern.dart';
-import 'package:knitty_griddy/model/pattern_settings.dart';
+import 'package:knitty_griddy/model/charts_model.dart';
+import 'package:knitty_griddy/model/knitting_chart.dart';
+import 'package:knitty_griddy/model/chart_settings.dart';
 import 'package:knitty_griddy/model/stitch_cell.dart';
 import 'package:knitty_griddy/model/undo_redo_manager.dart';
-import 'package:knitty_griddy/controls/stitchrepo/stitch_definition.dart';
-import 'package:knitty_griddy/controls/stitchrepo/stitch_repository.dart';
+import 'package:knitty_griddy/charts/stitchrepo/stitch_definition.dart';
+import 'package:knitty_griddy/charts/stitchrepo/stitch_repository.dart';
 import 'package:knitty_griddy/storage/model_repository.dart';
 
 class KnittyGriddyModel extends ChangeNotifier {
 
   final ModelRepository _repository;
 
-  // The immutable model being accessed throughout the app
-  GriddyModel _model;
+  // The immutable models being accessed throughout the app
+  ChartsModel _chartsModel;
   
-  final UndoRedoManager<KnittingPattern> _undoRedoManager;
+  final UndoRedoManager<KnittingChart> _undoRedoManager;
 
-  KnittyGriddySaveModel? _lastSaved;
+  ChartsSaveModel? _lastSaved;
 
   Future<void> autoSave() async {
     if (_lastSaved == null) {
-      _lastSaved = KnittyGriddySaveModel(
-        knittingPattern: _model.knittingPattern, 
-        patternInfos: _model.patternInfos, 
+      _lastSaved = ChartsSaveModel(
+        knittingChart: _chartsModel.knittingChart, 
+        chartInfos: _chartsModel.chartInfos, 
         stitchSets: List.from(StitchRepository.instance.sets),
       );
       return;
     }
 
-    final KnittyGriddySaveModel oldModel = _lastSaved!.copyWith();
+    final ChartsSaveModel oldModel = _lastSaved!.copyWith();
     _lastSaved = _lastSaved!.copyWith(
-      griddyModel: _model,
+      griddyModel: _chartsModel,
       stitchSets: List.from(StitchRepository.instance.sets),
     );
 
-    if (oldModel.patternInfos != _lastSaved!.patternInfos) {
-      await _repository.savePatternInfos(_lastSaved!.patternInfos);
+    if (oldModel.chartInfos != _lastSaved!.chartInfos) {
+      await _repository.saveChartInfos(_lastSaved!.chartInfos);
     }
 
     if (oldModel.stitchSets != _lastSaved!.stitchSets) {
       await _repository.saveStitchSets(_lastSaved!.stitchSets);
     }
 
-    if (oldModel.knittingPattern != _lastSaved!.knittingPattern) {
-      await _repository.savePattern(_lastSaved!.knittingPattern);
+    if (oldModel.knittingChart != _lastSaved!.knittingChart) {
+      await _repository.saveChart(_lastSaved!.knittingChart);
     }
 
     if (oldModel.stitchSets != _lastSaved!.stitchSets) {
@@ -71,16 +71,16 @@ class KnittyGriddyModel extends ChangeNotifier {
     required ModelRepository repository,
   }) : 
     _repository = repository, 
-    _model = const GriddyModel(), 
+    _chartsModel = const ChartsModel(), 
     _undoRedoManager = UndoRedoManager() {
     // Initialize the undo-redo manager
     _storeForUndo();
   }
 
   void loadOnStartup() {
-    _repository.loadPatternInfos().then((List<PatternInfo> patternInfos) {
-      _model = _model.copyWith(
-        patternInfos: patternInfos,
+    _repository.loadChartInfos().then((List<ChartInfo> chartInfos) {
+      _chartsModel = _chartsModel.copyWith(
+        chartInfos: chartInfos,
       );
       _repository.loadStitchSets().then((List<StitchSet> stitchSets) {
         StitchRepository.loadInitialStitchSets(stitchSets);
@@ -89,95 +89,95 @@ class KnittyGriddyModel extends ChangeNotifier {
     });
   }
 
-  Future<void> saveCurrentPattern() async {
-    await _repository.savePattern(_model.knittingPattern);
+  Future<void> saveCurrentChart() async {
+    await _repository.saveChart(_chartsModel.knittingChart);
   }
 
-  Future<void> _savePatternInfos() async {
-    await _repository.savePatternInfos(_model.patternInfos);
+  Future<void> _saveChartInfos() async {
+    await _repository.saveChartInfos(_chartsModel.chartInfos);
   }
 
-  Future<void> createNewPattern(String name) async {
+  Future<void> createNewChart(String name) async {
     final String id = const UuidV4Gen().get();
 
-    _model = _model.copyWith(
-      patternInfos: List.from(_model.patternInfos)..add(PatternInfo(id: id, name: name)),
-      knittingPattern: KnittingPattern(id: id, name: name)
+    _chartsModel = _chartsModel.copyWith(
+      chartInfos: List.from(_chartsModel.chartInfos)..add(ChartInfo(id: id, name: name)),
+      knittingChart: KnittingChart(id: id, name: name)
     );
 
     await autoSave();
     notifyListeners();
   }
 
-  Future<void> exportPattern() async {
-    await _repository.exportPattern(_model.knittingPattern);
+  Future<void> exportChart() async {
+    await _repository.exportChart(_chartsModel.knittingChart);
   }
 
-  Future<void> importPattern() async {
-    KnittingPattern? pattern = await _repository.importPattern();
-    if (pattern != null && !patternInfos.any((pi) => pi.id == pattern.id)) {
-      await _repository.savePattern(pattern);
-      _model = _model.copyWith(
-        patternInfos: [..._model.patternInfos, PatternInfo(id: pattern.id, name: pattern.name, description: pattern.description)],
+  Future<void> importChart() async {
+    KnittingChart? chart = await _repository.importChart();
+    if (chart != null && !chartInfos.any((pi) => pi.id == chart.id)) {
+      await _repository.saveChart(chart);
+      _chartsModel = _chartsModel.copyWith(
+        chartInfos: [..._chartsModel.chartInfos, ChartInfo(id: chart.id, name: chart.name, description: chart.description)],
       );
-      _savePatternInfos();
+      _saveChartInfos();
       notifyListeners();
     }
   }
 
-  void deletePattern(String patternId) {
-    _model = _model.copyWith(
-      patternInfos: _model.patternInfos.where((pi) => pi.id != patternId).toList()
+  void deleteChart(String chartId) {
+    _chartsModel = _chartsModel.copyWith(
+      chartInfos: _chartsModel.chartInfos.where((pi) => pi.id != chartId).toList()
     );
 
-    _repository.deletePattern(patternId);
-    _savePatternInfos();
+    _repository.deleteChart(chartId);
+    _saveChartInfos();
     notifyListeners();
   }
 
-  Future<void> loadPattern(String patternId) async {
-    KnittingPattern pattern = await _repository.loadPattern(patternId);
+  Future<void> loadChart(String chartId) async {
+    KnittingChart chart = await _repository.loadChart(chartId);
     // Import unknown stitches
-    for (StitchDefinition def in pattern.usedStitches) {
+    for (StitchDefinition def in chart.usedStitches) {
       if (!StitchRepository.hasStitch(def)) {
         StitchDefinition? sameStitchContent = StitchRepository.getStitchDefinitionByContent(def);
         if (sameStitchContent != null) {
           // We have a stitchdefinition in the repo that is the same except for the id. So use that
-          pattern = pattern.copyWith(
-            usedStitches: pattern.usedStitches.map((us) => us != def ? def : sameStitchContent).toList(),
-            stitches: pattern.stitches.map((sc) => sc.stitchDefinitionId != def.id ? sc : sc.copyWith(stitchDefinitionId: sameStitchContent.id)).toList()
+          chart = chart.copyWith(
+            usedStitches: chart.usedStitches.map((us) => us != def ? def : sameStitchContent).toList(),
+            stitches: chart.stitches.map((sc) => sc.stitchDefinitionId != def.id ? sc : sc.copyWith(stitchDefinitionId: sameStitchContent.id)).toList()
           );
         } else {
           StitchRepository.addStitchToImportedSet(def);
         }
       }
     }
-    _model = _model.copyWith(
-      knittingPattern: pattern,
+    _chartsModel = _chartsModel.copyWith(
+      knittingChart: chart,
     );
     notifyListeners();
   }
 
-  void setPatternName(String name) {
-    _model = _model.copyWith(
-      patternInfos: _model.patternInfos.map((pi) =>
-        pi.id != _model.knittingPattern.id ? pi :
+  void setChartName(String name) {
+    _chartsModel = _chartsModel.copyWith(
+      chartInfos: _chartsModel.chartInfos.map((pi) =>
+        pi.id != _chartsModel.knittingChart.id ? pi :
         pi.copyWith(name: name)
       ).toList(),
-      knittingPattern: _model.knittingPattern.copyWith(name: name)
+      knittingChart: _chartsModel.knittingChart.copyWith(name: name)
     );
 
     _storeForUndo();
     notifyListeners();
   }
 
-  void setPatternDescription(String description) {
-    _model = _model.copyWith(
-      patternInfos: _model.patternInfos.map((pi) =>
-        pi.id != _model.knittingPattern.id ? pi :
+  void setChartDescription(String description) {
+    _chartsModel = _chartsModel.copyWith(
+      chartInfos: _chartsModel.chartInfos.map((pi) =>
+        pi.id != _chartsModel.knittingChart.id ? pi :
         pi.copyWith(description: description)
       ).toList(),
-      knittingPattern: _model.knittingPattern.copyWith(description: description)
+      knittingChart: _chartsModel.knittingChart.copyWith(description: description)
     );
 
     _storeForUndo();
@@ -185,7 +185,7 @@ class KnittyGriddyModel extends ChangeNotifier {
   }
  
   void _storeForUndo() {
-    _undoRedoManager.store(_model.knittingPattern.copyWith());
+    _undoRedoManager.store(_chartsModel.knittingChart.copyWith());
   }
 
   bool get canUndo => _undoRedoManager.canUndo();
@@ -193,46 +193,32 @@ class KnittyGriddyModel extends ChangeNotifier {
 
   void undo() {
     if (_undoRedoManager.canUndo()) {
-      _model = _model.copyWith(knittingPattern: _undoRedoManager.undo());
+      _chartsModel = _chartsModel.copyWith(knittingChart: _undoRedoManager.undo());
       notifyListeners();
     }
   }
 
   void redo() {
     if (_undoRedoManager.canRedo()) {
-      _model = _model.copyWith(knittingPattern: _undoRedoManager.redo());
+      _chartsModel = _chartsModel.copyWith(knittingChart: _undoRedoManager.redo());
       notifyListeners();
     }
   }
 
-  List<PatternInfo> get patternInfos => _model.patternInfos;
-  PatternSettings get settings => _model.knittingPattern.patternSettings;
-  StitchCell stitchCell(int row, int column) => _model.knittingPattern.stitchCell(row, column);
-  List<StitchCell> get stitches => _model.knittingPattern.stitches;
-  StitchCell stitchAt(int column, int row) => _model.knittingPattern.stitches.firstWhere((cell) => cell.column == column && cell.row == row);
-  List<StitchDefinition> get usedStitches => _model.knittingPattern.usedStitches;
-  List<NamedColour> get usedColours => _model.knittingPattern.usedColours;
-  Selection get selection => _model.knittingPattern.selection;
-  Set<CellAddress> get outline => _model.knittingPattern.outline;
-  KnittingPattern get knittingPattern => _model.knittingPattern;
-  AppState get appState => _model.appState;
+  List<ChartInfo> get chartInfos => _chartsModel.chartInfos;
+  ChartSettings get settings => _chartsModel.knittingChart.chartSettings;
+  StitchCell stitchCell(int row, int column) => _chartsModel.knittingChart.stitchCell(row, column);
+  List<StitchCell> get stitches => _chartsModel.knittingChart.stitches;
+  StitchCell stitchAt(int column, int row) => _chartsModel.knittingChart.stitches.firstWhere((cell) => cell.column == column && cell.row == row);
+  List<StitchDefinition> get usedStitches => _chartsModel.knittingChart.usedStitches;
+  List<NamedColour> get usedColours => _chartsModel.knittingChart.usedColours;
+  Selection get selection => _chartsModel.knittingChart.selection;
+  Set<CellAddress> get outline => _chartsModel.knittingChart.outline;
+  KnittingChart get knittingChart => _chartsModel.knittingChart;
+  AppState get appState => _chartsModel.appState;
 
   List<StitchSet> filteredStitchSets(String filter) {
     return StitchRepository.filteredStitchSets(filter);
-  }
-
-  Map<String, List<StitchDefinition>> selectStitchDefinitionsPerCategory(String filter) {
-    if (filter.isEmpty) {
-      return StitchRepository.getDefinitionsPerCategory();
-    }
-
-    Map<String, List<StitchDefinition>> filtered = {};
-    StitchRepository.getDefinitionsPerCategory().forEach((key, value) {
-      if (value.any((sd) => sd.passesFilter(filter))) {
-        filtered[key] = value.where((sd) => sd.passesFilter(filter)).toList();
-      }
-    });
-    return filtered;
   }
 
   String createStitchSet(String name, List<StitchDefinition> stitches) {
@@ -273,35 +259,35 @@ class KnittyGriddyModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  bool isStitchUsedInPattern(StitchDefinition definition) =>
-    _model.knittingPattern.isStitchUsedInPattern(definition);
+  bool isStitchUsedInChart(StitchDefinition definition) =>
+    _chartsModel.knittingChart.isStitchUsedInChart(definition);
 
-  bool isColourUsedInPattern(NamedColour colour) =>
-    _model.knittingPattern.isColourUsedInPattern(colour);
+  bool isColourUsedInChart(NamedColour colour) =>
+    _chartsModel.knittingChart.isColourUsedInChart(colour);
 
   void appUseStitch(StitchDefinition stitchDefinition) {
-    _model = _model.copyWith(
-      appState: _model.appState.setSelectedStitchDefinition(stitchDefinition: stitchDefinition)
+    _chartsModel = _chartsModel.copyWith(
+      appState: _chartsModel.appState.setSelectedStitchDefinition(stitchDefinition: stitchDefinition)
     );
     notifyListeners();
   }
   void appUseColour(NamedColour colour) {
-    _model = _model.copyWith(
-      appState: _model.appState.setSelectedColour(colour: colour)
+    _chartsModel = _chartsModel.copyWith(
+      appState: _chartsModel.appState.setSelectedColour(colour: colour)
     );
     notifyListeners();
   }
   void setMouseOption(MouseOption option) {
-    _model = _model.copyWith(
-      appState: _model.appState.setSelectedMouseOption(mouseOption: option)
+    _chartsModel = _chartsModel.copyWith(
+      appState: _chartsModel.appState.setSelectedMouseOption(mouseOption: option)
     );
     notifyListeners();
   }
 
   void useGridType(GridType newGridType){
-    _model = _model.copyWith(
-      knittingPattern: _model.knittingPattern.copyWith(
-        patternSettings: _model.knittingPattern.patternSettings.copyWith(
+    _chartsModel = _chartsModel.copyWith(
+      knittingChart: _chartsModel.knittingChart.copyWith(
+        chartSettings: _chartsModel.knittingChart.chartSettings.copyWith(
           gridType: newGridType
         )
       )
@@ -315,7 +301,7 @@ class KnittyGriddyModel extends ChangeNotifier {
 
   void setStitch(int row, int column, StitchDefinition stitchDefinition, {bool storeForUndo = true, bool emitNotification = true}) {
     // Do nothing if there isn't enough room
-    if (stitchDefinition.columns + column > _model.knittingPattern.patternSettings.columns) {
+    if (stitchDefinition.columns + column > _chartsModel.knittingChart.chartSettings.columns) {
       return;
     }
 
@@ -355,9 +341,9 @@ class KnittyGriddyModel extends ChangeNotifier {
       return;
     }
 
-    _model = _model.copyWith(
-      knittingPattern: _model.knittingPattern.copyWith(
-        stitches: _model.knittingPattern.stitches.map((stitch) =>
+    _chartsModel = _chartsModel.copyWith(
+      knittingChart: _chartsModel.knittingChart.copyWith(
+        stitches: _chartsModel.knittingChart.stitches.map((stitch) =>
           newStitchCells.firstWhere((ns) => stitch.row == ns.row && stitch.column == ns.column, orElse: () => stitch),
         ).toList(),
       )
@@ -371,9 +357,9 @@ class KnittyGriddyModel extends ChangeNotifier {
   }
   
   void setStitchColour(int row, int column, NamedColour colour) {
-    _model = _model.copyWith(
-      knittingPattern: _model.knittingPattern.copyWith(
-        stitches: _model.knittingPattern.stitches.map((stitch) =>
+    _chartsModel = _chartsModel.copyWith(
+      knittingChart: _chartsModel.knittingChart.copyWith(
+        stitches: _chartsModel.knittingChart.stitches.map((stitch) =>
           stitch.row != row || stitch.column != column ? stitch : stitch.copyWith(
             colour: colour
           )
@@ -398,7 +384,7 @@ class KnittyGriddyModel extends ChangeNotifier {
       }
     } else {
       // We check for spots row by row
-      for (int row = 0; row < _model.knittingPattern.patternSettings.rows; row++) {
+      for (int row = 0; row < _chartsModel.knittingChart.chartSettings.rows; row++) {
         List<CellAddress> addressesOnRow = selection.addressesOnRow(row);
         if (addressesOnRow.isEmpty) {
           continue;
@@ -427,10 +413,10 @@ class KnittyGriddyModel extends ChangeNotifier {
   }
 
   void fillSelectionWithColor(NamedColour colour) {
-    _model = _model.copyWith(
-      knittingPattern: _model.knittingPattern.copyWith(
-        stitches: _model.knittingPattern.stitches.map((stitch) =>
-          _model.knittingPattern.selection.isSelected(stitch.column, stitch.row) ?
+    _chartsModel = _chartsModel.copyWith(
+      knittingChart: _chartsModel.knittingChart.copyWith(
+        stitches: _chartsModel.knittingChart.stitches.map((stitch) =>
+          _chartsModel.knittingChart.selection.isSelected(stitch.column, stitch.row) ?
             stitch.copyWith(colour: colour) : stitch
         ).toList()
       )
@@ -444,16 +430,16 @@ class KnittyGriddyModel extends ChangeNotifier {
 
   void insertColumn(int beforeColumn) {
     // Find multi-column stitches that will get broken
-    List<StitchCell> brokenStitches = _model.knittingPattern.stitches.where((stitch) =>
+    List<StitchCell> brokenStitches = _chartsModel.knittingChart.stitches.where((stitch) =>
       StitchRepository.getStitchDefinitionById(stitch.stitchDefinitionId).columns > 1 && 
       beforeColumn > stitch.column - (stitch.stitchDefinitionColumn - 1) && 
       beforeColumn < (stitch.column - (stitch.stitchDefinitionColumn - 1)) + StitchRepository.getStitchDefinitionById(stitch.stitchDefinitionId).columns
     ).toList();
 
     // Clear these broken stitches
-    _model = _model.copyWith(
-      knittingPattern: _model.knittingPattern.copyWith(
-        stitches: _model.knittingPattern.stitches.map((stitch) => 
+    _chartsModel = _chartsModel.copyWith(
+      knittingChart: _chartsModel.knittingChart.copyWith(
+        stitches: _chartsModel.knittingChart.stitches.map((stitch) => 
           brokenStitches.contains(stitch) ? stitch.copyWith(
             stitchDefinitionId: BasicStitchesSet.noStitch.id, stitchDefinitionColumn: 1) : stitch
         ).toList()
@@ -461,12 +447,12 @@ class KnittyGriddyModel extends ChangeNotifier {
     );
 
     // Move the columns after the insertion point to the right and clear the selection
-    _model = _model.copyWith(
-      knittingPattern: _model.knittingPattern.copyWith(
-        patternSettings: _model.knittingPattern.patternSettings.copyWith(
-          columns: _model.knittingPattern.patternSettings.columns + 1,
+    _chartsModel = _chartsModel.copyWith(
+      knittingChart: _chartsModel.knittingChart.copyWith(
+        chartSettings: _chartsModel.knittingChart.chartSettings.copyWith(
+          columns: _chartsModel.knittingChart.chartSettings.columns + 1,
         ),
-        stitches: _model.knittingPattern.stitches.map((stitch) =>
+        stitches: _chartsModel.knittingChart.stitches.map((stitch) =>
           stitch.column < beforeColumn ? 
             stitch : 
             stitch.copyWith(column: stitch.column + 1)
@@ -476,31 +462,31 @@ class KnittyGriddyModel extends ChangeNotifier {
     );
 
     // Create the new column of cells
-    List<StitchCell> newStitches = List.from(_model.knittingPattern.stitches);
+    List<StitchCell> newStitches = List.from(_chartsModel.knittingChart.stitches);
     newStitches.addAll(List<StitchCell>.generate(
-      _model.knittingPattern.patternSettings.rows,
+      _chartsModel.knittingChart.chartSettings.rows,
       (idx) =>
         StitchCell(
           row: idx, 
           column: beforeColumn, 
           stitchDefinitionId: BasicStitchesSet.noStitch.id, 
-          colour: _model.knittingPattern.mainColour
+          colour: _chartsModel.knittingChart.mainColour
         )
     ));
 
-    _model = _model.copyWith(knittingPattern: _model.knittingPattern.copyWith(stitches: newStitches));
+    _chartsModel = _chartsModel.copyWith(knittingChart: _chartsModel.knittingChart.copyWith(stitches: newStitches));
 
     _storeForUndo();
     notifyListeners();
   }
 
   void insertRow(int beforeRow) {
-    _model = _model.copyWith(
-      knittingPattern: _model.knittingPattern.copyWith(
-        patternSettings: _model.knittingPattern.patternSettings.copyWith(
-          rows: _model.knittingPattern.patternSettings.rows + 1
+    _chartsModel = _chartsModel.copyWith(
+      knittingChart: _chartsModel.knittingChart.copyWith(
+        chartSettings: _chartsModel.knittingChart.chartSettings.copyWith(
+          rows: _chartsModel.knittingChart.chartSettings.rows + 1
         ),
-        stitches: _model.knittingPattern.stitches.map((stitch) =>
+        stitches: _chartsModel.knittingChart.stitches.map((stitch) =>
           stitch.row < beforeRow ? stitch : stitch.copyWith(
             row: stitch.row + 1
           )
@@ -509,21 +495,21 @@ class KnittyGriddyModel extends ChangeNotifier {
       )
     );
 
-    List<StitchCell> newStitches = List.from(_model.knittingPattern.stitches);
+    List<StitchCell> newStitches = List.from(_chartsModel.knittingChart.stitches);
     newStitches.addAll(
       List<StitchCell>.generate(
-        _model.knittingPattern.patternSettings.columns, 
+        _chartsModel.knittingChart.chartSettings.columns, 
         (idx) => 
           StitchCell(
             row: beforeRow, 
             column: idx, 
             stitchDefinitionId: BasicStitchesSet.noStitch.id, 
-            colour: _model.knittingPattern.mainColour
+            colour: _chartsModel.knittingChart.mainColour
           )
       )
     );
 
-    _model = _model.copyWith(knittingPattern: _model.knittingPattern.copyWith(stitches: newStitches));
+    _chartsModel = _chartsModel.copyWith(knittingChart: _chartsModel.knittingChart.copyWith(stitches: newStitches));
 
     _storeForUndo();
     notifyListeners();
@@ -531,16 +517,16 @@ class KnittyGriddyModel extends ChangeNotifier {
 
   void deleteColumn(int column) {
     // Find multi-column stitches that will get broken
-    List<StitchCell> brokenStitches = _model.knittingPattern.stitches.where((stitch) =>
+    List<StitchCell> brokenStitches = _chartsModel.knittingChart.stitches.where((stitch) =>
       StitchRepository.getStitchDefinitionById(stitch.stitchDefinitionId).columns > 1 && 
       column >= stitch.column - (stitch.stitchDefinitionColumn - 1) && 
       column < (stitch.column - (stitch.stitchDefinitionColumn - 1)) + StitchRepository.getStitchDefinitionById(stitch.stitchDefinitionId).columns
     ).toList();
 
     // Clear these broken stitches
-    _model = _model.copyWith(
-      knittingPattern: _model.knittingPattern.copyWith(
-        stitches: _model.knittingPattern.stitches.map((stitch) => 
+    _chartsModel = _chartsModel.copyWith(
+      knittingChart: _chartsModel.knittingChart.copyWith(
+        stitches: _chartsModel.knittingChart.stitches.map((stitch) => 
           brokenStitches.contains(stitch) ? stitch.copyWith(
             stitchDefinitionId: BasicStitchesSet.noStitch.id, stitchDefinitionColumn: 1) : stitch
         ).toList()
@@ -548,18 +534,18 @@ class KnittyGriddyModel extends ChangeNotifier {
     );
 
     // Remove the column stitches
-    _model = _model.copyWith(
-      knittingPattern: _model.knittingPattern.copyWith(
-        stitches: _model.knittingPattern.stitches.where((stitch) => stitch.column != column).toList()
+    _chartsModel = _chartsModel.copyWith(
+      knittingChart: _chartsModel.knittingChart.copyWith(
+        stitches: _chartsModel.knittingChart.stitches.where((stitch) => stitch.column != column).toList()
       )
     );
 
-    _model = _model.copyWith(
-      knittingPattern: _model.knittingPattern.copyWith(
-        patternSettings: _model.knittingPattern.patternSettings.copyWith(
-          columns: _model.knittingPattern.patternSettings.columns - 1,
+    _chartsModel = _chartsModel.copyWith(
+      knittingChart: _chartsModel.knittingChart.copyWith(
+        chartSettings: _chartsModel.knittingChart.chartSettings.copyWith(
+          columns: _chartsModel.knittingChart.chartSettings.columns - 1,
         ),
-        stitches: _model.knittingPattern.stitches.map((stitch) =>
+        stitches: _chartsModel.knittingChart.stitches.map((stitch) =>
           stitch.column > column ? 
             stitch.copyWith(column: stitch.column - 1) :
             stitch
@@ -574,18 +560,18 @@ class KnittyGriddyModel extends ChangeNotifier {
 
   void deleteRow(int row) {
     // Remove the stitches
-    _model = _model.copyWith(
-      knittingPattern: _model.knittingPattern.copyWith(
-        stitches: _model.knittingPattern.stitches.where((stitch) => stitch.row != row).toList()
+    _chartsModel = _chartsModel.copyWith(
+      knittingChart: _chartsModel.knittingChart.copyWith(
+        stitches: _chartsModel.knittingChart.stitches.where((stitch) => stitch.row != row).toList()
       )
     );
 
-    _model = _model.copyWith(
-      knittingPattern: _model.knittingPattern.copyWith(
-        patternSettings: _model.knittingPattern.patternSettings.copyWith(
-          rows: _model.knittingPattern.patternSettings.rows - 1
+    _chartsModel = _chartsModel.copyWith(
+      knittingChart: _chartsModel.knittingChart.copyWith(
+        chartSettings: _chartsModel.knittingChart.chartSettings.copyWith(
+          rows: _chartsModel.knittingChart.chartSettings.rows - 1
         ),
-        stitches: _model.knittingPattern.stitches.map((stitch) =>
+        stitches: _chartsModel.knittingChart.stitches.map((stitch) =>
           stitch.row < row ? stitch : stitch.copyWith(
             row: stitch.row - 1
           )
@@ -601,12 +587,12 @@ class KnittyGriddyModel extends ChangeNotifier {
   // ********************************************* Selection *****************************************
 
   void selectNone() {
-    if (_model.knittingPattern.selection.isEmpty) {
+    if (_chartsModel.knittingChart.selection.isEmpty) {
       return;
     }
 
-    _model = _model.copyWith(
-      knittingPattern: _model.knittingPattern.copyWith(
+    _chartsModel = _chartsModel.copyWith(
+      knittingChart: _chartsModel.knittingChart.copyWith(
         selection: emptySelection
       )
     );
@@ -616,11 +602,11 @@ class KnittyGriddyModel extends ChangeNotifier {
   }
 
   void selectAll() {
-    _model = _model.copyWith(
-      knittingPattern: _model.knittingPattern.copyWith(
+    _chartsModel = _chartsModel.copyWith(
+      knittingChart: _chartsModel.knittingChart.copyWith(
         selection: selection.selectAll(
-          _model.knittingPattern.patternSettings.columns, 
-          _model.knittingPattern.patternSettings.rows)
+          _chartsModel.knittingChart.chartSettings.columns, 
+          _chartsModel.knittingChart.chartSettings.rows)
       )
     );
 
@@ -629,14 +615,14 @@ class KnittyGriddyModel extends ChangeNotifier {
   }
 
   void toggleStitchDefinition(StitchDefinition stitchDefinition) {
-    if (!_model.knittingPattern.isStitchUsedInPattern(stitchDefinition)) {
+    if (!_chartsModel.knittingChart.isStitchUsedInChart(stitchDefinition)) {
       return;
     }
 
     bool selectionContainsStitch = false;
     Set<CellAddress> affectedAddresses = {};
 
-    for (StitchCell cell in _model.knittingPattern.stitches) {
+    for (StitchCell cell in _chartsModel.knittingChart.stitches) {
       if (cell.stitchDefinitionId == stitchDefinition.id) {
         CellAddress address = CellAddress(column: cell.column, row: cell.row);
         affectedAddresses.add(address);
@@ -655,9 +641,9 @@ class KnittyGriddyModel extends ChangeNotifier {
       newAddresses.addAll(affectedAddresses);
     }
 
-    _model = _model.copyWith(
-      knittingPattern: _model.knittingPattern.copyWith(
-        selection: _model.knittingPattern.selection.copyWith(
+    _chartsModel = _chartsModel.copyWith(
+      knittingChart: _chartsModel.knittingChart.copyWith(
+        selection: _chartsModel.knittingChart.selection.copyWith(
           selectedCells: newAddresses
         )
       )
@@ -668,14 +654,14 @@ class KnittyGriddyModel extends ChangeNotifier {
   }
 
   void toggleColour(NamedColour colour) {
-    if (!_model.knittingPattern.isColourUsedInPattern(colour)) {
+    if (!_chartsModel.knittingChart.isColourUsedInChart(colour)) {
       return;
     }
 
     bool selectionContainsColour = false;
     Set<CellAddress> affectedAddresses = {};
 
-    for (StitchCell cell in _model.knittingPattern.stitches) {
+    for (StitchCell cell in _chartsModel.knittingChart.stitches) {
       if (cell.colour == colour) {
         CellAddress address = CellAddress(column: cell.column, row: cell.row);
         affectedAddresses.add(address);
@@ -694,9 +680,9 @@ class KnittyGriddyModel extends ChangeNotifier {
       newAddresses.addAll(affectedAddresses);
     }
 
-    _model = _model.copyWith(
-      knittingPattern: _model.knittingPattern.copyWith(
-        selection: _model.knittingPattern.selection.copyWith(
+    _chartsModel = _chartsModel.copyWith(
+      knittingChart: _chartsModel.knittingChart.copyWith(
+        selection: _chartsModel.knittingChart.selection.copyWith(
           selectedCells: newAddresses
         )
       )
@@ -707,9 +693,9 @@ class KnittyGriddyModel extends ChangeNotifier {
   }
 
   void invertSelection() {
-    _model = _model.copyWith(
-      knittingPattern: _model.knittingPattern.copyWith(
-        selection: _model.knittingPattern.selection.invert(_model.knittingPattern.patternSettings.columns, _model.knittingPattern.patternSettings.rows)
+    _chartsModel = _chartsModel.copyWith(
+      knittingChart: _chartsModel.knittingChart.copyWith(
+        selection: _chartsModel.knittingChart.selection.invert(_chartsModel.knittingChart.chartSettings.columns, _chartsModel.knittingChart.chartSettings.rows)
       )
     );
 
@@ -724,8 +710,8 @@ class KnittyGriddyModel extends ChangeNotifier {
       newOutline.addAll(selection.selectedCells);
     }
 
-    _model = _model.copyWith(
-      knittingPattern: _model.knittingPattern.copyWith(
+    _chartsModel = _chartsModel.copyWith(
+      knittingChart: _chartsModel.knittingChart.copyWith(
         outline: newOutline
       )
     );
@@ -735,9 +721,9 @@ class KnittyGriddyModel extends ChangeNotifier {
   }
 
   void toggleCell(int column, int row) {
-    _model = _model.copyWith(
-      knittingPattern: _model.knittingPattern.copyWith(
-        selection: _model.knittingPattern.selection.toggleCell(column, row)
+    _chartsModel = _chartsModel.copyWith(
+      knittingChart: _chartsModel.knittingChart.copyWith(
+        selection: _chartsModel.knittingChart.selection.toggleCell(column, row)
       )
     );
 
@@ -746,11 +732,11 @@ class KnittyGriddyModel extends ChangeNotifier {
   }
 
   void toggleRow(int row) {
-    _model = _model.copyWith(
-      knittingPattern: _model.knittingPattern.copyWith(
-        selection: _model.knittingPattern.selection.toggleRows(
+    _chartsModel = _chartsModel.copyWith(
+      knittingChart: _chartsModel.knittingChart.copyWith(
+        selection: _chartsModel.knittingChart.selection.toggleRows(
           [row], 
-          _model.knittingPattern.patternSettings.columns)
+          _chartsModel.knittingChart.chartSettings.columns)
       )
     );
 
@@ -759,11 +745,11 @@ class KnittyGriddyModel extends ChangeNotifier {
   }
 
   void toggleColumn(int column) {
-    _model = _model.copyWith(
-      knittingPattern: _model.knittingPattern.copyWith(
-        selection: _model.knittingPattern.selection.toggleColumns(
+    _chartsModel = _chartsModel.copyWith(
+      knittingChart: _chartsModel.knittingChart.copyWith(
+        selection: _chartsModel.knittingChart.selection.toggleColumns(
           [column], 
-          _model.knittingPattern.patternSettings.rows)
+          _chartsModel.knittingChart.chartSettings.rows)
       )
     );
 
@@ -773,13 +759,13 @@ class KnittyGriddyModel extends ChangeNotifier {
 
   void toggleOddRows() {
     List<int> rows = [];
-    for (int row = 1; row < _model.knittingPattern.patternSettings.rows; row += 2) {
+    for (int row = 1; row < _chartsModel.knittingChart.chartSettings.rows; row += 2) {
       rows.add(row);
     }
-    _model = _model.copyWith(
-      knittingPattern: _model.knittingPattern.copyWith(
-        selection: _model.knittingPattern.selection.toggleRows(
-          rows, _model.knittingPattern.patternSettings.columns)
+    _chartsModel = _chartsModel.copyWith(
+      knittingChart: _chartsModel.knittingChart.copyWith(
+        selection: _chartsModel.knittingChart.selection.toggleRows(
+          rows, _chartsModel.knittingChart.chartSettings.columns)
       )
     );
 
@@ -789,13 +775,13 @@ class KnittyGriddyModel extends ChangeNotifier {
 
   void toggleEvenRows() {
     List<int> rows = [];
-    for (int row = 0; row < _model.knittingPattern.patternSettings.rows; row += 2) {
+    for (int row = 0; row < _chartsModel.knittingChart.chartSettings.rows; row += 2) {
       rows.add(row);
     }
-    _model = _model.copyWith(
-      knittingPattern: _model.knittingPattern.copyWith(
-        selection: _model.knittingPattern.selection.toggleRows(
-          rows, _model.knittingPattern.patternSettings.columns)
+    _chartsModel = _chartsModel.copyWith(
+      knittingChart: _chartsModel.knittingChart.copyWith(
+        selection: _chartsModel.knittingChart.selection.toggleRows(
+          rows, _chartsModel.knittingChart.chartSettings.columns)
       )
     );
 
@@ -805,13 +791,13 @@ class KnittyGriddyModel extends ChangeNotifier {
 
   void toggleOddColumns() {
     List<int> columns = [];
-    for (int col = 1; col < _model.knittingPattern.patternSettings.columns; col += 2) {
+    for (int col = 1; col < _chartsModel.knittingChart.chartSettings.columns; col += 2) {
       columns.add(col);
     }
-    _model = _model.copyWith(
-      knittingPattern: _model.knittingPattern.copyWith(
-        selection: _model.knittingPattern.selection.toggleColumns(
-          columns, _model.knittingPattern.patternSettings.rows)
+    _chartsModel = _chartsModel.copyWith(
+      knittingChart: _chartsModel.knittingChart.copyWith(
+        selection: _chartsModel.knittingChart.selection.toggleColumns(
+          columns, _chartsModel.knittingChart.chartSettings.rows)
       )
     );
 
@@ -821,13 +807,13 @@ class KnittyGriddyModel extends ChangeNotifier {
 
   void toggleEvenColumns() {
     List<int> columns = [];
-    for (int col = 0; col < _model.knittingPattern.patternSettings.columns; col += 2) {
+    for (int col = 0; col < _chartsModel.knittingChart.chartSettings.columns; col += 2) {
       columns.add(col);
     }
-    _model = _model.copyWith(
-      knittingPattern: _model.knittingPattern.copyWith(
-        selection: _model.knittingPattern.selection.toggleColumns(
-          columns, _model.knittingPattern.patternSettings.rows)
+    _chartsModel = _chartsModel.copyWith(
+      knittingChart: _chartsModel.knittingChart.copyWith(
+        selection: _chartsModel.knittingChart.selection.toggleColumns(
+          columns, _chartsModel.knittingChart.chartSettings.rows)
       )
     );
 
@@ -839,15 +825,15 @@ class KnittyGriddyModel extends ChangeNotifier {
 
   void setNamedColour(NamedColour colour, Color newColor, String newName) {
 
-    _model = _model.copyWith(
-      knittingPattern: _model.knittingPattern.copyWith(
-        usedColours: _model.knittingPattern.usedColours.map((col) =>
+    _chartsModel = _chartsModel.copyWith(
+      knittingChart: _chartsModel.knittingChart.copyWith(
+        usedColours: _chartsModel.knittingChart.usedColours.map((col) =>
           col.name != colour.name ? col : col.copyWith(
             name: newName,
             color: newColor
           )
         ).toList(),
-        stitches: _model.knittingPattern.stitches.map((stitch) =>
+        stitches: _chartsModel.knittingChart.stitches.map((stitch) =>
           stitch.colour != colour ? stitch : stitch.copyWith(
             colour: stitch.colour.copyWith(
               name: newName,
@@ -863,9 +849,9 @@ class KnittyGriddyModel extends ChangeNotifier {
   }
 
   void addNamedColour(Color newColor, String newName) {
-    _model = _model.copyWith(
-      knittingPattern: _model.knittingPattern.copyWith(
-        usedColours: [..._model.knittingPattern.usedColours, NamedColour(name: newName, color: newColor)]
+    _chartsModel = _chartsModel.copyWith(
+      knittingChart: _chartsModel.knittingChart.copyWith(
+        usedColours: [..._chartsModel.knittingChart.usedColours, NamedColour(name: newName, color: newColor)]
       )
     );
 
@@ -896,7 +882,7 @@ class KnittyGriddyModel extends ChangeNotifier {
   ) {
     StitchRepository.updateStitchDefinition(olddef, newdef);
 
-    // the custom stitches are not part of the knittingpattern, so no undo here
+    // the custom stitches are not part of the knittingchart, so no undo here
     notifyListeners();
   } 
 
@@ -921,23 +907,23 @@ class KnittyGriddyModel extends ChangeNotifier {
   }
 
   void toggleUsedStitch(StitchDefinition definition) {
-    final bool wantToRemove = _model.knittingPattern.usedStitches.contains(definition);
+    final bool wantToRemove = _chartsModel.knittingChart.usedStitches.contains(definition);
     
     if (wantToRemove) {
-      // Guard against removing definitions in use on the pattern
-      if (isStitchUsedInPattern(definition)) {
+      // Guard against removing definitions in use on the chart
+      if (isStitchUsedInChart(definition)) {
         return;
       }
 
-      _model = _model.copyWith(
-        knittingPattern: _model.knittingPattern.copyWith(
-          usedStitches: _model.knittingPattern.usedStitches.where((s) => s != definition).toList()
+      _chartsModel = _chartsModel.copyWith(
+        knittingChart: _chartsModel.knittingChart.copyWith(
+          usedStitches: _chartsModel.knittingChart.usedStitches.where((s) => s != definition).toList()
         )
       );
     } else {
-      _model = _model.copyWith(
-        knittingPattern: _model.knittingPattern.copyWith(
-          usedStitches: [..._model.knittingPattern.usedStitches, definition]
+      _chartsModel = _chartsModel.copyWith(
+        knittingChart: _chartsModel.knittingChart.copyWith(
+          usedStitches: [..._chartsModel.knittingChart.usedStitches, definition]
         )
       );
     }
@@ -947,8 +933,8 @@ class KnittyGriddyModel extends ChangeNotifier {
   }
 
   void pruneUnusedStitches() {
-    _model = _model.copyWith(
-      knittingPattern: _model.knittingPattern.pruneUnusedStitches()
+    _chartsModel = _chartsModel.copyWith(
+      knittingChart: _chartsModel.knittingChart.pruneUnusedStitches()
     );
     
     _storeForUndo();
@@ -956,8 +942,8 @@ class KnittyGriddyModel extends ChangeNotifier {
   }
 
   void pruneUnusedColours() {
-    _model = _model.copyWith(
-      knittingPattern: _model.knittingPattern.pruneUnusedColours()
+    _chartsModel = _chartsModel.copyWith(
+      knittingChart: _chartsModel.knittingChart.pruneUnusedColours()
     );
 
     _storeForUndo();

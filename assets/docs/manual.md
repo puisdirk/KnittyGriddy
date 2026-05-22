@@ -22,6 +22,8 @@ Click on an existing chart or click the + button to create a new one. Both actio
 4. In Single-click or Paint mode, select a stitch to start drawing. In select mode, click a stitch to fill a region of the grid
 5. Colours work exactly the same as stitches. Click the pencil button to edit the main colour.
 6. Click the + button to choose more stitches from the stitch repository or to create more colours. The scissor buttons will limit the list to stitches or colours used in the chart.
+7. Export the chart to PNG or SVG format. Or save it as a chart file to share it with other KnittyGriddy users.
+
 
 #### Select mode
 

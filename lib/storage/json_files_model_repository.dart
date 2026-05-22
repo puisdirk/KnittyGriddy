@@ -5,9 +5,9 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 
-import 'package:knitty_griddy/controls/stitchrepo/stitch_set.dart';
-import 'package:knitty_griddy/model/knitting_pattern.dart';
-import 'package:knitty_griddy/model/pattern_info.dart';
+import 'package:knitty_griddy/charts/stitchrepo/stitch_set.dart';
+import 'package:knitty_griddy/model/knitting_chart.dart';
+import 'package:knitty_griddy/model/chart_info.dart';
 import 'package:knitty_griddy/storage/model_repository.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
@@ -31,12 +31,12 @@ class JsonFilesModelRepository implements ModelRepository {
   }
 
   @override
-  Future<List<PatternInfo>> loadPatternInfos() async {
+  Future<List<ChartInfo>> loadChartInfos() async {
     await _initAppDirectoryPath();
     
-    List<PatternInfo> infos = [];
+    List<ChartInfo> infos = [];
 
-    File infosFile = File(p.join(appDirectoryPath!, 'patternInfos.json'));
+    File infosFile = File(p.join(appDirectoryPath!, 'chartInfos.json'));
 
     // Set to true for a clean slate
     bool deletePrevious = false;
@@ -45,7 +45,7 @@ class JsonFilesModelRepository implements ModelRepository {
     if (deletePrevious) {
      if (infosFile.existsSync()) {
           infosFile.deleteSync();
-          infosFile = File(p.join(appDirectoryPath!, 'patternInfos.json'));
+          infosFile = File(p.join(appDirectoryPath!, 'chartInfos.json'));
         }
         Directory dir = Directory(appDirectoryPath!);
         List<FileSystemEntity> files = dir.listSync();
@@ -60,15 +60,15 @@ class JsonFilesModelRepository implements ModelRepository {
       try {
         Map<String, dynamic> jsonObject = jsonDecode(jsonContents);
 
-        if (jsonObject.containsKey('patternInfos')) {
-          List<Map<String, dynamic>> patternInfoObjects = 
-            (jsonObject['patternInfos'] as List).map((e) => e as Map<String, dynamic>).toList();
-          for (Map<String, dynamic> patternInfoObject in patternInfoObjects) {
-            infos.add(PatternInfo.fromJson(patternInfoObject));
+        if (jsonObject.containsKey('chartInfos')) {
+          List<Map<String, dynamic>> chartInfoObjects = 
+            (jsonObject['chartInfos'] as List).map((e) => e as Map<String, dynamic>).toList();
+          for (Map<String, dynamic> chartInfoObject in chartInfoObjects) {
+            infos.add(ChartInfo.fromJson(chartInfoObject));
           }
         }
       } catch (e) {
-        debugPrint('Error while loading patternInfos: $e');
+        debugPrint('Error while loading chartInfos: $e');
       }
     }
 
@@ -76,61 +76,61 @@ class JsonFilesModelRepository implements ModelRepository {
   }
 
   @override
-  Future<void> savePatternInfos(List<PatternInfo> patternInfos) async {
+  Future<void> saveChartInfos(List<ChartInfo> chartInfos) async {
     await _initAppDirectoryPath();
 
-    Map<String, Object> jsonObject = {'patternInfos': patternInfos.map((pi) => pi.toJson()).toList()};
+    Map<String, Object> jsonObject = {'chartInfos': chartInfos.map((pi) => pi.toJson()).toList()};
     try {
       String jsonString = codec.encode(jsonObject);
-      File infosFile =  File(p.join(appDirectoryPath!, 'patternInfos.json'));
+      File infosFile =  File(p.join(appDirectoryPath!, 'chartInfos.json'));
       infosFile.writeAsStringSync(jsonString);
     } catch (e) {
-      debugPrint('Error while saving patternInfos: $e');
+      debugPrint('Error while saving chartInfos: $e');
     }
   }
   
   @override
-  Future<KnittingPattern> loadPattern(String patternId) async {
+  Future<KnittingChart> loadChart(String chartId) async {
     await _initAppDirectoryPath();
 
-    File patternFile = File(p.join(appDirectoryPath!, '$patternId.json'));
-    if (!patternFile.existsSync()) {
-      throw Exception('Error in loadPattern: Pattern file ${patternFile.path} does not exist');
+    File chartFile = File(p.join(appDirectoryPath!, '$chartId.json'));
+    if (!chartFile.existsSync()) {
+      throw Exception('Error in loadChart: chart file ${chartFile.path} does not exist');
     }
     try {
-      String jsonString = patternFile.readAsStringSync();
+      String jsonString = chartFile.readAsStringSync();
       Map<String, dynamic> jsonObject = jsonDecode(jsonString);
-      return KnittingPattern.fromJson(jsonObject);
+      return KnittingChart.fromJson(jsonObject);
     } catch(e) {
-      throw Exception('Error in loadPattern: $e');
+      throw Exception('Error in loadChart: $e');
     }
   }
   
   @override
-  Future<void> savePattern(KnittingPattern pattern) async {
-    if (pattern.id == placeholderPatternId) {
+  Future<void> saveChart(KnittingChart chart) async {
+    if (chart.id == placeholderChartId) {
       return;
     }
 
     await _initAppDirectoryPath();
 
-    Map<String, Object> jsonObject = pattern.toJson();
+    Map<String, Object> jsonObject = chart.toJson();
 
     try {
       String jsonString = codec.encode(jsonObject);
-      File patternFile = File(p.join(appDirectoryPath!, '${pattern.id}.json'));
-      patternFile.writeAsStringSync(jsonString);
+      File chartFile = File(p.join(appDirectoryPath!, '${chart.id}.json'));
+      chartFile.writeAsStringSync(jsonString);
     } catch (e) {
-      debugPrint('Error in savePattern: $e');
+      debugPrint('Error in saveChart: $e');
     }
   }
   
   @override
-  Future<void> deletePattern(String patternId) async {
+  Future<void> deleteChart(String chartId) async {
     await _initAppDirectoryPath();
 
-    File patternFile = File(p.join(appDirectoryPath!, '$patternId.json'));
-    patternFile.deleteSync();
+    File chartFile = File(p.join(appDirectoryPath!, '$chartId.json'));
+    chartFile.deleteSync();
 
   }
 
@@ -218,11 +218,11 @@ class JsonFilesModelRepository implements ModelRepository {
   }
 
   @override
-  Future<KnittingPattern?> importPattern() async {
+  Future<KnittingChart?> importChart() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
-      dialogTitle: 'Load a pattern',
+      dialogTitle: 'Load a chart',
       allowMultiple: false,
-      allowedExtensions: ['kgp'],
+      allowedExtensions: ['kgc'],
       withData: true,
     );
 
@@ -230,10 +230,10 @@ class JsonFilesModelRepository implements ModelRepository {
       try {
         String jsonString = utf8.decode(result.files.first.bytes!);
         Map<String, dynamic> jsonObject = jsonDecode(jsonString);
-        KnittingPattern pattern = KnittingPattern.fromJson(jsonObject);
-        return pattern;
+        KnittingChart chart = KnittingChart.fromJson(jsonObject);
+        return chart;
       } catch (e) {
-        debugPrint('Error while importing pattern: $e');
+        debugPrint('Error while importing chart: $e');
       }
     }
 
@@ -241,19 +241,19 @@ class JsonFilesModelRepository implements ModelRepository {
   }
 
   @override
-  Future<void> exportPattern(KnittingPattern pattern) async {
-    Map<String, Object> jsonObject = pattern.toJson();
+  Future<void> exportChart(KnittingChart chart) async {
+    Map<String, Object> jsonObject = chart.toJson();
 
     try {
       String jsonString = jsonEncode(jsonObject);
 
       await FilePicker.platform.saveFile(
         dialogTitle: 'Where do you want to store the output?',
-        fileName: '${pattern.name}.kgp',
+        fileName: '${chart.name}.kgc',
         bytes: utf8.encode(jsonString),
       );
     } catch(e) {
-      debugPrint('Error while exporting pattern: $e');
+      debugPrint('Error while exporting chart: $e');
     }
 
   }

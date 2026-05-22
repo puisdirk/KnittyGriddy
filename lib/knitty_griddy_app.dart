@@ -2,7 +2,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:knitty_griddy/controls/pattern_chooser/pattern_chooser_page.dart';
+import 'package:knitty_griddy/charts/chart_chooser/chart_chooser_view.dart';
+import 'package:knitty_griddy/main_page.dart';
 import 'package:knitty_griddy/model/knitty_griddy_model.dart';
 import 'package:knitty_griddy/storage/model_repository.dart';
 import 'package:provider/provider.dart';
@@ -33,7 +34,7 @@ class KnittyGriddyApp extends StatelessWidget {
             colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue.shade200),
             useMaterial3: true
           ),
-          home: const PatternChooserPage(),
+          home: const MainPage(),
         );
       },
     );

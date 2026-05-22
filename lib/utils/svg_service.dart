@@ -3,23 +3,23 @@ import 'dart:convert';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:knitty_griddy/controls/stitchrepo/stitch_definition.dart';
-import 'package:knitty_griddy/controls/stitchrepo/stitch_repository.dart';
-import 'package:knitty_griddy/export/export_settings.dart';
+import 'package:knitty_griddy/charts/stitchrepo/stitch_definition.dart';
+import 'package:knitty_griddy/charts/stitchrepo/stitch_repository.dart';
+import 'package:knitty_griddy/charts/export/export_settings.dart';
 import 'package:knitty_griddy/model/cell_address.dart';
-import 'package:knitty_griddy/model/knitting_pattern.dart';
+import 'package:knitty_griddy/model/knitting_chart.dart';
 import 'package:knitty_griddy/model/named_colour.dart';
 import 'package:knitty_griddy/model/stitch_cell.dart';
 import 'package:knitty_griddy/utils/color_utilities.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 
 class SvgService {
-  static Future<void> exportToSVG(KnittingPattern pattern, ExportSettings exportSetting, Size drawingSize, Size legendSize) async {
+  static Future<void> exportToSVG(KnittingChart chart, ExportSettings exportSetting, Size drawingSize, Size legendSize) async {
     
     // Draw the grid itself by asking each stitchcell for its svg
     // Position those
     String gridCellsGroup = '<g class="gridcells" transform="translate($stitchCellWidth, $stitchCellHeight)">';
-    for (StitchCell cell in pattern.stitches) {
+    for (StitchCell cell in chart.stitches) {
       gridCellsGroup += '<g class="stitchcell" transform="translate(${cell.column * stitchCellWidth}, ${cell.row * stitchCellHeight})" clip-path="url(#stitchclippath)">';
       gridCellsGroup += '<rect x="0" y="0" width="$stitchCellWidth" height="$stitchCellHeight" fill="rgb(${cell.colour.color.red}, ${cell.colour.color.green}, ${cell.colour.color.blue}" fill-opacity="${cell.colour.color.alpha / 255}"/>';
       gridCellsGroup += StitchRepository.getStitchDefinitionById(cell.stitchDefinitionId).symbolAt(cell.stitchDefinitionColumn).toSvg(ColorUtilities.contrastingFromColor(cell.colour.color));
@@ -30,14 +30,14 @@ class SvgService {
     // Draw the grid lines
     Color gridColor = Colors.grey.shade600;
     String gridLinesGroup = '<g class="gridlines" transform="translate($stitchCellWidth, $stitchCellHeight)">';
-    gridLinesGroup += '<rect x="0" y="0" width="${pattern.patternSettings.columns * stitchCellWidth}" height="${pattern.patternSettings.rows * stitchCellHeight}" ';
+    gridLinesGroup += '<rect x="0" y="0" width="${chart.chartSettings.columns * stitchCellWidth}" height="${chart.chartSettings.rows * stitchCellHeight}" ';
     gridLinesGroup += 'fill="none" stroke="rgb(${gridColor.red}, ${gridColor.green}, ${gridColor.blue})" stroke-opacity="${gridColor.alpha / 255}" stroke-width="1"/>';
-    for (int col = 1; col < pattern.patternSettings.columns; col++) {
-      gridLinesGroup += '<line x1="${col * stitchCellWidth}" y1="0" x2="${col * stitchCellWidth}" y2="${pattern.patternSettings.rows * stitchCellWidth}" ';
+    for (int col = 1; col < chart.chartSettings.columns; col++) {
+      gridLinesGroup += '<line x1="${col * stitchCellWidth}" y1="0" x2="${col * stitchCellWidth}" y2="${chart.chartSettings.rows * stitchCellWidth}" ';
       gridLinesGroup += 'fill="none" stroke="rgb(${gridColor.red}, ${gridColor.green}, ${gridColor.blue})" stroke-opacity="${gridColor.alpha / 255}" stroke-width="1"/>';
     }
-    for (int row = 1; row < pattern.patternSettings.rows; row++) {
-      gridLinesGroup += '<line x1="0" y1="${row * stitchCellHeight}" x2="${pattern.patternSettings.columns * stitchCellWidth}" y2="${row * stitchCellHeight}" ';
+    for (int row = 1; row < chart.chartSettings.rows; row++) {
+      gridLinesGroup += '<line x1="0" y1="${row * stitchCellHeight}" x2="${chart.chartSettings.columns * stitchCellWidth}" y2="${row * stitchCellHeight}" ';
       gridLinesGroup += 'fill="none" stroke="rgb(${gridColor.red}, ${gridColor.green}, ${gridColor.blue})" stroke-opacity="${gridColor.alpha / 255}" stroke-width="1"/>';
     }
     gridLinesGroup += '</g>';
@@ -45,21 +45,21 @@ class SvgService {
     // Draw the outline
     Color outlineColor = Colors.orange;
     String outlineGroup = '<g class="outline" transform="translate($stitchCellWidth, $stitchCellHeight)">';
-    for (CellAddress address in pattern.outline) {
+    for (CellAddress address in chart.outline) {
       // top
-      if (!pattern.outline.contains(CellAddress(column: address.column, row: address.row - 1))) {
+      if (!chart.outline.contains(CellAddress(column: address.column, row: address.row - 1))) {
         outlineGroup += '<line x1="${address.column * stitchCellWidth}" y1="${address.row * stitchCellHeight}" x2="${(address.column * stitchCellWidth) + stitchCellWidth}" y2="${address.row * stitchCellHeight}" fill="none" stroke="rgb(${outlineColor.red}, ${outlineColor.green}, ${outlineColor.blue})" stroke-width="2"/>';
       }
       // bottom
-      if (!pattern.outline.contains(CellAddress(column: address.column, row: address.row + 1))) {
+      if (!chart.outline.contains(CellAddress(column: address.column, row: address.row + 1))) {
         outlineGroup += '<line x1="${(address.column * stitchCellWidth)}" y1="${(address.row * stitchCellHeight) + stitchCellHeight}" x2="${(address.column * stitchCellWidth) + stitchCellWidth}" y2="${(address.row * stitchCellHeight) + stitchCellHeight}" fill="none" stroke="rgb(${outlineColor.red}, ${outlineColor.green}, ${outlineColor.blue})" stroke-width="2"/>';
       }
       // left
-      if (!pattern.outline.contains(CellAddress(column: address.column - 1, row: address.row))) {
+      if (!chart.outline.contains(CellAddress(column: address.column - 1, row: address.row))) {
         outlineGroup += '<line x1="${address.column * stitchCellWidth}" y1="${address.row * stitchCellHeight}" x2="${address.column * stitchCellWidth}" y2="${(address.row * stitchCellHeight) + stitchCellHeight}" fill="none" stroke="rgb(${outlineColor.red}, ${outlineColor.green}, ${outlineColor.blue})" stroke-width="2"/>';
       }
       // right
-      if (!pattern.outline.contains(CellAddress(column: address.column + 1, row: address.row))) {
+      if (!chart.outline.contains(CellAddress(column: address.column + 1, row: address.row))) {
         outlineGroup += '<line x1="${(address.column * stitchCellWidth) + stitchCellWidth}" y1="${address.row * stitchCellHeight}" x2="${(address.column * stitchCellWidth) + stitchCellWidth}" y2="${(address.row * stitchCellHeight) + stitchCellHeight}" fill="none" stroke="rgb(${outlineColor.red}, ${outlineColor.green}, ${outlineColor.blue})" stroke-width="2"/>';
       }
 
@@ -67,10 +67,10 @@ class SvgService {
     outlineGroup += '</g>';
 
     // Draw the column and row numbers
-    List<String> leftSideRowIndicators = pattern.patternSettings.getLeftSideRowIndicators();
-    List<String> rightSideRowIndicators = pattern.patternSettings.getRightSideRowIndicators();
-    List<String> topSideColumnIndicators = pattern.patternSettings.getTopSideColumnIndicators();
-    List<String> bottomSideColumnIndicators = pattern.patternSettings.getBottomSideColumnIndicators();
+    List<String> leftSideRowIndicators = chart.chartSettings.getLeftSideRowIndicators();
+    List<String> rightSideRowIndicators = chart.chartSettings.getRightSideRowIndicators();
+    List<String> topSideColumnIndicators = chart.chartSettings.getTopSideColumnIndicators();
+    List<String> bottomSideColumnIndicators = chart.chartSettings.getBottomSideColumnIndicators();
     String columnAndRowNumbersGroup = '<g class="columnrownrs">';
     // Rows left side
     for (int row = 0; row < leftSideRowIndicators.length; row++) {
@@ -80,7 +80,7 @@ class SvgService {
     }
     // Rows right side
     for (int row = 0; row < rightSideRowIndicators.length; row++) {
-      columnAndRowNumbersGroup += '<text x="${stitchCellWidth + (pattern.patternSettings.columns * stitchCellWidth) + (stitchCellWidth / 2)}" y="${stitchCellHeight + (row * stitchCellHeight) + (stitchCellHeight / 2) + 8}" ';
+      columnAndRowNumbersGroup += '<text x="${stitchCellWidth + (chart.chartSettings.columns * stitchCellWidth) + (stitchCellWidth / 2)}" y="${stitchCellHeight + (row * stitchCellHeight) + (stitchCellHeight / 2) + 8}" ';
       columnAndRowNumbersGroup += 'text-anchor="middle" font-family="Roboto" font-size="14" fill="black" ';
       columnAndRowNumbersGroup += '>${rightSideRowIndicators[row]}</text>';
     }
@@ -92,7 +92,7 @@ class SvgService {
     }
     // Columns bottom
     for (int col = 0; col < bottomSideColumnIndicators.length; col++) {
-      columnAndRowNumbersGroup += '<text x="${stitchCellWidth + (col * stitchCellWidth) + (stitchCellWidth / 2)}" y="${stitchCellHeight + (pattern.patternSettings.rows * stitchCellHeight) + (stitchCellHeight / 2) + 8}" ';
+      columnAndRowNumbersGroup += '<text x="${stitchCellWidth + (col * stitchCellWidth) + (stitchCellWidth / 2)}" y="${stitchCellHeight + (chart.chartSettings.rows * stitchCellHeight) + (stitchCellHeight / 2) + 8}" ';
       columnAndRowNumbersGroup += 'text-anchor="middle" font-family="Roboto" font-size="14" fill="black" ';
       columnAndRowNumbersGroup += '>${bottomSideColumnIndicators[col]}</text>';
     }
@@ -105,7 +105,7 @@ class SvgService {
     if (exportSetting.showLegend) {
       if (exportSetting.legendVertical) {
         if (exportSetting.showStitches) {
-          for (StitchDefinition def in pattern.usedStitches) {
+          for (StitchDefinition def in chart.usedStitches) {
             int stitchHeight = 20;
             if (exportSetting.showStitchDescriptions && def.description.isNotEmpty) {
               stitchHeight = 20 + (def.description.split('\n').length * 20);
@@ -119,9 +119,9 @@ class SvgService {
           }
         }
 
-        if (exportSetting.showColours && pattern.usedColours.isNotEmpty) {
+        if (exportSetting.showColours && chart.usedColours.isNotEmpty) {
           totalLegendHeight += 20;
-          for (NamedColour colour in pattern.usedColours) {
+          for (NamedColour colour in chart.usedColours) {
             legendGroupChildren += '<g class="legendcolour" transform="translate(0, $totalLegendHeight)">';
             legendGroupChildren += SvgService._createColourEntry(colour);
             legendGroupChildren += '</g>';
@@ -134,11 +134,11 @@ class SvgService {
         const charWidth = 6.5;
         double legendWidth = 0;
 
-        if (exportSetting.showStitches && pattern.usedStitches.isNotEmpty) {
-          int numberOfStsPerColumn = (pattern.usedStitches.length / maxColumns).ceil();
+        if (exportSetting.showStitches && chart.usedStitches.isNotEmpty) {
+          int numberOfStsPerColumn = (chart.usedStitches.length / maxColumns).ceil();
           double highestColumnHeight = 0;
 
-          List<StitchDefinition> usedStitches = List.from(pattern.usedStitches);
+          List<StitchDefinition> usedStitches = List.from(chart.usedStitches);
 
           String stitchColumnsGroup = '<g class="stitchcolunmns">';
 
@@ -211,12 +211,12 @@ class SvgService {
           legendGroupChildren += stitchColumnsGroup;
         }
 
-        if (exportSetting.showColours && pattern.usedColours.isNotEmpty) {
-          int numberOfColorsPerColumn = (pattern.usedColours.length / maxColumns).ceil();
+        if (exportSetting.showColours && chart.usedColours.isNotEmpty) {
+          int numberOfColorsPerColumn = (chart.usedColours.length / maxColumns).ceil();
           double highestColumnHeight = 0;
           double colourColumsWidth = 0;
 
-          List<NamedColour> usedColours = List.from(pattern.usedColours);
+          List<NamedColour> usedColours = List.from(chart.usedColours);
 
           String colourColumnsGroup = '<g class="colourcolumns" transform="translate(0, $totalLegendHeight)">';
 
@@ -276,77 +276,76 @@ class SvgService {
     if (exportSetting.showLegend) {
       switch (exportSetting.legendPosition) {
         case LegendPosition.right:
-          double y = ((pattern.patternSettings.rows * stitchCellHeight) / 2) - (totalLegendHeight / 2);
+          double y = ((chart.chartSettings.rows * stitchCellHeight) / 2) - (totalLegendHeight / 2);
           if (y < 30) {
             y = 30;
           }
-          legendGroup = '<g class="legend" transform="translate(${((pattern.patternSettings.columns + 2) * stitchCellWidth) + 20}, $y)">$legendGroupChildren</g>';
+          legendGroup = '<g class="legend" transform="translate(${((chart.chartSettings.columns + 2) * stitchCellWidth) + 20}, $y)">$legendGroupChildren</g>';
           break;
         case LegendPosition.left:
-          double y = ((pattern.patternSettings.rows * stitchCellHeight) / 2) - (totalLegendHeight / 2);
+          double y = ((chart.chartSettings.rows * stitchCellHeight) / 2) - (totalLegendHeight / 2);
           if (y < 30) {
             y = 30;
           }
           legendGroup = '<g class="legend" transform="translate(0, $y)">$legendGroupChildren</g>';
           break;
         case LegendPosition.top:
-          double x = (((pattern.patternSettings.columns + 2) * stitchCellWidth) / 2) - (totalLegendWidth / 2);
+          double x = (((chart.chartSettings.columns + 2) * stitchCellWidth) / 2) - (totalLegendWidth / 2);
           if (x < 30) {
             x = 30;
           }
           legendGroup = '<g class="legend" transform="translate($x, 0)">$legendGroupChildren</g>';
           break;
         case LegendPosition.bottom:
-          double x = (((pattern.patternSettings.columns + 2) * stitchCellWidth) / 2) - (totalLegendWidth / 2);
+          double x = (((chart.chartSettings.columns + 2) * stitchCellWidth) / 2) - (totalLegendWidth / 2);
           if (x < 30) {
             x = 30;
           }
-          legendGroup = '<g class="legend" transform="translate($x, ${((pattern.patternSettings.rows + 2) * stitchCellHeight) + 10})">$legendGroupChildren</g>';
+          legendGroup = '<g class="legend" transform="translate($x, ${((chart.chartSettings.rows + 2) * stitchCellHeight) + 10})">$legendGroupChildren</g>';
           break;
       }
     }
 
-    String patternGroup = '';
+    String chartGroup = '';
     switch (exportSetting.legendPosition) {
       case LegendPosition.top:
-        double x = (totalLegendWidth / 2) - (((pattern.patternSettings.rows + 2) * stitchCellHeight) + 10) / 2;
+        double x = (totalLegendWidth / 2) - (((chart.chartSettings.rows + 2) * stitchCellHeight) + 10) / 2;
         if (x < 30) {
           x = 30;
         }
-        patternGroup = '<g class="pattern" transform="translate($x, ${totalLegendHeight + 20})">';
+        chartGroup = '<g class="chart" transform="translate($x, ${totalLegendHeight + 20})">';
         break;
       case LegendPosition.bottom:
-        double x = (totalLegendWidth / 2) - (((pattern.patternSettings.rows + 2) * stitchCellHeight) + 10) / 2;
+        double x = (totalLegendWidth / 2) - (((chart.chartSettings.rows + 2) * stitchCellHeight) + 10) / 2;
         if (x < 30) {
           x = 30;
         }
-        patternGroup = '<g class="pattern" transform="translate($x, 0)">';
+        chartGroup = '<g class="chart" transform="translate($x, 0)">';
         break;
       case LegendPosition.left:
-        patternGroup = '<g class="pattern" transform="translate($totalLegendWidth, 0)">';
+        chartGroup = '<g class="chart" transform="translate($totalLegendWidth, 0)">';
         break;
       case LegendPosition.right:
-        patternGroup = '<g class="pattern">';
+        chartGroup = '<g class="chart">';
     }
     
-    patternGroup += gridCellsGroup;
-    patternGroup += gridLinesGroup;
-    patternGroup += outlineGroup;
-    patternGroup += columnAndRowNumbersGroup;
-    patternGroup += '</g>';
+    chartGroup += gridCellsGroup;
+    chartGroup += gridLinesGroup;
+    chartGroup += outlineGroup;
+    chartGroup += columnAndRowNumbersGroup;
+    chartGroup += '</g>';
 
     String completeDrawing = '<svg width="${drawingSize.width}" height="${drawingSize.height}" viewBox="0 0 ${drawingSize.width} ${drawingSize.height}" xmlns="http://www.w3.org/2000/svg">';
     completeDrawing += '<defs><clipPath id="stitchclippath"><rect x="0" y="0" width="$stitchCellWidth" height="$stitchCellHeight"/></clipPath></defs>';
     completeDrawing += '<g class="inset" transform="translate(20, 20)">';
-    completeDrawing += patternGroup;
+    completeDrawing += chartGroup;
     completeDrawing += legendGroup;
     completeDrawing += '</g>';
     completeDrawing += '</svg>';
     
     await FilePicker.platform.saveFile(
       dialogTitle: 'Where do you want to store the output?',
-      // TODO: later, we'll have a pattern name here
-      fileName: 'pattern.svg',
+      fileName: '${chart.name}.svg',
       bytes: utf8.encode(completeDrawing),
     );
   }
