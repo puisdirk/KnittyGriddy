@@ -4,8 +4,8 @@ import 'package:flutter_spinbox/material.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 import 'package:knitty_griddy/charts/stitcheditor/linked_spinbox.dart';
 import 'package:knitty_griddy/utils/math_utitilies.dart';
-import 'package:knitty_griddy/model/knitting_symbol.dart';
-import 'package:knitty_griddy/model/knitting_symbol_part.dart';
+import 'package:knitty_griddy/charts/model/knitting_symbol.dart';
+import 'package:knitty_griddy/charts/model/knitting_symbol_part.dart';
 import 'package:knitty_griddy/charts/stitchrepo/stitch_definition.dart';
 
 class SymbolPartTransformControls extends StatelessWidget {

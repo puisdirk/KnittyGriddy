@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:knitty_griddy/charts/stitch_icon.dart';
 import 'package:knitty_griddy/charts/stitchrepo/stitch_set.dart';
 import 'package:knitty_griddy/utils/math_utitilies.dart';
-import 'package:knitty_griddy/model/knitting_chart.dart';
-import 'package:knitty_griddy/model/knitty_griddy_model.dart';
+import 'package:knitty_griddy/charts/model/knitting_chart.dart';
+import 'package:knitty_griddy/charts/model/charts_model.dart';
 import 'package:knitty_griddy/charts/stitchrepo/stitch_definition.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
@@ -63,7 +63,7 @@ class _StitchChooserState extends State<StitchChooser> {
           child: InkWell(
             borderRadius: const BorderRadius.all(Radius.circular(10)),
             splashColor: Colors.blue.withAlpha(30),
-            onTap: stitchInChart ? null : () => Provider.of<KnittyGriddyModel>(context, listen: false).toggleUsedStitch(sd),
+            onTap: stitchInChart ? null : () => Provider.of<ChartsModel>(context, listen: false).toggleUsedStitch(sd),
             child: Row(
               children: [
                 const SizedBox(width: _spacerwidth,),
@@ -112,10 +112,10 @@ class _StitchChooserState extends State<StitchChooser> {
             ),
             const SizedBox(height: 20,),
             Expanded(
-              child: Selector<KnittyGriddyModel, List<StitchSet>>(
+              child: Selector<ChartsModel, List<StitchSet>>(
                 selector: (_, model) => model.filteredStitchSets(filterText),
                 builder: (context, stitchSets, _) {
-                  return Selector<KnittyGriddyModel, KnittingChart>(
+                  return Selector<ChartsModel, KnittingChart>(
                     selector: (_, model) => model.knittingChart,
                     builder: (context, chart, _) {
                       return DefaultTabController(

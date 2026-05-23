@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/utils/constants.dart';
-import 'package:knitty_griddy/model/knitty_griddy_model.dart';
+import 'package:knitty_griddy/charts/model/charts_model.dart';
 import 'package:provider/provider.dart';
 
 class AddColumnIndicator extends StatefulWidget {
@@ -22,7 +22,7 @@ class _AddColumnIndicatorState extends State<AddColumnIndicator> {
   bool visible = false;
 
   void _insertColumn(BuildContext context) {
-    Provider.of<KnittyGriddyModel>(context, listen: false).insertColumn(widget.column);
+    Provider.of<ChartsModel>(context, listen: false).insertColumn(widget.column);
   }
 
   @override

@@ -2,9 +2,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/utils/math_utitilies.dart';
-import 'package:knitty_griddy/model/knitting_symbol.dart';
-import 'package:knitty_griddy/model/knitting_symbol_part.dart';
-import 'package:knitty_griddy/model/knitting_symbol_parts.dart';
+import 'package:knitty_griddy/charts/model/knitting_symbol.dart';
+import 'package:knitty_griddy/charts/model/knitting_symbol_part.dart';
+import 'package:knitty_griddy/charts/model/knitting_symbol_parts.dart';
 
 @immutable
 class StitchDefinition {

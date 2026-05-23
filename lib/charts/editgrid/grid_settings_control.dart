@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:knitty_griddy/model/app_state.dart';
-import 'package:knitty_griddy/model/knitty_griddy_model.dart';
-import 'package:knitty_griddy/model/chart_settings.dart';
+import 'package:knitty_griddy/charts/model/app_state.dart';
+import 'package:knitty_griddy/charts/model/charts_model.dart';
+import 'package:knitty_griddy/charts/model/chart_settings.dart';
 import 'package:provider/provider.dart';
 
 class GridSettingsControl extends StatelessWidget {
@@ -9,12 +9,12 @@ class GridSettingsControl extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Selector<KnittyGriddyModel, AppState>(
+    return Selector<ChartsModel, AppState>(
       selector: (_, model) => model.appState,
       builder: (context, appstate, _) {
         return appstate.mouseOption != MouseOption.settings ?
           const SizedBox(height: 1,) :
-          Selector<KnittyGriddyModel, ChartSettings>(
+          Selector<ChartsModel, ChartSettings>(
             selector: (_, model) => model.settings,
             builder: (context, settings, _) {
               return Row(
@@ -35,7 +35,7 @@ class GridSettingsControl extends StatelessWidget {
                         ),
                     ], 
                     selected: {settings.gridType},
-                    onSelectionChanged: (Set<GridType>? newGridType) => Provider.of<KnittyGriddyModel>(context, listen: false).useGridType(newGridType!.first),
+                    onSelectionChanged: (Set<GridType>? newGridType) => Provider.of<ChartsModel>(context, listen: false).useGridType(newGridType!.first),
                   ),
                 ],
               );

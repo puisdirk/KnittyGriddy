@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/utils/constants.dart';
-import 'package:knitty_griddy/model/knitty_griddy_model.dart';
+import 'package:knitty_griddy/charts/model/charts_model.dart';
 import 'package:provider/provider.dart';
 
 class DeleteRowIndicator extends StatefulWidget {
@@ -22,7 +22,7 @@ class _DeleteRowIndicatorState extends State<DeleteRowIndicator> {
   bool visible = false;
 
   void _deleteRow(BuildContext context) {
-    Provider.of<KnittyGriddyModel>(context, listen: false).deleteRow(widget.row);
+    Provider.of<ChartsModel>(context, listen: false).deleteRow(widget.row);
   }
 
   @override

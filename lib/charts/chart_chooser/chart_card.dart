@@ -1,8 +1,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/charts/maingrid/chart_page.dart';
-import 'package:knitty_griddy/model/knitty_griddy_model.dart';
-import 'package:knitty_griddy/model/chart_info.dart';
+import 'package:knitty_griddy/charts/model/charts_model.dart';
+import 'package:knitty_griddy/charts/model/chart_info.dart';
 import 'package:provider/provider.dart';
 
 class ChartCard extends StatelessWidget {
@@ -25,7 +25,7 @@ class ChartCard extends StatelessWidget {
         TextButton(
           onPressed: () {
             Navigator.pop(context);
-            Provider.of<KnittyGriddyModel>(context, listen: false).deleteChart(chartInfo.id);
+            Provider.of<ChartsModel>(context, listen: false).deleteChart(chartInfo.id);
           }, 
           child: const Text('Yes')
         ),
@@ -41,7 +41,7 @@ class ChartCard extends StatelessWidget {
       child: InkWell(
         splashColor: Colors.blue.withAlpha(30),
         onTap: () async {
-          await Provider.of<KnittyGriddyModel>(context, listen: false).loadChart(chartInfo.id);
+          await Provider.of<ChartsModel>(context, listen: false).loadChart(chartInfo.id);
           if (context.mounted) {
             Navigator.push(
               context, 

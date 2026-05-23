@@ -1,8 +1,7 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/charts/chart_chooser/chart_chooser_view.dart';
-import 'package:knitty_griddy/drawings/drawing_chooser_view.dart';
-import 'package:knitty_griddy/patterns/pattern_chooser_view.dart';
+import 'package:knitty_griddy/drawings/drawing_chooser/drawing_chooser_view.dart';
+import 'package:knitty_griddy/patterns/pattern_chooser/pattern_chooser_view.dart';
 
 enum Page {
   patterns(label: 'Patterns'),

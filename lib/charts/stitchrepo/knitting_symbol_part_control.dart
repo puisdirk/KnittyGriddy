@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/utils/constants.dart';
-import 'package:knitty_griddy/model/knitting_symbol_part.dart';
+import 'package:knitty_griddy/charts/model/knitting_symbol_part.dart';
 
 class KnittingSymbolPartControl extends StatelessWidget {
   final KnittingSymbolPart knittingSymbolPart;

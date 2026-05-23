@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
-import 'package:knitty_griddy/model/app_state.dart';
-import 'package:knitty_griddy/model/knitty_griddy_model.dart';
+import 'package:knitty_griddy/charts/model/app_state.dart';
+import 'package:knitty_griddy/charts/model/charts_model.dart';
 import 'package:provider/provider.dart';
 
 class GridOptionsToolbarPanel extends StatelessWidget {
@@ -11,7 +11,7 @@ class GridOptionsToolbarPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Selector<KnittyGriddyModel, AppState>(
+    return Selector<ChartsModel, AppState>(
       selector: (_, model) => model.appState,
       builder: (context, appState, _) {
         return Padding(
@@ -23,7 +23,7 @@ class GridOptionsToolbarPanel extends StatelessWidget {
                 child: InkWell(
                   borderRadius: const BorderRadius.all(Radius.circular(10)),
                   splashColor: Colors.blue.withAlpha(30),
-                  onTap: () => Provider.of<KnittyGriddyModel>(context, listen: false).setMouseOption(MouseOption.singleclick),
+                  onTap: () => Provider.of<ChartsModel>(context, listen: false).setMouseOption(MouseOption.singleclick),
                   child: const Center(
                     child: Row(
                       children: [
@@ -41,7 +41,7 @@ class GridOptionsToolbarPanel extends StatelessWidget {
                 child: InkWell(
                   borderRadius: const BorderRadius.all(Radius.circular(10)),
                   splashColor: Colors.blue.withAlpha(30),
-                  onTap: () => Provider.of<KnittyGriddyModel>(context, listen: false).setMouseOption(MouseOption.painting),
+                  onTap: () => Provider.of<ChartsModel>(context, listen: false).setMouseOption(MouseOption.painting),
                   child: const Row(
                     children: [
                       SizedBox(width: 14, height: 40,),
@@ -57,7 +57,7 @@ class GridOptionsToolbarPanel extends StatelessWidget {
                 child: InkWell(
                   borderRadius: const BorderRadius.all(Radius.circular(10)),
                   splashColor: Colors.blue.withAlpha(30),
-                  onTap: () => Provider.of<KnittyGriddyModel>(context, listen: false).setMouseOption(MouseOption.selecting),
+                  onTap: () => Provider.of<ChartsModel>(context, listen: false).setMouseOption(MouseOption.selecting),
                   child: const Row(
                     children: [
                       SizedBox(width: 14, height: 40,),
@@ -72,23 +72,23 @@ class GridOptionsToolbarPanel extends StatelessWidget {
               Row(
                 children: [
                   const Spacer(),
-                  Selector<KnittyGriddyModel, bool>(
+                  Selector<ChartsModel, bool>(
                     selector: (_, model) => model.canUndo,
                     builder: (context, canUndo, _) {
                       return TextButton.icon(
                         onPressed: canUndo ?
-                          () => Provider.of<KnittyGriddyModel>(context, listen: false).undo() : null, 
+                          () => Provider.of<ChartsModel>(context, listen: false).undo() : null, 
                         icon: const Icon(Icons.undo),
                         label: const Text('Undo'),
                       );
                     }
                   ),
-                  Selector<KnittyGriddyModel, bool>(
+                  Selector<ChartsModel, bool>(
                     selector: (_, model) => model.canRedo,
                     builder: (context, canRedo, _) {
                       return TextButton.icon(
                         onPressed: canRedo ?
-                          () => Provider.of<KnittyGriddyModel>(context, listen: false).redo() : null, 
+                          () => Provider.of<ChartsModel>(context, listen: false).redo() : null, 
                         icon: const Icon(Icons.redo),
                         label: const Text('Redo'),
                       );
@@ -101,7 +101,7 @@ class GridOptionsToolbarPanel extends StatelessWidget {
                       shape: const CircleBorder(),
                     ),
                     child: IconButton(
-                      onPressed: () => Provider.of<KnittyGriddyModel>(context, listen: false).setMouseOption(MouseOption.settings), 
+                      onPressed: () => Provider.of<ChartsModel>(context, listen: false).setMouseOption(MouseOption.settings), 
                       icon: const Icon(Icons.settings)
                     ),
                   ),

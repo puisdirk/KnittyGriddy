@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/charts/stitch_icon.dart';
 import 'package:knitty_griddy/charts/stitchrepo/stitch_chooser.dart';
-import 'package:knitty_griddy/model/selection.dart';
+import 'package:knitty_griddy/charts/model/selection.dart';
 import 'package:knitty_griddy/utils/math_utitilies.dart';
-import 'package:knitty_griddy/model/app_state.dart';
-import 'package:knitty_griddy/model/knitty_griddy_model.dart';
+import 'package:knitty_griddy/charts/model/app_state.dart';
+import 'package:knitty_griddy/charts/model/charts_model.dart';
 import 'package:knitty_griddy/charts/stitchrepo/stitch_definition.dart';
 import 'package:provider/provider.dart';
 
@@ -20,12 +20,12 @@ class StitchesToolbarPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      child: Selector<KnittyGriddyModel, List<StitchDefinition>>(
+      child: Selector<ChartsModel, List<StitchDefinition>>(
         selector: (_, model) => model.usedStitches,
         builder: (context, usedStitches, _) {
           return Column(
             children: [
-              Selector<KnittyGriddyModel, AppState>(
+              Selector<ChartsModel, AppState>(
                 selector: (_, model) => model.appState,
                 builder: (context, appState, _) {
                   return Wrap(alignment: WrapAlignment.start,
@@ -45,7 +45,7 @@ class StitchesToolbarPanel extends StatelessWidget {
                               child: Card(
                                 // Highlight the button for single click or paint mode
                                 color: appState.currentTool != Tool.select ? appState.selectedStitch == stitchDefinition ? Colors.blue.withAlpha(60) : null : null,
-                                child: Selector<KnittyGriddyModel, Selection>(
+                                child: Selector<ChartsModel, Selection>(
                                   selector: (_, model) => model.selection,
                                   builder: (context, selection, _) {
                                     return InkWell(
@@ -58,10 +58,10 @@ class StitchesToolbarPanel extends StatelessWidget {
                                         switch (appState.currentTool) {
                                           case Tool.stitch:
                                           case Tool.colour:
-                                            Provider.of<KnittyGriddyModel>(context, listen: false).appUseStitch(stitchDefinition);
+                                            Provider.of<ChartsModel>(context, listen: false).appUseStitch(stitchDefinition);
                                             break;
                                           case Tool.select:
-                                            Provider.of<KnittyGriddyModel>(context, listen: false).fillSelectionWithStitch(stitchDefinition);
+                                            Provider.of<ChartsModel>(context, listen: false).fillSelectionWithStitch(stitchDefinition);
                                             break;
                                         }
                                       },
@@ -83,7 +83,7 @@ class StitchesToolbarPanel extends StatelessWidget {
                                           const SizedBox(width: _spacerwidth, ),
                                           if (appState.currentTool == Tool.select)
                                             IconButton(
-                                              onPressed: () => Provider.of<KnittyGriddyModel>(context, listen: false).toggleStitchDefinition(stitchDefinition), 
+                                              onPressed: () => Provider.of<ChartsModel>(context, listen: false).toggleStitchDefinition(stitchDefinition), 
                                               icon: const Icon(Icons.select_all),
                                               iconSize: _iconSize,
                                             )
@@ -117,7 +117,7 @@ class StitchesToolbarPanel extends StatelessWidget {
                     ),
                     const SizedBox(width: 20,),
                     IconButton.outlined(
-                      onPressed: () => Provider.of<KnittyGriddyModel>(context, listen: false).pruneUnusedStitches(),
+                      onPressed: () => Provider.of<ChartsModel>(context, listen: false).pruneUnusedStitches(),
                       icon: const Icon(Icons.content_cut)
                     ),
                   ],

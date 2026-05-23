@@ -3,12 +3,12 @@ import 'dart:ui';
 
 import 'package:knitty_griddy/charts/stitchrepo/stitch_definition.dart';
 import 'package:knitty_griddy/charts/stitchrepo/stitch_set.dart';
-import 'package:knitty_griddy/model/basicshapes/knitting_symbol_arc.dart';
-import 'package:knitty_griddy/model/basicshapes/knitting_symbol_curve.dart';
-import 'package:knitty_griddy/model/basicshapes/knitting_symbol_path.dart';
-import 'package:knitty_griddy/model/basicshapes/knitting_symbol_rectangle.dart';
-import 'package:knitty_griddy/model/basicshapes/knitting_symbol_text.dart';
-import 'package:knitty_griddy/model/knitting_symbol.dart';
+import 'package:knitty_griddy/charts/model/basicshapes/knitting_symbol_arc.dart';
+import 'package:knitty_griddy/charts/model/basicshapes/knitting_symbol_curve.dart';
+import 'package:knitty_griddy/charts/model/basicshapes/knitting_symbol_path.dart';
+import 'package:knitty_griddy/charts/model/basicshapes/knitting_symbol_rectangle.dart';
+import 'package:knitty_griddy/charts/model/basicshapes/knitting_symbol_text.dart';
+import 'package:knitty_griddy/charts/model/knitting_symbol.dart';
 
 class BasicStitchesSet extends StitchSet {
 

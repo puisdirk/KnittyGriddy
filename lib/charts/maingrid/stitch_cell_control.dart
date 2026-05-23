@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:knitty_griddy/charts/stitchrepo/stitch_repository.dart';
 import 'package:knitty_griddy/utils/color_utilities.dart';
 import 'package:knitty_griddy/utils/constants.dart';
-import 'package:knitty_griddy/model/knitty_griddy_model.dart';
-import 'package:knitty_griddy/model/stitch_cell.dart';
+import 'package:knitty_griddy/charts/model/charts_model.dart';
+import 'package:knitty_griddy/charts/model/stitch_cell.dart';
 import 'package:knitty_griddy/charts/stitchrepo/knitting_symbol_control.dart';
 import 'package:provider/provider.dart';
 
@@ -26,7 +26,7 @@ class StitchCellControl extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Selector<KnittyGriddyModel, StitchCell>(
+    return Selector<ChartsModel, StitchCell>(
       selector: (_, model) => model.stitchAt(column, row),
       builder: (context, stitchCell, _) {
         return Positioned(

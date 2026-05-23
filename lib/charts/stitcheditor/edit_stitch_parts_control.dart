@@ -2,8 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 import 'package:knitty_griddy/charts/stitcheditor/stitch_parts_borders.dart';
-import 'package:knitty_griddy/model/knitting_symbol.dart';
-import 'package:knitty_griddy/model/knitting_symbol_part.dart';
+import 'package:knitty_griddy/charts/model/knitting_symbol.dart';
+import 'package:knitty_griddy/charts/model/knitting_symbol_part.dart';
 import 'package:knitty_griddy/charts/stitcheditor/add_stitch_column_indicator.dart';
 import 'package:knitty_griddy/charts/stitchrepo/knitting_symbol_control.dart';
 import 'package:knitty_griddy/charts/stitchrepo/knitting_symbol_part_control.dart';
