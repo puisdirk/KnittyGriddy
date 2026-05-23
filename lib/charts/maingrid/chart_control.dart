@@ -6,8 +6,8 @@ import 'package:knitty_griddy/charts/editgrid/column_and_row_numbers_panel.dart'
 import 'package:knitty_griddy/charts/maingrid/outline_control.dart';
 import 'package:knitty_griddy/charts/maingrid/selection_layer_panel.dart';
 import 'package:knitty_griddy/charts/maingrid/stitches_grid.dart';
-import 'package:knitty_griddy/model/knitty_griddy_model.dart';
-import 'package:knitty_griddy/model/chart_settings.dart';
+import 'package:knitty_griddy/charts/model/charts_model.dart';
+import 'package:knitty_griddy/charts/model/chart_settings.dart';
 import 'package:provider/provider.dart';
 
 class ChartControl extends StatelessWidget {
@@ -18,7 +18,7 @@ class ChartControl extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Selector<KnittyGriddyModel, ChartSettings>(
+    return Selector<ChartsModel, ChartSettings>(
       selector: (_, model) => model.settings,
       builder: (context, chartSettings, _) {
         return SizedBox(

@@ -1,8 +1,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/utils/constants.dart';
-import 'package:knitty_griddy/model/knitty_griddy_model.dart';
-import 'package:knitty_griddy/model/chart_settings.dart';
+import 'package:knitty_griddy/charts/model/charts_model.dart';
+import 'package:knitty_griddy/charts/model/chart_settings.dart';
 import 'package:provider/provider.dart';
 
 class ColumnAndRowNumbersPanel extends StatelessWidget {
@@ -13,7 +13,7 @@ class ColumnAndRowNumbersPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Selector<KnittyGriddyModel, ChartSettings>(
+    return Selector<ChartsModel, ChartSettings>(
       selector: (_, model) => model.settings,
       builder: (context, chartSettings, _) {
         // Get the numbers from the model

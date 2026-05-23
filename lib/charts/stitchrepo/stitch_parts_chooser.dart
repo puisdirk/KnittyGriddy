@@ -3,9 +3,9 @@ import 'package:knitty_griddy/charts/stitch_icon.dart';
 import 'package:knitty_griddy/charts/stitch_part_icon.dart';
 import 'package:knitty_griddy/charts/stitchrepo/stitch_set.dart';
 import 'package:knitty_griddy/utils/math_utitilies.dart';
-import 'package:knitty_griddy/model/knitting_symbol_part.dart';
-import 'package:knitty_griddy/model/knitting_symbol_parts.dart';
-import 'package:knitty_griddy/model/knitty_griddy_model.dart';
+import 'package:knitty_griddy/charts/model/knitting_symbol_part.dart';
+import 'package:knitty_griddy/charts/model/knitting_symbol_parts.dart';
+import 'package:knitty_griddy/charts/model/charts_model.dart';
 import 'package:knitty_griddy/charts/stitchrepo/stitch_definition.dart';
 import 'package:provider/provider.dart';
 
@@ -174,7 +174,7 @@ class _StitchPartsChooserState extends State<StitchPartsChooser> {
       content: SizedBox(
         width: 600,
         height: 400,
-        child: Selector<KnittyGriddyModel, List<StitchSet>>(
+        child: Selector<ChartsModel, List<StitchSet>>(
           selector: (_, model) => model.filteredStitchSets(''),
           builder: (context, stitchSets, _) {
            return DefaultTabController(

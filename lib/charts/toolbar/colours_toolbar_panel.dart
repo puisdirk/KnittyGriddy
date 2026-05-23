@@ -1,11 +1,11 @@
 
 import 'package:flutter/material.dart';
-import 'package:knitty_griddy/model/named_colour.dart';
+import 'package:knitty_griddy/charts/model/named_colour.dart';
 import 'package:knitty_griddy/charts/toolbar/add_new_colour_dialog.dart';
 import 'package:knitty_griddy/charts/toolbar/edit_colour_dialog.dart';
-import 'package:knitty_griddy/model/selection.dart';
-import 'package:knitty_griddy/model/app_state.dart';
-import 'package:knitty_griddy/model/knitty_griddy_model.dart';
+import 'package:knitty_griddy/charts/model/selection.dart';
+import 'package:knitty_griddy/charts/model/app_state.dart';
+import 'package:knitty_griddy/charts/model/charts_model.dart';
 import 'package:provider/provider.dart';
 
 class ColoursToolbarPanel extends StatelessWidget {
@@ -22,7 +22,7 @@ class ColoursToolbarPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      child: Selector<KnittyGriddyModel, List<NamedColour>>(
+      child: Selector<ChartsModel, List<NamedColour>>(
         selector: (_, model) => model.usedColours,
         builder: (context, usedColours, _) {
           double spacerWidth = 8;
@@ -37,10 +37,10 @@ class ColoursToolbarPanel extends StatelessWidget {
           }
           return Column(
             children: [
-              Selector<KnittyGriddyModel, AppState>(
+              Selector<ChartsModel, AppState>(
                 selector: (_, model) => model.appState,
                 builder: (context, appState, _) {
-                  return Selector<KnittyGriddyModel, Selection>(
+                  return Selector<ChartsModel, Selection>(
                     selector: (_, model) => model.selection,
                     builder: (context, selection, _) {
                       return Wrap(
@@ -61,10 +61,10 @@ class ColoursToolbarPanel extends StatelessWidget {
                                     switch (appState.currentTool) {
                                       case Tool.stitch:
                                       case Tool.colour:
-                                        Provider.of<KnittyGriddyModel>(context, listen: false).appUseColour(colour);
+                                        Provider.of<ChartsModel>(context, listen: false).appUseColour(colour);
                                         break;
                                       case Tool.select:
-                                        Provider.of<KnittyGriddyModel>(context, listen: false).fillSelectionWithColor(colour);
+                                        Provider.of<ChartsModel>(context, listen: false).fillSelectionWithColor(colour);
                                         break;
                                     }
                                   },
@@ -99,7 +99,7 @@ class ColoursToolbarPanel extends StatelessWidget {
                                         ),
                                       if (appState.currentTool == Tool.select)
                                         IconButton(
-                                          onPressed: () => Provider.of<KnittyGriddyModel>(context, listen: false).toggleColour(colour), 
+                                          onPressed: () => Provider.of<ChartsModel>(context, listen: false).toggleColour(colour), 
                                           icon: const Icon(Icons.select_all),
                                           iconSize: iconWidth,
                                         ),
@@ -132,7 +132,7 @@ class ColoursToolbarPanel extends StatelessWidget {
                     ),
                     const SizedBox(width: 20,),
                     IconButton.outlined(
-                      onPressed: () => Provider.of<KnittyGriddyModel>(context, listen: false).pruneUnusedColours(), 
+                      onPressed: () => Provider.of<ChartsModel>(context, listen: false).pruneUnusedColours(), 
                       icon: const Icon(Icons.content_cut)
                     )
                   ],

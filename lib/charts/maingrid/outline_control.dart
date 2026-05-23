@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
-import 'package:knitty_griddy/model/cell_address.dart';
-import 'package:knitty_griddy/model/knitty_griddy_model.dart';
+import 'package:knitty_griddy/charts/model/cell_address.dart';
+import 'package:knitty_griddy/charts/model/charts_model.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 import 'package:provider/provider.dart';
 
@@ -17,7 +17,7 @@ class OutlineControl extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Selector<KnittyGriddyModel, Set<CellAddress>>(
+    return Selector<ChartsModel, Set<CellAddress>>(
       selector: (_, model) => model.outline,
       builder: (context, outline, _) {
         return SizedBox(

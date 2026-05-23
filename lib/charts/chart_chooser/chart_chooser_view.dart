@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:knitty_griddy/charts/maingrid/chart_page.dart';
 import 'package:knitty_griddy/charts/chart_chooser/chart_card.dart';
 import 'package:knitty_griddy/charts/chart_chooser/stitch_repository_page.dart';
-import 'package:knitty_griddy/model/knitty_griddy_model.dart';
-import 'package:knitty_griddy/model/chart_info.dart';
+import 'package:knitty_griddy/charts/model/charts_model.dart';
+import 'package:knitty_griddy/charts/model/chart_info.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
@@ -36,7 +36,7 @@ class _ChartChooserViewState extends State<ChartChooserView> {
           borderRadius: const BorderRadius.all(Radius.circular(10)),
           splashColor: Colors.blue.withAlpha(30),
           onTap: () {
-            Provider.of<KnittyGriddyModel>(context, listen: false).createNewChart('Unnamed');
+            Provider.of<ChartsModel>(context, listen: false).createNewChart('Unnamed');
             Navigator.push(context, MaterialPageRoute(builder: (context) => const ChartPage(),));
           },
           child: const Center(
@@ -59,7 +59,7 @@ class _ChartChooserViewState extends State<ChartChooserView> {
             const Spacer(),
             OutlinedButton.icon(
               onPressed: () {
-                Provider.of<KnittyGriddyModel>(context, listen: false).importChart();
+                Provider.of<ChartsModel>(context, listen: false).importChart();
               }, 
               label: const Text('Import Chart'),
               icon: const Icon(Symbols.download, weight: 700,),
@@ -79,7 +79,7 @@ class _ChartChooserViewState extends State<ChartChooserView> {
           child: Center(
             child: Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Selector<KnittyGriddyModel, List<ChartInfo>>(
+              child: Selector<ChartsModel, List<ChartInfo>>(
                 selector: (_, model) => model.chartInfos,
                 builder: (context, chartInfos, _) {
                   List<Widget> chartCards = _createChartCards(chartInfos);

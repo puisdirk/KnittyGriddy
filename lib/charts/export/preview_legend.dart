@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:knitty_griddy/charts/stitch_icon.dart';
 import 'package:knitty_griddy/charts/stitchrepo/stitch_definition.dart';
 import 'package:knitty_griddy/charts/export/export_settings.dart';
-import 'package:knitty_griddy/model/knitting_chart.dart';
-import 'package:knitty_griddy/model/knitty_griddy_model.dart';
-import 'package:knitty_griddy/model/named_colour.dart';
+import 'package:knitty_griddy/charts/model/knitting_chart.dart';
+import 'package:knitty_griddy/charts/model/charts_model.dart';
+import 'package:knitty_griddy/charts/model/named_colour.dart';
 import 'package:provider/provider.dart';
 
 class PreviewLegend extends StatelessWidget {
@@ -151,7 +151,7 @@ class PreviewLegend extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    KnittingChart chart = Provider.of<KnittyGriddyModel>(context, listen: false).knittingChart.pruneUnusedStitchesAndColours();
+    KnittingChart chart = Provider.of<ChartsModel>(context, listen: false).knittingChart.pruneUnusedStitchesAndColours();
 
     return exportSettings.legendVertical ?
       Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.start, children: legendWidgetsVertical(chart),) : 

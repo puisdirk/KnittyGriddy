@@ -4,7 +4,7 @@ import 'package:knitty_griddy/charts/chart_chooser/stitch_set_panel.dart';
 import 'package:knitty_griddy/charts/stitchrepo/basic_stitches_set.dart';
 import 'package:knitty_griddy/charts/stitchrepo/stitch_repository.dart';
 import 'package:knitty_griddy/charts/stitchrepo/stitch_set.dart';
-import 'package:knitty_griddy/model/knitty_griddy_model.dart';
+import 'package:knitty_griddy/charts/model/charts_model.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
@@ -53,7 +53,7 @@ class _StitchRepositoryPageState extends State<StitchRepositoryPage> with Ticker
 
   @override
   Widget build(BuildContext context) {
-    return Selector<KnittyGriddyModel, List<StitchSet>>(
+    return Selector<ChartsModel, List<StitchSet>>(
       selector: (_, model) => model.filteredStitchSets(_filterText),
       builder: (context, filteredStitchSets, _) {
         _tabController = TabController(length: filteredStitchSets.length, vsync: this);
@@ -81,7 +81,7 @@ class _StitchRepositoryPageState extends State<StitchRepositoryPage> with Ticker
                       if (!StitchRepository.hasStitchSet(BasicStitchesSet.basicStitchSetId))
                       OutlinedButton.icon(
                         onPressed: () {
-                          Provider.of<KnittyGriddyModel>(context, listen: false).restoreBasicStitchSet();
+                          Provider.of<ChartsModel>(context, listen: false).restoreBasicStitchSet();
                           int newTabIdx = StitchRepository.indexOfSet(BasicStitchesSet.basicStitchSetId);
                           setState(() => tabIdx = newTabIdx);
                         },
@@ -91,7 +91,7 @@ class _StitchRepositoryPageState extends State<StitchRepositoryPage> with Ticker
                       const SizedBox(width: 10,),
                       OutlinedButton.icon(
                         onPressed: () async {
-                          String? id = await Provider.of<KnittyGriddyModel>(context, listen: false).importStitchesSet();
+                          String? id = await Provider.of<ChartsModel>(context, listen: false).importStitchesSet();
                           if (id != null) {
                             int newTabIdx = StitchRepository.indexOfSet(id);
                             if (newTabIdx != -1) {
@@ -105,7 +105,7 @@ class _StitchRepositoryPageState extends State<StitchRepositoryPage> with Ticker
                       const SizedBox(width: 10,),
                       OutlinedButton.icon(
                         onPressed: () {
-                          String id = Provider.of<KnittyGriddyModel>(context, listen: false).createStitchSet('Untitled', []);
+                          String id = Provider.of<ChartsModel>(context, listen: false).createStitchSet('Untitled', []);
                           int newTabIdx = StitchRepository.indexOfSet(id);
                           if (newTabIdx != -1) {
                             setState(() => tabIdx = newTabIdx);

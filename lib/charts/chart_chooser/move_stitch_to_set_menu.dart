@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:knitty_griddy/charts/stitchrepo/stitch_definition.dart';
 import 'package:knitty_griddy/charts/stitchrepo/stitch_repository.dart';
 import 'package:knitty_griddy/charts/stitchrepo/stitch_set.dart';
-import 'package:knitty_griddy/model/knitty_griddy_model.dart';
+import 'package:knitty_griddy/charts/model/charts_model.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
@@ -24,7 +24,7 @@ class MoveStitchToSetMenu extends StatelessWidget {
         for (StitchSet stitchSet in otherSets)
           MenuItemButton(
             onPressed: () {
-              Provider.of<KnittyGriddyModel>(context, listen: false).moveStitchToSet(
+              Provider.of<ChartsModel>(context, listen: false).moveStitchToSet(
                 stitchDefinition: stitchDefinition, 
                 sourceSetId: currentStitchSet.id, 
                 targetSetId: stitchSet.id);

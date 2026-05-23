@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:knitty_griddy/charts/stitcheditor/symbol_part_controls.dart';
 import 'package:knitty_griddy/charts/stitcheditor/symbol_transform_controls.dart';
-import 'package:knitty_griddy/model/knitting_symbol.dart';
-import 'package:knitty_griddy/model/knitting_symbol_part.dart';
-import 'package:knitty_griddy/model/knitting_symbol_parts.dart';
-import 'package:knitty_griddy/model/knitty_griddy_model.dart';
-import 'package:knitty_griddy/model/undo_redo_manager.dart';
+import 'package:knitty_griddy/charts/model/knitting_symbol.dart';
+import 'package:knitty_griddy/charts/model/knitting_symbol_part.dart';
+import 'package:knitty_griddy/charts/model/knitting_symbol_parts.dart';
+import 'package:knitty_griddy/charts/model/charts_model.dart';
+import 'package:knitty_griddy/utils/undo_redo_manager.dart';
 import 'package:knitty_griddy/charts/stitchrepo/stitch_definition.dart';
 import 'package:knitty_griddy/charts/stitcheditor/edit_stitch_parts_control.dart';
 import 'package:knitty_griddy/charts/stitchrepo/stitch_parts_chooser.dart';
@@ -90,7 +90,7 @@ class _EditStitchPageState extends State<EditStitchPage> {
   }
 
   void _setStitchDefinition(StitchDefinition newStitchDefinition) {
-    Provider.of<KnittyGriddyModel>(context, listen: false).updateStitchDefinition(olddef: stitchDefinition, newdef: newStitchDefinition);
+    Provider.of<ChartsModel>(context, listen: false).updateStitchDefinition(olddef: stitchDefinition, newdef: newStitchDefinition);
     setState(() {
       stitchDefinition = newStitchDefinition;
     });
@@ -147,7 +147,7 @@ class _EditStitchPageState extends State<EditStitchPage> {
                       onPressed: () {
                         Navigator.pop(context);
                         Navigator.pop(context);
-                        Provider.of<KnittyGriddyModel>(context, listen: false).deleteStitch(stitchDefinition);
+                        Provider.of<ChartsModel>(context, listen: false).deleteStitch(stitchDefinition);
                       },
                       child: const Text('Yes')),
                 ],

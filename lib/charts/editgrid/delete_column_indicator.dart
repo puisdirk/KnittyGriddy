@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/utils/constants.dart';
-import 'package:knitty_griddy/model/knitty_griddy_model.dart';
+import 'package:knitty_griddy/charts/model/charts_model.dart';
 import 'package:provider/provider.dart';
 
 class DeleteColumnIndicator extends StatefulWidget {
@@ -22,7 +22,7 @@ class _DeleteColumnIndicatorState extends State<DeleteColumnIndicator> {
   bool visible = false;
 
   void _deleteColumn(BuildContext context) {
-    Provider.of<KnittyGriddyModel>(context, listen: false).deleteColumn(widget.column);
+    Provider.of<ChartsModel>(context, listen: false).deleteColumn(widget.column);
   }
 
   @override

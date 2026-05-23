@@ -7,7 +7,7 @@ import 'package:knitty_griddy/charts/stitcheditor/edit_stitch_page.dart';
 import 'package:knitty_griddy/charts/stitchrepo/stitch_definition.dart';
 import 'package:knitty_griddy/charts/stitchrepo/stitch_repository.dart';
 import 'package:knitty_griddy/charts/stitchrepo/stitch_set.dart';
-import 'package:knitty_griddy/model/knitty_griddy_model.dart';
+import 'package:knitty_griddy/charts/model/charts_model.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
@@ -48,7 +48,7 @@ class _StitchSetPanelState extends State<StitchSetPanel> {
               const SizedBox(width: 10,),
               OutlinedButton.icon(
                 onPressed: () async {
-                  await Provider.of<KnittyGriddyModel>(context, listen: false).exportStitchesSet(widget.stitchSet);
+                  await Provider.of<ChartsModel>(context, listen: false).exportStitchesSet(widget.stitchSet);
                 }, 
                 icon: const Icon(Symbols.upload, weight: 700,),
                 label: const Text('Export Set'),
@@ -57,7 +57,7 @@ class _StitchSetPanelState extends State<StitchSetPanel> {
               if (widget.stitchSet.definitions.isEmpty)
                 OutlinedButton.icon(
                   onPressed: () {
-                    StitchDefinition sd = Provider.of<KnittyGriddyModel>(context, listen: false).addStitch(category: 'General', stitchSetId: widget.stitchSet.id);
+                    StitchDefinition sd = Provider.of<ChartsModel>(context, listen: false).addStitch(category: 'General', stitchSetId: widget.stitchSet.id);
                     Navigator.of(context).push(
                       MaterialPageRoute(builder: (context) => EditStitchPage(stitchDefinition: sd)),
                     );
@@ -83,7 +83,7 @@ class _StitchSetPanelState extends State<StitchSetPanel> {
                         ),
                         OutlinedButton(
                           onPressed: () {
-                            Provider.of<KnittyGriddyModel>(context, listen: false).deleteStitchSet(widget.stitchSet.id);
+                            Provider.of<ChartsModel>(context, listen: false).deleteStitchSet(widget.stitchSet.id);
                             Navigator.pop(context);
                           },
                           child: const Text('OK')
@@ -115,7 +115,7 @@ class _StitchSetPanelState extends State<StitchSetPanel> {
                       const Spacer(),
                       IconButton(
                         onPressed: () {
-                          StitchDefinition sd = Provider.of<KnittyGriddyModel>(context, listen: false).addStitch(category: category, stitchSetId: widget.stitchSet.id);
+                          StitchDefinition sd = Provider.of<ChartsModel>(context, listen: false).addStitch(category: category, stitchSetId: widget.stitchSet.id);
                             Navigator.of(context).push(
                               MaterialPageRoute(builder: (context) => EditStitchPage(stitchDefinition: sd)),
                             );
@@ -161,7 +161,7 @@ class _StitchSetPanelState extends State<StitchSetPanel> {
                       IconButton(
                         onPressed: () {
                           StitchDefinition newDef = def.copyWith(id: const UuidV4Gen().get());
-                          Provider.of<KnittyGriddyModel>(context, listen: false).addStitchToSet(
+                          Provider.of<ChartsModel>(context, listen: false).addStitchToSet(
                             targetStitchSet: widget.stitchSet, 
                             stitchDefinition: newDef
                           );
@@ -182,14 +182,14 @@ class _StitchSetPanelState extends State<StitchSetPanel> {
                                   TextButton(
                                     onPressed: () {
                                       Navigator.pop(context);
-                                      Provider.of<KnittyGriddyModel>(context, listen: false).deleteStitch(def);
+                                      Provider.of<ChartsModel>(context, listen: false).deleteStitch(def);
                                     },
                                     child: const Text('Yes')
                                   ),
                                   TextButton(
                                     onPressed: () {
                                       Navigator.pop(context);
-                                      Provider.of<KnittyGriddyModel>(context, listen: false).deleteStitch(def);
+                                      Provider.of<ChartsModel>(context, listen: false).deleteStitch(def);
                                     }, 
                                     child: const Text('Delete Permanently')
                                   )

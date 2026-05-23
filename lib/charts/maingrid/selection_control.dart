@@ -1,8 +1,8 @@
 
 import 'package:flutter/material.dart';
-import 'package:knitty_griddy/model/cell_address.dart';
-import 'package:knitty_griddy/model/knitting_chart.dart';
-import 'package:knitty_griddy/model/knitty_griddy_model.dart';
+import 'package:knitty_griddy/charts/model/cell_address.dart';
+import 'package:knitty_griddy/charts/model/knitting_chart.dart';
+import 'package:knitty_griddy/charts/model/charts_model.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 import 'package:provider/provider.dart';
 
@@ -11,7 +11,7 @@ class SelectionControl extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Selector<KnittyGriddyModel, KnittingChart>(
+    return Selector<ChartsModel, KnittingChart>(
       selector: (_, model) => model.knittingChart,
       builder: (context, knittingChart, _) {
         return knittingChart.selection.isEmpty ?

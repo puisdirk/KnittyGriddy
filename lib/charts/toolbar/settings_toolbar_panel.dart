@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
-import 'package:knitty_griddy/model/knitting_chart.dart';
-import 'package:knitty_griddy/model/knitty_griddy_model.dart';
+import 'package:knitty_griddy/charts/model/knitting_chart.dart';
+import 'package:knitty_griddy/charts/model/charts_model.dart';
 import 'package:provider/provider.dart';
 
 class SettingsToolbarPanel extends StatefulWidget {
@@ -22,11 +22,11 @@ class _SettingsToolbarPanelState extends State<SettingsToolbarPanel> {
   late TextEditingController descriptionController;
 
   void _nameChanged() {
-    Provider.of<KnittyGriddyModel>(context, listen: false).setChartName(nameController.text);
+    Provider.of<ChartsModel>(context, listen: false).setChartName(nameController.text);
   }
 
   void _descriptionChanged() {
-    Provider.of<KnittyGriddyModel>(context, listen: false).setChartDescription(descriptionController.text);
+    Provider.of<ChartsModel>(context, listen: false).setChartDescription(descriptionController.text);
   }
 
   @override

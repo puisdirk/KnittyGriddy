@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import 'package:knitty_griddy/model/named_colour.dart';
-import 'package:knitty_griddy/model/knitty_griddy_model.dart';
+import 'package:knitty_griddy/charts/model/named_colour.dart';
+import 'package:knitty_griddy/charts/model/charts_model.dart';
 import 'package:provider/provider.dart';
 
 class AddNewColourDialog extends StatefulWidget {
@@ -85,7 +85,7 @@ class _AddNewColourDialogState extends State<AddNewColourDialog> {
           onPressed: 
             isValidColourName ?
             () {
-              Provider.of<KnittyGriddyModel>(context, listen: false).addNamedColour(pickerColor, pickerColorName);
+              Provider.of<ChartsModel>(context, listen: false).addNamedColour(pickerColor, pickerColorName);
               Navigator.of(context).pop();
             } :
             null,

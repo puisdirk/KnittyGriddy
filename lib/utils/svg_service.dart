@@ -6,10 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:knitty_griddy/charts/stitchrepo/stitch_definition.dart';
 import 'package:knitty_griddy/charts/stitchrepo/stitch_repository.dart';
 import 'package:knitty_griddy/charts/export/export_settings.dart';
-import 'package:knitty_griddy/model/cell_address.dart';
-import 'package:knitty_griddy/model/knitting_chart.dart';
-import 'package:knitty_griddy/model/named_colour.dart';
-import 'package:knitty_griddy/model/stitch_cell.dart';
+import 'package:knitty_griddy/charts/model/cell_address.dart';
+import 'package:knitty_griddy/charts/model/knitting_chart.dart';
+import 'package:knitty_griddy/charts/model/named_colour.dart';
+import 'package:knitty_griddy/charts/model/stitch_cell.dart';
 import 'package:knitty_griddy/utils/color_utilities.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 

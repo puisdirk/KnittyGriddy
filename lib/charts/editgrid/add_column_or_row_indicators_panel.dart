@@ -5,8 +5,8 @@ import 'package:knitty_griddy/charts/editgrid/add_column_indicator.dart';
 import 'package:knitty_griddy/charts/editgrid/add_row_indicator.dart';
 import 'package:knitty_griddy/charts/editgrid/delete_column_indicator.dart';
 import 'package:knitty_griddy/charts/editgrid/delete_row_indicator.dart';
-import 'package:knitty_griddy/model/app_state.dart';
-import 'package:knitty_griddy/model/knitty_griddy_model.dart';
+import 'package:knitty_griddy/charts/model/app_state.dart';
+import 'package:knitty_griddy/charts/model/charts_model.dart';
 import 'package:provider/provider.dart';
 
 class AddColumnOrRowIndicatorsPanel extends StatelessWidget {
@@ -21,7 +21,7 @@ class AddColumnOrRowIndicatorsPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Selector<KnittyGriddyModel, AppState>(
+    return Selector<ChartsModel, AppState>(
       selector: (_, model) => model.appState,
       builder: (context, appState, _) {
         return SizedBox(

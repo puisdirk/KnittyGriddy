@@ -8,7 +8,7 @@ import 'dart:ui' as ui;
 import 'package:knitty_griddy/charts/export/export_toolbar.dart';
 import 'package:knitty_griddy/charts/export/preview_legend.dart';
 import 'package:knitty_griddy/charts/export/preview_stitches_grid.dart';
-import 'package:knitty_griddy/model/knitty_griddy_model.dart';
+import 'package:knitty_griddy/charts/model/charts_model.dart';
 import 'package:knitty_griddy/utils/svg_service.dart';
 import 'package:provider/provider.dart';
 
@@ -38,7 +38,7 @@ class _ExportPageState extends State<ExportPage> {
             height: toolbarHeight, 
             exportSetting: exportSettings,
             settingsChanged: (newSettings) => setState(() => exportSettings = newSettings),
-            exportToChart: () => Provider.of<KnittyGriddyModel>(context, listen: false).exportChart(),
+            exportToChart: () => Provider.of<ChartsModel>(context, listen: false).exportChart(),
             exportToPNG: () async {
               RenderRepaintBoundary drawingBoundary = drawingBoundaryKey.currentContext!.findRenderObject()! as RenderRepaintBoundary;
                 ui.Image image = await drawingBoundary.toImage(pixelRatio: 3);
@@ -47,7 +47,7 @@ class _ExportPageState extends State<ExportPage> {
 
                 String chartname = 'chart';
                 if (context.mounted) {
-                  chartname = Provider.of<KnittyGriddyModel>(context, listen: false).knittingChart.name;
+                  chartname = Provider.of<ChartsModel>(context, listen: false).knittingChart.name;
                 }
                 await FilePicker.platform.saveFile(
                     dialogTitle: 'Where do you want to store the output?',
@@ -65,7 +65,7 @@ class _ExportPageState extends State<ExportPage> {
               Size drawingSize = drawingBoundary.size;
 
               await SvgService.exportToSVG(
-                Provider.of<KnittyGriddyModel>(context, listen: false).knittingChart.pruneUnusedStitchesAndColours(), 
+                Provider.of<ChartsModel>(context, listen: false).knittingChart.pruneUnusedStitchesAndColours(), 
                 exportSettings, 
                 drawingSize, legendSize
               );

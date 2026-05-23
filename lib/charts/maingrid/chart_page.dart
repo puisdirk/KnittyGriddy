@@ -5,7 +5,7 @@ import 'package:knitty_griddy/charts/editgrid/grid_settings_control.dart';
 import 'package:knitty_griddy/charts/toolbar/knitting_toolbar.dart';
 import 'package:knitty_griddy/charts/maingrid/chart_control.dart';
 import 'package:knitty_griddy/charts/export/export_page.dart';
-import 'package:knitty_griddy/model/knitty_griddy_model.dart';
+import 'package:knitty_griddy/charts/model/charts_model.dart';
 import 'package:provider/provider.dart';
 
 class ChartPage extends StatefulWidget {
@@ -35,13 +35,14 @@ class _ChartPageState extends State<ChartPage> {
   @override
   Widget build(BuildContext context) {
     FocusScope.of(context).autofocus(_focusNode);
-    String chartname = Provider.of<KnittyGriddyModel>(context, listen: false).knittingChart.name;
+    String chartname = Provider.of<ChartsModel>(context, listen: false).knittingChart.name;
 
     return Scaffold(
       appBar: AppBar(
         leading: BackButton(
           onPressed: () {
-            Provider.of<KnittyGriddyModel>(context, listen: false).saveCurrentChart();
+            Provider.of<ChartsModel>(context, listen: false).saveCurrentChart();
+            Provider.of<ChartsModel>(context, listen: false).clearUndoRedo();
             Navigator.maybePop(context);
           },
         ),
@@ -67,9 +68,9 @@ class _ChartPageState extends State<ChartPage> {
           if (value is KeyDownEvent && value.logicalKey == LogicalKeyboardKey.keyZ && 
             (HardwareKeyboard.instance.isMetaPressed || HardwareKeyboard.instance.isControlPressed)) {
             if (HardwareKeyboard.instance.isShiftPressed) {
-              Provider.of<KnittyGriddyModel>(context, listen: false).redo();
+              Provider.of<ChartsModel>(context, listen: false).redo();
             } else {
-              Provider.of<KnittyGriddyModel>(context, listen: false).undo();
+              Provider.of<ChartsModel>(context, listen: false).undo();
             }
           }
         },
