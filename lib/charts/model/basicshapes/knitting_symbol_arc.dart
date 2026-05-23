@@ -140,7 +140,7 @@ class KnittingSymbolArc extends KnittingSymbolPart {
     int sweepArgFlag = 1;
 
     // The arc won't show up if start and end points are too close
-    if (MathUtitilies.distance(startPoint, endPoint) < 0.000003) {
+    if (MathUtitilies.offsetDistance(startPoint, endPoint) < 0.000003) {
       endPoint = startPoint.translate(0, 0.000003);
       sweepArgFlag = 0;
     }

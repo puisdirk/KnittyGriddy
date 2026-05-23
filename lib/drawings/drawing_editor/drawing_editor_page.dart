@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/drawing_editor_control.dart';
+import 'package:knitty_griddy/drawings/drawing_editor/drawing_toolbar.dart';
 import 'package:knitty_griddy/drawings/model/drawings_model.dart';
 import 'package:provider/provider.dart';
 
@@ -42,6 +43,16 @@ class _DrawingEditorPageState extends State<DrawingEditorPage> {
         ),
         title: Text('Drawing - $drawingName'),
         backgroundColor: Colors.grey.shade300,
+        bottom: const PreferredSize(
+          preferredSize: Size(2000, 40), 
+          child: DrawingToolbar()
+        ),
+        actions: [
+          IconButton(
+            onPressed: () {}, 
+            icon: const Icon(Icons.ios_share)
+          )
+        ],
         // TODO: could have export action here as in ChartPage
       ),
       body: KeyboardListener(
@@ -60,10 +71,7 @@ class _DrawingEditorPageState extends State<DrawingEditorPage> {
         child: const Center(
           child: Padding(
             padding: EdgeInsets.all(5.0),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.vertical,
               child: DrawingEditorControl(),
-            ),
           ),
         )
       ),
