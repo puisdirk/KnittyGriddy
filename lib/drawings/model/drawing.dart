@@ -1,11 +1,11 @@
 
 import 'package:flutter/foundation.dart';
-import 'package:knitty_griddy/drawings/model/elements/curve.dart';
-import 'package:knitty_griddy/drawings/model/elements/drawing_element.dart';
-import 'package:knitty_griddy/drawings/model/elements/line.dart';
-import 'package:knitty_griddy/drawings/model/elements/measurement_decoration.dart';
+import 'package:knitty_griddy/drawings/model/commands/curve_command.dart';
+import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
+import 'package:knitty_griddy/drawings/model/commands/line_command.dart';
+import 'package:knitty_griddy/drawings/model/commands/measurement_decoration_command.dart';
 import 'package:knitty_griddy/drawings/model/measurement_requirement.dart';
-import 'package:knitty_griddy/drawings/model/elements/point.dart';
+import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
 
 const String placeholderDrawingId = '_placeholder_drawing_id_';
 const Drawing placeholderDrawing = Drawing(
@@ -18,14 +18,14 @@ class Drawing {
   final String id;
   final String name;
   final String description;
-  final List<DrawingElement> elements;
+  final List<DrawingCommand> commands;
   final List<MeasurementRequirement> measurementRequirements;
 
   const Drawing({
     required this.id,
     required this.name,
     this.description = '',
-    this.elements = const[],
+    this.commands = const[],
     this.measurementRequirements = const[],
   });
 
@@ -33,14 +33,14 @@ class Drawing {
     String? id,
     String? name,
     String? description,
-    List<DrawingElement>? elements,
+    List<DrawingCommand>? commands,
     List<MeasurementRequirement>? measurementRequirements,
   }) {
     return Drawing(
       id: id?? this.id, 
       name: name?? this.name,
       description: description?? this.description,
-      elements: elements?? this.elements,
+      commands: commands?? this.commands,
       measurementRequirements: measurementRequirements?? this.measurementRequirements,
     );
   }
@@ -50,30 +50,30 @@ class Drawing {
       'id': id,
       'name': name,
       'description': description,
-      'elements': elements.map((e) => e.toJson()).toList(),
+      'commands': commands.map((e) => e.toJson()).toList(),
       'mreqs': measurementRequirements.map((e) => e.toJson()).toList(),
     };
   }
 
   static Drawing fromJson(Map<String, dynamic> json) {
-    List<DrawingElement> elements = [];
-    List<Map<String, dynamic>> elementObjects = (json['elements'] as List).map((o) => o as Map<String, dynamic>).toList();
-    for (Map<String, dynamic> elementObject in elementObjects) {
-      switch (elementObject['type'] as String) {
+    List<DrawingCommand> commands = [];
+    List<Map<String, dynamic>> commandObjects = (json['commands'] as List).map((o) => o as Map<String, dynamic>).toList();
+    for (Map<String, dynamic> commandObject in commandObjects) {
+      switch (commandObject['type'] as String) {
         case drawingTypePoint:
-          elements.add(Point.fromJson(elementObject));
+          commands.add(PointCommand.fromJson(commandObject));
           break;
         case drawingTypeLine:
-          elements.add(Line.fromJson(elementObject));
+          commands.add(LineCommand.fromJson(commandObject));
           break;
         case drawingTypeCurve:
-          elements.add(Curve.fromJson(elementObject));
+          commands.add(CurveCommand.fromJson(commandObject));
           break;
         case drawingTypeMeasurementDecoration:
-          elements.add(MeasurementDecoration.fromJson(elementObject));
+          commands.add(MeasurementDecorationCommand.fromJson(commandObject));
           break;
         default:
-          throw Exception('Unknown drawing element type ${elementObject['type']}');
+          throw Exception('Unknown drawing element type ${commandObject['type']}');
       }
     }
 
@@ -87,7 +87,7 @@ class Drawing {
       id: json['id'] as String, 
       name: json['name'] as String,
       description: json['description'] as String,
-      elements: elements,
+      commands: commands,
       measurementRequirements: measurementRequirements,
     );
   }
@@ -103,4 +103,25 @@ class Drawing {
       id == other.id &&
       name == other.name &&
       description == other.description;
+
+    List<LineCommand> get lines => commands.whereType<LineCommand>().toList();
+    List<PointCommand> get points => commands.whereType<PointCommand>().toList();
+    LineCommand? lineById(String id) {
+      try {
+        return commands.firstWhere((c) => c.id == id && c is LineCommand) as LineCommand;
+      } catch (e) {
+        return null;
+      }
+    }
+    PointCommand? pointById(String id) {
+      if (id == originId) {
+        return origin;
+      }
+      
+      try {
+        return commands.firstWhere((c) => c.id == id && c is PointCommand) as PointCommand;
+      } catch (e) {
+        return null;
+      }
+    }
 }
