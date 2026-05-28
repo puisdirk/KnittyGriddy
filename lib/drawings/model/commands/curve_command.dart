@@ -1,31 +1,34 @@
 
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/drawings/model/coordinate.dart';
-import 'package:knitty_griddy/drawings/model/elements/drawing_element.dart';
+import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
+import 'package:knitty_griddy/drawings/model/drawing.dart';
 
 const String drawingTypeCurve = 'curve';
 
 @immutable
-class Curve extends DrawingElement {
+class CurveCommand extends DrawingCommand {
 
   final Coordinate startPoint;
   final Coordinate endPoint;
   final Coordinate controlPoint;
 
-  const Curve({
+  const CurveCommand({
+    required super.id,
     required super.label,
     required this.startPoint,
     required this.endPoint,
     required this.controlPoint,
   });
 
-  Curve copyWith({
+  CurveCommand copyWith({
     String? label,
     Coordinate? startPoint,
     Coordinate? endPoint,
     Coordinate? controlPoint,
   }) {
-    return Curve(
+    return CurveCommand(
+      id: id,
       label: label?? this.label, 
       startPoint: startPoint?? this.startPoint, 
       endPoint: endPoint?? this.endPoint, 
@@ -37,6 +40,7 @@ class Curve extends DrawingElement {
   Map<String, Object> toJson() {
     return {
       'type': drawingTypeCurve,
+      'id': id,
       'label': label,
       'start': startPoint.toJson(),
       'end': endPoint.toJson(),
@@ -44,9 +48,10 @@ class Curve extends DrawingElement {
     };
   }
 
-  static Curve fromJson(Map<String, dynamic> json) {
-    return Curve(
-      label: json['label'], 
+  static CurveCommand fromJson(Map<String, dynamic> json) {
+    return CurveCommand(
+      id: json['id'] as String,
+      label: json['label'] as String, 
       startPoint: Coordinate.fromJson(json['start']), 
       endPoint: Coordinate.fromJson(json['end']), 
       controlPoint: Coordinate.fromJson(json['control']),
@@ -54,7 +59,7 @@ class Curve extends DrawingElement {
   }
 
   @override
-  Curve offset(double x, double y) {
+  CurveCommand offset(double x, double y) {
     return copyWith(
       startPoint: startPoint.offset(x, y),
       endPoint: endPoint.offset(x, y),
@@ -65,14 +70,29 @@ class Curve extends DrawingElement {
   @override
   bool operator ==(Object other) =>
     identical(this, other) ||
-    other is Curve &&
+    other is CurveCommand &&
     runtimeType == other.runtimeType &&
+    id == other.id &&
     label == other.label &&
     startPoint == other.startPoint &&
     endPoint == other.endPoint &&
     controlPoint == other.controlPoint;
   
   @override
-  int get hashCode => super.hashCode ^ label.hashCode ^ startPoint.hashCode ^ endPoint.hashCode ^ controlPoint.hashCode;
+  int get hashCode => super.hashCode ^ startPoint.hashCode ^ endPoint.hashCode ^ controlPoint.hashCode;
 
+  @override
+  void paint(Canvas canvas, Size size) {
+    // TODO: implement paint
+  }
+
+  @override
+  // TODO: implement isComplete
+  bool get isComplete => false;
+
+  @override
+  bool isValid(Drawing drawing) {
+    // TODO: implement isValid
+    return false;
+  }
 }

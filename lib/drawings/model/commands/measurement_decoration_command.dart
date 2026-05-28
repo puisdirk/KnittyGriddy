@@ -1,10 +1,12 @@
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:knitty_griddy/drawings/model/coordinate.dart';
-import 'package:knitty_griddy/drawings/model/elements/curve.dart';
-import 'package:knitty_griddy/drawings/model/elements/drawing_decoration.dart';
-import 'package:knitty_griddy/drawings/model/elements/line.dart';
-import 'package:knitty_griddy/drawings/model/elements/point.dart';
+import 'package:knitty_griddy/drawings/model/commands/curve_command.dart';
+import 'package:knitty_griddy/drawings/model/commands/drawing_decoration_command.dart';
+import 'package:knitty_griddy/drawings/model/commands/line_command.dart';
+import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
+import 'package:knitty_griddy/drawings/model/drawing.dart';
 
 const String drawingTypeMeasurementDecoration = 'measurementdecoration';
 
@@ -21,15 +23,16 @@ enum MeasurementDecorationUnit {
 }
 
 @immutable
-class MeasurementDecoration extends DrawingDecoration {
+class MeasurementDecorationCommand extends DrawingDecorationCommand {
   // A measurement decoration can be between two points, along a line, or along a set of curves
   final Coordinate startCoord;
   final Coordinate endCoord;
-  final List<Curve> curves;
+  final List<CurveCommand> curves;
   final MeasurementDecorationType measurementDecorationType;
   final MeasurementDecorationUnit measurementDecorationUnit;
 
-  const MeasurementDecoration({
+  const MeasurementDecorationCommand({
+    required super.id,
     required super.label,
     this.startCoord = const Coordinate(),
     this.endCoord = const Coordinate(),
@@ -38,15 +41,16 @@ class MeasurementDecoration extends DrawingDecoration {
     this.measurementDecorationUnit = MeasurementDecorationUnit.mm,
   });
 
-  MeasurementDecoration copyWith({
+  MeasurementDecorationCommand copyWith({
     String? label,
     Coordinate? startCoord,
     Coordinate? endCoord,
-    List<Curve>? curves,
+    List<CurveCommand>? curves,
     MeasurementDecorationType? measurementDecorationType,
     MeasurementDecorationUnit? measurementDecorationUnit,
   }) {
-    return MeasurementDecoration(
+    return MeasurementDecorationCommand(
+      id: id,
       label: label?? this.label,
       startCoord: startCoord?? this.startCoord,
       endCoord: endCoord?? this.endCoord,
@@ -56,30 +60,33 @@ class MeasurementDecoration extends DrawingDecoration {
     );
   }
 
-  MeasurementDecoration.fromPoints({
+  MeasurementDecorationCommand.fromPoints({
+    required super.id,
     required super.label,
-    required Point startPoint,
-    required Point endPoint,
+    required PointCommand startPoint,
+    required PointCommand endPoint,
     required this.measurementDecorationType,
     required this.measurementDecorationUnit,
-  }) : startCoord = startPoint.coordinate, endCoord = endPoint.coordinate, curves = const[];
+  }) : startCoord = const Coordinate() /*startPoint.coordinate*/, endCoord = const Coordinate() /*endPoint.coordinate*/, curves = const[];
 
-  MeasurementDecoration.fromLine({
+  MeasurementDecorationCommand.fromLine({
+    required super.id,
     required super.label,
-    required Line line,
+    required LineCommand line,
     required this.measurementDecorationType,
     required this.measurementDecorationUnit,
   }) : startCoord = line.startPoint, endCoord = line.endPoint, curves = const[];
 
-  MeasurementDecoration.fromCurves({
+  MeasurementDecorationCommand.fromCurves({
+    required super.id,
     required super.label,
-    required List<Curve> curves,
+    required List<CurveCommand> curves,
     required this.measurementDecorationType,
     required this.measurementDecorationUnit,
   }) : startCoord = curves.first.startPoint, endCoord = curves.last.endPoint, curves = List.from(curves);
 
   @override
-  MeasurementDecoration offset(double x, double y) {
+  MeasurementDecorationCommand offset(double x, double y) {
     return copyWith(
       startCoord: startCoord.offset(x, y),
       endCoord: endCoord.offset(x, y),
@@ -91,6 +98,7 @@ class MeasurementDecoration extends DrawingDecoration {
   Map<String, Object> toJson() {
     return {
       'type': drawingTypeMeasurementDecoration,
+      'id': id,
       'label': label,
       'start': startCoord.toJson(),
       'end': endCoord.toJson(),
@@ -100,15 +108,16 @@ class MeasurementDecoration extends DrawingDecoration {
     };
   }
 
-  static MeasurementDecoration fromJson(Map<String, dynamic> json) {
-    List<Curve> curves = [];
+  static MeasurementDecorationCommand fromJson(Map<String, dynamic> json) {
+    List<CurveCommand> curves = [];
     List<Map<String, dynamic>> curveObjects = (json['curves'] as List).map((o) => o as Map<String, dynamic>).toList();
     for (Map<String, dynamic> curveObject in curveObjects) {
-      curves.add(Curve.fromJson(curveObject));
+      curves.add(CurveCommand.fromJson(curveObject));
     }
 
-    return MeasurementDecoration(
-      label: json['label'],
+    return MeasurementDecorationCommand(
+      id: json['id'] as String,
+      label: json['label'] as String,
       startCoord: Coordinate.fromJson(json['start']),
       endCoord: Coordinate.fromJson(json['end']),
       curves: curves,
@@ -117,4 +126,18 @@ class MeasurementDecoration extends DrawingDecoration {
     );
   }
 
+  @override
+  void paint(Canvas canvas, Size size) {
+    // TODO: implement paint
+  }
+
+  @override
+  // TODO: implement isComplete
+  bool get isComplete => false;
+
+  @override
+  bool isValid(Drawing drawing) {
+    // TODO: implement isValid
+    return false;
+  }
 }

@@ -1,9 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:id_gen/id_gen.dart';
+import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
 import 'package:knitty_griddy/drawings/model/drawing.dart';
 import 'package:knitty_griddy/drawings/model/drawing_info.dart';
 import 'package:knitty_griddy/drawings/model/drawings_model_object.dart';
 import 'package:knitty_griddy/drawings/model/drawings_save_model_object.dart';
+import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
 import 'package:knitty_griddy/drawings/storage/drawings_model_repository.dart';
 import 'package:knitty_griddy/utils/undo_redo_manager.dart';
 
@@ -143,5 +145,32 @@ class DrawingsModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  //==================== Commands =====================
+
+  String addPointCommand() {
+    String id = const UuidV4Gen().get();
+    _drawingsModelObject = _drawingsModelObject.copyWith(
+      drawing: _drawingsModelObject.drawing.copyWith(
+        commands: [..._drawingsModelObject.drawing.commands, PointCommand(id: id, label: 'point')]
+      )
+    );
+
+    _storeForUndo();
+    notifyListeners();
+    return id;
+  }
+
+  void changeDrawingCommand(DrawingCommand newCommand) {
+    _drawingsModelObject = _drawingsModelObject.copyWith(
+      drawing: _drawingsModelObject.drawing.copyWith(
+        commands: _drawingsModelObject.drawing.commands.map((c) => c.id != newCommand.id ? c : newCommand).toList()
+      )
+    );
+
+    // TODO: validate the drawing
+
+    _storeForUndo();
+    notifyListeners();
+  }
 
 }

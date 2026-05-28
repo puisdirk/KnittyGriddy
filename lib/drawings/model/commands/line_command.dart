@@ -1,7 +1,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/drawings/model/coordinate.dart';
-import 'package:knitty_griddy/drawings/model/elements/drawing_element.dart';
+import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
+import 'package:knitty_griddy/drawings/model/drawing.dart';
 import 'package:knitty_griddy/drawings/model/infinite_line.dart';
 import 'package:knitty_griddy/utils/math_utitilies.dart';
 import 'package:vector_math/vector_math_64.dart';
@@ -9,22 +10,24 @@ import 'package:vector_math/vector_math_64.dart';
 const String drawingTypeLine = 'line';
 
 @immutable
-class Line extends DrawingElement {
+class LineCommand extends DrawingCommand {
   final Coordinate startPoint;
   final Coordinate endPoint;
 
-  const Line({
+  const LineCommand({
+    required super.id,
     required super.label,
     required this.startPoint,
     required this.endPoint,
   });
 
-  Line copyWith({
+  LineCommand copyWith({
     String? label,
     Coordinate? startPoint,
     Coordinate? endPoint,
   }) {
-    return Line(
+    return LineCommand(
+      id: id,
       label: label?? this.label, 
       startPoint: startPoint?? this.startPoint, 
       endPoint: endPoint?? this.endPoint,
@@ -32,7 +35,7 @@ class Line extends DrawingElement {
   }
 
   @override
-  Line offset(double x, double y) {
+  LineCommand offset(double x, double y) {
     return copyWith(
       startPoint: startPoint.offset(x, y),
       endPoint: endPoint.offset(x, y)
@@ -43,14 +46,16 @@ class Line extends DrawingElement {
   Map<String, Object> toJson() {
     return {
       'type': drawingTypeLine,
+      'id': id,
       'label': label,
       'start': startPoint.toJson(),
       'end': endPoint.toJson(),
     };
   }
 
-  static Line fromJson(Map<String, dynamic> json) {
-    return Line(
+  static LineCommand fromJson(Map<String, dynamic> json) {
+    return LineCommand(
+      id: json['id'] as String,
       label: json['label'] as String, 
       startPoint: Coordinate.fromJson(json['start']), 
       endPoint: Coordinate.fromJson(json['end']),
@@ -60,9 +65,10 @@ class Line extends DrawingElement {
   @override
   bool operator ==(Object other) =>
     identical(this, other) ||
-    other is Line &&
-    label == other.label &&
+    other is LineCommand &&
     runtimeType == other.runtimeType &&
+    id == other.id &&
+    label == other.label &&
     startPoint == other.startPoint &&
     endPoint == other.endPoint;
 
@@ -78,11 +84,11 @@ class Line extends DrawingElement {
     y: startPoint.y + (endPoint.y - startPoint.y) * fraction
   );
 
-  List<Coordinate> intersections(Line otherSegment) {
+  List<Coordinate> intersections(LineCommand otherSegment) {
     return _intersections(otherSegment).map((v) => Coordinate(x: v.x, y: v.y)).toList();
   } 
 
-  List<Vector2> _intersections(Line otherSegment) {
+  List<Vector2> _intersections(LineCommand otherSegment) {
     final from = Vector2(startPoint.x, startPoint.y);
     final to = Vector2(endPoint.x, endPoint.y);
     final otherFrom = Vector2(otherSegment.startPoint.x, otherSegment.startPoint.y);
@@ -142,5 +148,20 @@ class Line extends DrawingElement {
     }
 
     return true;
+  }
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // TODO: implement paint
+  }
+
+  @override
+  // TODO: implement isComplete
+  bool get isComplete => false;
+
+  @override
+  bool isValid(Drawing drawing) {
+    // TODO: implement isValid
+    return false;
   }
 }
