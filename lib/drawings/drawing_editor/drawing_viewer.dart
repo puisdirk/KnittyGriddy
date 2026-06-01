@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
@@ -15,9 +17,15 @@ class DrawingViewer extends StatelessWidget {
         return Selector<DrawingsModel, Drawing>(
           selector: (_, model) => model.drawing,
           builder: (context, drawing, _) {
-            return CustomPaint(
-              painter: DrawingPainter(drawing: drawing),
-              size: constraints.biggest,
+            return Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey),
+                borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(5))
+              ),
+              child: CustomPaint(
+                painter: DrawingPainter(drawing: drawing),
+                size: constraints.biggest,
+              ),
             );
           }
         );
@@ -35,11 +43,31 @@ class DrawingPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    // Prepare for text drawing
+    var style = TextStyle(color: Colors.grey[400]);
+
     Offset middle = Offset(size.width / 2, size.height / 2);
     canvas.drawCircle(middle, 2, Paint()..color = Colors.red..style = PaintingStyle.stroke);
+    // draw point label
+    final ParagraphBuilder paragraphBuilder = ParagraphBuilder(
+      ParagraphStyle(
+        fontSize: 10,
+        fontFamily: style.fontFamily,
+        fontStyle: style.fontStyle,
+        fontWeight: style.fontWeight,
+        textAlign: TextAlign.justify,
+      ),
+    )
+    ..pushStyle(style.getTextStyle())
+    ..addText('origin');
+
+    final Paragraph paragraph = paragraphBuilder.build()
+    ..layout(ParagraphConstraints(width: size.width));
+
+    canvas.drawParagraph(paragraph, middle);
 
     for (DrawingCommand command in drawing.commands) {
-      command.paint(canvas, size);
+      command.paint(canvas, size, style, drawing);
     }
   }
 

@@ -1,4 +1,5 @@
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/drawings/model/drawing.dart';
 
@@ -6,19 +7,24 @@ import 'package:knitty_griddy/drawings/model/drawing.dart';
 abstract class DrawingCommand {
   final String id;
   final String label;
+  final List<String> errors;
 
   const DrawingCommand({
     required this.id,
     required this.label,
+    required this.errors,
   });
 
   DrawingCommand offset(double x, double y);
   Map<String, Object> toJson();
-  void paint(Canvas canvas, Size size);
-  // All needed fields are filled
-  bool get isComplete;
-  // We have enough info in the drawing to draw this element
-  bool isValid(Drawing drawing);
+  
+  void paint(Canvas canvas, Size size, TextStyle style, Drawing drawing);
+  
+  DrawingCommand deleteReference({required String commandId});
+
+  DrawingCommand clearValidation();
+  DrawingCommand validate(Drawing drawing);
+  bool get isValidated;
 
   @override
   int get hashCode => id.hashCode ^ label.hashCode;
@@ -29,5 +35,6 @@ abstract class DrawingCommand {
     other is DrawingCommand &&
     runtimeType == other.runtimeType &&
     id == other.id &&
-    label == other.label;
+    label == other.label &&
+    listEquals(errors, other.errors);
 }

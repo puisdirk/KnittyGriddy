@@ -5,6 +5,7 @@ enum GridType {
   flat(label: 'Flat'),
   round(label: 'Round'),
   lace(label: 'Lace'),
+  mosaic(label: 'Mosaic'),
   fromMiddle(label: 'Centre');
 
   final String label;
@@ -73,6 +74,8 @@ class ChartSettings {
       case GridType.round:
       case GridType.lace:
         return List<String>.generate(rows, (row) => '-');
+      case GridType.mosaic:
+        return List<String>.generate(rows, (row) => '${row + 1}').reversed.toList();
       case GridType.fromMiddle:
         List<String> nums = [];
         if (rows.isEven) {
@@ -112,6 +115,8 @@ class ChartSettings {
           }
         }
         return nums.reversed.toList();
+      case GridType.mosaic:
+        return List<String>.generate(rows, (row) => '${row + 1}').reversed.toList();
       case GridType.fromMiddle:
         List<String> nums = [];
         if (rows.isEven) {
@@ -140,6 +145,7 @@ class ChartSettings {
       case GridType.flat:
       case GridType.round:
       case GridType.lace:
+      case GridType.mosaic:
         // ltr
         return List<String>.generate(columns, (col) => '${columns - col}');
       case GridType.fromMiddle:
@@ -170,6 +176,7 @@ class ChartSettings {
       case GridType.flat:
       case GridType.round:
       case GridType.lace:
+      case GridType.mosaic:
         // ltr
         return List<String>.generate(columns, (col) => '${columns - col}');
       case GridType.fromMiddle:

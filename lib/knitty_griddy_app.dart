@@ -2,6 +2,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_portal/flutter_portal.dart';
 import 'package:knitty_griddy/drawings/model/drawings_model.dart';
 import 'package:knitty_griddy/drawings/storage/drawings_model_repository.dart';
 import 'package:knitty_griddy/main_page.dart';
@@ -51,14 +52,16 @@ class KnittyGriddyApp extends StatelessWidget {
           }
         );
 
-        return MaterialApp(
-          debugShowCheckedModeBanner: false,
-          title: 'Knitty-Griddy',
-          theme: ThemeData(
-            colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue.shade200),
-            useMaterial3: true
+        return Portal(
+          child: MaterialApp(
+            debugShowCheckedModeBanner: false,
+            title: 'Knitty-Griddy',
+            theme: ThemeData(
+              colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue.shade200),
+              useMaterial3: true
+            ),
+            home: const MainPage(),
           ),
-          home: const MainPage(),
         );
       },
     );

@@ -1,10 +1,8 @@
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
 import 'package:knitty_griddy/drawings/model/coordinate.dart';
 import 'package:knitty_griddy/drawings/model/commands/curve_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_decoration_command.dart';
-import 'package:knitty_griddy/drawings/model/commands/line_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
 import 'package:knitty_griddy/drawings/model/drawing.dart';
 
@@ -31,6 +29,9 @@ class MeasurementDecorationCommand extends DrawingDecorationCommand {
   final MeasurementDecorationType measurementDecorationType;
   final MeasurementDecorationUnit measurementDecorationUnit;
 
+  final bool validated;
+  final bool valid;
+
   const MeasurementDecorationCommand({
     required super.id,
     required super.label,
@@ -39,6 +40,8 @@ class MeasurementDecorationCommand extends DrawingDecorationCommand {
     this.curves = const[],
     this.measurementDecorationType = MeasurementDecorationType.free,
     this.measurementDecorationUnit = MeasurementDecorationUnit.mm,
+    this.validated = false,
+    this.valid = false,
   });
 
   MeasurementDecorationCommand copyWith({
@@ -48,6 +51,8 @@ class MeasurementDecorationCommand extends DrawingDecorationCommand {
     List<CurveCommand>? curves,
     MeasurementDecorationType? measurementDecorationType,
     MeasurementDecorationUnit? measurementDecorationUnit,
+    bool? validated,
+    bool? valid,
   }) {
     return MeasurementDecorationCommand(
       id: id,
@@ -57,7 +62,15 @@ class MeasurementDecorationCommand extends DrawingDecorationCommand {
       curves: curves?? this.curves,
       measurementDecorationType: measurementDecorationType?? this.measurementDecorationType,
       measurementDecorationUnit: measurementDecorationUnit?? this.measurementDecorationUnit,
+      validated: validated?? this.validated,
+      valid: valid?? this.valid,
     );
+  }
+
+  @override
+  DrawingCommand deleteReference({required String commandId}) {
+    // TODO: implement deleteReference
+    return this;
   }
 
   MeasurementDecorationCommand.fromPoints({
@@ -67,23 +80,25 @@ class MeasurementDecorationCommand extends DrawingDecorationCommand {
     required PointCommand endPoint,
     required this.measurementDecorationType,
     required this.measurementDecorationUnit,
-  }) : startCoord = const Coordinate() /*startPoint.coordinate*/, endCoord = const Coordinate() /*endPoint.coordinate*/, curves = const[];
+  }) : valid = false, validated = false, startCoord = const Coordinate() /*startPoint.coordinate*/, endCoord = const Coordinate() /*endPoint.coordinate*/, curves = const[];
 
-  MeasurementDecorationCommand.fromLine({
+/*  MeasurementDecorationCommand.fromLine({
     required super.id,
     required super.label,
     required LineCommand line,
     required this.measurementDecorationType,
     required this.measurementDecorationUnit,
   }) : startCoord = line.startPoint, endCoord = line.endPoint, curves = const[];
-
+*/
+/*
   MeasurementDecorationCommand.fromCurves({
     required super.id,
     required super.label,
     required List<CurveCommand> curves,
     required this.measurementDecorationType,
     required this.measurementDecorationUnit,
-  }) : startCoord = curves.first.startPoint, endCoord = curves.last.endPoint, curves = List.from(curves);
+  }) : valid = false, validated = false, startCoord = curves.first.startPoint, endCoord = curves.last.endPoint, curves = List.from(curves);
+*/
 
   @override
   MeasurementDecorationCommand offset(double x, double y) {
@@ -127,17 +142,22 @@ class MeasurementDecorationCommand extends DrawingDecorationCommand {
   }
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(Canvas canvas, Size size, TextStyle style, Drawing drawing) {
     // TODO: implement paint
   }
+  
+  @override
+  bool get isValidated => validated;
 
   @override
-  // TODO: implement isComplete
-  bool get isComplete => false;
-
-  @override
-  bool isValid(Drawing drawing) {
-    // TODO: implement isValid
-    return false;
+  DrawingCommand clearValidation() {
+    return copyWith(validated: false, valid: false);
   }
+  
+  @override
+  DrawingCommand validate(Drawing drawing) {
+    // TODO: implement
+    return this;
+  }
+
 }

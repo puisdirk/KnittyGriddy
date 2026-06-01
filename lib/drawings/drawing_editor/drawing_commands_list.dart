@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:knitty_griddy/drawings/drawing_editor/command_controls/curve_command_control.dart';
+import 'package:knitty_griddy/drawings/drawing_editor/command_controls/line_command_control.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/command_controls/point_command_control.dart';
+import 'package:knitty_griddy/drawings/model/commands/curve_command.dart';
+import 'package:knitty_griddy/drawings/model/commands/line_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
 import 'package:knitty_griddy/drawings/model/drawing.dart';
 import 'package:knitty_griddy/drawings/model/drawings_model.dart';
@@ -16,15 +20,29 @@ class DrawingCommandsList extends StatefulWidget {
 class _DrawingCommandsListState extends State<DrawingCommandsList> {
 
   String selectedCommandId = '';
+  bool sorting = false;
 
   Widget createCommandControl(Drawing drawing, DrawingCommand command) {
-    bool valid = command.isValid(drawing);
-
     if (command is PointCommand) {
       return PointCommandControl(
+        key: GlobalObjectKey(command.id),
         command: command, 
-        valid: valid,
         finishedEditing: (newCommand) => Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(newCommand),
+        sorting: sorting,
+      );
+    } else if (command is LineCommand) {
+      return LineCommandControl(
+        key: GlobalObjectKey(command.id),
+        command: command, 
+        finishedEditing: (newCommand) => Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(newCommand),
+        sorting: sorting,
+      );
+    } else if (command is CurveCommand) {
+      return CurveCommandControl(
+        key: GlobalObjectKey(command.id),
+        command: command, 
+        finishedEditing: (newCommand) => Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(newCommand),
+        sorting: sorting,
       );
     }
 
@@ -50,16 +68,48 @@ class _DrawingCommandsListState extends State<DrawingCommandsList> {
                       setState(() => selectedCommandId = newId);
                     },
                     child: const Text('Add Point')
-                  )
+                  ),
+                  OutlinedButton(
+                    onPressed: () {
+                      String newId = Provider.of<DrawingsModel>(context, listen: false).addLineCommand();
+                      setState(() => selectedCommandId = newId);
+                    },
+                    child: const Text('Add Line')
+                  ),
+                  OutlinedButton(
+                    onPressed: () {
+                      String newId = Provider.of<DrawingsModel>(context, listen: false).addCurveCommand();
+                      setState(() => selectedCommandId = newId);
+                    },
+                    child: const Text('Add curve')
+                  ),
+                  const Spacer(),
+                  if (drawing.commands.length > 1)
+                    Container(
+                      decoration: BoxDecoration(
+                        color: sorting ? Colors.blue.withAlpha(60) : null,
+                        shape: BoxShape.circle
+                      ),
+                      child: IconButton(
+                        isSelected: sorting,
+                        onPressed: () => setState(() => sorting = !sorting), 
+                        icon: const Icon(Icons.sort),
+                      ),
+                    )
                 ],
               ),
               const SizedBox(height: 10,),
               Expanded(
-                child: ListView(
+                child: ReorderableListView(
+                  buildDefaultDragHandles: sorting,
                   children: [
                     for (DrawingCommand command in drawing.commands)
                       createCommandControl(drawing, command),
                   ],
+                  onReorder: (oldIndex, newIndex) {
+                    Provider.of<DrawingsModel>(context, listen: false).reorderCommands(oldIndex, (newIndex > oldIndex) ? newIndex - 1 : newIndex);
+                  },
+                  
                 ),
               ),
             ],

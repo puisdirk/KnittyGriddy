@@ -1,6 +1,9 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:id_gen/id_gen.dart';
+import 'package:knitty_griddy/drawings/model/commands/curve_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
+import 'package:knitty_griddy/drawings/model/commands/line_command.dart';
 import 'package:knitty_griddy/drawings/model/drawing.dart';
 import 'package:knitty_griddy/drawings/model/drawing_info.dart';
 import 'package:knitty_griddy/drawings/model/drawings_model_object.dart';
@@ -147,12 +150,55 @@ class DrawingsModel extends ChangeNotifier {
 
   //==================== Commands =====================
 
+  // TODO: generate unique labels
+
   String addPointCommand() {
     String id = const UuidV4Gen().get();
     _drawingsModelObject = _drawingsModelObject.copyWith(
       drawing: _drawingsModelObject.drawing.copyWith(
-        commands: [..._drawingsModelObject.drawing.commands, PointCommand(id: id, label: 'point')]
+        commands: [..._drawingsModelObject.drawing.commands, 
+          PointCommand(id: id, label: _drawingsModelObject.drawing.nextPointLabel)]
       )
+    );
+
+    _drawingsModelObject = _drawingsModelObject.copyWith(
+      drawing: _drawingsModelObject.drawing.validate()
+    );
+
+    _storeForUndo();
+    notifyListeners();
+    return id;
+  }
+
+  String addLineCommand() {
+    String id = const UuidV4Gen().get();
+    _drawingsModelObject = _drawingsModelObject.copyWith(
+      drawing: _drawingsModelObject.drawing.copyWith(
+        commands: [..._drawingsModelObject.drawing.commands, 
+          LineCommand(id: id, label: _drawingsModelObject.drawing.nextLineLabel)]
+      )
+    );
+
+    _drawingsModelObject = _drawingsModelObject.copyWith(
+      drawing: _drawingsModelObject.drawing.validate()
+    );
+
+    _storeForUndo();
+    notifyListeners();
+    return id;
+  }
+
+  String addCurveCommand() {
+    String id = const UuidV4Gen().get();
+    _drawingsModelObject = _drawingsModelObject.copyWith(
+      drawing: _drawingsModelObject.drawing.copyWith(
+        commands: [..._drawingsModelObject.drawing.commands,
+          CurveCommand(id: id, label: _drawingsModelObject.drawing.nextCurveLabel)]
+      )
+    );
+
+    _drawingsModelObject = _drawingsModelObject.copyWith(
+      drawing: _drawingsModelObject.drawing.validate()
     );
 
     _storeForUndo();
@@ -167,10 +213,43 @@ class DrawingsModel extends ChangeNotifier {
       )
     );
 
-    // TODO: validate the drawing
+    _drawingsModelObject = _drawingsModelObject.copyWith(
+      drawing: _drawingsModelObject.drawing.validate()
+    );
 
     _storeForUndo();
     notifyListeners();
   }
 
+  void deleteCommand({required String commandId}) {
+    _drawingsModelObject = _drawingsModelObject.copyWith(
+      drawing: _drawingsModelObject.drawing.copyWith(
+        commands: _drawingsModelObject.drawing.commands
+          .where((c) => c.id != commandId)
+          .map((c) => c.deleteReference(commandId: commandId)).toList()
+      )
+    );
+
+    _drawingsModelObject = _drawingsModelObject.copyWith(
+      drawing: _drawingsModelObject.drawing.validate()
+    );
+
+    _storeForUndo();
+    notifyListeners();
+  }
+
+  void reorderCommands(int oldIndex, int newIndex) {
+    List<DrawingCommand> newCommands = List.from(_drawingsModelObject.drawing.commands);
+    DrawingCommand temp = newCommands.removeAt(oldIndex);
+    newCommands.insert(newIndex, temp);
+
+    _drawingsModelObject = _drawingsModelObject.copyWith(
+      drawing: _drawingsModelObject.drawing.copyWith(
+        commands: newCommands
+      )
+    );
+
+    _storeForUndo();
+    notifyListeners();
+  }
 }

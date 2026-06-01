@@ -4,6 +4,13 @@ import 'package:knitty_griddy/charts/stitchrepo/basic_stitches_set.dart';
 import 'package:knitty_griddy/charts/model/named_colour.dart';
 import 'package:knitty_griddy/charts/model/stitch_cell.dart';
 
+const TextStyle smallStyle = TextStyle(fontSize: 10, color: Colors.black);
+const TextStyle smallStyleBold = TextStyle(fontSize: 10, color: Colors.black, fontWeight: FontWeight.bold);
+const TextStyle smallStyleBlue = TextStyle(fontSize: 10, color: Color.fromARGB(255, 85, 105, 114));
+
+const SizedBox hspacing = SizedBox(width: 10,);
+const SizedBox vspacing = SizedBox(height: 10,);
+
 // Warning: also change defaultStitches when changing these
 const int defaultGridRows = 10;
 const int defaultGridColumns = 10;
