@@ -1,38 +1,67 @@
 
+import 'dart:math';
+import 'dart:ui';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:knitty_griddy/drawings/model/coordinate.dart';
+import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
 import 'package:knitty_griddy/drawings/model/drawing.dart';
+import 'package:knitty_griddy/utils/math_utitilies.dart';
 
 const String drawingTypeCurve = 'curve';
 
 @immutable
 class CurveCommand extends DrawingCommand {
 
-  final Coordinate startPoint;
-  final Coordinate endPoint;
-  final Coordinate controlPoint;
+  final String startPointId;
+  final String endPointId;
+  final String amplitudeFormula;
+  final String slantFormula;
+
+  final bool validated;
+  final bool valid;
 
   const CurveCommand({
     required super.id,
     required super.label,
-    required this.startPoint,
-    required this.endPoint,
-    required this.controlPoint,
-  });
+    List<String>? errors,
+    this.startPointId = '',
+    this.endPointId = '',
+    this.amplitudeFormula = '',
+    this.slantFormula = '',
+    this.validated = false,
+    this.valid = false,
+  }) : super(errors: errors?? const[]);
 
   CurveCommand copyWith({
     String? label,
-    Coordinate? startPoint,
-    Coordinate? endPoint,
-    Coordinate? controlPoint,
+    String? startPointId,
+    String? endPointId,
+    String? amplitudeFormula,
+    String? slantFormula,
+    bool? validated,
+    bool? valid,
+    List<String>? errors,
   }) {
     return CurveCommand(
       id: id,
       label: label?? this.label, 
-      startPoint: startPoint?? this.startPoint, 
-      endPoint: endPoint?? this.endPoint, 
-      controlPoint: controlPoint?? this.controlPoint,
+      startPointId: startPointId?? this.startPointId, 
+      endPointId: endPointId?? this.endPointId, 
+      amplitudeFormula: amplitudeFormula?? this.amplitudeFormula,
+      slantFormula: slantFormula?? this.slantFormula,
+      validated: validated?? this.validated,
+      valid: valid?? this.valid,
+      errors: errors?? this.errors,
+    );
+  }
+
+  @override
+  DrawingCommand deleteReference({required String commandId}) {
+    return copyWith(
+      startPointId: startPointId == commandId ? '' : startPointId,
+      endPointId: endPointId == commandId ? '' : endPointId,
     );
   }
 
@@ -42,9 +71,10 @@ class CurveCommand extends DrawingCommand {
       'type': drawingTypeCurve,
       'id': id,
       'label': label,
-      'start': startPoint.toJson(),
-      'end': endPoint.toJson(),
-      'control': controlPoint.toJson(),
+      'from': startPointId,
+      'to': endPointId,
+      'amp': amplitudeFormula,
+      'slant': slantFormula,
     };
   }
 
@@ -52,19 +82,20 @@ class CurveCommand extends DrawingCommand {
     return CurveCommand(
       id: json['id'] as String,
       label: json['label'] as String, 
-      startPoint: Coordinate.fromJson(json['start']), 
-      endPoint: Coordinate.fromJson(json['end']), 
-      controlPoint: Coordinate.fromJson(json['control']),
+      startPointId: json['start'] as String,
+      endPointId: json['end'] as String, 
+      amplitudeFormula: json['amp'] as String,
+      slantFormula: json['slant'] as String,
     );
   }
 
   @override
   CurveCommand offset(double x, double y) {
-    return copyWith(
+    return this;/*copyWith(
       startPoint: startPoint.offset(x, y),
       endPoint: endPoint.offset(x, y),
       controlPoint: controlPoint.offset(x, y),
-    );
+    );*/
   }
 
   @override
@@ -74,25 +105,163 @@ class CurveCommand extends DrawingCommand {
     runtimeType == other.runtimeType &&
     id == other.id &&
     label == other.label &&
-    startPoint == other.startPoint &&
-    endPoint == other.endPoint &&
-    controlPoint == other.controlPoint;
+    startPointId == other.startPointId &&
+    endPointId == other.endPointId &&
+    amplitudeFormula == other.amplitudeFormula &&
+    slantFormula == other.slantFormula &&
+    validated == other.validated &&
+    valid == other.valid &&
+    listEquals(errors, other.errors);
   
   @override
-  int get hashCode => super.hashCode ^ startPoint.hashCode ^ endPoint.hashCode ^ controlPoint.hashCode;
+  int get hashCode => super.hashCode ^ startPointId.hashCode ^ endPointId.hashCode ^ 
+    amplitudeFormula.hashCode ^ slantFormula.hashCode ^
+    validated.hashCode ^ valid.hashCode ^ errors.hashCode;
 
   @override
-  void paint(Canvas canvas, Size size) {
-    // TODO: implement paint
+  void paint(Canvas canvas, Size size, TextStyle style, Drawing drawing) {
+    if (!valid) return;
+
+    Offset middle = Offset(size.width / 2, size.height / 2);
+
+    Offset? startCoordinate = getStartCoordinate(drawing);
+    if (startCoordinate == null) return;
+    startCoordinate += middle;
+
+    Offset? endCoordinate = getEndCoordinate(drawing);
+    if (endCoordinate == null) return;
+    endCoordinate += middle;
+
+    double? amplitude = getAmplitude(drawing);
+    if (amplitude == null) return;
+
+    double? slant = getSlant(drawing);
+    if (slant == null) return;
+
+    Offset controlCoordinate = getControlPointCoordinate(startCoordinate, endCoordinate, amplitude, slant);
+
+    Path p = Path()
+      ..moveTo(startCoordinate.dx, startCoordinate.dy)
+      ..quadraticBezierTo(
+        controlCoordinate.dx, controlCoordinate.dy, 
+        endCoordinate.dx, endCoordinate.dy);
+    
+    canvas.drawPath(p, Paint()..color = Colors.grey.shade700..style = PaintingStyle.stroke);
+  }
+
+  double? getAmplitude(Drawing drawing) {
+    // TODO: parse formula
+    return double.tryParse(amplitudeFormula);
+  }
+
+  double? getSlant(Drawing drawing) {
+    // TODO: parse formula
+    return double.tryParse(slantFormula);
   }
 
   @override
-  // TODO: implement isComplete
-  bool get isComplete => false;
+  bool get isValidated => validated;
+
+  Offset? getStartCoordinate(Drawing drawing) {
+    PointCommand? startPoint = drawing.pointById(startPointId);
+    if (startPoint == null) return null;
+    return startPoint.getCoordinate(drawing);
+  }
+
+  Offset? getEndCoordinate(Drawing drawing) {
+    PointCommand? endPoint = drawing.pointById(endPointId);
+    if (endPoint == null) return null;
+    return endPoint.getCoordinate(drawing);
+  }
+
+  // TODO: move to MathUtilities?
+  Offset getControlPointCoordinate(Offset startCoordinate, Offset endCoordinate, double amplitude, double slant) {
+    double lineLength = MathUtitilies.distance(startCoordinate, endCoordinate);
+    double ampLength = lineLength * amplitude;
+
+    Offset ampStartPoint = MathUtitilies.fractionOfLine(startCoordinate, endCoordinate, 0.5 + (slant / 2));
+
+    // control point is perpendicular to the line with the given ampLenght
+    final double angleOfLine = MathUtitilies.angleOfLine(startCoordinate, endCoordinate);
+    final double perpendicularAngle = angleOfLine + (pi / 2.0);
+    
+    return MathUtitilies.relativepointatangle(ampStartPoint, ampLength, perpendicularAngle);
+  }
 
   @override
-  bool isValid(Drawing drawing) {
-    // TODO: implement isValid
-    return false;
+  DrawingCommand clearValidation() {
+    return copyWith(validated: false, valid: false, errors: const[]);
+  }
+  
+  @override
+  DrawingCommand validate(Drawing drawing) {
+    bool isvalid = true;
+    bool retryValidation = true;
+    List<String> validationErrors = [];
+
+    if (label.isEmpty) { isvalid = false; retryValidation = false; validationErrors.add('Requires a label'); }
+    if (drawing.commands.any((c) => c.id != id && c.label == label)) { isvalid = false; retryValidation = false; validationErrors.add('Label should be unique'); }
+
+    if (startPointId.isEmpty) {
+      isvalid = false; 
+      retryValidation = false;
+      validationErrors.add('Requires a source point');
+    } else if (startPointId != originId) {
+      PointCommand? fromPoint = drawing.pointById(startPointId);
+      if (fromPoint == null) {
+        isvalid = false;
+        retryValidation = false;
+        validationErrors.add('Source point does not exist');
+      } else {
+        if (!fromPoint.isValidated) {
+          // We are not valid, but we should retry
+          isvalid = false;
+        } else if (!fromPoint.valid) {
+          isvalid = false;
+          retryValidation = false;
+          validationErrors.add('Source point ${fromPoint.label} has errors');
+        }
+      }
+    }
+
+    if (endPointId.isEmpty) {
+      isvalid = false; 
+      retryValidation = false;
+      validationErrors.add('Requires a target point');
+    } else if (endPointId != originId) {
+      PointCommand? toPoint = drawing.pointById(endPointId);
+      if (toPoint == null) {
+        isvalid = false;
+        retryValidation = false;
+        validationErrors.add('Target point does not exist');
+      } else {
+        if (!toPoint.isValidated) {
+          // We are not valid, but we should retry
+          isvalid = false;
+        } else if (!toPoint.valid) {
+          isvalid = false;
+          retryValidation = false;
+          validationErrors.add('Target point ${toPoint.label} has errors');
+        }
+      }
+    }
+
+    if (amplitudeFormula.isEmpty) {
+      isvalid = false;
+      retryValidation = false;
+      validationErrors.add('Requires an amplitude');
+    }
+
+    if (slantFormula.isEmpty) {
+      isvalid = false;
+      retryValidation = false;
+      validationErrors.add('Requires a slant');
+    }
+
+    return copyWith(
+      valid: isvalid,
+      validated: (isvalid || !retryValidation),
+      errors: validationErrors,
+    );
   }
 }

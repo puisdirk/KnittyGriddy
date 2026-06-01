@@ -1,45 +1,69 @@
+import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:knitty_griddy/drawings/model/coordinate.dart';
+
+import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
 import 'package:knitty_griddy/drawings/model/drawing.dart';
 import 'package:knitty_griddy/drawings/model/infinite_line.dart';
 import 'package:knitty_griddy/utils/math_utitilies.dart';
-import 'package:vector_math/vector_math_64.dart';
+import 'package:vector_math/vector_math_64.dart' as vec;
 
 const String drawingTypeLine = 'line';
 
 @immutable
 class LineCommand extends DrawingCommand {
-  final Coordinate startPoint;
-  final Coordinate endPoint;
+  final String fromPointId;
+  final String toPointId;
+
+  final bool validated;
+  final bool valid;
 
   const LineCommand({
     required super.id,
     required super.label,
-    required this.startPoint,
-    required this.endPoint,
-  });
+    List<String>? errors,
+    this.fromPointId = '',
+    this.toPointId = '',
+    this.validated = false,
+    this.valid = false,
+  }): super(errors: errors?? const[]);
 
   LineCommand copyWith({
     String? label,
-    Coordinate? startPoint,
-    Coordinate? endPoint,
+    String? fromPointId,
+    String? toPointId,
+    bool? validated,
+    bool? valid,
+    List<String>? errors,
   }) {
     return LineCommand(
       id: id,
-      label: label?? this.label, 
-      startPoint: startPoint?? this.startPoint, 
-      endPoint: endPoint?? this.endPoint,
+      label: label?? this.label,
+      fromPointId: fromPointId?? this.fromPointId,
+      toPointId: toPointId?? this.toPointId,
+      validated: validated?? this.validated,
+      valid: valid?? this.valid,
+      errors: errors?? this.errors,
+    );
+  }
+
+  @override
+  DrawingCommand deleteReference({required String commandId}) {
+    return copyWith(
+      fromPointId: fromPointId == commandId ? '' : fromPointId,
+      toPointId: toPointId == commandId ? '' : toPointId,
     );
   }
 
   @override
   LineCommand offset(double x, double y) {
-    return copyWith(
+    return this;
+/*    return copyWith(
       startPoint: startPoint.offset(x, y),
       endPoint: endPoint.offset(x, y)
-    );
+    );*/
   }
 
   @override
@@ -48,8 +72,8 @@ class LineCommand extends DrawingCommand {
       'type': drawingTypeLine,
       'id': id,
       'label': label,
-      'start': startPoint.toJson(),
-      'end': endPoint.toJson(),
+      'from': fromPointId,
+      'to': toPointId,
     };
   }
 
@@ -57,8 +81,8 @@ class LineCommand extends DrawingCommand {
     return LineCommand(
       id: json['id'] as String,
       label: json['label'] as String, 
-      startPoint: Coordinate.fromJson(json['start']), 
-      endPoint: Coordinate.fromJson(json['end']),
+      fromPointId: json['from'] as String, 
+      toPointId: json['to'] as String,
     );
   }
 
@@ -69,50 +93,78 @@ class LineCommand extends DrawingCommand {
     runtimeType == other.runtimeType &&
     id == other.id &&
     label == other.label &&
-    startPoint == other.startPoint &&
-    endPoint == other.endPoint;
+    fromPointId == other.fromPointId &&
+    toPointId == other.toPointId &&
+    validated == other.validated &&
+    valid == other.valid &&
+    listEquals(errors, other.errors);
 
   @override
-  int get hashCode => super.hashCode ^ startPoint.hashCode ^ endPoint.hashCode;
+  int get hashCode => super.hashCode ^ fromPointId.hashCode ^ toPointId.hashCode ^
+    valid.hashCode ^ validated.hashCode ^ errors.hashCode;
 
-  double lengthInMM() => MathUtitilies.distance(startPoint, endPoint);
+  double? lengthInMM(Drawing drawing) {
+    Offset? startOffset = getStartCoordinate(drawing);
+    if (startOffset == null) return null;
+    Offset? endOffset = getEndCoordinate(drawing);
+    if (endOffset == null) return null;
+    return MathUtitilies.distance(startOffset, endOffset);
+  }
 
-  Coordinate middle() => coordAt(0.5);
+  Offset? middle(Drawing drawing) => coordinateAt(0.5, drawing);
 
-  Coordinate coordAt(double fraction) => Coordinate(
-    x: startPoint.x + ((endPoint.x - startPoint.x) * fraction), 
-    y: startPoint.y + (endPoint.y - startPoint.y) * fraction
-  );
+  Offset? coordinateAt(double fraction, Drawing drawing) {
+    Offset? startOffset = getStartCoordinate(drawing);
+    if (startOffset == null) return null;
+    Offset? endOffset = getEndCoordinate(drawing);
+    if (endOffset == null) return null;
 
-  List<Coordinate> intersections(LineCommand otherSegment) {
-    return _intersections(otherSegment).map((v) => Coordinate(x: v.x, y: v.y)).toList();
+    return Offset(
+      startOffset.dx + ((endOffset.dx - startOffset.dx) * fraction), 
+      startOffset.dy + (endOffset.dy - startOffset.dy) * fraction
+    );
+  }
+
+  List<Offset> intersections(LineCommand otherSegment, Drawing drawing) {
+    if (!valid || !otherSegment.valid) return const[];
+    return _intersections(otherSegment, drawing).map((v) => Offset(v.x, v.y)).toList();
   } 
 
-  List<Vector2> _intersections(LineCommand otherSegment) {
-    final from = Vector2(startPoint.x, startPoint.y);
-    final to = Vector2(endPoint.x, endPoint.y);
-    final otherFrom = Vector2(otherSegment.startPoint.x, otherSegment.startPoint.y);
-    final otherTo = Vector2(otherSegment.endPoint.x, otherSegment.endPoint.y);
+  List<vec.Vector2> _intersections(LineCommand otherSegment, Drawing drawing) {
+    Offset? startPoint = getStartCoordinate(drawing);
+    if (startPoint == null) return const[];
+    Offset? endPoint = getEndCoordinate(drawing);
+    if (endPoint == null) return const[];
 
-    final result = toInfiniteLine().intersections(otherSegment.toInfiniteLine());
+    Offset? otherStartPoint = otherSegment.getStartCoordinate(drawing);
+    if (otherStartPoint == null) return const[];
+    Offset? otherEndPoint = otherSegment.getEndCoordinate(drawing);
+    if (otherEndPoint == null) return const[];
+
+    final from = vec.Vector2(startPoint.dx, startPoint.dy);
+    final to = vec.Vector2(endPoint.dx, endPoint.dy);
+    final otherFrom = vec.Vector2(otherStartPoint.dx, otherStartPoint.dy);
+    final otherTo = vec.Vector2(otherEndPoint.dx, otherEndPoint.dy);
+
+    final result = InfiniteLine.fromPoints(startPoint, endPoint).intersections(InfiniteLine.fromPoints(otherStartPoint, otherEndPoint));
     if (result.isNotEmpty) {
       // The lines are not parallel
       final intersection = result.first;
-      if (containsPoint(intersection) &&
-          otherSegment.containsPoint(intersection)) {
+      if (containsPoint(from, to, intersection) &&
+          containsPoint(otherFrom, otherTo, intersection)) {
         // The intersection point is on both line segments
         return result;
       }
     } else {
       // In here we know that the lines are parallel
       final overlaps = {
-        if (otherSegment.containsPoint(from)) from,
-        if (otherSegment.containsPoint(to)) to,
-        if (containsPoint(otherFrom)) otherFrom,
-        if (containsPoint(otherTo)) otherTo,
+        if (containsPoint(otherFrom, otherTo, from)) from,
+        if (containsPoint(otherFrom, otherTo, to)) to,
+        if (containsPoint(from, to, otherFrom)) otherFrom,
+        if (containsPoint(from, to, otherTo)) otherTo,
       };
       if (overlaps.isNotEmpty) {
-        final sum = Vector2.zero();
+        final sum = vec.Vector2.zero();
         overlaps.forEach(sum.add);
         return [sum..scale(1 / overlaps.length)];
       }
@@ -121,12 +173,8 @@ class LineCommand extends DrawingCommand {
     return [];
   }
 
-  InfiniteLine toInfiniteLine() => InfiniteLine.fromCoordinates(startPoint, endPoint);
-
-  bool containsPoint(Vector2 point, {double epsilon = 0.000001}) {
-    final from = Vector2(startPoint.x, startPoint.y);
-    final to = Vector2(endPoint.x, endPoint.y);
-
+  // TODO: move to MathUtils?
+  bool containsPoint(vec.Vector2 from, vec.Vector2 to, vec.Vector2 point, {double epsilon = 0.000001}) {
     final delta = to - from;
     final crossProduct =
         (point.y - from.y) * delta.x - (point.x - from.x) * delta.y;
@@ -150,18 +198,128 @@ class LineCommand extends DrawingCommand {
     return true;
   }
 
-  @override
-  void paint(Canvas canvas, Size size) {
-    // TODO: implement paint
+  Offset? getStartCoordinate(Drawing drawing) {
+    PointCommand? startPoint = drawing.pointById(fromPointId);
+    if (startPoint == null) return null;
+    return startPoint.getCoordinate(drawing);
+  }
+
+  Offset? getEndCoordinate(Drawing drawing) {
+    PointCommand? endPoint = drawing.pointById(toPointId);
+    if (endPoint == null) return null;
+    return endPoint.getCoordinate(drawing);
   }
 
   @override
-  // TODO: implement isComplete
-  bool get isComplete => false;
+  void paint(Canvas canvas, Size size, TextStyle style, Drawing drawing) {
+    if (!valid) {
+      return;
+    }
+
+    Offset? start = getStartCoordinate(drawing);
+    if (start == null) {
+      return;
+    }
+
+    Offset? end = getEndCoordinate(drawing);
+    if (end == null) {
+      return;
+    }
+
+    Offset middle = Offset(size.width / 2, size.height / 2);
+    start += middle;
+    end += middle;
+
+    canvas.drawLine(start, end, Paint()..color = Colors.grey.shade700..style = PaintingStyle.stroke);
+
+    // draw line label
+    Offset? midline = coordinateAt(0.3, drawing);
+    if (midline == null) return;
+    midline += middle;
+
+    final ParagraphBuilder paragraphBuilder = ParagraphBuilder(
+      ParagraphStyle(
+        fontSize: 10,
+        fontFamily: style.fontFamily,
+        fontStyle: style.fontStyle,
+        fontWeight: style.fontWeight,
+        textAlign: TextAlign.justify,
+      ),
+    )
+    ..pushStyle(style.getTextStyle())
+    ..addText(label);
+
+    final Paragraph paragraph = paragraphBuilder.build()
+    ..layout(ParagraphConstraints(width: size.width));
+
+    canvas.drawParagraph(paragraph,  midline.translate(2, 0));
+  }
 
   @override
-  bool isValid(Drawing drawing) {
-    // TODO: implement isValid
-    return false;
+  bool get isValidated => validated;
+
+  @override
+  DrawingCommand clearValidation() {
+    return copyWith(validated: false, valid: false, errors: const[]);
+  }
+  
+  @override
+  DrawingCommand validate(Drawing drawing) {
+    bool isvalid = true;
+    bool retryValidation = true;
+    List<String> validationErrors = [];
+
+    if (label.isEmpty) { isvalid = false; retryValidation = false; validationErrors.add('Requires a label'); }
+    if (drawing.commands.any((c) => c.id != id && c.label == label)) { isvalid = false; retryValidation = false; validationErrors.add('Label should be unique'); }
+
+    if (fromPointId.isEmpty) {
+      isvalid = false; 
+      retryValidation = false;
+      validationErrors.add('Requires a source point');
+    } else if (fromPointId != originId) {
+      PointCommand? fromPoint = drawing.pointById(fromPointId);
+      if (fromPoint == null) {
+        isvalid = false;
+        retryValidation = false;
+        validationErrors.add('Source point does not exist');
+      } else {
+        if (!fromPoint.isValidated) {
+          // We are not valid, but we should retry
+          isvalid = false;
+        } else if (!fromPoint.valid) {
+          isvalid = false;
+          retryValidation = false;
+          validationErrors.add('Source point ${fromPoint.label} has errors');
+        }
+      }
+    }
+
+    if (toPointId.isEmpty) {
+      isvalid = false; 
+      retryValidation = false;
+      validationErrors.add('Requires a target point');
+    } else if (toPointId != originId) {
+      PointCommand? toPoint = drawing.pointById(toPointId);
+      if (toPoint == null) {
+        isvalid = false;
+        retryValidation = false;
+        validationErrors.add('Target point does not exist');
+      } else {
+        if (!toPoint.isValidated) {
+          // We are not valid, but we should retry
+          isvalid = false;
+        } else if (!toPoint.valid) {
+          isvalid = false;
+          retryValidation = false;
+          validationErrors.add('Target point ${toPoint.label} has errors');
+        }
+      }
+    }
+
+    return copyWith(
+      valid: isvalid,
+      validated: (isvalid || !retryValidation),
+      errors: validationErrors,
+    );
   }
 }

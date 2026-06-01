@@ -1,5 +1,5 @@
 
-import 'package:knitty_griddy/drawings/model/coordinate.dart';
+import 'package:flutter/rendering.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 /// An infinite line on the 2D Cartesian space, represented in the form
@@ -11,10 +11,10 @@ class InfiniteLine {
 
   const InfiniteLine(this.a, this.b, this.c);
 
-  InfiniteLine.fromCoordinates(Coordinate p1, Coordinate p2) : this(
-    p2.y - p1.y,
-    p1.x - p2.x,
-    p2.y * p1.x - p1.y * p2.x,
+  InfiniteLine.fromPoints(Offset p1, Offset p2) : this(
+    p2.dy - p1.dy,
+    p1.dx - p2.dx,
+    p2.dy * p1.dx - p1.dy * p2.dx,
   );
 
   List<Vector2> intersections(InfiniteLine other) {

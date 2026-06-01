@@ -21,26 +21,30 @@ class MathUtitilies {
     return textPainter.size;
   }
 
-  static double offsetDistance(Offset p1, Offset p2) =>
+  static double distance(Offset p1, Offset p2) =>
    sqrt(pow(((p2.dx - p1.dx).abs()), 2.0) + pow(((p2.dy - p1.dy).abs()), 2.0));
-
-  static double distance(Coordinate p0, Coordinate p1) => 
-   sqrt(pow(((p1.x - p0.x).abs()), 2.0) + pow(((p1.y - p0.y).abs()), 2.0));
   
   // Given a start coordinate, calculate a new coordinate at distance away in a given direction
-  static Coordinate relativepointatangle(Coordinate p0, double distance, double angleInRadians) => 
-    Coordinate(x: p0.x + (distance * cos(angleInRadians)), y: p0.y + (distance * sin(angleInRadians)));
+  static Offset relativepointatangle(Offset p0, double distance, double angleInRadians) => 
+    Offset(p0.dx + (distance * cos(angleInRadians)), p0.dy + (distance * sin(angleInRadians)));
 
   // Given two coordinates, get the coordinate in the middle of those two
-  static Coordinate middleOfLine(Coordinate p0, Coordinate p1) => 
-    Coordinate(x: (p0.x + p1.x) / 2.0, y: (p0.y + p1.y) / 2.0);
+  static Offset middleOfLine(Offset p0, Offset p1) => 
+    Offset((p0.dx + p1.dx) / 2.0, (p0.dy + p1.dy) / 2.0);
+
+  // Given two coordinates, get a coordinate at a fraction of the line between these coordinates
+  static Offset fractionOfLine(Offset p0, Offset p1, double fraction) =>
+    Offset(
+      p0.dx + ((p1.dx - p0.dx) * fraction), 
+      p0.dy + (p1.dy - p0.dy) * fraction
+    );
 
   // Get the angle between two coordinates. (see https://www.mathsisfun.com/algebra/trig-finding-angle-right-triangle.html)
-  static double angleOfLine(Coordinate p0, Coordinate p1) {
-    final double opposite = p1.y - p0.y;
-    final double adjacent = p1.x - p0.x;
+  static double angleOfLine(Offset p0, Offset p1) {
+    final double opposite = p1.dy - p0.dy;
+    final double adjacent = p1.dx - p0.dx;
     if (adjacent == 0) {
-      return p0.x >= p1.x ? pi / 2.0 : (pi * 3.0) / 2.0; // 90 or 270
+      return p0.dx >= p1.dx ? pi / 2.0 : (pi * 3.0) / 2.0; // 90 or 270
     }
     return atan(opposite / adjacent);
   }

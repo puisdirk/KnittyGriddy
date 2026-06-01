@@ -45,6 +45,96 @@ class Drawing {
     );
   }
 
+  List<LineCommand> get lines => commands.whereType<LineCommand>().toList();
+  List<PointCommand> get points => commands.whereType<PointCommand>().toList();
+  List<CurveCommand> get curves => commands.whereType<CurveCommand>().toList();
+
+  LineCommand? lineById(String id) {
+    try {
+      return commands.firstWhere((c) => c.id == id && c is LineCommand) as LineCommand;
+    } catch (e) {
+      return null;
+    }
+  }
+  
+  PointCommand? pointById(String id) {
+    if (id == originId) {
+      return origin;
+    }
+    
+    try {
+      return commands.firstWhere((c) => c.id == id && c is PointCommand) as PointCommand;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  CurveCommand? curveById(String id) {
+    try {
+      return commands.firstWhere((c) => c.id == id && c is CurveCommand) as CurveCommand;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  String get nextPointLabel {
+    int nextNum = 1;
+    while (true) {
+      if (points.any((c) => c.label == 'p$nextNum')) {
+        nextNum++;
+      } else {
+        break;
+      }
+    }
+    return 'p$nextNum';
+  }
+
+  String get nextLineLabel {
+    int nextNum = 1;
+    while (true) {
+      if (lines.any((c) => c.label == 'l$nextNum')) {
+        nextNum++;
+      } else {
+        break;
+      }
+    }
+    return 'l$nextNum';
+  }
+
+  String get nextCurveLabel {
+    int nextNum = 1;
+    while (true) {
+      if (curves.any((c) => c.label == 'c$nextNum')) {
+        nextNum++;
+      } else {
+        break;
+      }
+    }
+    return 'c$nextNum';
+  }
+
+  Drawing validate() {
+    Drawing cleared = copyWith(commands: commands.map((c) => c.clearValidation()).toList());
+
+    int passes = 1;
+    int maxPasses = 10000;
+    while (true) {
+      if (cleared.commands.any((c) => !c.isValidated) && passes <= 10000) {
+        // We pass through the whole list on each loop
+        List<DrawingCommand> passedCommands = cleared.commands.map((c) => c.validate(cleared)).toList();
+        cleared = cleared.copyWith(
+          commands: passedCommands
+        );
+        passes++;
+      } else {
+        break;
+      }
+    }
+    if (passes >= maxPasses) print('validation overflow!!!!');
+
+    return cleared;
+  }
+
   Map<String, Object> toJson() {
     return {
       'id': id,
@@ -93,7 +183,7 @@ class Drawing {
   }
 
   @override
-  int get hashCode => id.hashCode ^ name.hashCode ^ description.hashCode;
+  int get hashCode => id.hashCode ^ name.hashCode ^ description.hashCode ^ commands.hashCode ^ measurementRequirements.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -102,26 +192,7 @@ class Drawing {
       runtimeType == other.runtimeType &&
       id == other.id &&
       name == other.name &&
-      description == other.description;
-
-    List<LineCommand> get lines => commands.whereType<LineCommand>().toList();
-    List<PointCommand> get points => commands.whereType<PointCommand>().toList();
-    LineCommand? lineById(String id) {
-      try {
-        return commands.firstWhere((c) => c.id == id && c is LineCommand) as LineCommand;
-      } catch (e) {
-        return null;
-      }
-    }
-    PointCommand? pointById(String id) {
-      if (id == originId) {
-        return origin;
-      }
-      
-      try {
-        return commands.firstWhere((c) => c.id == id && c is PointCommand) as PointCommand;
-      } catch (e) {
-        return null;
-      }
-    }
+      description == other.description &&
+      listEquals(commands, other.commands) &&
+      listEquals(measurementRequirements, other.measurementRequirements);
 }

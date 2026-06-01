@@ -8,6 +8,7 @@ abstract class DrawingDecorationCommand extends DrawingCommand {
   const DrawingDecorationCommand({
     required super.id,
     required super.label,
+    super.errors = const[],
   });
 
 }
