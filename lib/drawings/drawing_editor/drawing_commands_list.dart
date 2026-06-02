@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/command_controls/curve_command_control.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/command_controls/line_command_control.dart';
+import 'package:knitty_griddy/drawings/drawing_editor/command_controls/measurement_command_control.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/command_controls/point_command_control.dart';
 import 'package:knitty_griddy/drawings/model/commands/curve_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/line_command.dart';
+import 'package:knitty_griddy/drawings/model/commands/measurement_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
 import 'package:knitty_griddy/drawings/model/drawing.dart';
 import 'package:knitty_griddy/drawings/model/drawings_model.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
 class DrawingCommandsList extends StatefulWidget {
@@ -44,6 +47,13 @@ class _DrawingCommandsListState extends State<DrawingCommandsList> {
         finishedEditing: (newCommand) => Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(newCommand),
         sorting: sorting,
       );
+    } else if (command is MeasurementCommand) {
+      return MeasurementCommandControl(
+        key: GlobalObjectKey(command.id),
+        command: command, 
+        finishedEditing: (newCommand) => Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(newCommand), 
+        sorting: sorting
+      );
     }
 
     // TODO: other types
@@ -61,27 +71,48 @@ class _DrawingCommandsListState extends State<DrawingCommandsList> {
           return Column(
             children: [
               Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  OutlinedButton(
-                    onPressed: () {
-                      String newId = Provider.of<DrawingsModel>(context, listen: false).addPointCommand();
-                      setState(() => selectedCommandId = newId);
-                    },
-                    child: const Text('Add Point')
+                  const Spacer(),
+                  Tooltip(
+                    message: 'Add measurement',
+                    child: IconButton(
+                      onPressed: () {
+                        String newId = Provider.of<DrawingsModel>(context, listen: false).addMeasurementCommand();
+                        setState(() => selectedCommandId = newId);
+                      },
+                      icon: const Icon(Symbols.square_foot),
+                    ),
                   ),
-                  OutlinedButton(
-                    onPressed: () {
-                      String newId = Provider.of<DrawingsModel>(context, listen: false).addLineCommand();
-                      setState(() => selectedCommandId = newId);
-                    },
-                    child: const Text('Add Line')
+                  Tooltip(
+                    message: 'Add point',
+                    child: IconButton(
+                      onPressed: () {
+                        String newId = Provider.of<DrawingsModel>(context, listen: false).addPointCommand();
+                        setState(() => selectedCommandId = newId);
+                      },
+                      icon: const Icon(Symbols.line_start_circle),
+                    ),
                   ),
-                  OutlinedButton(
-                    onPressed: () {
-                      String newId = Provider.of<DrawingsModel>(context, listen: false).addCurveCommand();
-                      setState(() => selectedCommandId = newId);
-                    },
-                    child: const Text('Add curve')
+                  Tooltip(
+                    message: 'Add line',
+                    child: IconButton(
+                      onPressed: () {
+                        String newId = Provider.of<DrawingsModel>(context, listen: false).addLineCommand();
+                        setState(() => selectedCommandId = newId);
+                      },
+                      icon: const Icon(Symbols.pen_size_2),
+                    ),
+                  ),
+                  Tooltip(
+                    message: 'Add curve',
+                    child: IconButton(
+                      onPressed: () {
+                        String newId = Provider.of<DrawingsModel>(context, listen: false).addCurveCommand();
+                        setState(() => selectedCommandId = newId);
+                      },
+                      icon: const Icon(Symbols.line_curve),
+                    ),
                   ),
                   const Spacer(),
                   if (drawing.commands.length > 1)
@@ -95,7 +126,9 @@ class _DrawingCommandsListState extends State<DrawingCommandsList> {
                         onPressed: () => setState(() => sorting = !sorting), 
                         icon: const Icon(Icons.sort),
                       ),
-                    )
+                    ),
+                  if (drawing.commands.length < 2)
+                    const SizedBox(width: 40,),
                 ],
               ),
               const SizedBox(height: 10,),

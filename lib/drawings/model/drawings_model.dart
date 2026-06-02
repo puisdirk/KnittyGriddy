@@ -4,6 +4,7 @@ import 'package:id_gen/id_gen.dart';
 import 'package:knitty_griddy/drawings/model/commands/curve_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/line_command.dart';
+import 'package:knitty_griddy/drawings/model/commands/measurement_command.dart';
 import 'package:knitty_griddy/drawings/model/drawing.dart';
 import 'package:knitty_griddy/drawings/model/drawing_info.dart';
 import 'package:knitty_griddy/drawings/model/drawings_model_object.dart';
@@ -150,7 +151,23 @@ class DrawingsModel extends ChangeNotifier {
 
   //==================== Commands =====================
 
-  // TODO: generate unique labels
+  String addMeasurementCommand() {
+    String id = const UuidV4Gen().get();
+    _drawingsModelObject = _drawingsModelObject.copyWith(
+      drawing: _drawingsModelObject.drawing.copyWith(
+        commands: [..._drawingsModelObject.drawing.commands, 
+          MeasurementCommand(id: id, label: _drawingsModelObject.drawing.nextMeasurementLabel)]
+      )
+    );
+
+    _drawingsModelObject = _drawingsModelObject.copyWith(
+      drawing: _drawingsModelObject.drawing.validate()
+    );
+
+    _storeForUndo();
+    notifyListeners();
+    return id;
+  }
 
   String addPointCommand() {
     String id = const UuidV4Gen().get();

@@ -3,6 +3,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/drawings/model/drawing.dart';
 
+enum DrawingCommandTypes {
+  pointCommand,
+  lineCommand,
+  curveCommand,
+  measurementCommand,
+}
+
 @immutable
 abstract class DrawingCommand {
   final String id;
