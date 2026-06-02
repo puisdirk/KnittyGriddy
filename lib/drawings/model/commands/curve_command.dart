@@ -1,6 +1,5 @@
 
 import 'dart:math';
-import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -8,8 +7,6 @@ import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
 import 'package:knitty_griddy/drawings/model/drawing.dart';
 import 'package:knitty_griddy/utils/math_utitilies.dart';
-
-const String drawingTypeCurve = 'curve';
 
 @immutable
 class CurveCommand extends DrawingCommand {
@@ -68,7 +65,7 @@ class CurveCommand extends DrawingCommand {
   @override
   Map<String, Object> toJson() {
     return {
-      'type': drawingTypeCurve,
+      'type': DrawingCommandTypes.curveCommand.name,
       'id': id,
       'label': label,
       'from': startPointId,

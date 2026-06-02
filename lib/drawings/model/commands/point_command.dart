@@ -9,8 +9,6 @@ import 'package:knitty_griddy/drawings/model/commands/line_command.dart';
 import 'package:knitty_griddy/drawings/model/drawing.dart';
 import 'package:knitty_griddy/utils/math_utitilies.dart';
 
-const String drawingTypePoint = 'point';
-
 const String originId = '063f22af-bc7f-4e77-bc8b-60e48c821259';
 const PointCommand origin = PointCommand(id: originId, label: 'origin', valid: true, );
 
@@ -141,7 +139,7 @@ class PointCommand extends DrawingCommand {
   @override
   Map<String, Object> toJson() {
     return {
-      'type': drawingTypePoint,
+      'type': DrawingCommandTypes.pointCommand,
       'id': id,
       'label': label,
       'pdt': pointDefinitionType.name,

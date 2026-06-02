@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:knitty_griddy/drawings/model/commands/curve_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/line_command.dart';
+import 'package:knitty_griddy/drawings/model/commands/measurement_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/measurement_decoration_command.dart';
 import 'package:knitty_griddy/drawings/model/measurement_requirement.dart';
 import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
@@ -45,8 +46,9 @@ class Drawing {
     );
   }
 
-  List<LineCommand> get lines => commands.whereType<LineCommand>().toList();
+  List<MeasurementCommand> get measurements => commands.whereType<MeasurementCommand>().toList();
   List<PointCommand> get points => commands.whereType<PointCommand>().toList();
+  List<LineCommand> get lines => commands.whereType<LineCommand>().toList();
   List<CurveCommand> get curves => commands.whereType<CurveCommand>().toList();
 
   LineCommand? lineById(String id) {
@@ -75,6 +77,18 @@ class Drawing {
     } catch (e) {
       return null;
     }
+  }
+
+  String get nextMeasurementLabel {
+    int nextNum = 1;
+    while (true) {
+      if (measurements.any((c) => c.label == 'm$nextNum')) {
+        nextNum++;
+      } else {
+        break;
+      }
+    }
+    return 'm$nextNum';
   }
 
   String get nextPointLabel {
@@ -149,19 +163,22 @@ class Drawing {
     List<DrawingCommand> commands = [];
     List<Map<String, dynamic>> commandObjects = (json['commands'] as List).map((o) => o as Map<String, dynamic>).toList();
     for (Map<String, dynamic> commandObject in commandObjects) {
-      switch (commandObject['type'] as String) {
-        case drawingTypePoint:
+      DrawingCommandTypes commandType = DrawingCommandTypes.values.byName(commandObject['type'] as String);
+      switch (commandType) {
+        case DrawingCommandTypes.pointCommand:
           commands.add(PointCommand.fromJson(commandObject));
           break;
-        case drawingTypeLine:
+        case DrawingCommandTypes.lineCommand:
           commands.add(LineCommand.fromJson(commandObject));
           break;
-        case drawingTypeCurve:
+        case DrawingCommandTypes.curveCommand:
           commands.add(CurveCommand.fromJson(commandObject));
           break;
-        case drawingTypeMeasurementDecoration:
-          commands.add(MeasurementDecorationCommand.fromJson(commandObject));
-          break;
+//        case drawingTypeMeasurementDecoration:
+//          commands.add(MeasurementDecorationCommand.fromJson(commandObject));
+//          break;
+        case DrawingCommandTypes.measurementCommand:
+          commands.add(MeasurementCommand.fromJson(commandObject));
         default:
           throw Exception('Unknown drawing element type ${commandObject['type']}');
       }

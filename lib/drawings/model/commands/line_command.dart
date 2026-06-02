@@ -10,8 +10,6 @@ import 'package:knitty_griddy/drawings/model/infinite_line.dart';
 import 'package:knitty_griddy/utils/math_utitilies.dart';
 import 'package:vector_math/vector_math_64.dart' as vec;
 
-const String drawingTypeLine = 'line';
-
 @immutable
 class LineCommand extends DrawingCommand {
   final String fromPointId;
@@ -69,7 +67,7 @@ class LineCommand extends DrawingCommand {
   @override
   Map<String, Object> toJson() {
     return {
-      'type': drawingTypeLine,
+      'type': DrawingCommandTypes.lineCommand,
       'id': id,
       'label': label,
       'from': fromPointId,
