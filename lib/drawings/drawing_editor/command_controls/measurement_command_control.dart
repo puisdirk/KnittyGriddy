@@ -65,7 +65,9 @@ class _MeasurementCommandControlState extends State<MeasurementCommandControl> {
           Tooltip(
             message: widget.command.errors.join('\n'),
             child: const Icon(Icons.error_outline),
-          )
+          ),
+        if (!widget.sorting && widget.command.validated && !widget.command.valid && widget.command.errors.isNotEmpty)
+          hspacing,
       ],
     );
   }

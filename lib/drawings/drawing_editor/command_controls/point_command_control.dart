@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:knitty_griddy/drawings/drawing_editor/command_controls/formula_field.dart';
+import 'package:knitty_griddy/drawings/formulas/formula_field_control.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/command_controls/small_label.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/command_controls/small_text_field.dart';
 import 'package:knitty_griddy/drawings/model/commands/curve_command.dart';
@@ -191,6 +191,8 @@ class _PointCommandControlState extends State<PointCommandControl> {
             message: widget.command.errors.join('\n'),
             child: const Icon(Icons.error_outline)
           ),
+        if (!widget.sorting && widget.command.validated && !widget.command.valid && widget.command.errors.isNotEmpty)
+          hspacing,
       ],
     );
   }
@@ -241,10 +243,10 @@ class _PointCommandControlState extends State<PointCommandControl> {
                 children: [
                   const SmallLabel(label: 'Distance'),
                   hspacing,
-                  FormulaField(
+                  FormulaFieldControl(
                     controller: distanceFormulaController, 
                     focusNode: distanceFormulaFocusNode,
-                    width: 100, 
+                    width: 200, 
                     excludeCommand: changedCommand,
                   ),
                 ]
@@ -273,10 +275,10 @@ class _PointCommandControlState extends State<PointCommandControl> {
                     Stack(
                       children: [
                         Positioned(
-                          child: FormulaField(
+                          child: FormulaFieldControl(
                             controller: directionAngleFormulaController, 
                             focusNode: directionAngleFormulaFocusNode,
-                            width: 100, 
+                            width: 200, 
                             excludeCommand: changedCommand,
                           )
                         ),
@@ -339,7 +341,7 @@ class _PointCommandControlState extends State<PointCommandControl> {
                 children: [
                   const SmallLabel(label: 'Fraction'),
                   hspacing,
-                  FormulaField(
+                  FormulaFieldControl(
                     controller: onLineFractionFormulaController, 
                     focusNode: onLineFractionFormulaFocusNode,
                     width: 100, 
@@ -378,10 +380,10 @@ class _PointCommandControlState extends State<PointCommandControl> {
                 children: [
                   const SmallLabel(label: 'Fraction'),
                   hspacing,
-                  FormulaField(
+                  FormulaFieldControl(
                     controller: onCurveFractionFormulaController, 
                     focusNode: onCurveFractionFormulaFocusNode,
-                    width: 100, 
+                    width: 200, 
                     excludeCommand: changedCommand
                   )
                 ],

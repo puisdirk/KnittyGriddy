@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:knitty_griddy/drawings/drawing_editor/command_controls/formula_field.dart';
+import 'package:knitty_griddy/drawings/formulas/formula_field_control.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/command_controls/small_label.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/command_controls/small_text_field.dart';
 import 'package:knitty_griddy/drawings/model/commands/curve_command.dart';
@@ -120,7 +120,9 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
           Tooltip(
             message: widget.command.errors.join('\n'),
             child: const Icon(Icons.error_outline),
-          )
+          ),
+        if (!widget.sorting && widget.command.validated && !widget.command.valid && widget.command.errors.isNotEmpty)
+          hspacing,
       ],
     );
   }
@@ -199,10 +201,10 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
           children: [
             const SmallLabel(label: 'Amplitude'),
             hspacing,
-            FormulaField(
+            FormulaFieldControl(
               controller: amplitudeFormulaController, 
               focusNode: amplitudeFormulaFocusNode,
-              width: 100, 
+              width: 200, 
               excludeCommand: changedCommand,
             ),
           ]
@@ -212,10 +214,10 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
           children: [
             const SmallLabel(label: 'Slant'),
             hspacing,
-            FormulaField(
+            FormulaFieldControl(
               controller: slantFormulaController, 
               focusNode: slantFormulaFocusNode,
-              width: 100, 
+              width: 200, 
               excludeCommand: changedCommand,
             ),
           ]

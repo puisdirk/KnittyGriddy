@@ -55,6 +55,7 @@ dependencies:
   material_symbols_icons: ^4.2928.1
   multi_trigger_autocomplete: ^1.0.0
   flutter_portal: ^1.1.4
+  petitparser: ^6.0.2
 
 dev_dependencies:
   flutter_test:

@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:knitty_griddy/drawings/formulas/formula_grammar.dart';
 import 'package:knitty_griddy/drawings/model/commands/curve_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/line_command.dart';
@@ -209,6 +210,8 @@ class PointCommand extends DrawingCommand {
 
     if (!valid) return null;
 
+    final FormulaGrammar grammar = FormulaGrammar(drawing: drawing);
+
     switch (pointDefinitionType) {
       case PointDefinitionType.relativeToPoint:
         PointCommand? fromPoint = drawing.pointById(fromPointId);
@@ -217,19 +220,29 @@ class PointCommand extends DrawingCommand {
         Offset? coordinate =  fromPoint.getCoordinate(drawing);
         if (coordinate == null) return null;
         
-        // TODO: parse formula
+        if (distanceFormula.isEmpty) return null;
         double distance = 0;
         try {
-          distance = double.parse(distanceFormula);
+          DoubleOrError res = grammar.parse(distanceFormula);
+          if (res.isSuccess) {
+            distance = res.value!;
+          } else {
+            return null;
+          }
         } catch(e) {
           return null;
         }
 
         double offsetAngle = 0;
         if (direction == RelativePointDirection.angle) {
-          // TODO: parse formula
+          if (directionAngleFormula.isEmpty) return null;
           try {
-            offsetAngle = double.parse(directionAngleFormula);
+            DoubleOrError res = grammar.parse(directionAngleFormula);
+            if (res.isSuccess) {
+              offsetAngle = res.value!;
+            } else {
+              return null;
+            }
           } catch (e) {
             return null;
           }
@@ -242,9 +255,14 @@ class PointCommand extends DrawingCommand {
         LineCommand? line = drawing.lineById(onLineId);
         if (line == null || !line.valid) return null;
         double fraction = 0;
-        // TODO: parse formula
+        if (onLineFractionFormula.isEmpty) return null;
         try {
-          fraction = double.parse(onLineFractionFormula);
+          DoubleOrError res = grammar.parse(onLineFractionFormula);
+          if (res.isSuccess) {
+            fraction = res.value!;
+          } else {
+            return null;
+          }
         } catch (e) {
           return null;
         }
@@ -266,9 +284,14 @@ class PointCommand extends DrawingCommand {
         if (slant == null) return null;
 
         double fraction = 0;
-        // TODO: parse formula
+        if (onCurveFractionFormula.isEmpty) return null;
         try {
-          fraction = double.parse(onCurveFractionFormula);
+          DoubleOrError res = grammar.parse(onCurveFractionFormula);
+          if (res.isSuccess) {
+            fraction = res.value!;
+          } else {
+            return null;
+          }
         } catch (e) {
           return null;
         }
@@ -353,6 +376,8 @@ class PointCommand extends DrawingCommand {
     bool retryValidation = true;
     List<String> validationErrors = [];
 
+    final FormulaGrammar grammar = FormulaGrammar(drawing: drawing);
+
     if (label.isEmpty) { isvalid = false; retryValidation = false; validationErrors.add('Requires a label'); }
     if (drawing.commands.any((c) => c.id != id && c.label == label)) { isvalid = false; retryValidation = false; validationErrors.add('Label should be unique'); }
 
@@ -379,15 +404,33 @@ class PointCommand extends DrawingCommand {
             }
           }
         }
-        if (direction == RelativePointDirection.angle && directionAngleFormula.isEmpty) {
-          isvalid = false;
-          retryValidation = false;
-          validationErrors.add('Requires an angle');
+
+        if (direction == RelativePointDirection.angle) {
+          if (directionAngleFormula.isEmpty) {
+            isvalid = false;
+            retryValidation = false;
+            validationErrors.add('Requires an angle');
+          } else {
+            DoubleOrError res = grammar.parse(directionAngleFormula);
+            if (!res.isSuccess) {
+              isvalid = false;
+              retryValidation = res.error is MeasurementNotValidatedException;
+              validationErrors.add(res.error.toString());
+            }
+          }
         }
+
         if (distanceFormula.isEmpty) {
           isvalid = false;
           retryValidation = false;
           validationErrors.add('Requires a distance');
+        } else {
+          DoubleOrError res = grammar.parse(distanceFormula);
+          if (!res.isSuccess) {
+            isvalid = false;
+            retryValidation = res.error is MeasurementNotValidatedException;
+            validationErrors.add(res.error.toString());
+          }
         }
         break;
       case PointDefinitionType.onLine:
@@ -414,6 +457,13 @@ class PointCommand extends DrawingCommand {
           isvalid = false;
           retryValidation = false;
           validationErrors.add('Requires a fraction');
+        } else {
+          DoubleOrError res = grammar.parse(onLineFractionFormula);
+          if (!res.isSuccess) {
+            isvalid = false;
+            retryValidation = res.error is MeasurementNotValidatedException;
+            validationErrors.add(res.error.toString());
+          }
         }
         break;
       case PointDefinitionType.onCurve:
@@ -440,6 +490,13 @@ class PointCommand extends DrawingCommand {
           isvalid = false;
           retryValidation = false;
           validationErrors.add('Requires a fraction');
+        } else {
+          DoubleOrError res = grammar.parse(onCurveFractionFormula);
+          if (!res.isSuccess) {
+            isvalid = false;
+            retryValidation = res.error is MeasurementNotValidatedException;
+            validationErrors.add(res.error.toString());
+          }
         }
       case PointDefinitionType.onIntersection:
         if (intersectionLine1Id.isEmpty) {

@@ -79,6 +79,14 @@ class Drawing {
     }
   }
 
+  MeasurementCommand? measurementByName(String name) {
+    try {
+      return measurements.firstWhere((m) => m.label == name);
+    } catch (e) {
+      return null;
+    }
+  }
+
   String get nextMeasurementLabel {
     int nextNum = 1;
     while (true) {
@@ -130,7 +138,7 @@ class Drawing {
   Drawing validate() {
     Drawing cleared = copyWith(commands: commands.map((c) => c.clearValidation()).toList());
 
-    int passes = 1;
+    int passes = 0;
     int maxPasses = 10000;
     while (true) {
       if (cleared.commands.any((c) => !c.isValidated) && passes <= 10000) {
