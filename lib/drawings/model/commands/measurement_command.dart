@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -26,7 +24,7 @@ class MeasurementCommand extends DrawingCommand {
     this.decimals = 0,
     this.valid = false,
     this.validated = false,
-  }) : super(errors: const[]);
+  }) : super(errors: errors?? const[]);
 
   MeasurementCommand copyWith({
     String? label,
@@ -127,7 +125,7 @@ class MeasurementCommand extends DrawingCommand {
   }
 
   @override
-  DrawingCommand validate(Drawing drawing) {
+  MeasurementCommand validate(Drawing drawing) {
     bool isvalid = true;
     bool retryValidation = true;
     List<String> validationErrors = [];

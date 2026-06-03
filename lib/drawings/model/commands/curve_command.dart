@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:knitty_griddy/drawings/formulas/formula_grammar.dart';
 import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
 import 'package:knitty_griddy/drawings/model/drawing.dart';
@@ -147,13 +148,27 @@ class CurveCommand extends DrawingCommand {
   }
 
   double? getAmplitude(Drawing drawing) {
-    // TODO: parse formula
-    return double.tryParse(amplitudeFormula);
+    if (amplitudeFormula.isEmpty) return null;
+
+    final FormulaGrammar grammar = FormulaGrammar(drawing: drawing);
+    DoubleOrError res = grammar.parse(amplitudeFormula);
+    if (res.isSuccess) {
+      return res.value;
+    } else {
+      return null;
+    }
   }
 
   double? getSlant(Drawing drawing) {
-    // TODO: parse formula
-    return double.tryParse(slantFormula);
+    if (slantFormula.isEmpty) return null;
+
+    final FormulaGrammar grammar = FormulaGrammar(drawing: drawing);
+    DoubleOrError res = grammar.parse(slantFormula);
+    if (res.isSuccess) {
+      return res.value;
+    } else {
+      return null;
+    }
   }
 
   @override
@@ -195,6 +210,8 @@ class CurveCommand extends DrawingCommand {
     bool isvalid = true;
     bool retryValidation = true;
     List<String> validationErrors = [];
+
+    final FormulaGrammar grammar = FormulaGrammar(drawing: drawing);
 
     if (label.isEmpty) { isvalid = false; retryValidation = false; validationErrors.add('Requires a label'); }
     if (drawing.commands.any((c) => c.id != id && c.label == label)) { isvalid = false; retryValidation = false; validationErrors.add('Label should be unique'); }
@@ -247,12 +264,26 @@ class CurveCommand extends DrawingCommand {
       isvalid = false;
       retryValidation = false;
       validationErrors.add('Requires an amplitude');
+    } else {
+      DoubleOrError res = grammar.parse(amplitudeFormula);
+      if (!res.isSuccess) {
+        isvalid = false;
+        retryValidation = res.error is MeasurementNotValidatedException;
+        validationErrors.add(res.error.toString());
+      }
     }
 
     if (slantFormula.isEmpty) {
       isvalid = false;
       retryValidation = false;
       validationErrors.add('Requires a slant');
+    } else {
+      DoubleOrError res = grammar.parse(slantFormula);
+      if (!res.isSuccess) {
+        isvalid = false;
+        retryValidation = res.error is MeasurementNotValidatedException;
+        validationErrors.add(res.error.toString());
+      }
     }
 
     return copyWith(
