@@ -250,7 +250,7 @@ class PointCommand extends DrawingCommand {
           offsetAngle = direction.angleInDegrees;
         }
         coordinate += Offset.fromDirection(MathUtitilies.toRadians(offsetAngle), distance);
-        return coordinate.scale(1, -1);
+        return coordinate;
       case PointDefinitionType.onLine:
         LineCommand? line = drawing.lineById(onLineId);
         if (line == null || !line.valid) return null;
@@ -336,6 +336,7 @@ class PointCommand extends DrawingCommand {
     if (coordinate == null) {
       return;
     }
+    coordinate = coordinate.scale(1, -1);
 
     Offset middle = Offset(size.width / 2, size.height / 2);
     coordinate += middle;
@@ -414,7 +415,7 @@ class PointCommand extends DrawingCommand {
             DoubleOrError res = grammar.parse(directionAngleFormula);
             if (!res.isSuccess) {
               isvalid = false;
-              retryValidation = res.error is MeasurementNotValidatedException;
+              retryValidation = res.error is DependantNotValidated;
               validationErrors.add(res.error.toString());
             }
           }
@@ -428,7 +429,7 @@ class PointCommand extends DrawingCommand {
           DoubleOrError res = grammar.parse(distanceFormula);
           if (!res.isSuccess) {
             isvalid = false;
-            retryValidation = res.error is MeasurementNotValidatedException;
+            retryValidation = res.error is DependantNotValidated;
             validationErrors.add(res.error.toString());
           }
         }
@@ -461,7 +462,7 @@ class PointCommand extends DrawingCommand {
           DoubleOrError res = grammar.parse(onLineFractionFormula);
           if (!res.isSuccess) {
             isvalid = false;
-            retryValidation = res.error is MeasurementNotValidatedException;
+            retryValidation = res.error is DependantNotValidated;
             validationErrors.add(res.error.toString());
           }
         }
@@ -494,7 +495,7 @@ class PointCommand extends DrawingCommand {
           DoubleOrError res = grammar.parse(onCurveFractionFormula);
           if (!res.isSuccess) {
             isvalid = false;
-            retryValidation = res.error is MeasurementNotValidatedException;
+            retryValidation = res.error is DependantNotValidated;
             validationErrors.add(res.error.toString());
           }
         }

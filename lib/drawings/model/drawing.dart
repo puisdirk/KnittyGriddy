@@ -4,7 +4,7 @@ import 'package:knitty_griddy/drawings/model/commands/curve_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/line_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/measurement_command.dart';
-import 'package:knitty_griddy/drawings/model/commands/measurement_decoration_command.dart';
+import 'package:knitty_griddy/drawings/model/commands/variable_command.dart';
 import 'package:knitty_griddy/drawings/model/measurement_requirement.dart';
 import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
 
@@ -20,14 +20,12 @@ class Drawing {
   final String name;
   final String description;
   final List<DrawingCommand> commands;
-  final List<MeasurementRequirement> measurementRequirements;
 
   const Drawing({
     required this.id,
     required this.name,
     this.description = '',
     this.commands = const[],
-    this.measurementRequirements = const[],
   });
 
   Drawing copyWith({
@@ -35,14 +33,12 @@ class Drawing {
     String? name,
     String? description,
     List<DrawingCommand>? commands,
-    List<MeasurementRequirement>? measurementRequirements,
   }) {
     return Drawing(
       id: id?? this.id, 
       name: name?? this.name,
       description: description?? this.description,
       commands: commands?? this.commands,
-      measurementRequirements: measurementRequirements?? this.measurementRequirements,
     );
   }
 
@@ -50,11 +46,12 @@ class Drawing {
   List<PointCommand> get points => commands.whereType<PointCommand>().toList();
   List<LineCommand> get lines => commands.whereType<LineCommand>().toList();
   List<CurveCommand> get curves => commands.whereType<CurveCommand>().toList();
+  List<VariableCommand> get variables => commands.whereType<VariableCommand>().toList();
 
   LineCommand? lineById(String id) {
     try {
       return commands.firstWhere((c) => c.id == id && c is LineCommand) as LineCommand;
-    } catch (e) {
+    } catch (_) {
       return null;
     }
   }
@@ -66,7 +63,7 @@ class Drawing {
     
     try {
       return commands.firstWhere((c) => c.id == id && c is PointCommand) as PointCommand;
-    } catch (e) {
+    } catch (_) {
       return null;
     }
   }
@@ -74,7 +71,7 @@ class Drawing {
   CurveCommand? curveById(String id) {
     try {
       return commands.firstWhere((c) => c.id == id && c is CurveCommand) as CurveCommand;
-    } catch (e) {
+    } catch (_) {
       return null;
     }
   }
@@ -82,7 +79,15 @@ class Drawing {
   MeasurementCommand? measurementByName(String name) {
     try {
       return measurements.firstWhere((m) => m.label == name);
-    } catch (e) {
+    } catch (_) {
+      return null;
+    }
+  }
+
+  VariableCommand? variableByName(String name) {
+    try {
+      return variables.firstWhere((v) => v.label == name);
+    } catch (_) {
       return null;
     }
   }
@@ -97,6 +102,18 @@ class Drawing {
       }
     }
     return 'm$nextNum';
+  }
+
+  String get nextVariableLabel{
+    int nextNum = 1;
+    while (true) {
+      if (variables.any((c) => c.label == 'v$nextNum')) {
+        nextNum++;
+      } else {
+        break;
+      }
+    }
+    return 'v$nextNum';
   }
 
   String get nextPointLabel {
@@ -163,7 +180,6 @@ class Drawing {
       'name': name,
       'description': description,
       'commands': commands.map((e) => e.toJson()).toList(),
-      'mreqs': measurementRequirements.map((e) => e.toJson()).toList(),
     };
   }
 
@@ -182,11 +198,12 @@ class Drawing {
         case DrawingCommandTypes.curveCommand:
           commands.add(CurveCommand.fromJson(commandObject));
           break;
-//        case drawingTypeMeasurementDecoration:
-//          commands.add(MeasurementDecorationCommand.fromJson(commandObject));
-//          break;
         case DrawingCommandTypes.measurementCommand:
           commands.add(MeasurementCommand.fromJson(commandObject));
+          break;
+        case DrawingCommandTypes.variableCommand:
+          commands.add(VariableCommand.fromJson(commandObject));
+          break;
         default:
           throw Exception('Unknown drawing element type ${commandObject['type']}');
       }
@@ -203,12 +220,11 @@ class Drawing {
       name: json['name'] as String,
       description: json['description'] as String,
       commands: commands,
-      measurementRequirements: measurementRequirements,
     );
   }
 
   @override
-  int get hashCode => id.hashCode ^ name.hashCode ^ description.hashCode ^ commands.hashCode ^ measurementRequirements.hashCode;
+  int get hashCode => id.hashCode ^ name.hashCode ^ description.hashCode ^ commands.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -218,6 +234,5 @@ class Drawing {
       id == other.id &&
       name == other.name &&
       description == other.description &&
-      listEquals(commands, other.commands) &&
-      listEquals(measurementRequirements, other.measurementRequirements);
+      listEquals(commands, other.commands);
 }

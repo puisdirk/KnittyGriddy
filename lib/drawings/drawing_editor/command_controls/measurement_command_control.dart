@@ -5,7 +5,6 @@ import 'package:flutter_spinbox/material.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/command_controls/small_label.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/command_controls/small_text_field.dart';
 import 'package:knitty_griddy/drawings/model/commands/measurement_command.dart';
-import 'package:knitty_griddy/drawings/model/drawing.dart';
 import 'package:knitty_griddy/drawings/model/drawings_model.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 import 'package:provider/provider.dart';
@@ -59,7 +58,7 @@ class _MeasurementCommandControlState extends State<MeasurementCommandControl> {
       children: [
         Text(changedCommand.label, style: smallStyleBold,),
         hspacing,
-        Text('value: ${changedCommand.value.toStringAsFixed(changedCommand.decimals)}', style: smallStyle,),
+        Text('${changedCommand.value.toStringAsFixed(changedCommand.decimals)} ${changedCommand.unit.shortLabel}', style: smallStyle,),
         const Spacer(),
         if (!widget.sorting && widget.command.isValidated && !widget.command.valid && widget.command.errors.isNotEmpty)
           Tooltip(
@@ -89,6 +88,26 @@ class _MeasurementCommandControlState extends State<MeasurementCommandControl> {
             const SmallLabel(label: 'Label'),
             hspacing,
             SmallTextField(controller: labelController, width: 100),
+            hspacing,
+            const SmallLabel(label: 'Unit'),
+            hspacing,
+            DropdownButton<Unit>(
+              isDense: true,
+              autofocus: false,
+              style: smallStyle,
+              itemHeight: kMinInteractiveDimension,
+              focusColor: Colors.transparent,
+              underline: Container(),
+              items: [
+                for (Unit unit in Unit.values)
+                  DropdownMenuItem(value: unit, child: Text(unit.label))
+              ],
+              value: changedCommand.unit,
+              onChanged: (value) {
+                setState(() => changedCommand = changedCommand.copyWith(unit: value));
+              },
+            ),
+
           ],
         ),
         vspacing,

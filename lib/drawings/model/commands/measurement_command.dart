@@ -3,6 +3,19 @@ import 'package:flutter/material.dart';
 
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
 import 'package:knitty_griddy/drawings/model/drawing.dart';
+import 'package:knitty_griddy/utils/math_utitilies.dart';
+
+enum Unit {
+  mm(label: 'Millimeter', shortLabel: 'mm'),
+  cm(label: 'Centimeter', shortLabel: 'cm'),
+  meter(label: 'Meter', shortLabel: 'm'),
+  inches(label: 'Inches', shortLabel: '"'),
+  feet(label: 'Feet', shortLabel: 'ft');
+  
+  final String label;
+  final String shortLabel;
+  const Unit({required this.label, required this.shortLabel});
+}
 
 @immutable
 class MeasurementCommand extends DrawingCommand {
@@ -10,6 +23,7 @@ class MeasurementCommand extends DrawingCommand {
   final double maxValue;
   final double value;
   final int decimals;
+  final Unit unit;
 
   final bool validated;
   final bool valid;
@@ -22,6 +36,7 @@ class MeasurementCommand extends DrawingCommand {
     this.maxValue = 100,
     this.value = 50,
     this.decimals = 0,
+    this.unit = Unit.mm,
     this.valid = false,
     this.validated = false,
   }) : super(errors: errors?? const[]);
@@ -32,6 +47,7 @@ class MeasurementCommand extends DrawingCommand {
     double? maxValue,
     double? value,
     int? decimals,
+    Unit? unit,
     bool? validated,
     bool? valid,
     List<String>? errors,
@@ -54,11 +70,14 @@ class MeasurementCommand extends DrawingCommand {
       maxValue: max,
       value: val,
       decimals: decimals?? this.decimals,
+      unit: unit?? this.unit,
       valid: valid?? this.valid,
       validated: validated?? this.validated,
       errors: errors?? this.errors,
     );
   }
+
+  double get valueInMM => MathUtitilies.valueInMM(value, unit);
 
   @override
   bool operator ==(Object other) =>
@@ -71,13 +90,14 @@ class MeasurementCommand extends DrawingCommand {
       maxValue == other.maxValue &&
       value == other.value &&
       decimals == other.decimals &&
+      unit == other.unit &&
       valid == other.valid &&
       validated == other.validated &&
       listEquals(errors, other.errors);
   
   @override
   int get hashCode => super.hashCode ^ id.hashCode ^ label.hashCode ^
-    minValue.hashCode ^ maxValue.hashCode ^ value.hashCode ^ decimals.hashCode ^
+    minValue.hashCode ^ maxValue.hashCode ^ value.hashCode ^ decimals.hashCode ^ unit.hashCode ^
     valid.hashCode ^ validated.hashCode ^ errors.hashCode;
 
   @override
@@ -110,6 +130,7 @@ class MeasurementCommand extends DrawingCommand {
       'max': maxValue,
       'val': value,
       'dec': decimals,
+      'unit': unit.name,
     };
   }
 
@@ -121,6 +142,7 @@ class MeasurementCommand extends DrawingCommand {
       maxValue: json['max'] as double,
       value: json['val'] as double,
       decimals: json['dec'] as int,
+      unit: Unit.values.byName(json['unit'] as String),
     );
   }
 

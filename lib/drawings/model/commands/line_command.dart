@@ -218,11 +218,13 @@ class LineCommand extends DrawingCommand {
     if (start == null) {
       return;
     }
+    start = start.scale(1, -1);
 
     Offset? end = getEndCoordinate(drawing);
     if (end == null) {
       return;
     }
+    end = end.scale(1, -1);
 
     Offset middle = Offset(size.width / 2, size.height / 2);
     start += middle;
@@ -233,6 +235,7 @@ class LineCommand extends DrawingCommand {
     // draw line label
     Offset? midline = coordinateAt(0.3, drawing);
     if (midline == null) return;
+    midline = midline.scale(1, -1);
     midline += middle;
 
     final ParagraphBuilder paragraphBuilder = ParagraphBuilder(

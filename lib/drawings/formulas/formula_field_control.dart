@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:knitty_griddy/drawings/formulas/formula_function.dart';
 import 'package:knitty_griddy/drawings/formulas/function_chooser.dart';
 import 'package:knitty_griddy/drawings/formulas/measurement_command_chooser.dart';
+import 'package:knitty_griddy/drawings/formulas/variable_command_chooser.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/measurement_command.dart';
+import 'package:knitty_griddy/drawings/model/commands/variable_command.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 import 'package:multi_trigger_autocomplete/multi_trigger_autocomplete.dart';
 
@@ -35,6 +37,19 @@ class FormulaFieldControl extends StatelessWidget {
             return MeasurementCommandChooser(
               query: autocompleteQuery.query.toLowerCase(),
               onChooseMeasurement: (MeasurementCommand command) {
+                final MultiTriggerAutocompleteState autocompleteState = MultiTriggerAutocomplete.of(context);
+                autocompleteState.acceptAutocompleteOption(command.label);
+              }
+            );
+          }
+        ),
+        AutocompleteTrigger(
+          trigger: '!', 
+          optionsViewBuilder: (context, autocompleteQuery, textEditingController) {
+            return VariableCommandChooser(
+              excludeCommand: excludeCommand,
+              query: autocompleteQuery.query.toLowerCase(),
+              onChooseVariable: (VariableCommand command) {
                 final MultiTriggerAutocompleteState autocompleteState = MultiTriggerAutocomplete.of(context);
                 autocompleteState.acceptAutocompleteOption(command.label);
               }
