@@ -1,7 +1,9 @@
 
 import 'dart:math';
 
+import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/measurement_command.dart';
+import 'package:knitty_griddy/drawings/model/commands/variable_command.dart';
 import 'package:knitty_griddy/drawings/model/drawing.dart';
 import 'package:knitty_griddy/utils/math_utitilies.dart';
 import 'package:petitparser/petitparser.dart';
@@ -54,18 +56,38 @@ class GenericFormulaException extends FormulaException {
   }
 }
 
-class MeasurementNotValidatedException extends FormulaException {
-  final MeasurementCommand measurementCommand;
+class DependantNotValidated extends FormulaException {
+  final DrawingCommand command;
+  const DependantNotValidated({
+    super.buffer,
+    super.pos,
+    required this.command,
+  });
+}
 
+class MeasurementNotValidatedException extends DependantNotValidated {
   const MeasurementNotValidatedException({
     super.buffer,
     super.pos,  
-    required this.measurementCommand,
+    required super.command
   });
 
   @override
   String toString() {
-    return 'Measurement ${measurementCommand.label} is not valid';
+    return 'Measurement ${command.label} is not valid';
+  }
+}
+
+class VariableNotValidatedException extends DependantNotValidated {
+  const VariableNotValidatedException({
+    super.buffer,
+    super.pos,
+    required super.command,
+  });
+
+  @override
+  String toString() {
+    return 'Variable ${command.label} is not valid';
   }
 }
 
@@ -81,6 +103,20 @@ class MeasurementDoesNotExistException extends FormulaException {
   @override
   String toString() {
     return 'Measurement $measurementName does not exist';
+  }
+}
+
+class VariableDoesNotExistException extends FormulaException {
+  final String variableName;
+  const VariableDoesNotExistException({
+    super.buffer,
+    super.pos,
+    required this.variableName,
+  });
+
+  @override
+  String toString() {
+    return 'Variable $variableName does not exist';
   }
 }
 
@@ -103,6 +139,10 @@ class FormulaGrammar extends GrammarDefinition {
     } on MeasurementDoesNotExistException catch (err) {
       return DoubleOrError.error(err);
     } on MeasurementNotValidatedException catch (err) {
+      return DoubleOrError.error(err);
+    } on VariableDoesNotExistException catch (err) {
+      return DoubleOrError.error(err);
+    } on VariableNotValidatedException catch (err) {
       return DoubleOrError.error(err);
     } on GenericFormulaException catch(err) {
       return DoubleOrError.error(err);
@@ -163,7 +203,7 @@ class FormulaGrammar extends GrammarDefinition {
     return p[1];
   });
 
-  Parser number() => ref0(measurement) | ref0(pDouble).map((p) {
+  Parser number() => ref0(measurement) | ref0(variable) | ref0(unitDouble) | ref0(pDouble).map((p) {
     return p;
   });
 
@@ -178,13 +218,35 @@ class FormulaGrammar extends GrammarDefinition {
     }
 
     if (!m.validated) {
-      throw MeasurementNotValidatedException(measurementCommand: m);
+      throw MeasurementNotValidatedException(command: m);
     }
 
-    return m.value;
+    return m.valueInMM;
   });
 
-  Parser pDouble() => (digit().star() & (string('.') & digit().star()).optional()).flatten().map((d) {
+  Parser variable() => (char('!') & seq2(letter(), word().star()).flatten('variable name expected').trim()).map((p) {
+    if (p[1] is FailureParser) {
+      return failure(p[1].message);
+    }
+
+    VariableCommand? v = drawing.variableByName(p[1]);
+    if (v == null) {
+      throw VariableDoesNotExistException(variableName: p[1]);
+    }
+
+    if (!v.validated) {
+      throw VariableNotValidatedException(command: v);
+    }
+
+    return v.value(drawing);
+  });
+
+  Parser unitDouble() => (pDouble() & (string('mm') | string('cm') | string('m') | string('"') | string('ft')).trim()).map((p) {
+    Unit unit = Unit.values.byName(p[1]);
+    return MathUtitilies.valueInMM(p[0], unit);
+  });
+
+  Parser pDouble() => ((char('-')).optional() & digit().star() & (string('.') & digit().star()).optional()).flatten().map((d) {
     try {
       return double.parse(d);
     } catch (err) {

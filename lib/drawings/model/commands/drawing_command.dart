@@ -8,6 +8,7 @@ enum DrawingCommandTypes {
   lineCommand,
   curveCommand,
   measurementCommand,
+  variableCommand,
 }
 
 @immutable

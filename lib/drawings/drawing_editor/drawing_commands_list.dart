@@ -3,10 +3,12 @@ import 'package:knitty_griddy/drawings/drawing_editor/command_controls/curve_com
 import 'package:knitty_griddy/drawings/drawing_editor/command_controls/line_command_control.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/command_controls/measurement_command_control.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/command_controls/point_command_control.dart';
+import 'package:knitty_griddy/drawings/drawing_editor/command_controls/variable_command_control.dart';
 import 'package:knitty_griddy/drawings/model/commands/curve_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/line_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/measurement_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
+import 'package:knitty_griddy/drawings/model/commands/variable_command.dart';
 import 'package:knitty_griddy/drawings/model/drawing.dart';
 import 'package:knitty_griddy/drawings/model/drawings_model.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
@@ -54,6 +56,13 @@ class _DrawingCommandsListState extends State<DrawingCommandsList> {
         finishedEditing: (newCommand) => Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(newCommand), 
         sorting: sorting
       );
+    } else if (command is VariableCommand) {
+      return VariableCommandControl(
+        key: GlobalObjectKey(command.id),
+        command: command, 
+        finishedEditing: (newCommand) => Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(newCommand), 
+        sorting: sorting
+      );
     }
 
     // TODO: other types
@@ -83,6 +92,20 @@ class _DrawingCommandsListState extends State<DrawingCommandsList> {
                       },
                       icon: const Icon(Symbols.square_foot),
                     ),
+                  ),
+                  Tooltip(
+                    message: 'Add variable',
+                    child: IconButton(
+                      onPressed: () {
+                        String newId = Provider.of<DrawingsModel>(context, listen: false).addVariableCommand();
+                        setState(() => selectedCommandId = newId);
+                      },
+                      icon: const Icon(Symbols.settop_component),
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 45,
+                    child: VerticalDivider(indent: 10, endIndent: 10)
                   ),
                   Tooltip(
                     message: 'Add point',

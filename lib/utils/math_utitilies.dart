@@ -2,7 +2,7 @@
 import 'dart:math';
 
 import 'package:flutter/painting.dart';
-import 'package:knitty_griddy/drawings/model/coordinate.dart';
+import 'package:knitty_griddy/drawings/model/commands/measurement_command.dart';
 
 class MathUtitilies {
   static double toDegrees(double radians) {
@@ -53,6 +53,21 @@ class MathUtitilies {
     // a2 + b2 = c2, so opp2 + adj2 = hyp2 => adj2 = hyp2 - opp2
     // could also do cos(asin(opposite/hypotenuse)) * hypotenuse?
     return sqrt(pow(hypotenuse, 2) - pow(opposite, 2));
+  }
+
+  static double valueInMM(double value, Unit unit) {
+    switch (unit) {
+      case Unit.cm:
+        return value * 10;
+      case Unit.mm:
+        return value;
+      case Unit.meter:
+        return value * 1000;
+      case Unit.inches:
+        return value * 25.4;
+      case Unit.feet:
+        return value * 304.8;
+    }
   }
 
 }

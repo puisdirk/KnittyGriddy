@@ -26,8 +26,8 @@ class CurveCommand extends DrawingCommand {
     List<String>? errors,
     this.startPointId = '',
     this.endPointId = '',
-    this.amplitudeFormula = '',
-    this.slantFormula = '',
+    this.amplitudeFormula = '1',
+    this.slantFormula = '0',
     this.validated = false,
     this.valid = false,
   }) : super(errors: errors?? const[]);
@@ -124,10 +124,12 @@ class CurveCommand extends DrawingCommand {
 
     Offset? startCoordinate = getStartCoordinate(drawing);
     if (startCoordinate == null) return;
+    startCoordinate = startCoordinate.scale(1, -1);
     startCoordinate += middle;
 
     Offset? endCoordinate = getEndCoordinate(drawing);
     if (endCoordinate == null) return;
+    endCoordinate = endCoordinate.scale(1, -1);
     endCoordinate += middle;
 
     double? amplitude = getAmplitude(drawing);
@@ -195,7 +197,11 @@ class CurveCommand extends DrawingCommand {
 
     // control point is perpendicular to the line with the given ampLenght
     final double angleOfLine = MathUtitilies.angleOfLine(startCoordinate, endCoordinate);
-    final double perpendicularAngle = angleOfLine + (pi / 2.0);
+    double perpendicularAngle = angleOfLine + (pi / 2.0);
+    // Take quadrant into account
+    if (endCoordinate.dx > startCoordinate.dx) {
+      perpendicularAngle = angleOfLine - (pi / 2.0);
+    }
     
     return MathUtitilies.relativepointatangle(ampStartPoint, ampLength, perpendicularAngle);
   }
@@ -268,7 +274,7 @@ class CurveCommand extends DrawingCommand {
       DoubleOrError res = grammar.parse(amplitudeFormula);
       if (!res.isSuccess) {
         isvalid = false;
-        retryValidation = res.error is MeasurementNotValidatedException;
+        retryValidation = res.error is DependantNotValidated;
         validationErrors.add(res.error.toString());
       }
     }
@@ -281,7 +287,7 @@ class CurveCommand extends DrawingCommand {
       DoubleOrError res = grammar.parse(slantFormula);
       if (!res.isSuccess) {
         isvalid = false;
-        retryValidation = res.error is MeasurementNotValidatedException;
+        retryValidation = res.error is DependantNotValidated;
         validationErrors.add(res.error.toString());
       }
     }
