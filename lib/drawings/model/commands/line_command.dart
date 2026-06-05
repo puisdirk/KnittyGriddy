@@ -48,6 +48,25 @@ class LineCommand extends DrawingCommand {
   }
 
   @override
+  LineCommand markAsCyclic(String cycleDescription) {
+    return copyWith(
+      validated: true,
+      valid: false,
+      errors: ['Cycle detected: $cycleDescription'],
+    );
+  }
+
+  @override
+  Set<String> dependencies(Drawing drawing) {
+    Set<String> deps = {};
+
+    if (fromPointId.isNotEmpty) deps.add(fromPointId);
+    if (toPointId.isNotEmpty) deps.add(toPointId);
+
+    return deps;
+  }
+
+  @override
   DrawingCommand deleteReference({required String commandId}) {
     return copyWith(
       fromPointId: fromPointId == commandId ? '' : fromPointId,

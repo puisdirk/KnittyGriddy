@@ -4,8 +4,10 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/drawings/formulas/formula_grammar.dart';
+import 'package:knitty_griddy/drawings/model/commands/measurement_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
+import 'package:knitty_griddy/drawings/model/commands/variable_command.dart';
 import 'package:knitty_griddy/drawings/model/drawing.dart';
 import 'package:knitty_griddy/utils/math_utitilies.dart';
 
@@ -53,6 +55,32 @@ class CurveCommand extends DrawingCommand {
       valid: valid?? this.valid,
       errors: errors?? this.errors,
     );
+  }
+
+  @override
+  CurveCommand markAsCyclic(String cycleDescription) {
+    return copyWith(
+      validated: true,
+      valid: false,
+      errors: ['Cycle detected: $cycleDescription'],
+    );
+  }
+
+  @override
+  Set<String> dependencies(Drawing drawing) {
+    Set<String> deps = {};
+    
+    if (startPointId.isNotEmpty) {
+      deps.add(startPointId);
+    }
+    if (endPointId.isNotEmpty) {
+      deps.add(endPointId);
+    }
+
+    deps.addAll(FormulaExpression.dependencies(formula: amplitudeFormula, drawing: drawing));
+    deps.addAll(FormulaExpression.dependencies(formula: slantFormula, drawing: drawing));
+
+    return deps;
   }
 
   @override
