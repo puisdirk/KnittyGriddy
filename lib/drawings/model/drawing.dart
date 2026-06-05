@@ -1,4 +1,5 @@
 
+import 'package:directed_graph/directed_graph.dart';
 import 'package:flutter/foundation.dart';
 import 'package:knitty_griddy/drawings/model/commands/curve_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
@@ -152,14 +153,32 @@ class Drawing {
     return 'c$nextNum';
   }
 
+  List<String> _getCycle() {
+    Map<String, Set<String>> dependencies = {};
+    for (DrawingCommand command in commands) {
+      dependencies[command.id] = command.dependencies(this);
+    }
+    DirectedGraph<String> graph = DirectedGraph(dependencies);
+    return graph.cycle;
+  }
+
   Drawing validate() {
     Drawing cleared = copyWith(commands: commands.map((c) => c.clearValidation()).toList());
 
+    List<String> cycles = _getCycle();
+    if (cycles.isNotEmpty) {
+      String cycleDescription = cycles.map((cycle) => commands.firstWhere((c) => c.id == cycle).label).join(' -> ');
+      cleared = cleared.copyWith(
+        commands: cleared.commands.map((c) => cycles.contains(c.id) ? c.markAsCyclic(cycleDescription) : c).toList()
+      );
+      return cleared;
+    }
+
     int passes = 0;
-    int maxPasses = 10000;
+    int maxPasses = 1000;
     while (true) {
-      if (cleared.commands.any((c) => !c.isValidated) && passes <= 10000) {
-        // We pass through the whole list on each loop
+      if (cleared.commands.any((c) => !c.isValidated) && passes <= maxPasses) {
+        // We pass through the whole list on each loop as dependencies may not be solved yet
         List<DrawingCommand> passedCommands = cleared.commands.map((c) => c.validate(cleared)).toList();
         cleared = cleared.copyWith(
           commands: passedCommands

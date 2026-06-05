@@ -143,7 +143,7 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
         vspacing,
         Row(
           children: [
-            const SmallLabel(label: 'Label'),
+            const SmallLabel(label: 'Label', width: 55,),
             hspacing,
             SmallTextField(controller: curveLabelController, width: 100),
           ],
@@ -151,7 +151,7 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
         vspacing,
         Row(
           children: [
-            const SmallLabel(label: 'From'),
+            const SmallLabel(label: 'From', width: 55,),
             hspacing,
             DropdownButton<String>(
               isDense: true,
@@ -175,7 +175,7 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
         vspacing,
         Row(
           children: [
-            const SmallLabel(label: 'To'),
+            const SmallLabel(label: 'To', width: 55,),
             hspacing,
             DropdownButton<String>(
               isDense: true,
@@ -199,7 +199,7 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
         vspacing,
         Row(
           children: [
-            const SmallLabel(label: 'Amplitude'),
+            const SmallLabel(label: 'Amplitude', width: 55,),
             hspacing,
             FormulaFieldControl(
               controller: amplitudeFormulaController, 
@@ -212,7 +212,7 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
         vspacing,
         Row(
           children: [
-            const SmallLabel(label: 'Slant'),
+            const SmallLabel(label: 'Slant', width: 55,),
             hspacing,
             FormulaFieldControl(
               controller: slantFormulaController, 

@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:knitty_griddy/drawings/formulas/formula_grammar.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
+import 'package:knitty_griddy/drawings/model/commands/measurement_command.dart';
 import 'package:knitty_griddy/drawings/model/drawing.dart';
 
 class VariableCommand extends DrawingCommand {
@@ -34,6 +35,20 @@ class VariableCommand extends DrawingCommand {
       valid: valid?? this.valid,
       errors: errors?? this.errors,
     );
+  }
+
+  @override
+  VariableCommand markAsCyclic(String cycleDescription) {
+    return copyWith(
+      validated: true,
+      valid: false,
+      errors: ['Cycle detected: $cycleDescription'],
+    );
+  }
+
+  @override
+  Set<String> dependencies(Drawing drawing) {
+    return FormulaExpression.dependencies(formula: formula, drawing: drawing);
   }
 
   @override

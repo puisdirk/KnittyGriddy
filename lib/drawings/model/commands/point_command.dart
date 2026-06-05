@@ -122,6 +122,15 @@ class PointCommand extends DrawingCommand {
   }
 
   @override
+  PointCommand markAsCyclic(String cycleDescription) {
+    return copyWith(
+      validated: true,
+      valid: false,
+      errors: ['Cycle detected: $cycleDescription'],
+    );
+  }
+
+  @override
   PointCommand deleteReference({required String commandId}) {
     return copyWith(
       fromPointId: fromPointId == commandId ? '' : fromPointId,
@@ -371,6 +380,33 @@ class PointCommand extends DrawingCommand {
     return copyWith(validated: false, valid: false, errors: const[]);
   }
   
+  @override
+  Set<String> dependencies(Drawing drawing) {
+    Set<String> deps = {};
+
+    switch (pointDefinitionType) {
+      case PointDefinitionType.relativeToPoint:
+        if (fromPointId.isNotEmpty) deps.add(fromPointId);
+        deps.addAll(FormulaExpression.dependencies(formula: distanceFormula, drawing: drawing));
+        if (direction == RelativePointDirection.angle) deps.addAll(FormulaExpression.dependencies(formula: directionAngleFormula, drawing: drawing));
+        break;
+      case PointDefinitionType.onLine:
+        if (onLineId.isNotEmpty) deps.add(onLineId);
+        deps.addAll(FormulaExpression.dependencies(formula: onLineFractionFormula, drawing: drawing));
+        break;
+      case PointDefinitionType.onCurve:
+        if (onCurveId.isNotEmpty) deps.add(onCurveId);
+        deps.addAll(FormulaExpression.dependencies(formula: onCurveFractionFormula, drawing: drawing));
+        break;
+      case PointDefinitionType.onIntersection:
+        if (intersectionLine1Id.isNotEmpty) deps.add(intersectionLine1Id);
+        if (intersectionLine2Id.isNotEmpty) deps.add(intersectionLine2Id);
+        break;
+    }
+
+    return deps;
+  }
+
   @override
   DrawingCommand validate(Drawing drawing) {
     bool isvalid = true;

@@ -77,6 +77,20 @@ class MeasurementCommand extends DrawingCommand {
     );
   }
 
+  @override
+  MeasurementCommand markAsCyclic(String cycleDescription) {
+    return copyWith(
+      validated: true,
+      valid: false,
+      errors: ['Cycle detected: $cycleDescription'],
+    );
+  }
+
+  @override
+  Set<String> dependencies(Drawing drawing) {
+    return {};
+  }
+
   double get valueInMM => MathUtitilies.valueInMM(value, unit);
 
   @override

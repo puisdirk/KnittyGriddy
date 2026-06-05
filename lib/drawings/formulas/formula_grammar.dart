@@ -120,6 +120,35 @@ class VariableDoesNotExistException extends FormulaException {
   }
 }
 
+class FormulaExpression {
+  static final RegExp _variablergx = RegExp(r'!\w*');
+  static final RegExp _measurementrgx = RegExp(r'@\w*');
+
+  static Set<String> dependencies({required String formula, required Drawing drawing}) {
+    Set<String> deps = {};
+
+    if (formula.isNotEmpty) {
+      List<String> variableLabels = _variablergx.allMatches(formula).map((match) => match[0]!).toList();
+      List<String> measurementLabels = _measurementrgx.allMatches(formula).map((match) => match[0]!).toList();
+
+      for (String variableLabel in variableLabels) {
+        VariableCommand? variableCommand = drawing.variableByName(variableLabel.substring(1));
+        if (variableCommand != null) {
+          deps.add(variableCommand.id);
+        }
+      }
+      for (String measurementLabel in measurementLabels) {
+        MeasurementCommand? measurementCommand = drawing.measurementByName(measurementLabel.substring(1));
+        if (measurementCommand != null) {
+          deps.add(measurementCommand.id);
+        }
+      }
+    }    
+
+    return deps;
+  }
+}
+
 class FormulaGrammar extends GrammarDefinition {
 
   final Drawing drawing;

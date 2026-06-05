@@ -33,6 +33,9 @@ abstract class DrawingCommand {
   DrawingCommand clearValidation();
   DrawingCommand validate(Drawing drawing);
   bool get isValidated;
+  // Get the Ids of dependent commands
+  Set<String> dependencies(Drawing drawing);
+  DrawingCommand markAsCyclic(String cycleDescription);
 
   @override
   int get hashCode => id.hashCode ^ label.hashCode;
