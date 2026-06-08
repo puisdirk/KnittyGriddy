@@ -1,5 +1,5 @@
+
 import 'package:flutter/material.dart';
-//import 'package:knitty_griddy/drawings/formulas/drawing_commands_chooser.dart';
 import 'package:knitty_griddy/drawings/formulas/formula_function.dart';
 import 'package:knitty_griddy/drawings/formulas/function_chooser.dart';
 import 'package:knitty_griddy/drawings/formulas/measurement_command_chooser.dart';
@@ -10,19 +10,54 @@ import 'package:knitty_griddy/drawings/model/commands/variable_command.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 import 'package:multi_trigger_autocomplete/multi_trigger_autocomplete.dart';
 
-class FormulaFieldControl extends StatelessWidget {
-  final TextEditingController controller;
-  final FocusNode focusNode;
+class FormulaFieldControl extends StatefulWidget {
+  final String formula;
   final double width;
+  final String? unitLabel;
   final DrawingCommand excludeCommand;
+  final void Function(String newFormula) onFormulaChanged;
 
   const FormulaFieldControl({
-    required this.controller,
-    required this.focusNode,
+    required this.formula,
     required this.width,
+    this.unitLabel,
     required this.excludeCommand,
+    required this.onFormulaChanged,
     super.key
   });
+
+  @override
+  State<FormulaFieldControl> createState() => _FormulaFieldControlState();
+}
+
+class _FormulaFieldControlState extends State<FormulaFieldControl> {
+  late TextEditingController controller;
+  late FocusNode focusNode;
+
+  void focusChanged() {
+    if (!focusNode.hasFocus) {
+      widget.onFormulaChanged(controller.text);
+    }
+  }
+
+  @override
+  void initState() {
+    controller = TextEditingController(text: widget.formula);
+    focusNode = FocusNode();
+    focusNode.addListener(focusChanged);
+
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    focusNode.removeListener(focusChanged);
+    focusNode.dispose();
+
+    controller.dispose();
+
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +82,7 @@ class FormulaFieldControl extends StatelessWidget {
           trigger: '!', 
           optionsViewBuilder: (context, autocompleteQuery, textEditingController) {
             return VariableCommandChooser(
-              excludeCommand: excludeCommand,
+              excludeCommand: widget.excludeCommand,
               query: autocompleteQuery.query.toLowerCase(),
               onChooseVariable: (VariableCommand command) {
                 final MultiTriggerAutocompleteState autocompleteState = MultiTriggerAutocomplete.of(context);
@@ -86,7 +121,7 @@ class FormulaFieldControl extends StatelessWidget {
       ],
       fieldViewBuilder: (context, textEditingController, focusNode) {
         return SizedBox(
-          width: width,
+          width: widget.width,
           child: Stack(
             children: [
               Positioned(
@@ -104,8 +139,15 @@ class FormulaFieldControl extends StatelessWidget {
               ),
               const Positioned(
                 right: 10, bottom: 0,
-                child: Text('f', style: TextStyle(fontSize: 12, fontStyle: FontStyle.italic)),
-              )
+                child: Tooltip(
+                  message: '!: variables\n@: measurements\n#: functions',
+                  child: Text('f', style: TextStyle(fontSize: 12, fontStyle: FontStyle.italic))),
+              ),
+              if (widget.unitLabel != null)
+                Positioned(
+                  right: 5,
+                  child: Text(widget.unitLabel!, style: const TextStyle(fontSize: 24)),
+                ),
             ]
           ),
         );

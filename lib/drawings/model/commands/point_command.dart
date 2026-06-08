@@ -3,7 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:knitty_griddy/drawings/formulas/formula_grammar.dart';
+import 'package:knitty_griddy/drawings/formulas/formula_expression.dart';
 import 'package:knitty_griddy/drawings/model/commands/curve_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/line_command.dart';
@@ -18,7 +18,7 @@ enum PointDefinitionType {
   onLine(label: 'On a line'),
   onCurve(label: 'On a curve'),
   onIntersection(label: 'On intersection');
-  // TODO: as adjacent
+  // TODO: as adjacent?
 
   final String label;
 
@@ -59,13 +59,9 @@ class PointCommand extends DrawingCommand {
   final String intersectionLine1Id;
   final String intersectionLine2Id;
 
-  final bool validated;
-  final bool valid;
-
   const PointCommand({
     required super.id,
     required super.label,
-    List<String>? errors,
     PointDefinitionType? pointDefinitionType,
     this.fromPointId = '',
     this.distanceFormula = '',
@@ -77,12 +73,12 @@ class PointCommand extends DrawingCommand {
     this.onCurveFractionFormula = '',
     this.intersectionLine1Id = '',
     this.intersectionLine2Id = '',
-    this.validated = false,
-    this.valid = false,
+    super.validated,
+    super.valid,
+    super.errors,
   }) : 
     pointDefinitionType = pointDefinitionType?? PointDefinitionType.relativeToPoint,
-    direction = direction?? RelativePointDirection.north,
-    super(errors: errors?? const[]);
+    direction = direction?? RelativePointDirection.north;
 
   PointCommand copyWith({
     String? label,
@@ -122,6 +118,24 @@ class PointCommand extends DrawingCommand {
   }
 
   @override
+  double get editHeight {
+    switch (pointDefinitionType) {
+      case PointDefinitionType.relativeToPoint:
+        if (direction == RelativePointDirection.angle) {
+          return 230;
+        } else {
+          return 220;
+        }
+      case PointDefinitionType.onLine:
+        return 190;
+      case PointDefinitionType.onCurve:
+        return 190;
+      case PointDefinitionType.onIntersection:
+        return 190;
+    }
+  }
+
+  @override
   PointCommand markAsCyclic(String cycleDescription) {
     return copyWith(
       validated: true,
@@ -139,11 +153,6 @@ class PointCommand extends DrawingCommand {
       intersectionLine1Id: intersectionLine1Id == commandId ? '' : intersectionLine1Id,
       intersectionLine2Id: intersectionLine2Id == commandId ? '' : intersectionLine2Id,
     );
-  }
-
-  @override
-  PointCommand offset(double x, double y) {
-    return copyWith(/*coordinate: coordinate.offset(x, y)*/);
   }
 
   @override
@@ -211,15 +220,12 @@ class PointCommand extends DrawingCommand {
     fromPointId.hashCode ^ distanceFormula.hashCode ^ direction.hashCode ^ directionAngleFormula.hashCode ^
     onLineId.hashCode ^ onLineFractionFormula.hashCode ^
     onCurveId.hashCode ^ onCurveFractionFormula.hashCode ^
-    intersectionLine1Id.hashCode ^ intersectionLine2Id.hashCode^
-    valid.hashCode ^ validated.hashCode ^ errors.hashCode;
+    intersectionLine1Id.hashCode ^ intersectionLine2Id.hashCode;
 
   Offset? getCoordinate(Drawing drawing) {
     if (id == originId) return Offset.zero;
 
     if (!valid) return null;
-
-    final FormulaGrammar grammar = FormulaGrammar(drawing: drawing);
 
     switch (pointDefinitionType) {
       case PointDefinitionType.relativeToPoint:
@@ -229,30 +235,20 @@ class PointCommand extends DrawingCommand {
         Offset? coordinate =  fromPoint.getCoordinate(drawing);
         if (coordinate == null) return null;
         
-        if (distanceFormula.isEmpty) return null;
         double distance = 0;
-        try {
-          DoubleOrError res = grammar.parse(distanceFormula);
-          if (res.isSuccess) {
-            distance = res.value!;
-          } else {
-            return null;
-          }
-        } catch(e) {
+        FormulaParseResult res = FormulaExpression.validate(formula: distanceFormula, drawing: drawing, label: 'a distance');
+        if (res.isValid) {
+          distance = res.result!;
+        } else {
           return null;
         }
 
         double offsetAngle = 0;
         if (direction == RelativePointDirection.angle) {
-          if (directionAngleFormula.isEmpty) return null;
-          try {
-            DoubleOrError res = grammar.parse(directionAngleFormula);
-            if (res.isSuccess) {
-              offsetAngle = res.value!;
-            } else {
-              return null;
-            }
-          } catch (e) {
+          FormulaParseResult res = FormulaExpression.validate(formula: directionAngleFormula, drawing: drawing, label: 'an angle');
+          if (res.isValid) {
+            offsetAngle = res.result!;
+          } else {
             return null;
           }
         } else {
@@ -263,61 +259,31 @@ class PointCommand extends DrawingCommand {
       case PointDefinitionType.onLine:
         LineCommand? line = drawing.lineById(onLineId);
         if (line == null || !line.valid) return null;
+        
         double fraction = 0;
-        if (onLineFractionFormula.isEmpty) return null;
-        try {
-          DoubleOrError res = grammar.parse(onLineFractionFormula);
-          if (res.isSuccess) {
-            fraction = res.value!;
-          } else {
-            return null;
-          }
-        } catch (e) {
+        FormulaParseResult res = FormulaExpression.validate(formula: onLineFractionFormula, drawing: drawing, label: 'a fraction');
+        if (res.isValid) {
+          fraction = res.result!;
+        } else {
           return null;
         }
-        return line.coordinateAt(fraction, drawing);
+
+        return line.pointOnLine(fraction, drawing);
       case PointDefinitionType.onCurve:
         CurveCommand? curve = drawing.curveById(onCurveId);
         if (curve == null || !curve.valid) return null;
 
-        Offset? startCoordinate = curve.getStartCoordinate(drawing);
-        if (startCoordinate == null) return null;
-
-        Offset? endCoordinate = curve.getEndCoordinate(drawing);
-        if (endCoordinate == null) return null;
-
-        double? amplitude = curve.getAmplitude(drawing);
-        if (amplitude == null) return null;
-
-        double? slant = curve.getSlant(drawing);
-        if (slant == null) return null;
-
         double fraction = 0;
-        if (onCurveFractionFormula.isEmpty) return null;
-        try {
-          DoubleOrError res = grammar.parse(onCurveFractionFormula);
-          if (res.isSuccess) {
-            fraction = res.value!;
-          } else {
-            return null;
-          }
-        } catch (e) {
+        FormulaParseResult res = FormulaExpression.validate(formula: onCurveFractionFormula, drawing: drawing, label: 'a fraction');
+        if (res.isValid) {
+          fraction = res.result!;
+        } else {
           return null;
         }
 
-        Offset controlCoordinate = curve.getControlPointCoordinate(startCoordinate, endCoordinate, amplitude, slant);
-
-        Path p = Path()
-          ..moveTo(startCoordinate.dx, startCoordinate.dy)
-          ..quadraticBezierTo(
-            controlCoordinate.dx, controlCoordinate.dy, 
-            endCoordinate.dx, endCoordinate.dy);
-        
-        final PathMetrics m = p.computeMetrics();
-        final PathMetric pm = m.first;
-        final Offset pos = pm.getTangentForOffset(pm.length * fraction)!.position;
-
-        return pos;
+        Path? p = curve.getPath(drawing, Offset.zero);
+        if (p == null) return null;
+        return curve.pointOnPath(p, fraction);
       case PointDefinitionType.onIntersection:
         LineCommand? line1 = drawing.lineById(intersectionLine1Id);
         if (line1 == null) return null;
@@ -336,7 +302,7 @@ class PointCommand extends DrawingCommand {
   }
 
   @override
-  void paint(Canvas canvas, Size size, TextStyle style, Drawing drawing) {
+  void paint(Canvas canvas, Size size, Drawing drawing, bool selected) {
     if (!valid) {
       return;
     }
@@ -350,9 +316,10 @@ class PointCommand extends DrawingCommand {
     Offset middle = Offset(size.width / 2, size.height / 2);
     coordinate += middle;
 
-    canvas.drawCircle(coordinate, 2, Paint()..color = Colors.red..style = PaintingStyle.stroke);
+    canvas.drawCircle(coordinate, 2, Paint()..color = selected ? Colors.purple : Colors.grey.shade700..style = PaintingStyle.stroke);
 
     // draw point label
+    TextStyle style = TextStyle(color: selected ? Colors.purple : Colors.grey[400]);
     final ParagraphBuilder paragraphBuilder = ParagraphBuilder(
       ParagraphStyle(
         fontSize: 10,
@@ -371,9 +338,6 @@ class PointCommand extends DrawingCommand {
     canvas.drawParagraph(paragraph,  coordinate.translate(2, 0));
 
   }
-
-  @override
-  bool get isValidated => validated;
 
   @override
   DrawingCommand clearValidation() {
@@ -413,62 +377,49 @@ class PointCommand extends DrawingCommand {
     bool retryValidation = true;
     List<String> validationErrors = [];
 
-    final FormulaGrammar grammar = FormulaGrammar(drawing: drawing);
-
     if (label.isEmpty) { isvalid = false; retryValidation = false; validationErrors.add('Requires a label'); }
     if (drawing.commands.any((c) => c.id != id && c.label == label)) { isvalid = false; retryValidation = false; validationErrors.add('Label should be unique'); }
 
     switch (pointDefinitionType) {
       case PointDefinitionType.relativeToPoint:
+        if (direction == RelativePointDirection.angle) {
+          FormulaParseResult res = FormulaExpression.validate(formula: directionAngleFormula, drawing: drawing, label: 'an angle');
+          if (res.isInvalid) {
+            isvalid = false;
+            if (!res.shouldRetry) retryValidation = false;
+            validationErrors.add(res.errorMessage);
+          }
+        }
+
+        FormulaParseResult res = FormulaExpression.validate(formula: distanceFormula, drawing: drawing, label: 'a distance');
+        if (res.isInvalid) {
+          isvalid = false;
+          if (!res.shouldRetry) retryValidation = false;
+          validationErrors.add(res.errorMessage);
+        }
+
         if (fromPointId.isEmpty) {
           isvalid = false; 
           retryValidation = false;
-          validationErrors.add('Requires a source point');
+          validationErrors.add('Requires a reference point');
         } else if (fromPointId != originId) {
           PointCommand? fromPoint = drawing.pointById(fromPointId);
           if (fromPoint == null) {
             isvalid = false;
             retryValidation = false;
-            validationErrors.add('Source point does not exist');
+            validationErrors.add('Reference point does not exist');
           } else {
-            if (!fromPoint.isValidated) {
+            if (!fromPoint.validated) {
               // We are not valid, but we should retry
               isvalid = false;
             } else if (!fromPoint.valid) {
               isvalid = false;
               retryValidation = false;
-              validationErrors.add('Source point ${fromPoint.label} has errors');
+              validationErrors.add('Reference point ${fromPoint.label} has errors');
             }
           }
         }
 
-        if (direction == RelativePointDirection.angle) {
-          if (directionAngleFormula.isEmpty) {
-            isvalid = false;
-            retryValidation = false;
-            validationErrors.add('Requires an angle');
-          } else {
-            DoubleOrError res = grammar.parse(directionAngleFormula);
-            if (!res.isSuccess) {
-              isvalid = false;
-              retryValidation = res.error is DependantNotValidated;
-              validationErrors.add(res.error.toString());
-            }
-          }
-        }
-
-        if (distanceFormula.isEmpty) {
-          isvalid = false;
-          retryValidation = false;
-          validationErrors.add('Requires a distance');
-        } else {
-          DoubleOrError res = grammar.parse(distanceFormula);
-          if (!res.isSuccess) {
-            isvalid = false;
-            retryValidation = res.error is DependantNotValidated;
-            validationErrors.add(res.error.toString());
-          }
-        }
         break;
       case PointDefinitionType.onLine:
         if (onLineId.isEmpty) {
@@ -481,7 +432,7 @@ class PointCommand extends DrawingCommand {
             isvalid = false;
             retryValidation = false;
             validationErrors.add('Reference line does not exist');
-          } else if (!line.isValidated) {
+          } else if (!line.validated) {
             // We are not valid, but we should retry
             isvalid = false;
           } else if (!line.valid) {
@@ -490,17 +441,12 @@ class PointCommand extends DrawingCommand {
             validationErrors.add('Reference line ${line.label} has errors');
           }
         }
-        if (onLineFractionFormula.isEmpty) {
+
+        FormulaParseResult res = FormulaExpression.validate(formula: onLineFractionFormula, drawing: drawing, label: 'a fraction');
+        if (res.isInvalid) {
           isvalid = false;
-          retryValidation = false;
-          validationErrors.add('Requires a fraction');
-        } else {
-          DoubleOrError res = grammar.parse(onLineFractionFormula);
-          if (!res.isSuccess) {
-            isvalid = false;
-            retryValidation = res.error is DependantNotValidated;
-            validationErrors.add(res.error.toString());
-          }
+          if (!res.shouldRetry) retryValidation = false;
+          validationErrors.add(res.errorMessage);
         }
         break;
       case PointDefinitionType.onCurve:
@@ -523,17 +469,12 @@ class PointCommand extends DrawingCommand {
             validationErrors.add('Reference curve ${curve.label} has errors');
           }
         }
-        if (onCurveFractionFormula.isEmpty) {
+
+        FormulaParseResult res = FormulaExpression.validate(formula: onCurveFractionFormula, drawing: drawing, label: 'a fraction');
+        if (res.isInvalid) {
           isvalid = false;
-          retryValidation = false;
-          validationErrors.add('Requires a fraction');
-        } else {
-          DoubleOrError res = grammar.parse(onCurveFractionFormula);
-          if (!res.isSuccess) {
-            isvalid = false;
-            retryValidation = res.error is DependantNotValidated;
-            validationErrors.add(res.error.toString());
-          }
+          if (!res.shouldRetry) retryValidation = false;
+          validationErrors.add(res.errorMessage);
         }
       case PointDefinitionType.onIntersection:
         if (intersectionLine1Id.isEmpty) {
@@ -546,7 +487,7 @@ class PointCommand extends DrawingCommand {
             isvalid = false;
             retryValidation = false;
             validationErrors.add('Line 1 does not exist');
-          } else if (!line.isValidated) {
+          } else if (!line.validated) {
             // We are not valid, but we should retry
             isvalid = false;
           } else if (!line.valid) {
@@ -565,7 +506,7 @@ class PointCommand extends DrawingCommand {
             isvalid = false;
             retryValidation = false;
             validationErrors.add('Line 2 does not exist');
-          } else if (!line.isValidated) {
+          } else if (!line.validated) {
             // We are not valid, but we should retry
             isvalid = false;
           } else if (!line.valid) {

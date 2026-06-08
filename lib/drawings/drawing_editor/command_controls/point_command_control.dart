@@ -12,13 +12,13 @@ import 'package:provider/provider.dart';
 
 class PointCommandControl extends StatefulWidget {
   final PointCommand command;
-  final void Function(PointCommand newCommand) finishedEditing;
   final bool sorting;
+  final bool editing;
 
   const PointCommandControl({
     required this.command,
-    required this.finishedEditing,
     required this.sorting,
+    required this.editing,
     super.key
   });
 
@@ -27,60 +27,32 @@ class PointCommandControl extends StatefulWidget {
 }
 
 class _PointCommandControlState extends State<PointCommandControl> {
-  bool editing = false;
-  late PointCommand changedCommand;
   late TextEditingController pointLabelController;
-  late TextEditingController distanceFormulaController;
-  late FocusNode distanceFormulaFocusNode;
-  late TextEditingController directionAngleFormulaController;
-  late FocusNode directionAngleFormulaFocusNode;
-  late TextEditingController onLineFractionFormulaController;
-  late FocusNode onLineFractionFormulaFocusNode;
-  late TextEditingController onCurveFractionFormulaController;
-  late FocusNode onCurveFractionFormulaFocusNode;
 
   void pointLabelChanged() {
-    setState(() => changedCommand = changedCommand.copyWith(label: pointLabelController.text));
+    Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(label: pointLabelController.text));
   }
 
-  void distanceFormulaChanged() {
-    setState(() => changedCommand = changedCommand.copyWith(distanceFormula: distanceFormulaController.text));
+  void distanceFormulaChanged(String formula) {
+    Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(distanceFormula: formula));
   }
 
-  void directionAngleFormulaChanged() {
-    setState(() => changedCommand = changedCommand.copyWith(directionAngleFormula: directionAngleFormulaController.text));
+  void directionAngleFormulaChanged(String formula) {
+    Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(directionAngleFormula: formula));
   }
 
-  void onLineFractionFormulaChanged() {
-    setState(() => changedCommand = changedCommand.copyWith(onLineFractionFormula: onLineFractionFormulaController.text));
+  void onLineFractionFormulaChanged(String formula) {
+    Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(onLineFractionFormula: formula));
   }
 
-  void onCurveFractionFormulaChanged() {
-    setState(() => changedCommand = changedCommand.copyWith(onCurveFractionFormula: onCurveFractionFormulaController.text));
+  void onCurveFractionFormulaChanged(String formula) {
+    Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(onCurveFractionFormula: formula));
   }
 
   @override
   void initState() {
-    changedCommand = widget.command.copyWith();
-
-    pointLabelController = TextEditingController(text: changedCommand.label);
+    pointLabelController = TextEditingController(text: widget.command.label);
     pointLabelController.addListener(pointLabelChanged);
-
-    distanceFormulaController = TextEditingController(text: changedCommand.distanceFormula);
-    distanceFormulaController.addListener(distanceFormulaChanged);
-    distanceFormulaFocusNode = FocusNode();
-
-    directionAngleFormulaController = TextEditingController(text: changedCommand.directionAngleFormula);
-    directionAngleFormulaController.addListener(directionAngleFormulaChanged);
-    directionAngleFormulaFocusNode = FocusNode();
-
-    onLineFractionFormulaController = TextEditingController(text: changedCommand.onLineFractionFormula);
-    onLineFractionFormulaController.addListener(onLineFractionFormulaChanged);
-    onLineFractionFormulaFocusNode = FocusNode();
-
-    onCurveFractionFormulaController = TextEditingController(text: changedCommand.onCurveFractionFormula);
-    onCurveFractionFormulaController.addListener(onCurveFractionFormulaChanged);
-    onCurveFractionFormulaFocusNode = FocusNode();
 
     super.initState();
   }
@@ -90,22 +62,6 @@ class _PointCommandControlState extends State<PointCommandControl> {
     pointLabelController.removeListener(pointLabelChanged);
     pointLabelController.dispose();
 
-    distanceFormulaFocusNode.dispose();
-    distanceFormulaController.removeListener(distanceFormulaChanged);
-    distanceFormulaController.dispose();
-
-    directionAngleFormulaFocusNode.dispose();
-    directionAngleFormulaController.removeListener(directionAngleFormulaChanged);
-    directionAngleFormulaController.dispose();
-
-    onLineFractionFormulaFocusNode.dispose();
-    onLineFractionFormulaController.removeListener(onLineFractionFormulaChanged);
-    onLineFractionFormulaController.dispose();
-
-    onCurveFractionFormulaFocusNode.dispose();
-    onCurveFractionFormulaController.removeListener(onCurveFractionFormulaChanged);
-    onCurveFractionFormulaController.dispose();
-
     super.dispose();
   }
 
@@ -114,66 +70,66 @@ class _PointCommandControlState extends State<PointCommandControl> {
 
     String content = 'Point ';
 
-    if (changedCommand.pointDefinitionType == PointDefinitionType.relativeToPoint) {
+    if (widget.command.pointDefinitionType == PointDefinitionType.relativeToPoint) {
       String distanceLabel = '???';
-      if (changedCommand.distanceFormula.isNotEmpty) {
-        distanceLabel = changedCommand.distanceFormula;
+      if (widget.command.distanceFormula.isNotEmpty) {
+        distanceLabel = widget.command.distanceFormula;
       }
 
       String directionLabel = '???';
-      if (changedCommand.direction == RelativePointDirection.angle) {
+      if (widget.command.direction == RelativePointDirection.angle) {
         String angleFormulaLabel = '???';
-        if (changedCommand.directionAngleFormula.isNotEmpty) {
-          angleFormulaLabel = changedCommand.directionAngleFormula;
+        if (widget.command.directionAngleFormula.isNotEmpty) {
+          angleFormulaLabel = widget.command.directionAngleFormula;
         }
         directionLabel = 'at angle $angleFormulaLabel';
       } else {
-        directionLabel = changedCommand.direction.label;
+        directionLabel = widget.command.direction.label;
       }
 
       String fromPointLabel = '???';
-      PointCommand? fromPoint = drawing.pointById(changedCommand.fromPointId);
+      PointCommand? fromPoint = drawing.pointById(widget.command.fromPointId);
       if (fromPoint != null) {
         fromPointLabel = fromPoint.label;
       }
 
       content += '$distanceLabel $directionLabel of $fromPointLabel';
 
-    } else if (changedCommand.pointDefinitionType == PointDefinitionType.onLine) {
+    } else if (widget.command.pointDefinitionType == PointDefinitionType.onLine) {
       String onlineLabel = '???';
-      LineCommand? line = drawing.lineById(changedCommand.onLineId);
+      LineCommand? line = drawing.lineById(widget.command.onLineId);
       if (line != null) {
         onlineLabel = line.label;
       }
 
       String fractionLabel = '???';
-      if (changedCommand.onLineFractionFormula.isNotEmpty) {
-        fractionLabel = changedCommand.onLineFractionFormula;
+      if (widget.command.onLineFractionFormula.isNotEmpty) {
+        fractionLabel = widget.command.onLineFractionFormula;
       }
 
       content += 'on line $onlineLabel at $fractionLabel';
-    } else if (changedCommand.pointDefinitionType == PointDefinitionType.onCurve) {
+    } else if (widget.command.pointDefinitionType == PointDefinitionType.onCurve) {
       String oncurveLabel = '???';
-      CurveCommand? curve = drawing.curveById(changedCommand.onCurveId);
+      CurveCommand? curve = drawing.curveById(widget.command.onCurveId);
       if (curve != null) {
         oncurveLabel = curve.label;
       }
 
       String fractionLabel = '???';
-      if (changedCommand.onCurveFractionFormula.isNotEmpty) {
-        fractionLabel = changedCommand.onCurveFractionFormula;
+      if (widget.command.onCurveFractionFormula.isNotEmpty) {
+        fractionLabel = widget.command.onCurveFractionFormula;
       }
 
       content += 'on curve $oncurveLabel at $fractionLabel';
-    } else if (changedCommand.pointDefinitionType == PointDefinitionType.onIntersection) {
+    } else if (widget.command.pointDefinitionType == PointDefinitionType.onIntersection) {
       String l1label = '???';
-      LineCommand? l1 = drawing.lineById(changedCommand.intersectionLine1Id);
+      LineCommand? l1 = drawing.lineById(widget.command.intersectionLine1Id);
       if (l1 != null) {
         l1label = l1.label;
       }
       
       String l2label = '???';
-      LineCommand? l2 = drawing.lineById(changedCommand.intersectionLine2Id);
+      LineCommand? l2 = drawing.lineById(widget.command.intersectionLine2Id);
       if (l2 != null) {
         l2label = l2.label;
       }
@@ -182,11 +138,11 @@ class _PointCommandControlState extends State<PointCommandControl> {
 
     return Row(
       children: [
-        Text(changedCommand.label, style: smallStyleBold, ),
+        Text(widget.command.label, style: smallStyleBold, ),
         hspacing,
         Text(content, style: smallStyle,),
         const Spacer(),
-        if (!widget.sorting && widget.command.isValidated && !widget.command.valid && widget.command.errors.isNotEmpty)
+        if (!widget.sorting && widget.command.validated && !widget.command.valid && widget.command.errors.isNotEmpty)
           Tooltip(
             message: widget.command.errors.join('\n'),
             child: const Icon(Icons.error_outline)
@@ -210,6 +166,7 @@ class _PointCommandControlState extends State<PointCommandControl> {
             const Text('Point', style: smallStyle,),
             hspacing,
             DropdownButton<PointDefinitionType>(
+              key: GlobalObjectKey('${widget.command.id}-pdt'),
               isDense: true,
               autofocus: false,
               style: smallStyle,
@@ -220,9 +177,9 @@ class _PointCommandControlState extends State<PointCommandControl> {
                 for (PointDefinitionType pdt in PointDefinitionType.values)
                   DropdownMenuItem(value: pdt, child: Text(pdt.label))
               ],
-              value: changedCommand.pointDefinitionType,
+              value: widget.command.pointDefinitionType,
               onChanged: (value) {
-                setState(() => changedCommand = changedCommand.copyWith(pointDefinitionType: value));
+                Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(pointDefinitionType: value));
               },
             ),
           ],
@@ -232,11 +189,15 @@ class _PointCommandControlState extends State<PointCommandControl> {
           children: [
             const SmallLabel(label: 'Label'),
             hspacing,
-            SmallTextField(controller: pointLabelController, width: 100),
+            SmallTextField(
+              key: GlobalObjectKey('${widget.command.id}-label'),
+              controller: pointLabelController, 
+              width: 100
+            ),
           ],
         ),
         vspacing,
-        if (changedCommand.pointDefinitionType == PointDefinitionType.relativeToPoint)
+        if (widget.command.pointDefinitionType == PointDefinitionType.relativeToPoint)
           Column(
             children: [
               Row(
@@ -244,10 +205,11 @@ class _PointCommandControlState extends State<PointCommandControl> {
                   const SmallLabel(label: 'Distance'),
                   hspacing,
                   FormulaFieldControl(
-                    controller: distanceFormulaController, 
-                    focusNode: distanceFormulaFocusNode,
+                    key: GlobalObjectKey('${widget.command.id}-dist'),
+                    formula: widget.command.distanceFormula,
                     width: 200, 
-                    excludeCommand: changedCommand,
+                    excludeCommand: widget.command,
+                    onFormulaChanged: distanceFormulaChanged,
                   ),
                 ]
               ),
@@ -257,6 +219,7 @@ class _PointCommandControlState extends State<PointCommandControl> {
                   const SmallLabel(label: 'Direction'),
                   hspacing,
                   DropdownButton<RelativePointDirection>(
+                    key: GlobalObjectKey('${widget.command.id}-dir'),
                     isDense: true,
                     autofocus: false,
                     style: smallStyle,
@@ -267,23 +230,18 @@ class _PointCommandControlState extends State<PointCommandControl> {
                       for (RelativePointDirection direction in RelativePointDirection.values)
                         DropdownMenuItem(value: direction, child: Text(direction.label)),
                     ], 
-                    onChanged: (value) => setState(() => changedCommand = changedCommand.copyWith(direction: value)),
-                    value: changedCommand.direction,
+                    onChanged: (value) => Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(direction: value)),
+                    value: widget.command.direction,
                   ),
                   hspacing,
-                  if (changedCommand.direction == RelativePointDirection.angle)
-                    Stack(
-                      children: [
-                        Positioned(
-                          child: FormulaFieldControl(
-                            controller: directionAngleFormulaController, 
-                            focusNode: directionAngleFormulaFocusNode,
-                            width: 200, 
-                            excludeCommand: changedCommand,
-                          )
-                        ),
-                        const Positioned(right: 5, child: Text(' °', style: TextStyle(fontSize: 24))),
-                      ]
+                  if (widget.command.direction == RelativePointDirection.angle)
+                    FormulaFieldControl(
+                      key: GlobalObjectKey('${widget.command.id}-angle'),
+                      formula: widget.command.directionAngleFormula,
+                      width: 200, 
+                      excludeCommand: widget.command,
+                      onFormulaChanged: directionAngleFormulaChanged,
+                      unitLabel: ' °',
                     ),
                 ],
               ),
@@ -293,6 +251,7 @@ class _PointCommandControlState extends State<PointCommandControl> {
                   const SmallLabel(label: 'Of'),
                   hspacing,
                   DropdownButton<String>(
+                    key: GlobalObjectKey('${widget.command.id}-of'),
                     isDense: true,
                     autofocus: false,
                     style: smallStyle,
@@ -302,17 +261,17 @@ class _PointCommandControlState extends State<PointCommandControl> {
                     items: [
                       const DropdownMenuItem(value: '', child: Text('')),
                       DropdownMenuItem(value: origin.id, child: Text(origin.label)),
-                      for (PointCommand point in drawing.points.where((p) => p.id != changedCommand.id))
+                      for (PointCommand point in drawing.points.where((p) => p.id != widget.command.id))
                         DropdownMenuItem(value: point.id, child: Text(point.label)),
                     ],
-                    onChanged: (value) => setState(() => changedCommand = changedCommand.copyWith(fromPointId: value)),
-                    value: changedCommand.fromPointId,
+                    onChanged: (value) => Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(fromPointId: value?? '')),
+                    value: widget.command.fromPointId,
                   )
                 ]
               ),
             ]
           ),
-        if (changedCommand.pointDefinitionType == PointDefinitionType.onLine)
+        if (widget.command.pointDefinitionType == PointDefinitionType.onLine)
           Column(
             children: [
               Row(
@@ -320,6 +279,7 @@ class _PointCommandControlState extends State<PointCommandControl> {
                   const SmallLabel(label: 'Line'),
                   hspacing,
                   DropdownButton<String>(
+                    key: GlobalObjectKey('${widget.command.id}-line'),
                     isDense: true,
                     autofocus: false,
                     style: smallStyle,
@@ -331,8 +291,8 @@ class _PointCommandControlState extends State<PointCommandControl> {
                       for (LineCommand line in drawing.lines)
                         DropdownMenuItem(value: line.id, child: Text(line.label))
                     ], 
-                    onChanged: (value) => setState(() => changedCommand = changedCommand.copyWith(onLineId: value)),
-                    value: changedCommand.onLineId,
+                    onChanged: (value) => Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(onLineId: value?? '')),
+                    value: widget.command.onLineId,
                   ),
                 ]
               ),
@@ -342,16 +302,17 @@ class _PointCommandControlState extends State<PointCommandControl> {
                   const SmallLabel(label: 'Fraction'),
                   hspacing,
                   FormulaFieldControl(
-                    controller: onLineFractionFormulaController, 
-                    focusNode: onLineFractionFormulaFocusNode,
+                    key: GlobalObjectKey('${widget.command.id}-linefrac'),
+                    formula: widget.command.onLineFractionFormula,
                     width: 100, 
-                    excludeCommand: changedCommand
+                    excludeCommand: widget.command,
+                    onFormulaChanged: onLineFractionFormulaChanged,
                   )
                 ],
               )
             ],
           ),
-        if (changedCommand.pointDefinitionType == PointDefinitionType.onCurve)
+        if (widget.command.pointDefinitionType == PointDefinitionType.onCurve)
           Column(
             children: [
               Row(
@@ -359,6 +320,7 @@ class _PointCommandControlState extends State<PointCommandControl> {
                   const SmallLabel(label: 'Curve'),
                   hspacing,
                   DropdownButton<String>(
+                    key: GlobalObjectKey('${widget.command.id}-curve'),
                     isDense: true,
                     autofocus: false,
                     style: smallStyle,
@@ -370,8 +332,8 @@ class _PointCommandControlState extends State<PointCommandControl> {
                       for (CurveCommand curve in drawing.curves)
                         DropdownMenuItem(value: curve.id, child: Text(curve.label))
                     ], 
-                    onChanged: (value) => setState(() => changedCommand = changedCommand.copyWith(onCurveId: value)),
-                    value: changedCommand.onCurveId,
+                    onChanged: (value) => Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(onCurveId: value?? '')),
+                    value: widget.command.onCurveId,
                   ),
                 ]
               ),
@@ -381,16 +343,17 @@ class _PointCommandControlState extends State<PointCommandControl> {
                   const SmallLabel(label: 'Fraction'),
                   hspacing,
                   FormulaFieldControl(
-                    controller: onCurveFractionFormulaController, 
-                    focusNode: onCurveFractionFormulaFocusNode,
+                    key: GlobalObjectKey('${widget.command.id}-curvefrac'),
+                    formula: widget.command.onCurveFractionFormula,
                     width: 200, 
-                    excludeCommand: changedCommand
+                    excludeCommand: widget.command,
+                    onFormulaChanged: onCurveFractionFormulaChanged,
                   )
                 ],
               )
             ],
           ),
-        if (changedCommand.pointDefinitionType == PointDefinitionType.onIntersection)
+        if (widget.command.pointDefinitionType == PointDefinitionType.onIntersection)
           Column(
             children: [
               Row(
@@ -398,6 +361,7 @@ class _PointCommandControlState extends State<PointCommandControl> {
                   const SmallLabel(label: 'Line 1'),
                   hspacing,
                   DropdownButton<String>(
+                    key: GlobalObjectKey('${widget.command.id}-line1'),
                     isDense: true,
                     autofocus: false,
                     style: smallStyle,
@@ -406,11 +370,11 @@ class _PointCommandControlState extends State<PointCommandControl> {
                     underline: Container(),
                     items: [
                       const DropdownMenuItem(value: '', child: Text('')),
-                      for (LineCommand line in drawing.lines.where((l) => l.id != changedCommand.intersectionLine2Id))
+                      for (LineCommand line in drawing.lines.where((l) => l.id != widget.command.intersectionLine2Id))
                         DropdownMenuItem(value: line.id, child: Text(line.label))
                     ], 
-                    onChanged: (value) => setState(() => changedCommand = changedCommand.copyWith(intersectionLine1Id: value)),
-                    value: changedCommand.intersectionLine1Id,
+                    onChanged: (value) => Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(intersectionLine1Id: value?? '')),
+                    value: widget.command.intersectionLine1Id,
                   ),
                 ],
               ),
@@ -420,6 +384,7 @@ class _PointCommandControlState extends State<PointCommandControl> {
                   const SmallLabel(label: 'Line 2'),
                   hspacing,
                   DropdownButton<String>(
+                    key: GlobalObjectKey('${widget.command.id}-line2'),
                     isDense: true,
                     autofocus: false,
                     style: smallStyle,
@@ -428,11 +393,11 @@ class _PointCommandControlState extends State<PointCommandControl> {
                     underline: Container(),
                     items: [
                       const DropdownMenuItem(value: '', child: Text('')),
-                      for (LineCommand line in drawing.lines.where((l) => l.id != changedCommand.intersectionLine1Id))
+                      for (LineCommand line in drawing.lines.where((l) => l.id != widget.command.intersectionLine1Id))
                         DropdownMenuItem(value: line.id, child: Text(line.label))
                     ], 
-                    onChanged: (value) => setState(() => changedCommand = changedCommand.copyWith(intersectionLine2Id: value)),
-                    value: changedCommand.intersectionLine2Id,
+                    onChanged: (value) => Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(intersectionLine2Id: value?? '')),
+                    value: widget.command.intersectionLine2Id,
                   ),
                 ],
               ),
@@ -444,77 +409,6 @@ class _PointCommandControlState extends State<PointCommandControl> {
 
   @override
   Widget build(BuildContext context) {
-    double controlHeight = 60;
-    if (editing && !widget.sorting) {
-      if (changedCommand.pointDefinitionType == PointDefinitionType.relativeToPoint) {
-        if (changedCommand.direction == RelativePointDirection.angle) {
-          controlHeight = 230;
-        } else {
-          controlHeight = 220;
-        }
-      }
-      if (changedCommand.pointDefinitionType == PointDefinitionType.onLine) {
-        controlHeight = 190;
-      }
-      if (changedCommand.pointDefinitionType == PointDefinitionType.onCurve) {
-        controlHeight = 190;
-      }
-      if (changedCommand.pointDefinitionType == PointDefinitionType.onIntersection) {
-        controlHeight = 190;
-      }
-    }
-
-    return SizedBox(
-      height: controlHeight,
-      child: Container(
-        decoration: BoxDecoration(
-          color: (widget.command.validated && !widget.command.valid) ? Colors.red.withAlpha(20) : Colors.grey.shade100,
-          border: Border.all(color: Colors.grey),
-          borderRadius: const BorderRadius.all(Radius.circular(5)),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(8),
-          child: Row(
-            children: [
-              Expanded(
-                child:  (editing && !widget.sorting) ? createEditContent() : createViewContent(),
-              ),
-              if (!widget.sorting)
-              Column(
-                children: [
-                  IconButton(
-                    onPressed:() {
-                      if (editing) {
-                        widget.finishedEditing(changedCommand);
-                      }
-                      setState(() => editing = !editing);
-                    },
-                    icon: editing ? const Icon(Icons.check) : const Icon(Icons.edit)
-                  ),
-                  if (editing)
-                    IconButton(
-                      onPressed: () => widget.finishedEditing(changedCommand), 
-                      icon: const Icon(Icons.refresh)
-                    ),
-                  const Spacer(),
-                  if (editing && widget.command.isValidated && !widget.command.valid && widget.command.errors.isNotEmpty)
-                    Tooltip(
-                      message: widget.command.errors.join('\n'),
-                      child: const Icon(Icons.error_outline)
-                    ),
-                  if (editing && widget.command.isValidated && !widget.command.valid && widget.command.errors.isNotEmpty)
-                    const Spacer(),
-                  if (editing)
-                    IconButton(
-                      onPressed: () => Provider.of<DrawingsModel>(context, listen: false).deleteCommand(commandId: changedCommand.id), 
-                      icon: const Icon(Icons.delete)
-                    ),
-                ],
-              ),
-            ]
-          )
-        ),
-      )
-    );
+    return (widget.editing && !widget.sorting) ? createEditContent() : createViewContent();
   }
 }

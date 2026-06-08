@@ -11,13 +11,13 @@ import 'package:provider/provider.dart';
 
 class CurveCommandControl extends StatefulWidget {
   final CurveCommand command;
-  final void Function(CurveCommand newCommand) finishedEditing;
   final bool sorting;
+  final bool editing;
 
   const CurveCommandControl({
     required this.command,
-    required this.finishedEditing,
     required this.sorting,
+    required this.editing,
     super.key
   });
 
@@ -26,41 +26,40 @@ class CurveCommandControl extends StatefulWidget {
 }
 
 class _CurveCommandControlState extends State<CurveCommandControl> {
-  bool editing = false;
-  late CurveCommand changedCommand;
-
   late TextEditingController curveLabelController;
-  late TextEditingController amplitudeFormulaController;
-  late FocusNode amplitudeFormulaFocusNode;
-  late TextEditingController slantFormulaController;
-  late FocusNode slantFormulaFocusNode;
 
   void curveLabelChanged() {
-    setState(() => changedCommand = changedCommand.copyWith(label: curveLabelController.text));
+    Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(label: curveLabelController.text));
   }
 
-  void amplitudeFormulaChanged() {
-    setState(() => changedCommand = changedCommand.copyWith(amplitudeFormula: amplitudeFormulaController.text));
+  void quadAmplitudeFormulaChanged(String formula) {
+    Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(quadAmplitudeFormula: formula));
   }
 
-  void slantFormulaChanged() {
-    setState(() => changedCommand = changedCommand.copyWith(slantFormula: slantFormulaController.text));
+  void quadSlantFormulaChanged(String formula) {
+    Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(quadSlantFormula: formula));
+  }
+
+  void cubicAmplitude1FormulaChanged(String formula) {
+    Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(cubicAmplitudeFormula1: formula));
+  }
+
+  void cubicSlant1FormulaChanged(String formula) {
+    Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(cubicSlantFormula1: formula));
+  }
+
+  void cubicAmplitude2FormulaChanged(String formula) {
+    Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(cubicAmplitudeFormula2: formula));
+  }
+
+  void cubicSlant2FormulaChanged(String formula) {
+    Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(cubicSlantFormula2: formula));
   }
 
   @override
   void initState() {
-    changedCommand = widget.command.copyWith();
-
-    curveLabelController = TextEditingController(text: changedCommand.label);
+    curveLabelController = TextEditingController(text: widget.command.label);
     curveLabelController.addListener(curveLabelChanged);
-
-    amplitudeFormulaController = TextEditingController(text: changedCommand.amplitudeFormula);
-    amplitudeFormulaController.addListener(amplitudeFormulaChanged);
-    amplitudeFormulaFocusNode = FocusNode();
-
-    slantFormulaController = TextEditingController(text: changedCommand.slantFormula);
-    slantFormulaController.addListener(slantFormulaChanged);
-    slantFormulaFocusNode = FocusNode();
 
     super.initState();
   }
@@ -69,14 +68,6 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
   void dispose() {
     curveLabelController.removeListener(curveLabelChanged);
     curveLabelController.dispose();
-
-    amplitudeFormulaController.removeListener(amplitudeFormulaChanged);
-    amplitudeFormulaController.dispose();
-    amplitudeFormulaFocusNode.dispose();
-
-    slantFormulaController.removeListener(slantFormulaChanged);
-    slantFormulaController.dispose();
-    slantFormulaFocusNode.dispose();
 
     super.dispose();
   }
@@ -87,32 +78,74 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
     String content = 'Curve ';
 
     String startPointLabel = '???';
-    PointCommand? startPoint = drawing.pointById(changedCommand.startPointId);
+    PointCommand? startPoint = drawing.pointById(widget.command.startPointId);
     if (startPoint != null) {
       startPointLabel = startPoint.label;
     }
 
     String endPointLabel = '???';
-    PointCommand? endPoint = drawing.pointById(changedCommand.endPointId);
+    PointCommand? endPoint = drawing.pointById(widget.command.endPointId);
     if (endPoint != null) {
       endPointLabel = endPoint.label;
     }
 
-    String ampLabel = '???';
-    if (changedCommand.amplitudeFormula.isNotEmpty) {
-      ampLabel = changedCommand.amplitudeFormula;
-    }
+    content += 'between $startPointLabel and $endPointLabel ';
 
-    String slantLabel = '???';
-    if (changedCommand.slantFormula.isNotEmpty) {
-      slantLabel = changedCommand.slantFormula;
-    }
+    switch (widget.command.curveDefinitionType) {
+      case CurveDefinitionType.quadratic:
+        String ampLabel = '???';
+        String slantLabel = '???';
+        if (widget.command.quadAmplitudeFormula.isNotEmpty) {
+          ampLabel = widget.command.quadAmplitudeFormula;
+        }
 
-    content += 'between $startPointLabel and $endPointLabel with amplitude $ampLabel and slant $slantLabel';
+        if (widget.command.quadSlantFormula.isNotEmpty) {
+          slantLabel = widget.command.quadSlantFormula;
+        }
+
+        content += 'quadratic with amplitude $ampLabel and slant $slantLabel';
+        break;
+      case CurveDefinitionType.cubic:
+        String ampLabel = '???';
+        String slantLabel = '???';
+        if (widget.command.cubicAmplitudeFormula1.isNotEmpty) {
+          ampLabel = widget.command.cubicAmplitudeFormula1;
+        }
+
+        if (widget.command.cubicSlantFormula1.isNotEmpty) {
+          slantLabel = widget.command.cubicSlantFormula1;
+        }
+
+        content += 'cubic with amplitude $ampLabel and slant $slantLabel';
+        break;
+      case CurveDefinitionType.quadraticFromPoints:
+        String ctrlPointLabel = '???';
+        PointCommand? ctrlPoint = drawing.pointById(widget.command.quadCtrlPointId);
+        if (ctrlPoint != null) {
+          ctrlPointLabel = ctrlPoint.label;
+        }
+
+        content += 'quadratic with control point $ctrlPointLabel';
+        break;
+      case CurveDefinitionType.cubicFromPoints:
+        String ctrlPoint1Label = '???';
+        String ctrlPoint2Label = '???';
+        PointCommand? ctrlPoint1 = drawing.pointById(widget.command.cubicCtrlPointId1);
+        if (ctrlPoint1 != null) {
+          ctrlPoint1Label = ctrlPoint1.label;
+        }
+        PointCommand? ctrlPoint2 = drawing.pointById(widget.command.cubicCtrlPointId2);
+        if (ctrlPoint2 != null) {
+          ctrlPoint2Label = ctrlPoint2.label;
+        }
+
+        content += 'cubic with control points $ctrlPoint1Label and $ctrlPoint2Label';
+        break;
+    }
   
     return Row(
       children: [
-        Text(changedCommand.label, style: smallStyleBold,),
+        Text(widget.command.label, style: smallStyleBold,),
         hspacing,
         Text(content, style: smallStyle,),
         const Spacer(),
@@ -129,31 +162,55 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
 
   Widget createEditContent() {
     final Drawing drawing = Provider.of<DrawingsModel>(context, listen: false).drawing;
+    final double labelWidth = widget.command.curveDefinitionType == CurveDefinitionType.cubicFromPoints ? 90 : 70;
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Row(
+        Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Curve', style: smallStyle,),
-          ],
-        ),
-        vspacing,
-        Row(
-          children: [
-            const SmallLabel(label: 'Label', width: 55,),
+            const Text('Curve', style: smallStyle,),
             hspacing,
-            SmallTextField(controller: curveLabelController, width: 100),
+            DropdownButton<CurveDefinitionType>(
+              key: GlobalObjectKey('${widget.command.id}-cdt'),
+              isDense: true,
+              autofocus: false,
+              style: smallStyle,
+              itemHeight: kMinInteractiveDimension,
+              focusColor: Colors.transparent,
+              underline: Container(),
+              items: [
+                for (CurveDefinitionType cdt in CurveDefinitionType.values)
+                  DropdownMenuItem(value: cdt, child: Text(cdt.label))
+              ],
+              value: widget.command.curveDefinitionType,
+              onChanged: (value) {
+                Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(curveDefinitionType: value));
+              },
+            ),            
           ],
         ),
         vspacing,
         Row(
           children: [
-            const SmallLabel(label: 'From', width: 55,),
+            SmallLabel(label: 'Label', width: labelWidth,),
+            hspacing,
+            SmallTextField(
+              key: GlobalObjectKey('${widget.command.id}-label'),
+              controller: curveLabelController, 
+              width: 100
+            ),
+          ],
+        ),
+        vspacing,
+        Row(
+          children: [
+            SmallLabel(label: 'From', width: labelWidth,),
             hspacing,
             DropdownButton<String>(
+              key: GlobalObjectKey('${widget.command.id}-from'),
               isDense: true,
               autofocus: false,
               style: smallStyle,
@@ -162,22 +219,23 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
               underline: Container(),
               items: [
                 const DropdownMenuItem(value: '', child: Text('')),
-                if (changedCommand.endPointId != origin.id)
+                if (widget.command.endPointId != origin.id)
                   DropdownMenuItem(value: origin.id, child: Text(origin.label)),
-                for (PointCommand point in drawing.points.where((p) => p.id != changedCommand.endPointId))
+                for (PointCommand point in drawing.points.where((p) => p.id != widget.command.endPointId))
                   DropdownMenuItem(value: point.id, child: Text(point.label)),
               ],
-              onChanged: (value) => setState(() => changedCommand = changedCommand.copyWith(startPointId: value)),
-              value: changedCommand.startPointId,
+              onChanged: (value) => Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(startPointId: value?? '')),
+              value: widget.command.startPointId,
             ),
           ],
         ),
         vspacing,
         Row(
           children: [
-            const SmallLabel(label: 'To', width: 55,),
+            SmallLabel(label: 'To', width: labelWidth,),
             hspacing,
             DropdownButton<String>(
+              key: GlobalObjectKey('${widget.command.id}-to'),
               isDense: true,
               autofocus: false,
               style: smallStyle,
@@ -186,104 +244,192 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
               underline: Container(),
               items: [
                 const DropdownMenuItem(value: '', child: Text('')),
-                if (changedCommand.startPointId != origin.id)
+                if (widget.command.startPointId != origin.id)
                   DropdownMenuItem(value: origin.id, child: Text(origin.label)),
-                for (PointCommand point in drawing.points.where((p) => p.id != changedCommand.startPointId))
+                for (PointCommand point in drawing.points.where((p) => p.id != widget.command.startPointId))
                   DropdownMenuItem(value: point.id, child: Text(point.label)),
               ],
-              onChanged: (value) => setState(() => changedCommand = changedCommand.copyWith(endPointId: value)),
-              value: changedCommand.endPointId,
+              onChanged: (value) => Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(endPointId: value?? '')),
+              value: widget.command.endPointId,
             ),
           ],
         ),
         vspacing,
-        Row(
-          children: [
-            const SmallLabel(label: 'Amplitude', width: 55,),
-            hspacing,
-            FormulaFieldControl(
-              controller: amplitudeFormulaController, 
-              focusNode: amplitudeFormulaFocusNode,
-              width: 200, 
-              excludeCommand: changedCommand,
-            ),
-          ]
-        ),
-        vspacing,
-        Row(
-          children: [
-            const SmallLabel(label: 'Slant', width: 55,),
-            hspacing,
-            FormulaFieldControl(
-              controller: slantFormulaController, 
-              focusNode: slantFormulaFocusNode,
-              width: 200, 
-              excludeCommand: changedCommand,
-            ),
-          ]
-        ),
+        if (widget.command.curveDefinitionType == CurveDefinitionType.quadratic)
+          Column(
+            children: [
+              Row(
+                children: [
+                  SmallLabel(label: 'Amplitude', width: labelWidth,),
+                  hspacing,
+                  FormulaFieldControl(
+                    key: GlobalObjectKey('${widget.command.id}-qamp'),
+                    formula: widget.command.quadAmplitudeFormula, 
+                    width: 200, 
+                    excludeCommand: widget.command, 
+                    onFormulaChanged: quadAmplitudeFormulaChanged,
+                  ),
+                ]
+              ),
+              vspacing,
+              Row(
+                children: [
+                  SmallLabel(label: 'Slant', width: labelWidth,),
+                  hspacing,
+                  FormulaFieldControl(
+                    key: GlobalObjectKey('${widget.command.id}-qslant'),
+                    formula: widget.command.quadSlantFormula, 
+                    width: 200, 
+                    excludeCommand: widget.command,
+                    onFormulaChanged: quadSlantFormulaChanged,
+                  ),
+                ]
+              ),
+            ],
+          ),
+        if (widget.command.curveDefinitionType == CurveDefinitionType.cubic)
+          Column(
+            children: [
+              Row(
+                children: [
+                  SmallLabel(label: 'Amplitude 1', width: labelWidth,),
+                  hspacing,
+                  FormulaFieldControl(
+                    key: GlobalObjectKey('${widget.command.id}-camp1'),
+                    formula: widget.command.cubicAmplitudeFormula1, 
+                    width: 200, 
+                    excludeCommand: widget.command, 
+                    onFormulaChanged: cubicAmplitude1FormulaChanged,
+                  ),
+                ]
+              ),
+              vspacing,
+              Row(
+                children: [
+                  SmallLabel(label: 'Slant 1', width: labelWidth,),
+                  hspacing,
+                  FormulaFieldControl(
+                    key: GlobalObjectKey('${widget.command.id}-cslant1'),
+                    formula: widget.command.cubicSlantFormula1, 
+                    width: 200, 
+                    excludeCommand: widget.command,
+                    onFormulaChanged: cubicSlant1FormulaChanged,
+                  ),
+                ]
+              ),
+              vspacing,
+              Row(
+                children: [
+                  SmallLabel(label: 'Amplitude 2', width: labelWidth,),
+                  hspacing,
+                  FormulaFieldControl(
+                    key: GlobalObjectKey('${widget.command.id}-camp2'),
+                    formula: widget.command.cubicAmplitudeFormula2, 
+                    width: 200, 
+                    excludeCommand: widget.command, 
+                    onFormulaChanged: cubicAmplitude2FormulaChanged,
+                  ),
+                ]
+              ),
+              vspacing,
+              Row(
+                children: [
+                  SmallLabel(label: 'Slant 2', width: labelWidth,),
+                  hspacing,
+                  FormulaFieldControl(
+                    key: GlobalObjectKey('${widget.command.id}-cslant1'),
+                    formula: widget.command.cubicSlantFormula2, 
+                    width: 200, 
+                    excludeCommand: widget.command,
+                    onFormulaChanged: cubicSlant2FormulaChanged,
+                  ),
+                ]
+              ),
+            ],
+          ),
+        if (widget.command.curveDefinitionType == CurveDefinitionType.quadraticFromPoints)
+          Row(
+            children: [
+              SmallLabel(label: 'Control point', width: labelWidth,),
+              hspacing,
+              DropdownButton<String>(
+                key: GlobalObjectKey('${widget.command.id}-qctrl'),
+                isDense: true,
+                autofocus: false,
+                style: smallStyle,
+                itemHeight: kMinInteractiveDimension,
+                focusColor: Colors.transparent,
+                underline: Container(),
+                items: [
+                  const DropdownMenuItem(value: '', child: Text('')),
+                  if (widget.command.quadCtrlPointId != origin.id)
+                    DropdownMenuItem(value: origin.id, child: Text(origin.label)),
+                  for (PointCommand point in drawing.points)
+                    DropdownMenuItem(value: point.id, child: Text(point.label)),
+                ],
+                onChanged: (value) => Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(quadCtrlPointId: value?? '')),
+                value: widget.command.quadCtrlPointId,
+              ),
+            ],
+          ),
+        if (widget.command.curveDefinitionType == CurveDefinitionType.cubicFromPoints)
+          Column(
+            children: [
+              Row(
+                children: [
+                  SmallLabel(label: 'Control point 1', width: labelWidth,),
+                  hspacing,
+                  DropdownButton<String>(
+                    key: GlobalObjectKey('${widget.command.id}-cctrl1'),
+                    isDense: true,
+                    autofocus: false,
+                    style: smallStyle,
+                    itemHeight: kMinInteractiveDimension,
+                    focusColor: Colors.transparent,
+                    underline: Container(),
+                    items: [
+                      const DropdownMenuItem(value: '', child: Text('')),
+                      DropdownMenuItem(value: origin.id, child: Text(origin.label)),
+                      for (PointCommand point in drawing.points)
+                        DropdownMenuItem(value: point.id, child: Text(point.label)),
+                    ],
+                    onChanged: (value) => Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(cubicCtrlPointId1: value?? '')),
+                    value: widget.command.cubicCtrlPointId1,
+                  ),
+                ],
+              ),
+              vspacing,
+              Row(
+                children: [
+                  SmallLabel(label: 'Control point 2', width: labelWidth,),
+                  hspacing,
+                  DropdownButton<String>(
+                    key: GlobalObjectKey('${widget.command.id}-cctrl2'),
+                    isDense: true,
+                    autofocus: false,
+                    style: smallStyle,
+                    itemHeight: kMinInteractiveDimension,
+                    focusColor: Colors.transparent,
+                    underline: Container(),
+                    items: [
+                      const DropdownMenuItem(value: '', child: Text('')),
+                      DropdownMenuItem(value: origin.id, child: Text(origin.label)),
+                      for (PointCommand point in drawing.points)
+                        DropdownMenuItem(value: point.id, child: Text(point.label)),
+                    ],
+                    onChanged: (value) => Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(cubicCtrlPointId2: value?? '')),
+                    value: widget.command.cubicCtrlPointId2,
+                  ),
+                ],
+              ),
+            ],
+          ),
       ],
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    double controlHeight = 60;
-    if (editing && !widget.sorting) {
-      controlHeight = 260;
-    }
-
-    return SizedBox(
-      height: controlHeight,
-      child: Container(
-        decoration: BoxDecoration(
-          color: (widget.command.validated && !widget.command.valid) ? Colors.red.withAlpha(20) : Colors.grey.shade100,
-          border: Border.all(color: Colors.grey, ),
-          borderRadius: const BorderRadius.all(Radius.circular(5)),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(8),
-          child: Row(
-            children: [
-              Expanded(
-                child: (editing && !widget.sorting) ? createEditContent() : createViewContent(),
-              ),
-              if (!widget.sorting)
-              Column(
-                children: [
-                  IconButton(
-                    onPressed: () {
-                      if (editing) {
-                        widget.finishedEditing(changedCommand);
-                      }
-                      setState(() => editing = !editing);
-                    }, 
-                    icon: editing ? const Icon(Icons.check) : const Icon(Icons.edit),
-                  ),
-                  if (editing)
-                    IconButton(
-                      onPressed: () => widget.finishedEditing(changedCommand), 
-                      icon: const Icon(Icons.refresh)
-                    ),
-                  const Spacer(),
-                  if (editing && widget.command.validated && !widget.command.valid && widget.command.errors.isNotEmpty)
-                    Tooltip(
-                      message: widget.command.errors.join('\n'),
-                      child: const Icon(Icons.error_outline),
-                    ),
-                  if (editing && widget.command.validated && !widget.command.valid && widget.command.errors.isNotEmpty)
-                    const Spacer(),
-                  if (editing)
-                    IconButton(
-                      onPressed: () => Provider.of<DrawingsModel>(context, listen: false).deleteCommand(commandId: changedCommand.id), 
-                      icon: const Icon(Icons.delete)
-                    ),
-                ],
-              )
-            ],
-          ),
-        ),
-      ),
-    );
+    return (widget.editing && !widget.sorting) ? createEditContent() : createViewContent();
   }
 }

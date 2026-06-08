@@ -1,152 +1,24 @@
 
 import 'dart:math';
 
-import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/measurement_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/variable_command.dart';
 import 'package:knitty_griddy/drawings/model/drawing.dart';
 import 'package:knitty_griddy/utils/math_utitilies.dart';
 import 'package:petitparser/petitparser.dart';
 
-class DoubleOrError {
-  final double? value;
-  final FormulaException? error;
-
-  const DoubleOrError({
-    this.value,
-    this.error,
-  });
-
-  factory DoubleOrError.valid(double val) {
-    return DoubleOrError(value: val);
-  }
-
-  factory DoubleOrError.error(FormulaException err) {
-    return DoubleOrError(error: err);
-  }
-
-  bool get isSuccess => error == null && value != null;
-}
-
 class FormulaException {
   final String? buffer;
   final int? pos;
+  final String errorMessage;
+  final bool shouldRetry;
 
   const FormulaException({
     this.buffer,
     this.pos,
+    this.errorMessage = '',
+    this.shouldRetry = false,
   });
-}
-
-class GenericFormulaException extends FormulaException {
-  final String message;
-
-  const GenericFormulaException({
-    super.buffer,
-    super.pos,
-    required this.message,
-  });
-
-  @override
-  String toString() {
-    String str = message;
-    str += pos == null ? '' : ' at position $pos';
-    str += (buffer == null || buffer!.isEmpty) ? '' : ' of buffer $buffer';
-    return str;
-  }
-}
-
-class DependantNotValidated extends FormulaException {
-  final DrawingCommand command;
-  const DependantNotValidated({
-    super.buffer,
-    super.pos,
-    required this.command,
-  });
-}
-
-class MeasurementNotValidatedException extends DependantNotValidated {
-  const MeasurementNotValidatedException({
-    super.buffer,
-    super.pos,  
-    required super.command
-  });
-
-  @override
-  String toString() {
-    return 'Measurement ${command.label} is not valid';
-  }
-}
-
-class VariableNotValidatedException extends DependantNotValidated {
-  const VariableNotValidatedException({
-    super.buffer,
-    super.pos,
-    required super.command,
-  });
-
-  @override
-  String toString() {
-    return 'Variable ${command.label} is not valid';
-  }
-}
-
-class MeasurementDoesNotExistException extends FormulaException {
-  final String measurementName;
-
-  const MeasurementDoesNotExistException({
-    super.buffer,
-    super.pos,  
-    required this.measurementName,
-  });
-
-  @override
-  String toString() {
-    return 'Measurement $measurementName does not exist';
-  }
-}
-
-class VariableDoesNotExistException extends FormulaException {
-  final String variableName;
-  const VariableDoesNotExistException({
-    super.buffer,
-    super.pos,
-    required this.variableName,
-  });
-
-  @override
-  String toString() {
-    return 'Variable $variableName does not exist';
-  }
-}
-
-class FormulaExpression {
-  static final RegExp _variablergx = RegExp(r'!\w*');
-  static final RegExp _measurementrgx = RegExp(r'@\w*');
-
-  static Set<String> dependencies({required String formula, required Drawing drawing}) {
-    Set<String> deps = {};
-
-    if (formula.isNotEmpty) {
-      List<String> variableLabels = _variablergx.allMatches(formula).map((match) => match[0]!).toList();
-      List<String> measurementLabels = _measurementrgx.allMatches(formula).map((match) => match[0]!).toList();
-
-      for (String variableLabel in variableLabels) {
-        VariableCommand? variableCommand = drawing.variableByName(variableLabel.substring(1));
-        if (variableCommand != null) {
-          deps.add(variableCommand.id);
-        }
-      }
-      for (String measurementLabel in measurementLabels) {
-        MeasurementCommand? measurementCommand = drawing.measurementByName(measurementLabel.substring(1));
-        if (measurementCommand != null) {
-          deps.add(measurementCommand.id);
-        }
-      }
-    }    
-
-    return deps;
-  }
 }
 
 class FormulaGrammar extends GrammarDefinition {
@@ -157,27 +29,8 @@ class FormulaGrammar extends GrammarDefinition {
     required this.drawing
   }) : super();
 
-  DoubleOrError parse(String formula) {
-    try {
-      Result d = buildFrom(start().end()).parse(formula);
-      if (d is Success) {
-        return DoubleOrError.valid(d.value);
-      } else {
-        return DoubleOrError.error(GenericFormulaException(message: d.message, buffer: d.buffer, pos: d.position));
-      }
-    } on MeasurementDoesNotExistException catch (err) {
-      return DoubleOrError.error(err);
-    } on MeasurementNotValidatedException catch (err) {
-      return DoubleOrError.error(err);
-    } on VariableDoesNotExistException catch (err) {
-      return DoubleOrError.error(err);
-    } on VariableNotValidatedException catch (err) {
-      return DoubleOrError.error(err);
-    } on GenericFormulaException catch(err) {
-      return DoubleOrError.error(err);
-    } catch (e) {
-      return DoubleOrError.error(GenericFormulaException(message: e.toString()));
-    }
+  Result parse(String formula) {
+    return buildFrom(start().end()).parse(formula);
   }
 
   @override
@@ -243,11 +96,18 @@ class FormulaGrammar extends GrammarDefinition {
 
     MeasurementCommand? m = drawing.measurementByName(p[1]);
     if (m == null) {
-      throw MeasurementDoesNotExistException(measurementName: p[1]);
+      throw FormulaException(errorMessage: 'Measurement ${p[1]} does not exist', shouldRetry: false);
+//      throw MeasurementDoesNotExistException(measurementName: p[1]);
     }
 
     if (!m.validated) {
-      throw MeasurementNotValidatedException(command: m);
+      throw FormulaException(errorMessage: 'Measurement ${p[1]} is not validated', shouldRetry: true);
+//      throw MeasurementNotValidatedException(command: m);
+    }
+
+    if (!m.valid) {
+      throw FormulaException(errorMessage: 'Measurement ${p[1]} has errors', shouldRetry: false);
+//      throw MeasurementNotValidException(command: m);
     }
 
     return m.valueInMM;
@@ -260,11 +120,18 @@ class FormulaGrammar extends GrammarDefinition {
 
     VariableCommand? v = drawing.variableByName(p[1]);
     if (v == null) {
-      throw VariableDoesNotExistException(variableName: p[1]);
+      throw FormulaException(errorMessage: 'Variable ${p[1]} does not exist', shouldRetry: false);
+//      throw VariableDoesNotExistException(variableName: p[1]);
     }
 
     if (!v.validated) {
-      throw VariableNotValidatedException(command: v);
+      throw FormulaException(errorMessage: 'Variable ${p[1]} is not validated', shouldRetry: true);
+//      throw VariableNotValidatedException(command: v);
+    }
+
+    if (!v.valid) {
+      throw FormulaException(errorMessage: 'Variable ${p[1]} has errors', shouldRetry: false);
+//      throw VariableNotValidException(command: v);
     }
 
     return v.value(drawing);

@@ -15,18 +15,15 @@ class LineCommand extends DrawingCommand {
   final String fromPointId;
   final String toPointId;
 
-  final bool validated;
-  final bool valid;
-
   const LineCommand({
     required super.id,
     required super.label,
-    List<String>? errors,
     this.fromPointId = '',
     this.toPointId = '',
-    this.validated = false,
-    this.valid = false,
-  }): super(errors: errors?? const[]);
+    super.validated,
+    super.valid,
+    super.errors,
+  });
 
   LineCommand copyWith({
     String? label,
@@ -46,6 +43,9 @@ class LineCommand extends DrawingCommand {
       errors: errors?? this.errors,
     );
   }
+
+  @override
+  double get editHeight => 170;
 
   @override
   LineCommand markAsCyclic(String cycleDescription) {
@@ -72,15 +72,6 @@ class LineCommand extends DrawingCommand {
       fromPointId: fromPointId == commandId ? '' : fromPointId,
       toPointId: toPointId == commandId ? '' : toPointId,
     );
-  }
-
-  @override
-  LineCommand offset(double x, double y) {
-    return this;
-/*    return copyWith(
-      startPoint: startPoint.offset(x, y),
-      endPoint: endPoint.offset(x, y)
-    );*/
   }
 
   @override
@@ -117,8 +108,7 @@ class LineCommand extends DrawingCommand {
     listEquals(errors, other.errors);
 
   @override
-  int get hashCode => super.hashCode ^ fromPointId.hashCode ^ toPointId.hashCode ^
-    valid.hashCode ^ validated.hashCode ^ errors.hashCode;
+  int get hashCode => super.hashCode ^ fromPointId.hashCode ^ toPointId.hashCode;
 
   double? lengthInMM(Drawing drawing) {
     Offset? startOffset = getStartCoordinate(drawing);
@@ -128,9 +118,9 @@ class LineCommand extends DrawingCommand {
     return MathUtitilies.distance(startOffset, endOffset);
   }
 
-  Offset? middle(Drawing drawing) => coordinateAt(0.5, drawing);
+  Offset? middle(Drawing drawing) => pointOnLine(0.5, drawing);
 
-  Offset? coordinateAt(double fraction, Drawing drawing) {
+  Offset? pointOnLine(double fraction, Drawing drawing) {
     Offset? startOffset = getStartCoordinate(drawing);
     if (startOffset == null) return null;
     Offset? endOffset = getEndCoordinate(drawing);
@@ -228,7 +218,7 @@ class LineCommand extends DrawingCommand {
   }
 
   @override
-  void paint(Canvas canvas, Size size, TextStyle style, Drawing drawing) {
+  void paint(Canvas canvas, Size size, Drawing drawing, bool selected) {
     if (!valid) {
       return;
     }
@@ -249,14 +239,15 @@ class LineCommand extends DrawingCommand {
     start += middle;
     end += middle;
 
-    canvas.drawLine(start, end, Paint()..color = Colors.grey.shade700..style = PaintingStyle.stroke);
+    canvas.drawLine(start, end, Paint()..color = selected ? Colors.purple : Colors.grey.shade700..style = PaintingStyle.stroke);
 
     // draw line label
-    Offset? midline = coordinateAt(0.3, drawing);
+    Offset? midline = pointOnLine(0.3, drawing);
     if (midline == null) return;
     midline = midline.scale(1, -1);
     midline += middle;
 
+    TextStyle style = TextStyle(color: selected ? Colors.purple : Colors.grey[400]);
     final ParagraphBuilder paragraphBuilder = ParagraphBuilder(
       ParagraphStyle(
         fontSize: 10,
@@ -274,9 +265,6 @@ class LineCommand extends DrawingCommand {
 
     canvas.drawParagraph(paragraph,  midline.translate(2, 0));
   }
-
-  @override
-  bool get isValidated => validated;
 
   @override
   DrawingCommand clearValidation() {
@@ -303,7 +291,7 @@ class LineCommand extends DrawingCommand {
         retryValidation = false;
         validationErrors.add('Source point does not exist');
       } else {
-        if (!fromPoint.isValidated) {
+        if (!fromPoint.validated) {
           // We are not valid, but we should retry
           isvalid = false;
         } else if (!fromPoint.valid) {
@@ -325,7 +313,7 @@ class LineCommand extends DrawingCommand {
         retryValidation = false;
         validationErrors.add('Target point does not exist');
       } else {
-        if (!toPoint.isValidated) {
+        if (!toPoint.validated) {
           // We are not valid, but we should retry
           isvalid = false;
         } else if (!toPoint.valid) {
