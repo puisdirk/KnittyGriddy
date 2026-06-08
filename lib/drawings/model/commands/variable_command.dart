@@ -1,24 +1,21 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
-import 'package:knitty_griddy/drawings/formulas/formula_grammar.dart';
+import 'package:knitty_griddy/drawings/formulas/formula_expression.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
-import 'package:knitty_griddy/drawings/model/commands/measurement_command.dart';
 import 'package:knitty_griddy/drawings/model/drawing.dart';
 
 class VariableCommand extends DrawingCommand {
   final String formula;
-  final bool validated;
-  final bool valid;
 
   const VariableCommand({
     required super.id,
     required super.label,
     this.formula = '',
-    List<String>? errors,
-    this.validated = false,
-    this.valid = false,
-  }) : super(errors: errors?? const[]);
+    super.validated,
+    super.valid,
+    super.errors,
+  });
 
   VariableCommand copyWith({
     String? label,
@@ -36,6 +33,9 @@ class VariableCommand extends DrawingCommand {
       errors: errors?? this.errors,
     );
   }
+
+  @override
+  double get editHeight => 165;
 
   @override
   VariableCommand markAsCyclic(String cycleDescription) {
@@ -61,26 +61,12 @@ class VariableCommand extends DrawingCommand {
     return this;
   }
 
-  @override
-  bool get isValidated => validated;
-
-  @override
-  VariableCommand offset(double x, double y) {
-    return this;
-  }
-
   double? value(Drawing drawing) {
-    if (!valid) return null;
-
-    if (formula.isEmpty) return null;
-
-    final FormulaGrammar grammar = FormulaGrammar(drawing: drawing);
-
-    return grammar.parse(formula).value;
+    return FormulaExpression.validate(formula: formula, drawing: drawing).result;
   }
 
   @override
-  void paint(Canvas canvas, Size size, TextStyle style, Drawing drawing) {
+  void paint(Canvas canvas, Size size, Drawing drawing, bool selected) {
   }
 
   @override
@@ -122,22 +108,14 @@ class VariableCommand extends DrawingCommand {
     bool retryValidation = true;
     List<String> validationErrors = [];
 
-    final FormulaGrammar grammar = FormulaGrammar(drawing: drawing);
-
     if (label.isEmpty) { isvalid = false; retryValidation = false; validationErrors.add('Requires a label'); }
     if (drawing.commands.any((c) => c.id != id && c.label == label)) { isvalid = false; retryValidation = false; validationErrors.add('Label should be unique'); }
 
-    if (formula.isEmpty) {
+    FormulaParseResult res = FormulaExpression.validate(formula: formula, drawing: drawing);
+    if (res.isInvalid) {
       isvalid = false;
-      retryValidation = false;
-      validationErrors.add('Requires a value');
-    } else {
-      DoubleOrError res = grammar.parse(formula);
-      if (!res.isSuccess) {
-        isvalid = false;
-        retryValidation = res.error is DependantNotValidated;
-        validationErrors.add(res.error.toString());
-      }
+      if (!res.shouldRetry) retryValidation = false;
+      validationErrors.add(res.errorMessage);
     }
 
     return copyWith(

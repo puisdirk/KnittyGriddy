@@ -8,7 +8,12 @@ import 'package:knitty_griddy/drawings/model/drawings_model.dart';
 import 'package:provider/provider.dart';
 
 class DrawingViewer extends StatelessWidget {
-  const DrawingViewer({super.key});
+  final String? selectedCommandId;
+
+  const DrawingViewer({
+    required this.selectedCommandId,
+    super.key
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +28,7 @@ class DrawingViewer extends StatelessWidget {
                 borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(5))
               ),
               child: CustomPaint(
-                painter: DrawingPainter(drawing: drawing),
+                painter: DrawingPainter(drawing: drawing, selectedCommandId: selectedCommandId),
                 size: constraints.biggest,
               ),
             );
@@ -36,9 +41,11 @@ class DrawingViewer extends StatelessWidget {
 
 class DrawingPainter extends CustomPainter {
   final Drawing drawing;
+  final String? selectedCommandId;
 
   const DrawingPainter({
     required this.drawing,
+    required this.selectedCommandId,
   });
 
   @override
@@ -47,7 +54,7 @@ class DrawingPainter extends CustomPainter {
     var style = TextStyle(color: Colors.grey[400]);
 
     Offset middle = Offset(size.width / 2, size.height / 2);
-    canvas.drawCircle(middle, 2, Paint()..color = Colors.red..style = PaintingStyle.stroke);
+    canvas.drawCircle(middle, 2, Paint()..color = Colors.grey.shade700..style = PaintingStyle.stroke);
     // draw point label
     final ParagraphBuilder paragraphBuilder = ParagraphBuilder(
       ParagraphStyle(
@@ -66,14 +73,16 @@ class DrawingPainter extends CustomPainter {
 
     canvas.drawParagraph(paragraph, middle);
 
+    // We draw each command, but we draw the selected one last
     for (DrawingCommand command in drawing.commands) {
-      command.paint(canvas, size, style, drawing);
+      if (command.id != selectedCommandId) command.paint(canvas, size, drawing, false);
     }
+    if (selectedCommandId != null) drawing.commands.firstWhere((c) => c.id == selectedCommandId).paint(canvas, size, drawing, true);
   }
 
   @override
   bool shouldRepaint(covariant DrawingPainter oldDelegate) {
-    return !listEquals(oldDelegate.drawing.commands, drawing.commands);
+    return !listEquals(oldDelegate.drawing.commands, drawing.commands) || selectedCommandId != oldDelegate.selectedCommandId;
   }
 
 }

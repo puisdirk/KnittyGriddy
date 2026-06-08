@@ -25,21 +25,18 @@ class MeasurementCommand extends DrawingCommand {
   final int decimals;
   final Unit unit;
 
-  final bool validated;
-  final bool valid;
-
   const MeasurementCommand({
     required super.id,
     required super.label,
-    List<String>? errors,
     this.minValue = 0,
     this.maxValue = 100,
     this.value = 50,
     this.decimals = 0,
     this.unit = Unit.mm,
-    this.valid = false,
-    this.validated = false,
-  }) : super(errors: errors?? const[]);
+    super.valid,
+    super.validated,
+    super.errors,
+  });
 
   MeasurementCommand copyWith({
     String? label,
@@ -57,12 +54,12 @@ class MeasurementCommand extends DrawingCommand {
     double val = value?? this.value;
     if (val < min) val = min;
     if (val > max) val = max;
-    if (decimals != null) {
+//    if (decimals != null) {
       // Force refresh of the stepper controls
-      min += 0.0000000001;
-      max += 0.0000000001;
-      val += 0.0000000001;
-    }
+//      min += 0.0000000001;
+//      max += 0.0000000001;
+//      val += 0.0000000001;
+//    }
     return MeasurementCommand(
       id: id, 
       label: label?? this.label,
@@ -76,6 +73,9 @@ class MeasurementCommand extends DrawingCommand {
       errors: errors?? this.errors,
     );
   }
+
+  @override
+  double get editHeight => 320;
 
   @override
   MeasurementCommand markAsCyclic(String cycleDescription) {
@@ -111,8 +111,7 @@ class MeasurementCommand extends DrawingCommand {
   
   @override
   int get hashCode => super.hashCode ^ id.hashCode ^ label.hashCode ^
-    minValue.hashCode ^ maxValue.hashCode ^ value.hashCode ^ decimals.hashCode ^ unit.hashCode ^
-    valid.hashCode ^ validated.hashCode ^ errors.hashCode;
+    minValue.hashCode ^ maxValue.hashCode ^ value.hashCode ^ decimals.hashCode ^ unit.hashCode;
 
   @override
   DrawingCommand clearValidation() {
@@ -125,15 +124,7 @@ class MeasurementCommand extends DrawingCommand {
   }
 
   @override
-  bool get isValidated => validated;
-
-  @override
-  DrawingCommand offset(double x, double y) {
-    return this;
-  }
-
-  @override
-  void paint(Canvas canvas, Size size, TextStyle style, Drawing drawing) {
+  void paint(Canvas canvas, Size size, Drawing drawing, bool selected) {
   }
 
   @override

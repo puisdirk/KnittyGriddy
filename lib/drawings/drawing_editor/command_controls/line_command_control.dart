@@ -6,17 +6,18 @@ import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
 import 'package:knitty_griddy/drawings/model/drawing.dart';
 import 'package:knitty_griddy/drawings/model/drawings_model.dart';
 import 'package:knitty_griddy/utils/constants.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
 class LineCommandControl extends StatefulWidget {
   final LineCommand command;
-  final void Function(LineCommand newCommand) finishedEditing;
   final bool sorting;
+  final bool editing;
 
   const LineCommandControl({
     required this.command,
-    required this.finishedEditing,
     required this.sorting,
+    required this.editing,
     super.key
   });
 
@@ -25,20 +26,15 @@ class LineCommandControl extends StatefulWidget {
 }
 
 class _LineCommandControlState extends State<LineCommandControl> {
-  bool editing = false;
-  late LineCommand changedCommand;
-
   late TextEditingController lineLabelController;
 
   void lineLabelChanged() {
-    setState(() => changedCommand = changedCommand.copyWith(label: lineLabelController.text));
+    Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(label: lineLabelController.text));
   }
 
   @override
   void initState() {
-    changedCommand = widget.command.copyWith();
-
-    lineLabelController = TextEditingController(text: changedCommand.label);
+    lineLabelController = TextEditingController(text: widget.command.label);
     lineLabelController.addListener(lineLabelChanged);
 
     super.initState();
@@ -58,13 +54,13 @@ class _LineCommandControlState extends State<LineCommandControl> {
     String content = 'Line ';
 
     String point1label = '???';
-    PointCommand? p1 = drawing.pointById(changedCommand.fromPointId);
+    PointCommand? p1 = drawing.pointById(widget.command.fromPointId);
     if (p1 != null) {
       point1label = p1.label;
     }
 
     String point2label = '???';
-    PointCommand? p2 = drawing.pointById(changedCommand.toPointId);
+    PointCommand? p2 = drawing.pointById(widget.command.toPointId);
     if (p2 != null) {
       point2label = p2.label;
     }
@@ -73,11 +69,11 @@ class _LineCommandControlState extends State<LineCommandControl> {
 
     return Row(
       children: [
-        Text(changedCommand.label, style: smallStyleBold,),
+        Text(widget.command.label, style: smallStyleBold,),
         hspacing,
         Text(content, style: smallStyle,),
         const Spacer(),
-        if (!widget.sorting && widget.command.isValidated && !widget.command.valid && widget.command.errors.isNotEmpty)
+        if (!widget.sorting && widget.command.validated && !widget.command.valid && widget.command.errors.isNotEmpty)
           Tooltip(
             message: widget.command.errors.join('\n'),
             child: const Icon(Icons.error_outline),
@@ -106,7 +102,11 @@ class _LineCommandControlState extends State<LineCommandControl> {
           children: [
             const SmallLabel(label: 'Label'),
             hspacing,
-            SmallTextField(controller: lineLabelController, width: 100),
+            SmallTextField(
+              key: GlobalObjectKey('${widget.command.id}-label'),
+              controller: lineLabelController, 
+              width: 100
+            ),
           ],
         ),
         vspacing,
@@ -115,6 +115,7 @@ class _LineCommandControlState extends State<LineCommandControl> {
             const SmallLabel(label: 'From'),
             hspacing,
             DropdownButton<String>(
+              key: GlobalObjectKey('${widget.command.id}-from'),
               isDense: true,
               autofocus: false,
               style: smallStyle,
@@ -123,13 +124,13 @@ class _LineCommandControlState extends State<LineCommandControl> {
               underline: Container(),
               items: [
                 const DropdownMenuItem(value: '', child: Text('')),
-                if (changedCommand.toPointId != origin.id)
+                if (widget.command.toPointId != origin.id)
                   DropdownMenuItem(value: origin.id, child: Text(origin.label)),
-                for (PointCommand point in drawing.points.where((p) => p.id != changedCommand.toPointId))
+                for (PointCommand point in drawing.points.where((p) => p.id != widget.command.toPointId))
                   DropdownMenuItem(value: point.id, child: Text(point.label)),
               ],
-              onChanged: (value) => setState(() => changedCommand = changedCommand.copyWith(fromPointId: value)),
-              value: changedCommand.fromPointId,
+              onChanged: (value) => Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(fromPointId: value?? '')),
+              value: widget.command.fromPointId,
             ),
           ],
         ),
@@ -139,6 +140,7 @@ class _LineCommandControlState extends State<LineCommandControl> {
             const SmallLabel(label: 'To'),
             hspacing,
             DropdownButton<String>(
+              key: GlobalObjectKey('${widget.command.id}-to'),
               isDense: true,
               autofocus: false,
               style: smallStyle,
@@ -147,13 +149,13 @@ class _LineCommandControlState extends State<LineCommandControl> {
               underline: Container(),
               items: [
                 const DropdownMenuItem(value: '', child: Text('')),
-                if (changedCommand.fromPointId != origin.id)
+                if (widget.command.fromPointId != origin.id)
                   DropdownMenuItem(value: origin.id, child: Text(origin.label)),
-                for (PointCommand point in drawing.points.where((p) => p.id != changedCommand.fromPointId))
+                for (PointCommand point in drawing.points.where((p) => p.id != widget.command.fromPointId))
                   DropdownMenuItem(value: point.id, child: Text(point.label)),
               ],
-              onChanged: (value) => setState(() => changedCommand = changedCommand.copyWith(toPointId: value)),
-              value: changedCommand.toPointId,
+              onChanged: (value) => Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(toPointId: value?? '')),
+              value: widget.command.toPointId,
             ),
           ],
         )
@@ -163,62 +165,6 @@ class _LineCommandControlState extends State<LineCommandControl> {
 
   @override
   Widget build(BuildContext context) {
-    double controlHeight = 60;
-    if (editing && !widget.sorting) {
-      controlHeight = 170;
-    }
-
-    return SizedBox(
-      height: controlHeight,
-      child: Container(
-        decoration: BoxDecoration(
-          color: (widget.command.validated && !widget.command.valid) ? Colors.red.withAlpha(20) : Colors.grey.shade100,
-          border: Border.all(color: Colors.grey),
-          borderRadius: const BorderRadius.all(Radius.circular(5)),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(8),
-          child: Row(
-            children: [
-              Expanded(
-                child: (editing && !widget.sorting) ? createEditContent() : createViewContent(),
-              ),
-              if (!widget.sorting)
-              Column(
-                children: [
-                  IconButton(
-                    onPressed: () {
-                      if (editing) {
-                        widget.finishedEditing(changedCommand);
-                      }
-                      setState(() => editing = !editing);
-                    }, 
-                    icon: editing ? const Icon(Icons.check) : const Icon(Icons.edit),
-                  ),
-                  if (editing)
-                    IconButton(
-                      onPressed: () => widget.finishedEditing(changedCommand), 
-                      icon: const Icon(Icons.refresh)
-                    ),
-                  const Spacer(),
-                  if (editing && widget.command.validated && !widget.command.valid && widget.command.errors.isNotEmpty)
-                    Tooltip(
-                      message: widget.command.errors.join('\n'),
-                      child: const Icon(Icons.error_outline),
-                    ),
-                  if (editing && widget.command.validated && !widget.command.valid && widget.command.errors.isNotEmpty)
-                    const Spacer(),
-                  if (editing)
-                    IconButton(
-                      onPressed: () => Provider.of<DrawingsModel>(context, listen: false).deleteCommand(commandId: changedCommand.id), 
-                      icon: const Icon(Icons.delete)
-                    ),
-                ],
-              )
-            ],
-          ),
-        ),
-      ),
-    );
+    return (widget.editing && !widget.sorting) ? createEditContent() : createViewContent();
   }
 }

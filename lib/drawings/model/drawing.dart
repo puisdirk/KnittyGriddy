@@ -153,31 +153,28 @@ class Drawing {
     return 'c$nextNum';
   }
 
-  List<String> _getCycle() {
-    Map<String, Set<String>> dependencies = {};
-    for (DrawingCommand command in commands) {
-      dependencies[command.id] = command.dependencies(this);
-    }
-    DirectedGraph<String> graph = DirectedGraph(dependencies);
-    return graph.cycle;
-  }
-
   Drawing validate() {
     Drawing cleared = copyWith(commands: commands.map((c) => c.clearValidation()).toList());
 
-    List<String> cycles = _getCycle();
-    if (cycles.isNotEmpty) {
-      String cycleDescription = cycles.map((cycle) => commands.firstWhere((c) => c.id == cycle).label).join(' -> ');
-      cleared = cleared.copyWith(
-        commands: cleared.commands.map((c) => cycles.contains(c.id) ? c.markAsCyclic(cycleDescription) : c).toList()
-      );
-      return cleared;
+    while (true) {
+      Map<String, Set<String>> dependencies = {};
+      for (DrawingCommand command in cleared.commands.where((c) => !c.validated)) {
+        dependencies[command.id] = command.dependencies(this);
+      }
+      DirectedGraph<String> graph = DirectedGraph(dependencies);
+      List<String> cycles = graph.cycle;
+
+      if (cycles.isEmpty) break;
+        String cycleDescription = cycles.map((cycle) => commands.firstWhere((c) => c.id == cycle).label).join(' -> ');
+        cleared = cleared.copyWith(
+          commands: cleared.commands.map((c) => cycles.contains(c.id) ? c.markAsCyclic(cycleDescription) : c).toList()
+        );
     }
 
     int passes = 0;
     int maxPasses = 1000;
     while (true) {
-      if (cleared.commands.any((c) => !c.isValidated) && passes <= maxPasses) {
+      if (cleared.commands.any((c) => !c.validated) && passes <= maxPasses) {
         // We pass through the whole list on each loop as dependencies may not be solved yet
         List<DrawingCommand> passedCommands = cleared.commands.map((c) => c.validate(cleared)).toList();
         cleared = cleared.copyWith(

@@ -11,13 +11,13 @@ import 'package:provider/provider.dart';
 
 class MeasurementCommandControl extends StatefulWidget {
   final MeasurementCommand command;
-  final void Function(MeasurementCommand newCommand) finishedEditing;
   final bool sorting;
+  final bool editing;
 
   const MeasurementCommandControl({
     required this.command,
-    required this.finishedEditing,
     required this.sorting,
+    required this.editing,
     super.key
   });
 
@@ -26,20 +26,15 @@ class MeasurementCommandControl extends StatefulWidget {
 }
 
 class _MeasurementCommandControlState extends State<MeasurementCommandControl> {
-  bool editing = false;
-  late MeasurementCommand changedCommand;
-
   late TextEditingController labelController;
 
   void labelChanged() {
-    setState(() => changedCommand = changedCommand.copyWith(label: labelController.text));
+    Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(label: labelController.text));
   }
 
   @override
   void initState() {
-    changedCommand = widget.command.copyWith();
-
-    labelController = TextEditingController(text: changedCommand.label);
+    labelController = TextEditingController(text: widget.command.label);
     labelController.addListener(labelChanged);
 
     super.initState();
@@ -56,11 +51,11 @@ class _MeasurementCommandControlState extends State<MeasurementCommandControl> {
   Widget createViewContent() {
     return Row(
       children: [
-        Text(changedCommand.label, style: smallStyleBold,),
+        Text(widget.command.label, style: smallStyleBold,),
         hspacing,
-        Text('${changedCommand.value.toStringAsFixed(changedCommand.decimals)} ${changedCommand.unit.shortLabel}', style: smallStyle,),
+        Text('${widget.command.value.toStringAsFixed(widget.command.decimals)} ${widget.command.unit.shortLabel}', style: smallStyle,),
         const Spacer(),
-        if (!widget.sorting && widget.command.isValidated && !widget.command.valid && widget.command.errors.isNotEmpty)
+        if (!widget.sorting && widget.command.validated && !widget.command.valid && widget.command.errors.isNotEmpty)
           Tooltip(
             message: widget.command.errors.join('\n'),
             child: const Icon(Icons.error_outline),
@@ -87,11 +82,16 @@ class _MeasurementCommandControlState extends State<MeasurementCommandControl> {
           children: [
             const SmallLabel(label: 'Label'),
             hspacing,
-            SmallTextField(controller: labelController, width: 100),
+            SmallTextField(
+              key: GlobalObjectKey('${widget.command.id}-label'),
+              controller: labelController, 
+              width: 100
+            ),
             hspacing,
             const SmallLabel(label: 'Unit'),
             hspacing,
             DropdownButton<Unit>(
+              key: GlobalObjectKey('${widget.command.id}-unit'),
               isDense: true,
               autofocus: false,
               style: smallStyle,
@@ -102,9 +102,9 @@ class _MeasurementCommandControlState extends State<MeasurementCommandControl> {
                 for (Unit unit in Unit.values)
                   DropdownMenuItem(value: unit, child: Text(unit.label))
               ],
-              value: changedCommand.unit,
+              value: widget.command.unit,
               onChanged: (value) {
-                setState(() => changedCommand = changedCommand.copyWith(unit: value));
+                Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(unit: value));
               },
             ),
 
@@ -118,13 +118,13 @@ class _MeasurementCommandControlState extends State<MeasurementCommandControl> {
             SizedBox(
               width: 180,
               child: SpinBox(
+                key: GlobalObjectKey('${widget.command.id}-dec'),
                 textStyle: smallStyle,
-                onChanged: (value) => setState(() {
-                  changedCommand = changedCommand.copyWith(decimals: value.toInt());
-                }),
+                onChanged: (value) => 
+                  Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(decimals: value.toInt())),
                 min: 0,
                 max: 5,
-                value: changedCommand.decimals.toDouble(),
+                value: widget.command.decimals.toDouble(),
               ),
             )
           ],
@@ -137,15 +137,14 @@ class _MeasurementCommandControlState extends State<MeasurementCommandControl> {
             SizedBox(
               width: 180,
               child: SpinBox(
+                key: GlobalObjectKey('${widget.command.id}-min'),
                 textStyle: smallStyle,
-                onChanged: (value) => setState(() {
-                  changedCommand = changedCommand.copyWith(minValue: value);
-                }),
-                step: 1 / pow(10, changedCommand.decimals),
-                decimals: changedCommand.decimals,
-                value: changedCommand.minValue,
+                onChanged: (value) => Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(minValue: value)),
+                step: 1 / pow(10, widget.command.decimals),
+                decimals: widget.command.decimals,
+                value: widget.command.minValue,
                 min: -100000,
-                max: changedCommand.maxValue,
+                max: widget.command.maxValue,
               ),
             )
           ],
@@ -158,14 +157,13 @@ class _MeasurementCommandControlState extends State<MeasurementCommandControl> {
             SizedBox(
               width: 180,
               child: SpinBox(
+                key: GlobalObjectKey('${widget.command.id}-max'),
                 textStyle: smallStyle,
-                onChanged: (value) => setState(() {
-                  changedCommand = changedCommand.copyWith(maxValue: value);
-                }),
-                step: 1 / pow(10, changedCommand.decimals),
-                decimals: changedCommand.decimals,
-                value: changedCommand.maxValue,
-                min: changedCommand.minValue,
+                onChanged:(value) => Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(maxValue: value)),
+                step: 1 / pow(10, widget.command.decimals),
+                decimals: widget.command.decimals,
+                value: widget.command.maxValue,
+                min: widget.command.minValue,
                 max: 100000,
               ),
             )
@@ -179,15 +177,15 @@ class _MeasurementCommandControlState extends State<MeasurementCommandControl> {
             SizedBox(
               width: 180,
               child: SpinBox(
+                key: GlobalObjectKey('${widget.command.id}-def'),
                 textStyle: smallStyle,
-                onChanged: (value) => setState(() {
-                  changedCommand = changedCommand.copyWith(value: value);
-                }),
-                step: 1 / pow(10, changedCommand.decimals),
-                decimals: changedCommand.decimals,
-                value: changedCommand.value,
-                min: changedCommand.minValue,
-                max: changedCommand.maxValue,
+                onChanged: (value) => 
+                  Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(value: value)),
+                step: 1 / pow(10, widget.command.decimals),
+                decimals: widget.command.decimals,
+                value: widget.command.value,
+                min: widget.command.minValue,
+                max: widget.command.maxValue,
               ),
             )
           ],
@@ -198,62 +196,6 @@ class _MeasurementCommandControlState extends State<MeasurementCommandControl> {
 
   @override
   Widget build(BuildContext context) {
-    double controlHeight = 60;
-    if (editing && !widget.sorting) {
-      controlHeight = 320;
-    }
-
-    return SizedBox(
-      height: controlHeight,
-      child: Container(
-        decoration: BoxDecoration(
-          color: (widget.command.validated && !widget.command.valid) ? Colors.red.withAlpha(20) : Colors.grey.shade100,
-          border: Border.all(color: Colors.grey),
-          borderRadius: const BorderRadius.all(Radius.circular(5)),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(8),
-          child: Row(
-            children: [
-              Expanded(
-                child: (editing && !widget.sorting) ? createEditContent() : createViewContent(),
-              ),
-              if (!widget.sorting)
-              Column(
-                children: [
-                  IconButton(
-                    onPressed: () {
-                      if (editing) {
-                        widget.finishedEditing(changedCommand);
-                      }
-                      setState(() => editing = !editing);
-                    }, 
-                    icon: editing ? const Icon(Icons.check) : const Icon(Icons.edit),
-                  ),
-                  if (editing)
-                    IconButton(
-                      onPressed: () => widget.finishedEditing(changedCommand), 
-                      icon: const Icon(Icons.refresh)
-                    ),
-                  const Spacer(),
-                  if (editing && widget.command.validated && !widget.command.valid && widget.command.errors.isNotEmpty)
-                    Tooltip(
-                      message: widget.command.errors.join('\n'),
-                      child: const Icon(Icons.error_outline),
-                    ),
-                  if (editing && widget.command.validated && !widget.command.valid && widget.command.errors.isNotEmpty)
-                    const Spacer(),
-                  if (editing)
-                    IconButton(
-                      onPressed: () => Provider.of<DrawingsModel>(context, listen: false).deleteCommand(commandId: changedCommand.id), 
-                      icon: const Icon(Icons.delete)
-                    ),
-                ],
-              )
-            ],
-          ),
-        ),
-      ),
-    );
+    return (widget.editing && !widget.sorting) ? createEditContent() : createViewContent();
   }
 }

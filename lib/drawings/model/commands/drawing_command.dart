@@ -15,30 +15,36 @@ enum DrawingCommandTypes {
 abstract class DrawingCommand {
   final String id;
   final String label;
+
+  final bool valid;
+  final bool validated;
   final List<String> errors;
 
   const DrawingCommand({
     required this.id,
     required this.label,
-    required this.errors,
+    this.valid = false,
+    this.validated = false,
+    this.errors = const[],
   });
 
-  DrawingCommand offset(double x, double y);
-  Map<String, Object> toJson();
+  double get editHeight;
   
-  void paint(Canvas canvas, Size size, TextStyle style, Drawing drawing);
+  Map<String, Object> toJson();  
+  void paint(Canvas canvas, Size size, Drawing drawing, bool selected);
   
   DrawingCommand deleteReference({required String commandId});
 
   DrawingCommand clearValidation();
   DrawingCommand validate(Drawing drawing);
-  bool get isValidated;
+
   // Get the Ids of dependent commands
   Set<String> dependencies(Drawing drawing);
+
   DrawingCommand markAsCyclic(String cycleDescription);
 
   @override
-  int get hashCode => id.hashCode ^ label.hashCode;
+  int get hashCode => id.hashCode ^ label.hashCode ^ valid.hashCode ^ validated.hashCode ^ errors.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -47,5 +53,7 @@ abstract class DrawingCommand {
     runtimeType == other.runtimeType &&
     id == other.id &&
     label == other.label &&
+    valid == other.valid &&
+    validated == other.validated &&
     listEquals(errors, other.errors);
 }
