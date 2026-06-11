@@ -7,6 +7,7 @@ import 'package:knitty_griddy/drawings/drawing_editor/command_controls/small_tex
 import 'package:knitty_griddy/drawings/model/commands/measurement_command.dart';
 import 'package:knitty_griddy/drawings/model/drawings_model.dart';
 import 'package:knitty_griddy/utils/constants.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
 class MeasurementCommandControl extends StatefulWidget {
@@ -26,34 +27,32 @@ class MeasurementCommandControl extends StatefulWidget {
 }
 
 class _MeasurementCommandControlState extends State<MeasurementCommandControl> {
-  late TextEditingController labelController;
 
-  void labelChanged() {
-    Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(label: labelController.text));
+  void labelChanged(String newText) {
+    if (widget.command.label != newText) {
+      Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(label: newText));
+    }
   }
 
   @override
   void initState() {
-    labelController = TextEditingController(text: widget.command.label);
-    labelController.addListener(labelChanged);
-
     super.initState();
   }
 
   @override
   void dispose() {
-    labelController.removeListener(labelChanged);
-    labelController.dispose();
-
     super.dispose();
   }
 
   Widget createViewContent() {
     return Row(
       children: [
-        Text(widget.command.label, style: smallStyleBold,),
+        const Icon(Symbols.square_foot),
         hspacing,
-        Text('${widget.command.value.toStringAsFixed(widget.command.decimals)} ${widget.command.unit.shortLabel}', style: smallStyle,),
+        Text(widget.command.label, style: smallStyleBold),
+        hspacing,
+        Text('${widget.command.value.toStringAsFixed(widget.command.decimals)} ${widget.command.unit.shortLabel}', 
+          style: smallStyle, overflow: TextOverflow.ellipsis,),
         const Spacer(),
         if (!widget.sorting && widget.command.validated && !widget.command.valid && widget.command.errors.isNotEmpty)
           Tooltip(
@@ -84,8 +83,9 @@ class _MeasurementCommandControlState extends State<MeasurementCommandControl> {
             hspacing,
             SmallTextField(
               key: GlobalObjectKey('${widget.command.id}-label'),
-              controller: labelController, 
-              width: 100
+              initialText: widget.command.label,
+              width: 100,
+              onTextChanged: labelChanged,
             ),
             hspacing,
             const SmallLabel(label: 'Unit'),
@@ -104,7 +104,9 @@ class _MeasurementCommandControlState extends State<MeasurementCommandControl> {
               ],
               value: widget.command.unit,
               onChanged: (value) {
-                Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(unit: value));
+                if (value != widget.command.unit) {
+                  Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(unit: value));
+                }
               },
             ),
 
@@ -120,8 +122,11 @@ class _MeasurementCommandControlState extends State<MeasurementCommandControl> {
               child: SpinBox(
                 key: GlobalObjectKey('${widget.command.id}-dec'),
                 textStyle: smallStyle,
-                onChanged: (value) => 
-                  Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(decimals: value.toInt())),
+                onChanged: (value) {
+                  if (value != widget.command.decimals.toDouble()) {
+                    Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(decimals: value.toInt()));
+                  }
+                },
                 min: 0,
                 max: 5,
                 value: widget.command.decimals.toDouble(),
@@ -139,7 +144,11 @@ class _MeasurementCommandControlState extends State<MeasurementCommandControl> {
               child: SpinBox(
                 key: GlobalObjectKey('${widget.command.id}-min'),
                 textStyle: smallStyle,
-                onChanged: (value) => Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(minValue: value)),
+                onChanged: (value) {
+                  if (value != widget.command.minValue) {
+                    Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(minValue: value));
+                  }
+                },
                 step: 1 / pow(10, widget.command.decimals),
                 decimals: widget.command.decimals,
                 value: widget.command.minValue,
@@ -159,7 +168,11 @@ class _MeasurementCommandControlState extends State<MeasurementCommandControl> {
               child: SpinBox(
                 key: GlobalObjectKey('${widget.command.id}-max'),
                 textStyle: smallStyle,
-                onChanged:(value) => Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(maxValue: value)),
+                onChanged:(value) {
+                  if (value != widget.command.maxValue) {
+                    Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(maxValue: value));
+                  }
+                },
                 step: 1 / pow(10, widget.command.decimals),
                 decimals: widget.command.decimals,
                 value: widget.command.maxValue,
@@ -179,8 +192,11 @@ class _MeasurementCommandControlState extends State<MeasurementCommandControl> {
               child: SpinBox(
                 key: GlobalObjectKey('${widget.command.id}-def'),
                 textStyle: smallStyle,
-                onChanged: (value) => 
-                  Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(value: value)),
+                onChanged: (value) {
+                  if (value != widget.command.decimals) {
+                    Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(value: value));
+                  }
+                },
                 step: 1 / pow(10, widget.command.decimals),
                 decimals: widget.command.decimals,
                 value: widget.command.value,

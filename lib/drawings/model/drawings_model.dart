@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:id_gen/id_gen.dart';
 import 'package:knitty_griddy/drawings/model/commands/curve_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
@@ -125,6 +124,7 @@ class DrawingsModel extends ChangeNotifier {
       _drawingsModelObject = _drawingsModelObject.copyWith(
         drawingInfos: [...drawingInfos, DrawingInfo(id: drawing.id, name: drawing.name, description: drawing.description)],
       );
+
       _saveDrawingInfos();
       notifyListeners();
     }
@@ -147,6 +147,39 @@ class DrawingsModel extends ChangeNotifier {
       drawing: drawing
     );
 
+    _drawingsModelObject = _drawingsModelObject.copyWith(
+      drawing: _drawingsModelObject.drawing.validate()
+    );
+      
+
+    notifyListeners();
+  }
+
+  void setDrawingName(String newName) {
+    _drawingsModelObject = _drawingsModelObject.copyWith(
+      drawing: _drawingsModelObject.drawing.copyWith(
+        name: newName,
+      ),
+      drawingInfos: _drawingsModelObject.drawingInfos.map((di) => di.id != _drawingsModelObject.drawing.id ? di : di.copyWith(
+        name: newName,
+      )).toList()
+    );
+
+    _saveDrawingInfos();
+    notifyListeners();
+  }
+
+  void setDrawingDescription(String newDescription) {
+    _drawingsModelObject = _drawingsModelObject.copyWith(
+      drawing: _drawingsModelObject.drawing.copyWith(
+        description: newDescription,
+      ),
+      drawingInfos: _drawingsModelObject.drawingInfos.map((di) => di.id != _drawingsModelObject.drawing.id ? di : di.copyWith(
+        description: newDescription,
+      )).toList()
+    );
+
+    _saveDrawingInfos();
     notifyListeners();
   }
 
@@ -157,7 +190,7 @@ class DrawingsModel extends ChangeNotifier {
     _drawingsModelObject = _drawingsModelObject.copyWith(
       drawing: _drawingsModelObject.drawing.copyWith(
         commands: [..._drawingsModelObject.drawing.commands, 
-          MeasurementCommand(id: id, label: _drawingsModelObject.drawing.nextMeasurementLabel)]
+          MeasurementCommand(id: id, label: _drawingsModelObject.drawing.nextMeasurementLabel, initiallyOpen: true)]
       )
     );
 
@@ -175,7 +208,7 @@ class DrawingsModel extends ChangeNotifier {
     _drawingsModelObject = _drawingsModelObject.copyWith(
       drawing: _drawingsModelObject.drawing.copyWith(
         commands: [..._drawingsModelObject.drawing.commands, 
-          VariableCommand(id: id, label: _drawingsModelObject.drawing.nextVariableLabel)]
+          VariableCommand(id: id, label: _drawingsModelObject.drawing.nextVariableLabel, initiallyOpen: true)]
       )
     );
 
@@ -193,7 +226,7 @@ class DrawingsModel extends ChangeNotifier {
     _drawingsModelObject = _drawingsModelObject.copyWith(
       drawing: _drawingsModelObject.drawing.copyWith(
         commands: [..._drawingsModelObject.drawing.commands, 
-          PointCommand(id: id, label: _drawingsModelObject.drawing.nextPointLabel)]
+          PointCommand(id: id, label: _drawingsModelObject.drawing.nextPointLabel, initiallyOpen: true)]
       )
     );
 
@@ -211,7 +244,7 @@ class DrawingsModel extends ChangeNotifier {
     _drawingsModelObject = _drawingsModelObject.copyWith(
       drawing: _drawingsModelObject.drawing.copyWith(
         commands: [..._drawingsModelObject.drawing.commands, 
-          LineCommand(id: id, label: _drawingsModelObject.drawing.nextLineLabel)]
+          LineCommand(id: id, label: _drawingsModelObject.drawing.nextLineLabel, initiallyOpen: true)]
       )
     );
 
@@ -229,7 +262,7 @@ class DrawingsModel extends ChangeNotifier {
     _drawingsModelObject = _drawingsModelObject.copyWith(
       drawing: _drawingsModelObject.drawing.copyWith(
         commands: [..._drawingsModelObject.drawing.commands,
-          CurveCommand(id: id, label: _drawingsModelObject.drawing.nextCurveLabel)]
+          CurveCommand(id: id, label: _drawingsModelObject.drawing.nextCurveLabel, initiallyOpen: true)]
       )
     );
 
@@ -242,17 +275,19 @@ class DrawingsModel extends ChangeNotifier {
     return id;
   }
 
-  void changeDrawingCommand(DrawingCommand newCommand) {
+  void changeDrawingCommand(DrawingCommand newCommand, {bool validate = true}) {
     _drawingsModelObject = _drawingsModelObject.copyWith(
       drawing: _drawingsModelObject.drawing.copyWith(
         commands: _drawingsModelObject.drawing.commands.map((c) => c.id != newCommand.id ? c : newCommand).toList()
       )
     );
 
-    _drawingsModelObject = _drawingsModelObject.copyWith(
-      drawing: _drawingsModelObject.drawing.validate()
-    );
-
+    if (validate) {
+      _drawingsModelObject = _drawingsModelObject.copyWith(
+        drawing: _drawingsModelObject.drawing.validate()
+      );
+    }
+    
     _storeForUndo();
     notifyListeners();
   }

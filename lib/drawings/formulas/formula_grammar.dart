@@ -1,6 +1,7 @@
 
 import 'dart:math';
 
+import 'package:knitty_griddy/drawings/model/commands/line_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/measurement_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/variable_command.dart';
 import 'package:knitty_griddy/drawings/model/drawing.dart';
@@ -94,20 +95,18 @@ class FormulaGrammar extends GrammarDefinition {
       return failure(p[1].message);
     }
 
-    MeasurementCommand? m = drawing.measurementByName(p[1]);
+    String measurementName = ((p[1]) as String).replaceAll('_', ' ');
+    MeasurementCommand? m = drawing.measurementByName(measurementName);
     if (m == null) {
-      throw FormulaException(errorMessage: 'Measurement ${p[1]} does not exist', shouldRetry: false);
-//      throw MeasurementDoesNotExistException(measurementName: p[1]);
+      throw FormulaException(errorMessage: 'Measurement $measurementName does not exist', shouldRetry: false);
     }
 
     if (!m.validated) {
-      throw FormulaException(errorMessage: 'Measurement ${p[1]} is not validated', shouldRetry: true);
-//      throw MeasurementNotValidatedException(command: m);
+      throw FormulaException(errorMessage: 'Measurement $measurementName is not validated', shouldRetry: true);
     }
 
     if (!m.valid) {
-      throw FormulaException(errorMessage: 'Measurement ${p[1]} has errors', shouldRetry: false);
-//      throw MeasurementNotValidException(command: m);
+      throw FormulaException(errorMessage: 'Measurement $measurementName has errors', shouldRetry: false);
     }
 
     return m.valueInMM;
@@ -118,20 +117,18 @@ class FormulaGrammar extends GrammarDefinition {
       return failure(p[1].message);
     }
 
-    VariableCommand? v = drawing.variableByName(p[1]);
+    String varName = ((p[1]) as String).replaceAll('_', ' ');
+    VariableCommand? v = drawing.variableByName(varName);
     if (v == null) {
-      throw FormulaException(errorMessage: 'Variable ${p[1]} does not exist', shouldRetry: false);
-//      throw VariableDoesNotExistException(variableName: p[1]);
+      throw FormulaException(errorMessage: 'Variable $varName does not exist', shouldRetry: false);
     }
 
     if (!v.validated) {
-      throw FormulaException(errorMessage: 'Variable ${p[1]} is not validated', shouldRetry: true);
-//      throw VariableNotValidatedException(command: v);
+      throw FormulaException(errorMessage: 'Variable $varName is not validated', shouldRetry: true);
     }
 
     if (!v.valid) {
-      throw FormulaException(errorMessage: 'Variable ${p[1]} has errors', shouldRetry: false);
-//      throw VariableNotValidException(command: v);
+      throw FormulaException(errorMessage: 'Variable $varName has errors', shouldRetry: false);
     }
 
     return v.value(drawing);
@@ -150,17 +147,38 @@ class FormulaGrammar extends GrammarDefinition {
     }
   });
 
-  // Maths functions like cos(x), max(x, y), etc
-  Parser mathsfunction() => seq2(
-    seq3(char('#'),letter(), word().star()).flatten('function name expected').trim(),
-    seq3(
-      char('(').trim(),
-      ref0(term).starSeparated(char(',')).map((list) {
-        return list.elements;
-      }),
-      char(')').trim(),
-    ).map3((_, list, __) => list)
-  ).map2((name, args) {
+  Parser linelength() => 
+    seq2(
+      string('#linelength'),
+      seq3(
+        char('(').trim(),
+        (word().star().trim().flatten()),
+        char(')').trim()).map3((_, label, __) => label)
+    ).map2((_, lineLabel) {
+      LineCommand? line = drawing.lineByName(lineLabel);
+      if (line == null) {
+        throw FormulaException(errorMessage: 'Line $lineLabel does not exist', shouldRetry: false);
+      }
+      if (!line.validated) {
+        throw FormulaException(errorMessage: 'Line $lineLabel is not validated', shouldRetry: true);
+      }
+      if (!line.valid) {
+        throw FormulaException(errorMessage: 'Line $lineLabel has errors', shouldRetry: false);
+      }
+      return line.lengthInMM(drawing);
+    });
+
+  Parser mathsExpression() =>
+    seq2(
+      seq3(char('#'),letter(), word().star()).flatten('function name expected').trim(),
+      seq3(
+        char('(').trim(),
+        ref0(term).starSeparated(char(',')).map((list) {
+          return list.elements;
+        }),
+        char(')').trim()
+      ).map3((_, list, __) => list)
+    ).map2((name, args) {
     // Here we get a function name and the args list. E.g. cos(5) will give name cos and args [5]
     // Original would create an 'Application' here, but I'll just perform the maths right here and return
     // a double
@@ -176,7 +194,9 @@ class FormulaGrammar extends GrammarDefinition {
           case '#atan': return atan(args[0]);
           case '#exp': return exp(args[0]);
           case '#log': return log(args[0]);
-          case '#sqrt': return sqrt(args[0]);
+          case '#sqrt': {
+            return sqrt(args[0]);
+          }
           case '#pow': return pow(args[0], 2);
           case '#abs': return (args[0] as double).abs();
           case '#ceil': return (args[0] as double).ceil();
@@ -185,7 +205,7 @@ class FormulaGrammar extends GrammarDefinition {
           case '#toRadians': return (MathUtitilies.toRadians(args[0] as double));
           case '#toDegrees': return (MathUtitilies.toDegrees(args[0] as double));
           default:
-            throw ArgumentError.value(name, 'Unknown function', 'Unknown function $name');
+            throw FormulaException(errorMessage: 'Unknown function $name', shouldRetry: false);
         }
       case 2:
         switch (name) {
@@ -195,11 +215,14 @@ class FormulaGrammar extends GrammarDefinition {
           case '#power': return pow(args[0] as double, args[1] as double);
 
           default:
-            throw ArgumentError.value(name, 'Unknown function', 'Unknown function $name');
+            throw FormulaException(errorMessage: 'Unknown function $name', shouldRetry: false);
         }
       default:
-        throw ArgumentError.value(name, 'Unknown function', 'Unknown function $name');
+        throw FormulaException(errorMessage: 'Unknown function $name', shouldRetry: false);
     }
   });
 
+  // Maths functions like cos(x), max(x, y), etc or linelength(linelabel)
+  Parser mathsfunction() => (ref0(linelength) | ref0(mathsExpression));
+    
 }

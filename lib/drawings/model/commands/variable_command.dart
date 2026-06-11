@@ -8,6 +8,9 @@ import 'package:knitty_griddy/drawings/model/drawing.dart';
 class VariableCommand extends DrawingCommand {
   final String formula;
 
+  // Validated cache  
+  final double? storedValue;
+
   const VariableCommand({
     required super.id,
     required super.label,
@@ -15,6 +18,8 @@ class VariableCommand extends DrawingCommand {
     super.validated,
     super.valid,
     super.errors,
+    super.initiallyOpen,
+    this.storedValue,
   });
 
   VariableCommand copyWith({
@@ -23,6 +28,8 @@ class VariableCommand extends DrawingCommand {
     bool? validated,
     bool? valid,
     List<String>? errors,
+    bool? initiallyOpen,
+    double? storedValue,
   }) {
     return VariableCommand(
       id: id, 
@@ -31,11 +38,23 @@ class VariableCommand extends DrawingCommand {
       validated: validated?? this.validated,
       valid: valid?? this.valid,
       errors: errors?? this.errors,
+      initiallyOpen: initiallyOpen?? this.initiallyOpen,
+      storedValue: storedValue?? this.storedValue,
     );
   }
 
   @override
   double get editHeight => 165;
+
+  @override
+  Rect getBoundingBox(Drawing drawing) {
+    return Rect.zero;
+  }
+
+  @override
+  VariableCommand setInitiallyClosed() {
+    return copyWith(initiallyOpen: false);
+  }
 
   @override
   VariableCommand markAsCyclic(String cycleDescription) {
@@ -53,7 +72,7 @@ class VariableCommand extends DrawingCommand {
 
   @override
   VariableCommand clearValidation() {
-    return copyWith(validated: false, valid: false, errors: const[]);
+    return copyWith(validated: false, valid: false, errors: const[], storedValue: null);
   }
 
   @override
@@ -62,7 +81,8 @@ class VariableCommand extends DrawingCommand {
   }
 
   double? value(Drawing drawing) {
-    return FormulaExpression.validate(formula: formula, drawing: drawing).result;
+    return storedValue;
+//    return FormulaExpression.validate(formula: formula, drawing: drawing).result;
   }
 
   @override
@@ -72,7 +92,7 @@ class VariableCommand extends DrawingCommand {
   @override
   Map<String, Object> toJson() {
     return {
-      'type': DrawingCommandTypes.variableCommand,
+      'type': DrawingCommandTypes.variableCommand.name,
       'id': id,
       'label': label,
       'formula': formula,
@@ -97,10 +117,11 @@ class VariableCommand extends DrawingCommand {
       formula == other.formula &&
       valid == other.valid &&
       validated == other.validated &&
-      listEquals(errors, other.errors);
+      listEquals(errors, other.errors) &&
+      storedValue == other.storedValue;
   
   @override
-  int get hashCode => super.hashCode ^ formula.hashCode;
+  int get hashCode => super.hashCode ^ formula.hashCode ^ storedValue.hashCode;
 
   @override
   DrawingCommand validate(Drawing drawing) {
@@ -122,6 +143,7 @@ class VariableCommand extends DrawingCommand {
       valid: isvalid,
       validated: (isvalid || !retryValidation),
       errors: validationErrors,
+      storedValue: isvalid ? res.result : null,
     );
   }
 

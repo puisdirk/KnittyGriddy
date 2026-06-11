@@ -73,7 +73,7 @@ class _FormulaFieldControlState extends State<FormulaFieldControl> {
               query: autocompleteQuery.query.toLowerCase(),
               onChooseMeasurement: (MeasurementCommand command) {
                 final MultiTriggerAutocompleteState autocompleteState = MultiTriggerAutocomplete.of(context);
-                autocompleteState.acceptAutocompleteOption(command.label);
+                autocompleteState.acceptAutocompleteOption(command.label.replaceAll(' ', '_'));
               }
             );
           }
@@ -86,7 +86,7 @@ class _FormulaFieldControlState extends State<FormulaFieldControl> {
               query: autocompleteQuery.query.toLowerCase(),
               onChooseVariable: (VariableCommand command) {
                 final MultiTriggerAutocompleteState autocompleteState = MultiTriggerAutocomplete.of(context);
-                autocompleteState.acceptAutocompleteOption(command.label);
+                autocompleteState.acceptAutocompleteOption(command.label.replaceAll(' ', '_'));
               }
             );
           }

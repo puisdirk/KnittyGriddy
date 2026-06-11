@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/drawing_editor_control.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/drawing_toolbar.dart';
+import 'package:knitty_griddy/drawings/model/drawing.dart';
 import 'package:knitty_griddy/drawings/model/drawings_model.dart';
+import 'package:knitty_griddy/utils/constants.dart';
 import 'package:provider/provider.dart';
 
 class DrawingEditorPage extends StatefulWidget {
@@ -14,6 +16,7 @@ class DrawingEditorPage extends StatefulWidget {
 
 class _DrawingEditorPageState extends State<DrawingEditorPage> {
   late FocusNode _focusNode;
+  bool showDrawingNameAndDescription = false;
 
   @override
   void initState() {
@@ -30,7 +33,6 @@ class _DrawingEditorPageState extends State<DrawingEditorPage> {
   @override
   Widget build(BuildContext context) {
     FocusScope.of(context).autofocus(_focusNode);
-    String drawingName = Provider.of<DrawingsModel>(context, listen: false).drawing.name;
 
     return Scaffold(
       appBar: AppBar(
@@ -41,16 +43,39 @@ class _DrawingEditorPageState extends State<DrawingEditorPage> {
             Navigator.maybePop(context);
           },
         ),
-        title: Text('Drawing - $drawingName'),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Selector<DrawingsModel, String>(
+              selector: (_, model) => model.drawing.name,
+              builder: (context, name, _) {
+                return Text('Drawing - $name');
+              }
+            ),
+            hspacing,
+            IconButton(
+              onPressed: () => setState(() => showDrawingNameAndDescription = !showDrawingNameAndDescription),
+              icon: Icon(showDrawingNameAndDescription ? Icons.check : Icons.edit)
+            ),
+          ],
+        ),
         backgroundColor: Colors.grey.shade300,
-        bottom: const PreferredSize(
-          preferredSize: Size(2000, 40), 
-          child: DrawingToolbar()
+        bottom: PreferredSize(
+          preferredSize: Size(2000, showDrawingNameAndDescription ? 160 : 40), 
+          child: Selector<DrawingsModel, Drawing>(
+            selector: (_, model) => model.drawing,
+            builder: (context, drawing, _) {
+              return DrawingToolbar(
+                drawing: drawing,
+                showDrawingNameAndDescription: showDrawingNameAndDescription,
+              );
+            }
+          )
         ),
         actions: [
           IconButton(
             onPressed: () {
-              // TODO: implement
+              Provider.of<DrawingsModel>(context, listen: false).exportDrawing();
             }, 
             icon: const Icon(Icons.ios_share)
           )

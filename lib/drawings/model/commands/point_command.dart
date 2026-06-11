@@ -8,6 +8,7 @@ import 'package:knitty_griddy/drawings/model/commands/curve_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/line_command.dart';
 import 'package:knitty_griddy/drawings/model/drawing.dart';
+import 'package:knitty_griddy/utils/constants.dart';
 import 'package:knitty_griddy/utils/math_utitilies.dart';
 
 const String originId = '063f22af-bc7f-4e77-bc8b-60e48c821259';
@@ -59,6 +60,9 @@ class PointCommand extends DrawingCommand {
   final String intersectionLine1Id;
   final String intersectionLine2Id;
 
+  // Validated cache
+  final Offset? storedCoordinate;
+
   const PointCommand({
     required super.id,
     required super.label,
@@ -76,6 +80,8 @@ class PointCommand extends DrawingCommand {
     super.validated,
     super.valid,
     super.errors,
+    super.initiallyOpen,
+    this.storedCoordinate,
   }) : 
     pointDefinitionType = pointDefinitionType?? PointDefinitionType.relativeToPoint,
     direction = direction?? RelativePointDirection.north;
@@ -96,6 +102,8 @@ class PointCommand extends DrawingCommand {
     bool? validated,
     bool? valid,
     List<String>? errors,
+    bool? initiallyOpen,
+    Offset? storedCoordinate,
   }) {
     return PointCommand(
       id: id,
@@ -114,6 +122,8 @@ class PointCommand extends DrawingCommand {
       validated: validated?? this.validated,
       valid: valid?? this.valid,
       errors: errors?? this.errors,
+      initiallyOpen: initiallyOpen?? this.initiallyOpen,
+      storedCoordinate: storedCoordinate?? this.storedCoordinate,
     );
   }
 
@@ -133,6 +143,22 @@ class PointCommand extends DrawingCommand {
       case PointDefinitionType.onIntersection:
         return 190;
     }
+  }
+
+  @override
+  Rect getBoundingBox(Drawing drawing) {
+    if (valid) {
+      Offset? coord = getCoordinate(drawing);
+      if (coord != null) {
+        return Rect.fromPoints(coord - const Offset(1, 1), coord + const Offset(1, 1));
+      }
+    }
+    return Rect.zero;
+  }
+
+  @override
+  PointCommand setInitiallyClosed() {
+    return copyWith(initiallyOpen: false);
   }
 
   @override
@@ -158,7 +184,7 @@ class PointCommand extends DrawingCommand {
   @override
   Map<String, Object> toJson() {
     return {
-      'type': DrawingCommandTypes.pointCommand,
+      'type': DrawingCommandTypes.pointCommand.name,
       'id': id,
       'label': label,
       'pdt': pointDefinitionType.name,
@@ -185,7 +211,7 @@ class PointCommand extends DrawingCommand {
       direction: RelativePointDirection.values.byName(json['direction'] as String),
       directionAngleFormula: json['angle'] as String,
       onLineId: json['onlineid'] as String,
-      onLineFractionFormula: json['fraction'] as String,
+      onLineFractionFormula: json['onlinefraction'] as String,
       onCurveId: json['oncurveid'] as String,
       onCurveFractionFormula: json['oncurvefraction'] as String,
       intersectionLine1Id: json['isl1id'] as String,
@@ -213,20 +239,24 @@ class PointCommand extends DrawingCommand {
     intersectionLine2Id == other.intersectionLine2Id &&
     validated == other.validated &&
     valid == other.valid &&
-    listEquals(errors, other.errors);
+    listEquals(errors, other.errors) &&
+    storedCoordinate == other.storedCoordinate;
 
   @override
   int get hashCode => super.hashCode ^ pointDefinitionType.hashCode ^ 
     fromPointId.hashCode ^ distanceFormula.hashCode ^ direction.hashCode ^ directionAngleFormula.hashCode ^
     onLineId.hashCode ^ onLineFractionFormula.hashCode ^
     onCurveId.hashCode ^ onCurveFractionFormula.hashCode ^
-    intersectionLine1Id.hashCode ^ intersectionLine2Id.hashCode;
+    intersectionLine1Id.hashCode ^ intersectionLine2Id.hashCode ^
+    storedCoordinate.hashCode;
 
   Offset? getCoordinate(Drawing drawing) {
     if (id == originId) return Offset.zero;
 
     if (!valid) return null;
 
+    return storedCoordinate;
+/*
     switch (pointDefinitionType) {
       case PointDefinitionType.relativeToPoint:
         PointCommand? fromPoint = drawing.pointById(fromPointId);
@@ -299,6 +329,7 @@ class PointCommand extends DrawingCommand {
         // TODO: other def types
         return null;
     }
+*/
   }
 
   @override
@@ -316,10 +347,16 @@ class PointCommand extends DrawingCommand {
     Offset middle = Offset(size.width / 2, size.height / 2);
     coordinate += middle;
 
-    canvas.drawCircle(coordinate, 2, Paint()..color = selected ? Colors.purple : Colors.grey.shade700..style = PaintingStyle.stroke);
+    canvas.drawCircle(
+      coordinate, 
+      2, 
+      Paint()
+        ..color = selected ? selectedColor : Colors.grey.shade700
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = selected ? 2 : 1);
 
     // draw point label
-    TextStyle style = TextStyle(color: selected ? Colors.purple : Colors.grey[400]);
+    TextStyle style = TextStyle(color: selected ? selectedColor : Colors.grey[400]);
     final ParagraphBuilder paragraphBuilder = ParagraphBuilder(
       ParagraphStyle(
         fontSize: 10,
@@ -336,12 +373,11 @@ class PointCommand extends DrawingCommand {
     ..layout(ParagraphConstraints(width: size.width));
 
     canvas.drawParagraph(paragraph,  coordinate.translate(2, 0));
-
   }
 
   @override
   DrawingCommand clearValidation() {
-    return copyWith(validated: false, valid: false, errors: const[]);
+    return copyWith(validated: false, valid: false, errors: const[], storedCoordinate: null);
   }
   
   @override
@@ -377,33 +413,46 @@ class PointCommand extends DrawingCommand {
     bool retryValidation = true;
     List<String> validationErrors = [];
 
+    Offset? newStoredCoordinate;
+
     if (label.isEmpty) { isvalid = false; retryValidation = false; validationErrors.add('Requires a label'); }
     if (drawing.commands.any((c) => c.id != id && c.label == label)) { isvalid = false; retryValidation = false; validationErrors.add('Label should be unique'); }
 
     switch (pointDefinitionType) {
       case PointDefinitionType.relativeToPoint:
+        double offsetAngle = 0;
         if (direction == RelativePointDirection.angle) {
           FormulaParseResult res = FormulaExpression.validate(formula: directionAngleFormula, drawing: drawing, label: 'an angle');
           if (res.isInvalid) {
             isvalid = false;
             if (!res.shouldRetry) retryValidation = false;
             validationErrors.add(res.errorMessage);
+          } else {
+            offsetAngle = res.result!;
           }
+        } else {
+          offsetAngle = direction.angleInDegrees;
         }
 
+        double distance = 0;
         FormulaParseResult res = FormulaExpression.validate(formula: distanceFormula, drawing: drawing, label: 'a distance');
         if (res.isInvalid) {
           isvalid = false;
           if (!res.shouldRetry) retryValidation = false;
           validationErrors.add(res.errorMessage);
+        } else {
+          distance = res.result!;
         }
 
+        PointCommand? fromPoint;
         if (fromPointId.isEmpty) {
           isvalid = false; 
           retryValidation = false;
           validationErrors.add('Requires a reference point');
-        } else if (fromPointId != originId) {
-          PointCommand? fromPoint = drawing.pointById(fromPointId);
+        } else if (fromPointId == originId) {
+          fromPoint = origin;
+        } else {
+          fromPoint = drawing.pointById(fromPointId);
           if (fromPoint == null) {
             isvalid = false;
             retryValidation = false;
@@ -420,14 +469,21 @@ class PointCommand extends DrawingCommand {
           }
         }
 
+        if (isvalid) {
+          Offset offset = fromPoint!.getCoordinate(drawing)!;
+          offset += Offset.fromDirection(MathUtitilies.toRadians(offsetAngle), distance);
+          newStoredCoordinate = offset;
+        }
+
         break;
       case PointDefinitionType.onLine:
+        LineCommand? line;
         if (onLineId.isEmpty) {
           isvalid = false;
           retryValidation = false;
           validationErrors.add('Requires a reference line');
         } else {
-          LineCommand? line = drawing.lineById(onLineId);
+          line = drawing.lineById(onLineId);
           if (line == null) {
             isvalid = false;
             retryValidation = false;
@@ -442,20 +498,29 @@ class PointCommand extends DrawingCommand {
           }
         }
 
+        double fraction = 0;
         FormulaParseResult res = FormulaExpression.validate(formula: onLineFractionFormula, drawing: drawing, label: 'a fraction');
         if (res.isInvalid) {
           isvalid = false;
           if (!res.shouldRetry) retryValidation = false;
           validationErrors.add(res.errorMessage);
+        } else {
+          fraction = res.result!;
         }
+
+        if (isvalid) {
+          newStoredCoordinate = line!.pointOnLine(fraction, drawing);
+        }
+
         break;
       case PointDefinitionType.onCurve:
+        CurveCommand? curve;
         if (onCurveId.isEmpty) {
           isvalid = false;
           retryValidation = false;
           validationErrors.add('Requires a curve');
         } else {
-          CurveCommand? curve = drawing.curveById(onCurveId);
+          curve = drawing.curveById(onCurveId);
           if (curve == null) {
             isvalid = false;
             retryValidation = false;
@@ -470,30 +535,42 @@ class PointCommand extends DrawingCommand {
           }
         }
 
+        double fraction = 0;
         FormulaParseResult res = FormulaExpression.validate(formula: onCurveFractionFormula, drawing: drawing, label: 'a fraction');
         if (res.isInvalid) {
           isvalid = false;
           if (!res.shouldRetry) retryValidation = false;
           validationErrors.add(res.errorMessage);
+        } else {
+          fraction = res.result!;
         }
+
+        if (isvalid) {
+          Path p = curve!.getPath(drawing, Offset.zero)!;
+          newStoredCoordinate = curve.pointOnPath(p, fraction);
+        }
+
       case PointDefinitionType.onIntersection:
+        LineCommand? line1;
+        LineCommand? line2;
+        
         if (intersectionLine1Id.isEmpty) {
           isvalid = false;
           retryValidation = false;
           validationErrors.add('Requires Line 1');
         } else {
-          LineCommand? line = drawing.lineById(intersectionLine1Id);
-          if (line == null) {
+          line1 = drawing.lineById(intersectionLine1Id);
+          if (line1 == null) {
             isvalid = false;
             retryValidation = false;
             validationErrors.add('Line 1 does not exist');
-          } else if (!line.validated) {
+          } else if (!line1.validated) {
             // We are not valid, but we should retry
             isvalid = false;
-          } else if (!line.valid) {
+          } else if (!line1.valid) {
             isvalid = false;
             retryValidation = false;
-            validationErrors.add('Line ${line.label} has errors');
+            validationErrors.add('Line ${line1.label} has errors');
           }
         }
         if (intersectionLine2Id.isEmpty) {
@@ -501,20 +578,30 @@ class PointCommand extends DrawingCommand {
           retryValidation = false;
           validationErrors.add('Requires Line 2');
         } else {
-          LineCommand? line = drawing.lineById(intersectionLine2Id);
-          if (line == null) {
+          line2 = drawing.lineById(intersectionLine2Id);
+          if (line2 == null) {
             isvalid = false;
             retryValidation = false;
             validationErrors.add('Line 2 does not exist');
-          } else if (!line.validated) {
+          } else if (!line2.validated) {
             // We are not valid, but we should retry
             isvalid = false;
-          } else if (!line.valid) {
+          } else if (!line2.valid) {
             isvalid = false;
             retryValidation = false;
-            validationErrors.add('Line ${line.label} has errors');
+            validationErrors.add('Line ${line2.label} has errors');
           }
         }
+
+        if (isvalid) {
+          List<Offset> intersections = line1!.intersections(line2!, drawing);
+          if (intersections.isEmpty) {
+            newStoredCoordinate = line1.getStartCoordinate(drawing);
+          } else {
+            newStoredCoordinate = intersections.first;
+          }
+        }
+
         break;
     }
 
@@ -522,6 +609,7 @@ class PointCommand extends DrawingCommand {
       valid: isvalid,
       validated: (isvalid || !retryValidation),
       errors: validationErrors,
+      storedCoordinate: newStoredCoordinate,
     );
   }
 }

@@ -7,6 +7,7 @@ import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
 import 'package:knitty_griddy/drawings/model/drawing.dart';
 import 'package:knitty_griddy/drawings/model/infinite_line.dart';
+import 'package:knitty_griddy/utils/constants.dart';
 import 'package:knitty_griddy/utils/math_utitilies.dart';
 import 'package:vector_math/vector_math_64.dart' as vec;
 
@@ -14,6 +15,10 @@ import 'package:vector_math/vector_math_64.dart' as vec;
 class LineCommand extends DrawingCommand {
   final String fromPointId;
   final String toPointId;
+
+  // Validated cache  
+  final Offset? storedStartCoordinate;
+  final Offset? storedEndCoordinate;
 
   const LineCommand({
     required super.id,
@@ -23,6 +28,9 @@ class LineCommand extends DrawingCommand {
     super.validated,
     super.valid,
     super.errors,
+    super.initiallyOpen,
+    this.storedStartCoordinate,
+    this.storedEndCoordinate,
   });
 
   LineCommand copyWith({
@@ -32,6 +40,9 @@ class LineCommand extends DrawingCommand {
     bool? validated,
     bool? valid,
     List<String>? errors,
+    bool? initiallyOpen,
+    Offset? storedStartCoordinate,
+    Offset? storedEndCoordinate,
   }) {
     return LineCommand(
       id: id,
@@ -41,11 +52,32 @@ class LineCommand extends DrawingCommand {
       validated: validated?? this.validated,
       valid: valid?? this.valid,
       errors: errors?? this.errors,
+      initiallyOpen: initiallyOpen?? this.initiallyOpen,
+      storedStartCoordinate: storedStartCoordinate?? this.storedStartCoordinate,
+      storedEndCoordinate: storedEndCoordinate?? this.storedEndCoordinate,
     );
   }
 
   @override
   double get editHeight => 170;
+
+  @override
+  Rect getBoundingBox(Drawing drawing) {
+    if (valid) {
+      Offset? start = getStartCoordinate(drawing);
+      Offset? end = getEndCoordinate(drawing);
+      if (start != null && end != null) {
+        return Rect.fromPoints(start, end);
+      }
+    }
+
+    return Rect.zero;
+  }
+
+  @override
+  LineCommand setInitiallyClosed() {
+    return copyWith(initiallyOpen: false);
+  }
 
   @override
   LineCommand markAsCyclic(String cycleDescription) {
@@ -77,7 +109,7 @@ class LineCommand extends DrawingCommand {
   @override
   Map<String, Object> toJson() {
     return {
-      'type': DrawingCommandTypes.lineCommand,
+      'type': DrawingCommandTypes.lineCommand.name,
       'id': id,
       'label': label,
       'from': fromPointId,
@@ -105,10 +137,13 @@ class LineCommand extends DrawingCommand {
     toPointId == other.toPointId &&
     validated == other.validated &&
     valid == other.valid &&
-    listEquals(errors, other.errors);
+    listEquals(errors, other.errors) &&
+    storedStartCoordinate == other.storedStartCoordinate &&
+    storedEndCoordinate == other.storedEndCoordinate;
 
   @override
-  int get hashCode => super.hashCode ^ fromPointId.hashCode ^ toPointId.hashCode;
+  int get hashCode => super.hashCode ^ fromPointId.hashCode ^ toPointId.hashCode ^
+    storedStartCoordinate.hashCode ^ storedEndCoordinate.hashCode;
 
   double? lengthInMM(Drawing drawing) {
     Offset? startOffset = getStartCoordinate(drawing);
@@ -206,15 +241,11 @@ class LineCommand extends DrawingCommand {
   }
 
   Offset? getStartCoordinate(Drawing drawing) {
-    PointCommand? startPoint = drawing.pointById(fromPointId);
-    if (startPoint == null) return null;
-    return startPoint.getCoordinate(drawing);
+    return storedStartCoordinate;
   }
 
   Offset? getEndCoordinate(Drawing drawing) {
-    PointCommand? endPoint = drawing.pointById(toPointId);
-    if (endPoint == null) return null;
-    return endPoint.getCoordinate(drawing);
+    return storedEndCoordinate;
   }
 
   @override
@@ -239,7 +270,13 @@ class LineCommand extends DrawingCommand {
     start += middle;
     end += middle;
 
-    canvas.drawLine(start, end, Paint()..color = selected ? Colors.purple : Colors.grey.shade700..style = PaintingStyle.stroke);
+    canvas.drawLine(
+      start, 
+      end, 
+      Paint()
+        ..color = selected ? selectedColor : Colors.grey.shade700
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = selected ? 2 : 1);
 
     // draw line label
     Offset? midline = pointOnLine(0.3, drawing);
@@ -247,7 +284,7 @@ class LineCommand extends DrawingCommand {
     midline = midline.scale(1, -1);
     midline += middle;
 
-    TextStyle style = TextStyle(color: selected ? Colors.purple : Colors.grey[400]);
+    TextStyle style = TextStyle(color: selected ? selectedColor : Colors.grey[400]);
     final ParagraphBuilder paragraphBuilder = ParagraphBuilder(
       ParagraphStyle(
         fontSize: 10,
@@ -268,7 +305,8 @@ class LineCommand extends DrawingCommand {
 
   @override
   DrawingCommand clearValidation() {
-    return copyWith(validated: false, valid: false, errors: const[]);
+    return copyWith(validated: false, valid: false, errors: const[], 
+      storedStartCoordinate: null, storedEndCoordinate: null);
   }
   
   @override
@@ -280,12 +318,15 @@ class LineCommand extends DrawingCommand {
     if (label.isEmpty) { isvalid = false; retryValidation = false; validationErrors.add('Requires a label'); }
     if (drawing.commands.any((c) => c.id != id && c.label == label)) { isvalid = false; retryValidation = false; validationErrors.add('Label should be unique'); }
 
+    PointCommand? fromPoint;
     if (fromPointId.isEmpty) {
       isvalid = false; 
       retryValidation = false;
       validationErrors.add('Requires a source point');
-    } else if (fromPointId != originId) {
-      PointCommand? fromPoint = drawing.pointById(fromPointId);
+    } else if (fromPointId == originId) {
+      fromPoint = origin;
+    } else {
+      fromPoint = drawing.pointById(fromPointId);
       if (fromPoint == null) {
         isvalid = false;
         retryValidation = false;
@@ -302,12 +343,15 @@ class LineCommand extends DrawingCommand {
       }
     }
 
+    PointCommand? toPoint;
     if (toPointId.isEmpty) {
       isvalid = false; 
       retryValidation = false;
       validationErrors.add('Requires a target point');
-    } else if (toPointId != originId) {
-      PointCommand? toPoint = drawing.pointById(toPointId);
+    } else if (toPointId == originId) {
+      toPoint = origin;
+    } else {
+      toPoint = drawing.pointById(toPointId);
       if (toPoint == null) {
         isvalid = false;
         retryValidation = false;
@@ -328,6 +372,8 @@ class LineCommand extends DrawingCommand {
       valid: isvalid,
       validated: (isvalid || !retryValidation),
       errors: validationErrors,
+      storedStartCoordinate: isvalid ? fromPoint!.getCoordinate(drawing) : null,
+      storedEndCoordinate: isvalid ? toPoint!.getCoordinate(drawing) : null,
     );
   }
 }

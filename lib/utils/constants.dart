@@ -11,6 +11,9 @@ const TextStyle smallStyleBlue = TextStyle(fontSize: 10, color: Color.fromARGB(2
 const SizedBox hspacing = SizedBox(width: 10,);
 const SizedBox vspacing = SizedBox(height: 10,);
 
+const Color selectedColor = Colors.purple;
+const Color selectedColorLight = Color.fromARGB(60, 156, 39, 176);
+
 // Warning: also change defaultStitches when changing these
 const int defaultGridRows = 10;
 const int defaultGridColumns = 10;

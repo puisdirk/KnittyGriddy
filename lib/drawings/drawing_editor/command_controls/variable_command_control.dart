@@ -25,38 +25,27 @@ class VariableCommandControl extends StatefulWidget {
 }
 
 class _VariableCommandControlState extends State<VariableCommandControl> {
-  late TextEditingController labelController;
-
-  void labelChanged() {
-    Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(label: labelController.text));
+  
+  void labelChanged(String newText) {
+    if (widget.command.label != newText) {
+      Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(label: newText));
+    }
   }
 
-  void formulaChanged(String formula) {
-    Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(formula: formula));
-  }
-
-  @override
-  void initState() {    
-    labelController = TextEditingController(text: widget.command.label);
-    labelController.addListener(labelChanged);
-
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    labelController.removeListener(labelChanged);
-    labelController.dispose();
-
-    super.dispose();
+  void formulaChanged(String newFormula) {
+    if (widget.command.formula != newFormula) {
+      Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(formula: newFormula));
+    }
   }
 
   Widget createViewContent() {
     return Row(
       children: [
+        const Icon(Symbols.settop_component),
+        hspacing,
         Text(widget.command.label, style: smallStyleBold,),
         hspacing,
-        Text(widget.command.formula, style: smallStyle,),
+        Text(widget.command.formula, style: smallStyle, overflow: TextOverflow.ellipsis,),
         const Spacer(),
         if (!widget.sorting && widget.command.validated && !widget.command.valid && widget.command.errors.isNotEmpty)
           Tooltip(
@@ -87,8 +76,9 @@ class _VariableCommandControlState extends State<VariableCommandControl> {
             hspacing,
             SmallTextField(
               key: GlobalObjectKey('${widget.command.id}-label'),
-              controller: labelController, 
-              width: 100
+              initialText: widget.command.label,
+              width: 100,
+              onTextChanged: labelChanged,
             ),
           ]
         ),

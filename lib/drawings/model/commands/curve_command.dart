@@ -8,6 +8,7 @@ import 'package:knitty_griddy/drawings/formulas/formula_expression.dart';
 import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
 import 'package:knitty_griddy/drawings/model/drawing.dart';
+import 'package:knitty_griddy/utils/constants.dart';
 import 'package:knitty_griddy/utils/math_utitilies.dart';
 
 enum CurveDefinitionType {
@@ -57,6 +58,7 @@ class CurveCommand extends DrawingCommand {
     super.validated,
     super.valid,
     super.errors,
+    super.initiallyOpen,
   }) : curveDefinitionType = curveDefinitionType?? CurveDefinitionType.quadratic;
 
   CurveCommand copyWith({
@@ -76,6 +78,7 @@ class CurveCommand extends DrawingCommand {
     bool? validated,
     bool? valid,
     List<String>? errors,
+    bool? initiallyOpen,
   }) {
     return CurveCommand(
       id: id,
@@ -95,6 +98,7 @@ class CurveCommand extends DrawingCommand {
       validated: validated?? this.validated,
       valid: valid?? this.valid,
       errors: errors?? this.errors,
+      initiallyOpen: initiallyOpen?? this.initiallyOpen,
     );
   }
 
@@ -104,6 +108,20 @@ class CurveCommand extends DrawingCommand {
     if (curveDefinitionType == CurveDefinitionType.cubicFromPoints) return 240;
     if (curveDefinitionType == CurveDefinitionType.quadraticFromPoints) return 200;
     return 270;
+  }
+
+  @override
+  Rect getBoundingBox(Drawing drawing) {
+    if (valid) {
+      Path? p = getPath(drawing, Offset.zero);
+      if (p != null) return p.getBounds();
+    }
+    return Rect.zero;
+  }
+
+  @override
+  CurveCommand setInitiallyClosed() {
+    return copyWith(initiallyOpen: false);
   }
 
   @override
@@ -181,8 +199,8 @@ class CurveCommand extends DrawingCommand {
     return CurveCommand(
       id: json['id'] as String,
       label: json['label'] as String, 
-      startPointId: json['start'] as String,
-      endPointId: json['end'] as String, 
+      startPointId: json['from'] as String,
+      endPointId: json['to'] as String, 
       curveDefinitionType: CurveDefinitionType.values.byName(json['cdt'] as String),
       quadAmplitudeFormula: json['qamp'] as String,
       quadSlantFormula: json['qslant'] as String,
@@ -340,10 +358,15 @@ class CurveCommand extends DrawingCommand {
     Path? p = getPath(drawing, middle);
     if (p == null) return;
 
-    canvas.drawPath(p, Paint()..color = selected ? Colors.purple : Colors.grey.shade700..style = PaintingStyle.stroke);
+    canvas.drawPath(
+      p, 
+      Paint()
+        ..color = selected ? selectedColor : Colors.grey.shade700
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = selected ? 2 : 1);
 
     // draw curve label
-    TextStyle style = TextStyle(color: selected ? Colors.purple : Colors.grey[400]);
+    TextStyle style = TextStyle(color: selected ? selectedColor : Colors.grey[400]);
     final ParagraphBuilder paragraphBuilder = ParagraphBuilder(
       ParagraphStyle(
         fontSize: 10,
@@ -363,7 +386,11 @@ class CurveCommand extends DrawingCommand {
     canvas.drawParagraph(paragraph, labelPosition);
 
     // Draw control points and lines
-    Paint controlsPaint = Paint()..color = selected ? Colors.purple.withAlpha(60) : Colors.grey.withAlpha(60)..style = PaintingStyle.stroke..strokeWidth = .5;
+    Paint controlsPaint = Paint()
+      ..color = selected ? selectedColorLight : Colors.grey.withAlpha(60)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = selected ? 1 : .5;
+      
     if (curveDefinitionType == CurveDefinitionType.quadratic) {
       Offset controlCoordinate = getControlPointCoordinate(startCoordinate, endCoordinate, getQuadAmplitude(drawing)!, getQuadSlant(drawing)!);
       canvas.drawRect(Rect.fromCenter(center: controlCoordinate, width: 3, height: 3), controlsPaint);
