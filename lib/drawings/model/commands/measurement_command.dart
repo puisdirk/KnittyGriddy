@@ -32,10 +32,11 @@ class MeasurementCommand extends DrawingCommand {
     this.maxValue = 100,
     this.value = 50,
     this.decimals = 0,
-    this.unit = Unit.mm,
+    this.unit = Unit.cm,
     super.valid,
     super.validated,
     super.errors,
+    super.initiallyOpen,
   });
 
   MeasurementCommand copyWith({
@@ -48,6 +49,7 @@ class MeasurementCommand extends DrawingCommand {
     bool? validated,
     bool? valid,
     List<String>? errors,
+    bool? initiallyOpen,
   }) {
     double min = minValue?? this.minValue;
     double max = maxValue?? this.maxValue;
@@ -71,11 +73,17 @@ class MeasurementCommand extends DrawingCommand {
       valid: valid?? this.valid,
       validated: validated?? this.validated,
       errors: errors?? this.errors,
+      initiallyOpen: initiallyOpen?? this.initiallyOpen,
     );
   }
 
   @override
   double get editHeight => 320;
+
+  @override
+  Rect getBoundingBox(Drawing drawing) {
+    return Rect.zero;
+  }
 
   @override
   MeasurementCommand markAsCyclic(String cycleDescription) {
@@ -119,6 +127,11 @@ class MeasurementCommand extends DrawingCommand {
   }
 
   @override
+  MeasurementCommand setInitiallyClosed() {
+    return copyWith(initiallyOpen: false);
+  }
+
+  @override
   DrawingCommand deleteReference({required String commandId}) {
     return this;
   }
@@ -131,6 +144,8 @@ class MeasurementCommand extends DrawingCommand {
   Map<String, Object> toJson() {
     return {
       'type': DrawingCommandTypes.measurementCommand.name,
+      'id': id,
+      'label': label,
       'min': minValue,
       'max': maxValue,
       'val': value,

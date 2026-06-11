@@ -26,25 +26,20 @@ class LineCommandControl extends StatefulWidget {
 }
 
 class _LineCommandControlState extends State<LineCommandControl> {
-  late TextEditingController lineLabelController;
 
-  void lineLabelChanged() {
-    Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(label: lineLabelController.text));
+  void lineLabelChanged(String newText) {
+    if (widget.command.label != newText) {
+      Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(label: newText));
+    }
   }
 
   @override
   void initState() {
-    lineLabelController = TextEditingController(text: widget.command.label);
-    lineLabelController.addListener(lineLabelChanged);
-
     super.initState();
   }
 
   @override
   void dispose() {
-    lineLabelController.removeListener(lineLabelChanged);
-    lineLabelController.dispose();
-
     super.dispose();
   }
 
@@ -69,9 +64,11 @@ class _LineCommandControlState extends State<LineCommandControl> {
 
     return Row(
       children: [
+        const Icon(Symbols.pen_size_2),
+        hspacing,
         Text(widget.command.label, style: smallStyleBold,),
         hspacing,
-        Text(content, style: smallStyle,),
+        Text(content, style: smallStyle, overflow: TextOverflow.ellipsis,),
         const Spacer(),
         if (!widget.sorting && widget.command.validated && !widget.command.valid && widget.command.errors.isNotEmpty)
           Tooltip(
@@ -104,8 +101,9 @@ class _LineCommandControlState extends State<LineCommandControl> {
             hspacing,
             SmallTextField(
               key: GlobalObjectKey('${widget.command.id}-label'),
-              controller: lineLabelController, 
-              width: 100
+              initialText: widget.command.label,
+              width: 100,
+              onTextChanged: lineLabelChanged,
             ),
           ],
         ),
@@ -129,7 +127,11 @@ class _LineCommandControlState extends State<LineCommandControl> {
                 for (PointCommand point in drawing.points.where((p) => p.id != widget.command.toPointId))
                   DropdownMenuItem(value: point.id, child: Text(point.label)),
               ],
-              onChanged: (value) => Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(fromPointId: value?? '')),
+              onChanged: (value) {
+                if (value != widget.command.fromPointId) {
+                  Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(fromPointId: value?? ''));
+                }
+              },
               value: widget.command.fromPointId,
             ),
           ],
@@ -154,7 +156,11 @@ class _LineCommandControlState extends State<LineCommandControl> {
                 for (PointCommand point in drawing.points.where((p) => p.id != widget.command.fromPointId))
                   DropdownMenuItem(value: point.id, child: Text(point.label)),
               ],
-              onChanged: (value) => Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(toPointId: value?? '')),
+              onChanged: (value) {
+                if (value != widget.command.toPointId) {
+                  Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(toPointId: value?? ''));
+                }
+              },
               value: widget.command.toPointId,
             ),
           ],

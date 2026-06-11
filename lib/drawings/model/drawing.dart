@@ -1,13 +1,15 @@
 
 import 'package:directed_graph/directed_graph.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 import 'package:knitty_griddy/drawings/model/commands/curve_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/line_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/measurement_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/variable_command.dart';
-import 'package:knitty_griddy/drawings/model/measurement_requirement.dart';
 import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
+
+const bool printDebugTiming = false;
 
 const String placeholderDrawingId = '_placeholder_drawing_id_';
 const Drawing placeholderDrawing = Drawing(
@@ -41,6 +43,34 @@ class Drawing {
       description: description?? this.description,
       commands: commands?? this.commands,
     );
+  }
+
+  void _printTiming(String message) {
+    if (printDebugTiming) {
+      print(message);
+    }
+  }
+
+  Rect getBoundingBox() {
+    int lastTick = 0;
+    Stopwatch stopwatch = Stopwatch()..start();
+
+    _printTiming('------- start bounding box -------');
+
+    Rect bbox = Rect.zero;
+    for (DrawingCommand command in commands) {
+      Rect cbbox = command.getBoundingBox(this);
+
+      _printTiming('got bbox of ${command.label} in ${stopwatch.elapsedMilliseconds - lastTick})');
+      lastTick = stopwatch.elapsedMilliseconds;
+
+      bbox = bbox.expandToInclude(cbbox);
+    }
+
+    _printTiming('------- end bbox in ${stopwatch.elapsedMilliseconds} ------');
+    stopwatch.stop();
+
+    return bbox;
   }
 
   List<MeasurementCommand> get measurements => commands.whereType<MeasurementCommand>().toList();
@@ -79,7 +109,7 @@ class Drawing {
 
   MeasurementCommand? measurementByName(String name) {
     try {
-      return measurements.firstWhere((m) => m.label == name);
+      return measurements.firstWhere((m) => m.label.replaceAll('_', ' ') == name.replaceAll('_', ' '));
     } catch (_) {
       return null;
     }
@@ -87,7 +117,15 @@ class Drawing {
 
   VariableCommand? variableByName(String name) {
     try {
-      return variables.firstWhere((v) => v.label == name);
+      return variables.firstWhere((v) => v.label.replaceAll('_', ' ') == name.replaceAll('_', ' '));
+    } catch (_) {
+      return null;
+    }
+  }
+
+  LineCommand? lineByName(String name) {
+    try {
+      return lines.firstWhere((l) => l.label.replaceAll('_', ' ') == name.replaceAll('_', ' '));
     } catch (_) {
       return null;
     }
@@ -154,8 +192,13 @@ class Drawing {
   }
 
   Drawing validate() {
+    int lastTick = 0;
+    Stopwatch stopwatch = Stopwatch()..start();
+    _printTiming('----------- validating ----------');
     Drawing cleared = copyWith(commands: commands.map((c) => c.clearValidation()).toList());
 
+    _printTiming('cleared (${stopwatch.elapsedMilliseconds - lastTick})');
+    lastTick = stopwatch.elapsedMilliseconds;
     while (true) {
       Map<String, Set<String>> dependencies = {};
       for (DrawingCommand command in cleared.commands.where((c) => !c.validated)) {
@@ -170,13 +213,27 @@ class Drawing {
           commands: cleared.commands.map((c) => cycles.contains(c.id) ? c.markAsCyclic(cycleDescription) : c).toList()
         );
     }
+    _printTiming('dependencies checked (${stopwatch.elapsedMilliseconds - lastTick})');
+    lastTick = stopwatch.elapsedMilliseconds;
+    int valstartTick = lastTick;
 
     int passes = 0;
     int maxPasses = 1000;
     while (true) {
       if (cleared.commands.any((c) => !c.validated) && passes <= maxPasses) {
+        _printTiming('pass $passes');
         // We pass through the whole list on each loop as dependencies may not be solved yet
-        List<DrawingCommand> passedCommands = cleared.commands.map((c) => c.validate(cleared)).toList();
+        List<DrawingCommand> passedCommands = cleared.commands.map((c) {
+          if (!c.validated) {
+            DrawingCommand r = c.validate(cleared);
+            _printTiming('validation of ${r.label}: ${stopwatch.elapsedMilliseconds - lastTick}msec. Validated: ${r.validated}');
+            lastTick = stopwatch.elapsedMilliseconds;
+            return r;
+          }
+          return c;
+          
+//          return c.validate(cleared);
+        }).toList();
         cleared = cleared.copyWith(
           commands: passedCommands
         );
@@ -185,8 +242,13 @@ class Drawing {
         break;
       }
     }
-    if (passes >= maxPasses) print('validation overflow!!!!');
 
+    if (passes >= maxPasses) _printTiming('validation overflow!!!!');
+    _printTiming('validated in $passes passes (${stopwatch.elapsedMilliseconds - valstartTick})');
+
+    _printTiming('----------- end validation (${stopwatch.elapsedMilliseconds}) ----------');
+    stopwatch.stop();
+    
     return cleared;
   }
 
@@ -223,12 +285,6 @@ class Drawing {
         default:
           throw Exception('Unknown drawing element type ${commandObject['type']}');
       }
-    }
-
-    List<MeasurementRequirement> measurementRequirements = [];
-    List<Map<String, dynamic>> reqObjects = (json['mreqs'] as List).map((o) => o as Map<String, dynamic>).toList();
-    for (Map<String, dynamic> reqObject in reqObjects) {
-      measurementRequirements.add(MeasurementRequirement.fromJson(reqObject));
     }
 
     return Drawing(

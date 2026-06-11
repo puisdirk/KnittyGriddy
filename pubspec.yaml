@@ -57,6 +57,8 @@ dependencies:
   flutter_portal: ^1.1.4
   petitparser: ^6.0.2
   directed_graph: ^0.4.3
+  shared_preferences: ^2.5.3
+  http: ^1.6.0
 
 dev_dependencies:
   flutter_test:

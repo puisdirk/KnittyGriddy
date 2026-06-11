@@ -24,20 +24,17 @@ class FunctionChooser extends StatelessWidget {
         elevation: 10,
         clipBehavior: Clip.hardEdge,
         color: Colors.white,
-        child: SizedBox(
-          height: 500,
-          child: ListView.separated(
-            shrinkWrap: true,
-            itemCount: queried.length,
-            separatorBuilder: (context, index) => Divider(height: 1, color: Colors.grey.shade200,),
-            itemBuilder: (context, index) {
-              return ListTile(
-                tileColor: Colors.white,
-                title: Text(queried.elementAt(index).signature, style: smallStyle,),
-                onTap: () => onChooseFunction(queried.elementAt(index)),
-              );
-            },
-          ),
+        child: ListView.separated(
+          shrinkWrap: true,
+          itemCount: queried.length,
+          separatorBuilder: (context, index) => Divider(height: 1, color: Colors.grey.shade200,),
+          itemBuilder: (context, index) {
+            return ListTile(
+              tileColor: Colors.white,
+              title: Text(queried.elementAt(index).signature, style: smallStyle,),
+              onTap: () => onChooseFunction(queried.elementAt(index)),
+            );
+          },
         ),
       ),
     );

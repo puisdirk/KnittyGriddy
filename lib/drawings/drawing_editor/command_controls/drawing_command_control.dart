@@ -11,6 +11,7 @@ import 'package:knitty_griddy/drawings/model/commands/measurement_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/variable_command.dart';
 import 'package:knitty_griddy/drawings/model/drawings_model.dart';
+import 'package:knitty_griddy/utils/constants.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
@@ -20,7 +21,6 @@ class DrawingCommandControl extends StatefulWidget {
   final bool selected;
   final void Function() onSelect;
   final void Function() onDelete;
-  final bool editing;
 
   const DrawingCommandControl({
     required this.command,
@@ -28,7 +28,6 @@ class DrawingCommandControl extends StatefulWidget {
     required this.selected,
     required this.onSelect,
     required this.onDelete,
-    this.editing = true,
     super.key
   });
 
@@ -41,7 +40,7 @@ class _DrawingCommandControlState extends State<DrawingCommandControl> {
 
   @override
   void initState() {
-    editing = widget.editing;
+    editing = widget.command.initiallyOpen;
 
     super.initState();
   }
@@ -104,7 +103,7 @@ class _DrawingCommandControlState extends State<DrawingCommandControl> {
         child: Container(
           decoration: BoxDecoration(
             color: (widget.command.validated && !widget.command.valid) ? Colors.red.withAlpha(20) : Colors.grey.shade100,
-            border: Border.all(color: widget.selected ? Colors.purple : Colors.grey),
+            border: Border.all(color: widget.selected ? selectedColor : Colors.grey),
             borderRadius: const BorderRadius.all(Radius.circular(5)),
           ),
           child: Padding(
@@ -119,6 +118,12 @@ class _DrawingCommandControlState extends State<DrawingCommandControl> {
                   children: [
                     IconButton(
                       onPressed: () {
+                        // Let focus-dependent controls do their thing
+                        FocusScope.of(context).unfocus();
+
+                        if (editing == true) {
+                          Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.setInitiallyClosed(), validate: false);
+                        }
                         setState(() => editing = !editing);
                       }, 
                       icon: editing ? const Icon(Symbols.top_panel_close) : const Icon(Symbols.top_panel_open),

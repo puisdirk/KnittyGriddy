@@ -20,12 +20,15 @@ abstract class DrawingCommand {
   final bool validated;
   final List<String> errors;
 
+  final bool initiallyOpen;
+
   const DrawingCommand({
     required this.id,
     required this.label,
     this.valid = false,
     this.validated = false,
     this.errors = const[],
+    this.initiallyOpen = false,
   });
 
   double get editHeight;
@@ -33,7 +36,10 @@ abstract class DrawingCommand {
   Map<String, Object> toJson();  
   void paint(Canvas canvas, Size size, Drawing drawing, bool selected);
   
+  Rect getBoundingBox(Drawing drawing);
+
   DrawingCommand deleteReference({required String commandId});
+  DrawingCommand setInitiallyClosed();
 
   DrawingCommand clearValidation();
   DrawingCommand validate(Drawing drawing);
