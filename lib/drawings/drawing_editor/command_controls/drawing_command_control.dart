@@ -89,6 +89,63 @@ class _DrawingCommandControlState extends State<DrawingCommandControl> {
     return const Placeholder();
   }
 
+  Widget createStatusControls() {
+    if (editing) {
+      return Column(
+        children: [
+          IconButton(
+            onPressed: () {
+              // Let focus-dependent controls do their thing
+              FocusScope.of(context).unfocus();
+      
+//              if (editing == true) {
+//                Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.setInitiallyClosed(), validate: false);
+//              }
+              setState(() => editing = !editing);
+            }, 
+            icon: editing ? const Icon(Symbols.top_panel_close) : const Icon(Symbols.top_panel_open),
+          ),
+          const Spacer(),
+          if (widget.command.hasErrors)
+            Tooltip(
+              message: widget.command.errors.join('\n'),
+              child: const Icon(Icons.error_outline),
+            ),
+          if (widget.command.hasErrors)
+            const Spacer(),
+          IconButton(
+            onPressed: widget.onDelete, 
+            icon: const Icon(Icons.delete)
+          ),
+        ],
+      );
+    } 
+    
+    return Row(
+      children: [
+        if (widget.command.validated && !widget.command.valid && widget.command.errors.isNotEmpty)
+          Tooltip(
+            message: widget.command.errors.join('\n'),
+            child: const Icon(Icons.error_outline),
+          ),
+        if (widget.command.validated && !widget.command.valid && widget.command.errors.isNotEmpty)
+          hspacing,
+        IconButton(
+          onPressed: () {
+            // Let focus-dependent controls do their thing
+            FocusScope.of(context).unfocus();
+    
+//            if (editing == true) {
+//              Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.setInitiallyClosed(), validate: false);
+//            }
+            setState(() => editing = !editing);
+          }, 
+          icon: editing ? const Icon(Symbols.top_panel_close) : const Icon(Symbols.top_panel_open),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     double controlHeight = 60;
@@ -110,39 +167,10 @@ class _DrawingCommandControlState extends State<DrawingCommandControl> {
             padding: const EdgeInsets.all(8),
             child: Row(
               children: [
-                Expanded(
-                  child: createCommandControl(),
-                ),
+                createCommandControl(),
+                const Spacer(),
                 if (!widget.sorting)
-                Column(
-                  children: [
-                    IconButton(
-                      onPressed: () {
-                        // Let focus-dependent controls do their thing
-                        FocusScope.of(context).unfocus();
-
-                        if (editing == true) {
-                          Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.setInitiallyClosed(), validate: false);
-                        }
-                        setState(() => editing = !editing);
-                      }, 
-                      icon: editing ? const Icon(Symbols.top_panel_close) : const Icon(Symbols.top_panel_open),
-                    ),
-                    const Spacer(),
-                    if (editing && widget.command.validated && !widget.command.valid && widget.command.errors.isNotEmpty)
-                      Tooltip(
-                        message: widget.command.errors.join('\n'),
-                        child: const Icon(Icons.error_outline),
-                      ),
-                    if (editing && widget.command.validated && !widget.command.valid && widget.command.errors.isNotEmpty)
-                      const Spacer(),
-                    if (editing)
-                      IconButton(
-                        onPressed: widget.onDelete, 
-                        icon: const Icon(Icons.delete)
-                      ),
-                  ],
-                )
+                  createStatusControls(),
               ],
             ),
           ),

@@ -48,6 +48,7 @@ abstract class DrawingCommand {
   Set<String> dependencies(Drawing drawing);
 
   DrawingCommand markAsCyclic(String cycleDescription);
+  bool get hasErrors => validated && !valid && errors.isNotEmpty;
 
   @override
   int get hashCode => id.hashCode ^ label.hashCode ^ valid.hashCode ^ validated.hashCode ^ errors.hashCode;

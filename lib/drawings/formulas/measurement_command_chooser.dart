@@ -18,10 +18,14 @@ class MeasurementCommandChooser extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<MeasurementCommand> measurements = 
-      Provider.of<DrawingsModel>(context, listen: false).drawing.measurements.where((m) => m.label.toLowerCase().contains(query)).toList();
+      Provider.of<DrawingsModel>(context, listen: false)
+        .drawing.measurements.where((m) => m.label.toLowerCase().contains(query))
+        .toList();
     if (measurements.isEmpty) {
       return const SizedBox.shrink();
     }
+
+    measurements.sort((a, b) => a.label.compareTo(b.label));
 
     return ConstrainedBox(
       constraints: const BoxConstraints(maxHeight: 260),

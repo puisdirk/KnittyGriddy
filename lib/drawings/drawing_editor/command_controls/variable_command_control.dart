@@ -39,22 +39,27 @@ class _VariableCommandControlState extends State<VariableCommandControl> {
   }
 
   Widget createViewContent() {
+//    String content = '???';
+//    if (widget.command.valid) {
+//      content = widget.command.storedValue!.toString();
+//    }
     return Row(
       children: [
         const Icon(Symbols.settop_component),
         hspacing,
-        Text(widget.command.label, style: smallStyleBold,),
-        hspacing,
-        Text(widget.command.formula, style: smallStyle, overflow: TextOverflow.ellipsis,),
-        const Spacer(),
-        if (!widget.sorting && widget.command.validated && !widget.command.valid && widget.command.errors.isNotEmpty)
-          Tooltip(
-            message: widget.command.errors.join('\n'),
-            child: const Icon(Icons.error_outline),
-          ),
-        if (!widget.sorting && widget.command.validated && !widget.command.valid && widget.command.errors.isNotEmpty)
-          hspacing,
-      ],
+        SizedBox(
+          width: widget.command.hasErrors ? commandControlViewWidth : commandControlViewWidthNoError,
+          child: RichText(
+            overflow: TextOverflow.ellipsis,
+            text: TextSpan(
+              children: [
+                TextSpan(text: widget.command.label, style: smallStyleBold,),
+                TextSpan(text: widget.command.formula, style: smallStyle)
+              ]
+            )
+          )
+        )
+      ]
     );
   }
 
@@ -90,7 +95,7 @@ class _VariableCommandControlState extends State<VariableCommandControl> {
             FormulaFieldControl(
               key: GlobalObjectKey('${widget.command.id}-form'),
               excludeCommand: widget.command,
-              width: 200,
+              width: 240,
               formula: widget.command.formula,
               onFormulaChanged: formulaChanged,
             ),

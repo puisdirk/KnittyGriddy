@@ -420,6 +420,16 @@ class PointCommand extends DrawingCommand {
 
     switch (pointDefinitionType) {
       case PointDefinitionType.relativeToPoint:
+        double distance = 0;
+        FormulaParseResult res = FormulaExpression.validate(formula: distanceFormula, drawing: drawing, label: 'a distance');
+        if (res.isInvalid) {
+          isvalid = false;
+          if (!res.shouldRetry) retryValidation = false;
+          validationErrors.add(res.errorMessage);
+        } else {
+          distance = res.result!;
+        }
+
         double offsetAngle = 0;
         if (direction == RelativePointDirection.angle) {
           FormulaParseResult res = FormulaExpression.validate(formula: directionAngleFormula, drawing: drawing, label: 'an angle');
@@ -432,16 +442,6 @@ class PointCommand extends DrawingCommand {
           }
         } else {
           offsetAngle = direction.angleInDegrees;
-        }
-
-        double distance = 0;
-        FormulaParseResult res = FormulaExpression.validate(formula: distanceFormula, drawing: drawing, label: 'a distance');
-        if (res.isInvalid) {
-          isvalid = false;
-          if (!res.shouldRetry) retryValidation = false;
-          validationErrors.add(res.errorMessage);
-        } else {
-          distance = res.result!;
         }
 
         PointCommand? fromPoint;

@@ -83,7 +83,7 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
   Widget createViewContent() {
     final Drawing drawing = Provider.of<DrawingsModel>(context, listen: false).drawing;
 
-    String content = 'Curve ';
+    String content = ' Curve ';
 
     String startPointLabel = '???';
     PointCommand? startPoint = drawing.pointById(widget.command.startPointId);
@@ -155,17 +155,18 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
       children: [
         const Icon(Symbols.line_curve),
         hspacing,
-        Text(widget.command.label, style: smallStyleBold,),
-        hspacing,
-        Text(content, style: smallStyle, overflow: TextOverflow.ellipsis,),
-        const Spacer(),
-        if (!widget.sorting && widget.command.validated && !widget.command.valid && widget.command.errors.isNotEmpty)
-          Tooltip(
-            message: widget.command.errors.join('\n'),
-            child: const Icon(Icons.error_outline),
+        SizedBox(
+          width: widget.command.hasErrors ? commandControlViewWidth : commandControlViewWidthNoError,
+          child: RichText(
+            overflow: TextOverflow.ellipsis,
+            text: TextSpan(
+              children: [
+                TextSpan(text: widget.command.label, style: smallStyleBold,),
+                TextSpan(text: content, style: smallStyle,)
+              ]
+            )
           ),
-        if (!widget.sorting && widget.command.validated && !widget.command.valid && widget.command.errors.isNotEmpty)
-          hspacing,
+        )
       ],
     );
   }
@@ -286,7 +287,7 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
                   FormulaFieldControl(
                     key: GlobalObjectKey('${widget.command.id}-qamp'),
                     formula: widget.command.quadAmplitudeFormula, 
-                    width: 200, 
+                    width: 240, 
                     excludeCommand: widget.command, 
                     onFormulaChanged: quadAmplitudeFormulaChanged,
                   ),
@@ -300,7 +301,7 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
                   FormulaFieldControl(
                     key: GlobalObjectKey('${widget.command.id}-qslant'),
                     formula: widget.command.quadSlantFormula, 
-                    width: 200, 
+                    width: 240, 
                     excludeCommand: widget.command,
                     onFormulaChanged: quadSlantFormulaChanged,
                   ),
@@ -318,7 +319,7 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
                   FormulaFieldControl(
                     key: GlobalObjectKey('${widget.command.id}-camp1'),
                     formula: widget.command.cubicAmplitudeFormula1, 
-                    width: 200, 
+                    width: 240, 
                     excludeCommand: widget.command, 
                     onFormulaChanged: cubicAmplitude1FormulaChanged,
                   ),
@@ -332,7 +333,7 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
                   FormulaFieldControl(
                     key: GlobalObjectKey('${widget.command.id}-cslant1'),
                     formula: widget.command.cubicSlantFormula1, 
-                    width: 200, 
+                    width: 240, 
                     excludeCommand: widget.command,
                     onFormulaChanged: cubicSlant1FormulaChanged,
                   ),
@@ -346,7 +347,7 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
                   FormulaFieldControl(
                     key: GlobalObjectKey('${widget.command.id}-camp2'),
                     formula: widget.command.cubicAmplitudeFormula2, 
-                    width: 200, 
+                    width: 240, 
                     excludeCommand: widget.command, 
                     onFormulaChanged: cubicAmplitude2FormulaChanged,
                   ),
@@ -360,7 +361,7 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
                   FormulaFieldControl(
                     key: GlobalObjectKey('${widget.command.id}-cslant1'),
                     formula: widget.command.cubicSlantFormula2, 
-                    width: 200, 
+                    width: 240, 
                     excludeCommand: widget.command,
                     onFormulaChanged: cubicSlant2FormulaChanged,
                   ),

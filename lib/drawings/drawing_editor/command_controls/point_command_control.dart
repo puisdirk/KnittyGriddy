@@ -71,7 +71,7 @@ class _PointCommandControlState extends State<PointCommandControl> {
   Widget createViewContent() {
     final Drawing drawing = Provider.of<DrawingsModel>(context, listen: false).drawing;
 
-    String content = 'Point ';
+    String content = ' Point ';
 
     if (widget.command.pointDefinitionType == PointDefinitionType.relativeToPoint) {
       String distanceLabel = '???';
@@ -143,17 +143,18 @@ class _PointCommandControlState extends State<PointCommandControl> {
       children: [
         const Icon(Symbols.line_start_circle),
         hspacing,
-        Text(widget.command.label, style: smallStyleBold),
-        hspacing,
-        Text(content, style: smallStyle, overflow: TextOverflow.ellipsis,),
-        const Spacer(),
-        if (!widget.sorting && widget.command.validated && !widget.command.valid && widget.command.errors.isNotEmpty)
-          Tooltip(
-            message: widget.command.errors.join('\n'),
-            child: const Icon(Icons.error_outline)
-          ),
-        if (!widget.sorting && widget.command.validated && !widget.command.valid && widget.command.errors.isNotEmpty)
-          hspacing,
+        SizedBox(
+          width: widget.command.hasErrors ? commandControlViewWidth : commandControlViewWidthNoError,
+          child: RichText(
+            overflow: TextOverflow.ellipsis,
+            text: TextSpan(
+              children: [
+                TextSpan(text: widget.command.label, style: smallStyleBold),
+                TextSpan(text: content, style: smallStyle,)
+              ]  
+            ),
+          )
+        )
       ],
     );
   }
@@ -207,6 +208,8 @@ class _PointCommandControlState extends State<PointCommandControl> {
         vspacing,
         if (widget.command.pointDefinitionType == PointDefinitionType.relativeToPoint)
           Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
@@ -215,7 +218,7 @@ class _PointCommandControlState extends State<PointCommandControl> {
                   FormulaFieldControl(
                     key: GlobalObjectKey('${widget.command.id}-dist'),
                     formula: widget.command.distanceFormula,
-                    width: 200, 
+                    width: 240, 
                     excludeCommand: widget.command,
                     onFormulaChanged: distanceFormulaChanged,
                   ),
@@ -250,7 +253,7 @@ class _PointCommandControlState extends State<PointCommandControl> {
                     FormulaFieldControl(
                       key: GlobalObjectKey('${widget.command.id}-angle'),
                       formula: widget.command.directionAngleFormula,
-                      width: 200, 
+                      width: 155, 
                       excludeCommand: widget.command,
                       onFormulaChanged: directionAngleFormulaChanged,
                       unitLabel: ' °',
@@ -289,6 +292,8 @@ class _PointCommandControlState extends State<PointCommandControl> {
           ),
         if (widget.command.pointDefinitionType == PointDefinitionType.onLine)
           Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
@@ -324,7 +329,7 @@ class _PointCommandControlState extends State<PointCommandControl> {
                   FormulaFieldControl(
                     key: GlobalObjectKey('${widget.command.id}-linefrac'),
                     formula: widget.command.onLineFractionFormula,
-                    width: 100, 
+                    width: 240, 
                     excludeCommand: widget.command,
                     onFormulaChanged: onLineFractionFormulaChanged,
                   )
@@ -369,7 +374,7 @@ class _PointCommandControlState extends State<PointCommandControl> {
                   FormulaFieldControl(
                     key: GlobalObjectKey('${widget.command.id}-curvefrac'),
                     formula: widget.command.onCurveFractionFormula,
-                    width: 200, 
+                    width: 240, 
                     excludeCommand: widget.command,
                     onFormulaChanged: onCurveFractionFormulaChanged,
                   )

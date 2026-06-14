@@ -14,6 +14,10 @@ const SizedBox vspacing = SizedBox(height: 10,);
 const Color selectedColor = Colors.purple;
 const Color selectedColorLight = Color.fromARGB(60, 156, 39, 176);
 
+// For controlling the ellipsis in view mode
+const double commandControlViewWidth = 250;
+const double commandControlViewWidthNoError = commandControlViewWidth + 30;
+
 // Warning: also change defaultStitches when changing these
 const int defaultGridRows = 10;
 const int defaultGridColumns = 10;
