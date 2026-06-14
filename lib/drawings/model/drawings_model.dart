@@ -278,7 +278,7 @@ class DrawingsModel extends ChangeNotifier {
   void changeDrawingCommand(DrawingCommand newCommand, {bool validate = true}) {
     _drawingsModelObject = _drawingsModelObject.copyWith(
       drawing: _drawingsModelObject.drawing.copyWith(
-        commands: _drawingsModelObject.drawing.commands.map((c) => c.id != newCommand.id ? c : newCommand).toList()
+        commands: _drawingsModelObject.drawing.commands.map((c) => c.id != newCommand.id ? c : newCommand.setInitiallyClosed()).toList()
       )
     );
 

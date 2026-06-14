@@ -27,6 +27,8 @@ class VariableCommandChooser extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
+    variables.sort((a, b) => a.label.compareTo(b.label));
+
     return ConstrainedBox(
       constraints: const BoxConstraints(maxHeight: 260),
       child: Card(

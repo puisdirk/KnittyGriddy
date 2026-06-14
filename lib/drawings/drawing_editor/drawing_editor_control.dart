@@ -16,10 +16,12 @@ class _DrawingEditorControlState extends State<DrawingEditorControl> {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Expanded(flex: 2, 
+        Expanded(//flex: 2, 
           child: DrawingViewer(selectedCommandId: selectedCommandId,)
         ),
-        Expanded(flex: 1, 
+        //Expanded(flex: 1, 
+        SizedBox(
+          width: 400,
           child: DrawingCommandsList(
             selectedCommandId: selectedCommandId,
             onSelect: (id) => setState(() => selectedCommandId = id),

@@ -152,7 +152,7 @@ class FormulaGrammar extends GrammarDefinition {
       string('#linelength'),
       seq3(
         char('(').trim(),
-        (word().star().trim().flatten()),
+        (word().star()).flatten().trim(),
         char(')').trim()).map3((_, label, __) => label)
     ).map2((_, lineLabel) {
       LineCommand? line = drawing.lineByName(lineLabel);
@@ -173,7 +173,7 @@ class FormulaGrammar extends GrammarDefinition {
       seq3(char('#'),letter(), word().star()).flatten('function name expected').trim(),
       seq3(
         char('(').trim(),
-        ref0(term).starSeparated(char(',')).map((list) {
+        ref0(term).starSeparated(string(',').trim()).map((list) {
           return list.elements;
         }),
         char(')').trim()
@@ -209,6 +209,9 @@ class FormulaGrammar extends GrammarDefinition {
         }
       case 2:
         switch (name) {
+          case '#adjacent': return sqrt(pow(args[0], 2) - pow(args[1], 2));
+          case '#hypotenuse': return sqrt(pow(args[0], 2) + pow(args[1], 2));
+          case '#opposite': return sqrt(pow(args[1], 2) - pow(args[0], 2));
           case '#atan2': return atan2(args[0], args[1]);
           case '#max': return max(args[0] as double, args[1] as double);
           case '#min': return min(args[0] as double, args[1] as double);

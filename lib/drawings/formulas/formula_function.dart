@@ -17,7 +17,10 @@ enum FormulaFunction {
   toRadians(insert: 'toRadians(', signature: 'toRadians(angle)'),
   toDegrees(insert: 'toDegrees(', signature: 'toDegrees(angle)'),
 
-  atan2(insert: 'atan2', signature: 'atan2(num, num)'),
+  adjacent(insert: 'adjacent(', signature: 'adjacent(hypotenuse, opposite)'),
+  hypotenuse(insert: 'hypotenuse(', signature: 'hypotenuse(opposite, adjacent)'),
+  opposite(insert: 'opposite(', signature: 'opposite(hypotenuse, adjacent)'),
+  atan2(insert: 'atan2(', signature: 'atan2(num, num)'),
   max(insert: 'max(', signature: 'max(num, num)'),
   min(insert: 'min(', signature: 'min(num, num)'),
   power(insert: 'power(', signature: 'power(num, exp)');

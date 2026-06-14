@@ -49,18 +49,21 @@ class _MeasurementCommandControlState extends State<MeasurementCommandControl> {
       children: [
         const Icon(Symbols.square_foot),
         hspacing,
-        Text(widget.command.label, style: smallStyleBold),
-        hspacing,
-        Text('${widget.command.value.toStringAsFixed(widget.command.decimals)} ${widget.command.unit.shortLabel}', 
-          style: smallStyle, overflow: TextOverflow.ellipsis,),
-        const Spacer(),
-        if (!widget.sorting && widget.command.validated && !widget.command.valid && widget.command.errors.isNotEmpty)
-          Tooltip(
-            message: widget.command.errors.join('\n'),
-            child: const Icon(Icons.error_outline),
+        SizedBox(
+          width: widget.command.hasErrors ? commandControlViewWidth : commandControlViewWidthNoError,
+          child: RichText(
+            overflow: TextOverflow.ellipsis,
+            text: TextSpan(
+              children: [
+                TextSpan(text: widget.command.label, style: smallStyleBold),
+                TextSpan(
+                  text: ' ${widget.command.value.toStringAsFixed(widget.command.decimals)} ${widget.command.unit.shortLabel}', 
+                  style: smallStyle
+                )
+              ]
+            )
           ),
-        if (!widget.sorting && widget.command.validated && !widget.command.valid && widget.command.errors.isNotEmpty)
-          hspacing,
+        ),
       ],
     );
   }
