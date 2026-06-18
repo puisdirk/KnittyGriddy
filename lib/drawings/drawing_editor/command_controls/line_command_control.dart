@@ -29,7 +29,7 @@ class _LineCommandControlState extends State<LineCommandControl> {
 
   void lineLabelChanged(String newText) {
     if (widget.command.label != newText) {
-      Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(label: newText));
+      Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommandLabel(widget.command.copyWith(label: newText), widget.command.label);
     }
   }
 
@@ -101,7 +101,7 @@ class _LineCommandControlState extends State<LineCommandControl> {
             const SmallLabel(label: 'Label'),
             hspacing,
             SmallTextField(
-              key: GlobalObjectKey('${widget.command.id}-label'),
+              key: GlobalObjectKey('${widget.command.id}-${widget.command.version}-label'),
               initialText: widget.command.label,
               width: 100,
               onTextChanged: lineLabelChanged,

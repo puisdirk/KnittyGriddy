@@ -22,6 +22,7 @@ class LineCommand extends DrawingCommand {
 
   const LineCommand({
     required super.id,
+    required super.version,
     required super.label,
     this.fromPointId = '',
     this.toPointId = '',
@@ -46,6 +47,7 @@ class LineCommand extends DrawingCommand {
   }) {
     return LineCommand(
       id: id,
+      version: version + 1,
       label: label?? this.label,
       fromPointId: fromPointId?? this.fromPointId,
       toPointId: toPointId?? this.toPointId,
@@ -99,7 +101,12 @@ class LineCommand extends DrawingCommand {
   }
 
   @override
-  DrawingCommand deleteReference({required String commandId}) {
+  LineCommand dependentLabelChanged(String oldLabel, String newLabel) {
+    return this;
+  }
+
+  @override
+  LineCommand deleteReference({required String commandId}) {
     return copyWith(
       fromPointId: fromPointId == commandId ? '' : fromPointId,
       toPointId: toPointId == commandId ? '' : toPointId,
@@ -120,6 +127,7 @@ class LineCommand extends DrawingCommand {
   static LineCommand fromJson(Map<String, dynamic> json) {
     return LineCommand(
       id: json['id'] as String,
+      version: 0,
       label: json['label'] as String, 
       fromPointId: json['from'] as String, 
       toPointId: json['to'] as String,
@@ -132,6 +140,7 @@ class LineCommand extends DrawingCommand {
     other is LineCommand &&
     runtimeType == other.runtimeType &&
     id == other.id &&
+    version == other.version &&
     label == other.label &&
     fromPointId == other.fromPointId &&
     toPointId == other.toPointId &&
@@ -249,7 +258,26 @@ class LineCommand extends DrawingCommand {
   }
 
   @override
-  void paint(Canvas canvas, Size size, Drawing drawing, bool selected) {
+  String previewPath(Drawing drawing) {
+    if (!valid) return '';
+
+    Offset? start = getStartCoordinate(drawing);
+    if (start == null) {
+      return '';
+    }
+    start = start.scale(1, -1);
+
+    Offset? end = getEndCoordinate(drawing);
+    if (end == null) {
+      return '';
+    }
+    end = end.scale(1, -1);
+
+    return ' M ${start.dx},${start.dy} L${end.dx},${end.dy}';
+  }
+
+  @override
+  void paint(Canvas canvas, Size size, Drawing drawing, bool selected, {bool asPart = false}) {
     if (!valid) {
       return;
     }
@@ -274,9 +302,9 @@ class LineCommand extends DrawingCommand {
       start, 
       end, 
       Paint()
-        ..color = selected ? selectedColor : Colors.grey.shade700
+        ..color = selected ? selectedColor : asPart ? partColor : Colors.grey.shade700
         ..style = PaintingStyle.stroke
-        ..strokeWidth = selected ? 2 : 1);
+        ..strokeWidth = asPart || selected ? 2 : 1);
 
     // draw line label
     Offset? midline = pointOnLine(0.3, drawing);
@@ -304,13 +332,13 @@ class LineCommand extends DrawingCommand {
   }
 
   @override
-  DrawingCommand clearValidation() {
+  LineCommand clearValidation() {
     return copyWith(validated: false, valid: false, errors: const[], 
       storedStartCoordinate: null, storedEndCoordinate: null);
   }
   
   @override
-  DrawingCommand validate(Drawing drawing) {
+  LineCommand validate(Drawing drawing) {
     bool isvalid = true;
     bool retryValidation = true;
     List<String> validationErrors = [];

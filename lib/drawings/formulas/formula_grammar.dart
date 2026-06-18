@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:knitty_griddy/drawings/model/commands/line_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/measurement_command.dart';
+import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/variable_command.dart';
 import 'package:knitty_griddy/drawings/model/drawing.dart';
 import 'package:knitty_griddy/utils/math_utitilies.dart';
@@ -147,6 +148,31 @@ class FormulaGrammar extends GrammarDefinition {
     }
   });
 
+  Parser distance() =>
+    seq2(
+      string('#distance'),
+      seq5(
+        char('(').trim(),
+        (word().star()).flatten().trim(),
+        char(',').trim(),
+        (word().star()).flatten().trim(),
+        char(')').trim()  
+      ).map5((_, p1label, __, p2label, ___) {
+
+            PointCommand? p1 = drawing.pointByName(p1label);
+            if (p1 == null) throw FormulaException(errorMessage: 'Point $p1label does not exist', shouldRetry: false);
+            if (!p1.validated) throw FormulaException(errorMessage: 'Point $p1label is not validated', shouldRetry: true);
+            if (!p1.valid) throw FormulaException(errorMessage: 'Point $p1label has errors', shouldRetry: false);
+
+            PointCommand? p2 = drawing.pointByName(p2label);
+            if (p2 == null) throw FormulaException(errorMessage: 'Point $p2label does not exist', shouldRetry: false);
+            if (!p2.validated) throw FormulaException(errorMessage: 'Point $p2label is not validated', shouldRetry: true);
+            if (!p2.valid) throw FormulaException(errorMessage: 'Point $p2label has errors', shouldRetry: false);
+
+            return MathUtitilies.distance(p1.getCoordinate(drawing)!, p2.getCoordinate(drawing)!);
+      })
+    ).map2((_, dist) => dist);
+
   Parser linelength() => 
     seq2(
       string('#linelength'),
@@ -226,6 +252,6 @@ class FormulaGrammar extends GrammarDefinition {
   });
 
   // Maths functions like cos(x), max(x, y), etc or linelength(linelabel)
-  Parser mathsfunction() => (ref0(linelength) | ref0(mathsExpression));
+  Parser mathsfunction() => (ref0(linelength) | ref0(distance) | ref0(mathsExpression));
     
 }

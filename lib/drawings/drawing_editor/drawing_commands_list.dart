@@ -94,17 +94,48 @@ class _DrawingCommandsListState extends State<DrawingCommandsList> {
                         icon: const Icon(Symbols.line_curve),
                       ),
                     ),
+                    const SizedBox(
+                      height: 45,
+                      child: VerticalDivider(indent: 10, endIndent: 10)
+                    ),
+                    Tooltip(
+                      message: 'Add part',
+                      child: IconButton(
+                        onPressed: () {
+                          String newId = Provider.of<DrawingsModel>(context, listen: false).addPartCommand();
+                          widget.onSelect(newId);
+                        },
+                        icon: const Icon(Icons.extension_outlined),
+                      ),
+                    ),
+                    Tooltip(
+                      message: 'Include part',
+                      child: IconButton(
+                        onPressed: () {
+                          String newId = Provider.of<DrawingsModel>(context, listen: false).addIncludedPartCommand();
+                          widget.onSelect(newId);
+                        }, 
+                        icon: const Icon(Symbols.apparel)),
+                    ),
                     const Spacer(),
+                    if (drawing.commands.length > 1)
+                      const SizedBox(
+                        height: 45,
+                        child: VerticalDivider(indent: 10, endIndent: 10)
+                      ),
                     if (drawing.commands.length > 1)
                       Container(
                         decoration: BoxDecoration(
                           color: sorting ? Colors.blue.withAlpha(60) : null,
                           shape: BoxShape.circle
                         ),
-                        child: IconButton(
-                          isSelected: sorting,
-                          onPressed: () => setState(() => sorting = !sorting), 
-                          icon: const Icon(Icons.sort),
+                        child: Tooltip(
+                          message: sorting ? 'End reordering' : 'Reorder',
+                          child: IconButton(
+                            isSelected: sorting,
+                            onPressed: () => setState(() => sorting = !sorting), 
+                            icon: const Icon(Icons.sort),
+                          ),
                         ),
                       ),
                     if (drawing.commands.length < 2)

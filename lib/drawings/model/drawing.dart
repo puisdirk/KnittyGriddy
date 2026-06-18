@@ -4,10 +4,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:knitty_griddy/drawings/model/commands/curve_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
+import 'package:knitty_griddy/drawings/model/commands/included_part_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/line_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/measurement_command.dart';
+import 'package:knitty_griddy/drawings/model/commands/part_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/variable_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
+import 'package:knitty_griddy/drawings/model/part_info.dart';
 
 const bool printDebugTiming = false;
 
@@ -78,6 +81,26 @@ class Drawing {
   List<LineCommand> get lines => commands.whereType<LineCommand>().toList();
   List<CurveCommand> get curves => commands.whereType<CurveCommand>().toList();
   List<VariableCommand> get variables => commands.whereType<VariableCommand>().toList();
+  List<PartCommand> get parts => commands.whereType<PartCommand>().toList();
+  List<DrawingCommand> get linesAndCurves => [...lines, ...curves];
+  List<PartInfo> get partInfos {
+    Drawing validated = validate();
+    List<PartInfo> infos = [];
+
+    for (PartCommand part in validated.parts) {
+      infos.add(part.getInfo(validated));
+    }
+
+    return infos;
+  }
+
+  DrawingCommand commandById(String id) {
+    return commands.firstWhere((c) => c.id == id);
+  }
+
+  String commandLabel(String id) {
+    return commandById(id).label;
+  }
 
   LineCommand? lineById(String id) {
     try {
@@ -94,6 +117,16 @@ class Drawing {
     
     try {
       return commands.firstWhere((c) => c.id == id && c is PointCommand) as PointCommand;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  PointCommand? pointByName(String name) {
+    if (name == 'origin') return origin;
+
+    try {
+      return points.firstWhere((p) => p.label.replaceAll('_', ' ') == name.replaceAll('_', ' '));
     } catch (_) {
       return null;
     }
@@ -131,6 +164,14 @@ class Drawing {
     }
   }
 
+  PartCommand? partById(String id) {
+    try {
+      return commands.firstWhere((c) => c.id == id && c is PartCommand) as PartCommand;
+    } catch (_) {
+      return null;
+    }
+  }
+  
   String get nextMeasurementLabel {
     int nextNum = 1;
     while (true) {
@@ -189,6 +230,30 @@ class Drawing {
       }
     }
     return 'c$nextNum';
+  }
+
+  String get nextPartLabel {
+    int nextNum = 1;
+    while (true) {
+      if (curves.any((c) => c.label == 'part$nextNum')) {
+        nextNum++;
+      } else {
+        break;
+      }
+    }
+    return 'part$nextNum';
+  }
+
+  String get nextIncludedPartLabel {
+    int nextNum = 1;
+    while (true) {
+      if (curves.any((c) => c.label == 'subpart$nextNum')) {
+        nextNum++;
+      } else {
+        break;
+      }
+    }
+    return 'subpart$nextNum';
   }
 
   Drawing validate() {
@@ -282,6 +347,11 @@ class Drawing {
         case DrawingCommandTypes.variableCommand:
           commands.add(VariableCommand.fromJson(commandObject));
           break;
+        case DrawingCommandTypes.partCommand:
+          commands.add(PartCommand.fromJson(commandObject));
+          break;
+        case DrawingCommandTypes.includedPartCommand:
+          commands.add(IncludedPartCommand.fromJson(commandObject));
         default:
           throw Exception('Unknown drawing element type ${commandObject['type']}');
       }

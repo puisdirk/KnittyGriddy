@@ -13,6 +13,7 @@ const SizedBox vspacing = SizedBox(height: 10,);
 
 const Color selectedColor = Colors.purple;
 const Color selectedColorLight = Color.fromARGB(60, 156, 39, 176);
+const Color partColor = Colors.blue;
 
 // For controlling the ellipsis in view mode
 const double commandControlViewWidth = 250;

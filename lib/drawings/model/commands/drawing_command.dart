@@ -9,11 +9,14 @@ enum DrawingCommandTypes {
   curveCommand,
   measurementCommand,
   variableCommand,
+  partCommand,
+  includedPartCommand,
 }
 
 @immutable
 abstract class DrawingCommand {
   final String id;
+  final int version;
   final String label;
 
   final bool valid;
@@ -24,6 +27,7 @@ abstract class DrawingCommand {
 
   const DrawingCommand({
     required this.id,
+    required this.version,
     required this.label,
     this.valid = false,
     this.validated = false,
@@ -34,11 +38,12 @@ abstract class DrawingCommand {
   double get editHeight;
   
   Map<String, Object> toJson();  
-  void paint(Canvas canvas, Size size, Drawing drawing, bool selected);
+  void paint(Canvas canvas, Size size, Drawing drawing, bool selected, {bool asPart = false});
   
   Rect getBoundingBox(Drawing drawing);
 
   DrawingCommand deleteReference({required String commandId});
+  DrawingCommand dependentLabelChanged(String oldLabel, String newLabel);
   DrawingCommand setInitiallyClosed();
 
   DrawingCommand clearValidation();
@@ -49,6 +54,8 @@ abstract class DrawingCommand {
 
   DrawingCommand markAsCyclic(String cycleDescription);
   bool get hasErrors => validated && !valid && errors.isNotEmpty;
+
+  String previewPath(Drawing drawing) { return ''; }
 
   @override
   int get hashCode => id.hashCode ^ label.hashCode ^ valid.hashCode ^ validated.hashCode ^ errors.hashCode;

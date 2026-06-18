@@ -46,7 +46,6 @@ class ChartsModel extends ChangeNotifier {
 
   void clearUndoRedo() {
     _undoRedoManager.clear();
-    _storeForUndo();
   }
 
   void loadOnStartup() {
@@ -107,6 +106,7 @@ class ChartsModel extends ChangeNotifier {
     );
 
     await autoSave();
+    _storeForUndo();
     notifyListeners();
   }
 
@@ -156,6 +156,8 @@ class ChartsModel extends ChangeNotifier {
     _chartsModelObject = _chartsModelObject.copyWith(
       knittingChart: chart,
     );
+
+    _storeForUndo();
     notifyListeners();
   }
 
@@ -186,7 +188,9 @@ class ChartsModel extends ChangeNotifier {
   }
  
   void _storeForUndo() {
-    _undoRedoManager.store(_chartsModelObject.knittingChart.copyWith());
+    if (_chartsModelObject.knittingChart != placeholderChart) {
+      _undoRedoManager.store(_chartsModelObject.knittingChart.copyWith());
+    }
   }
 
   bool get canUndo => _undoRedoManager.canUndo();

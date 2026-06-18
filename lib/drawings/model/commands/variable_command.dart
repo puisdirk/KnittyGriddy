@@ -13,6 +13,7 @@ class VariableCommand extends DrawingCommand {
 
   const VariableCommand({
     required super.id,
+    required super.version,
     required super.label,
     this.formula = '',
     super.validated,
@@ -33,6 +34,7 @@ class VariableCommand extends DrawingCommand {
   }) {
     return VariableCommand(
       id: id, 
+      version: version + 1,
       label: label?? this.label,
       formula: formula?? this.formula,
       validated: validated?? this.validated,
@@ -80,13 +82,20 @@ class VariableCommand extends DrawingCommand {
     return this;
   }
 
+  @override
+  DrawingCommand dependentLabelChanged(String oldLabel, String newLabel) {
+    return copyWith(
+      formula: formula.replaceAll(oldLabel, newLabel),
+    );
+  }
+
   double? value(Drawing drawing) {
     return storedValue;
 //    return FormulaExpression.validate(formula: formula, drawing: drawing).result;
   }
 
   @override
-  void paint(Canvas canvas, Size size, Drawing drawing, bool selected) {
+  void paint(Canvas canvas, Size size, Drawing drawing, bool selected, {bool asPart = false}) {
   }
 
   @override
@@ -102,6 +111,7 @@ class VariableCommand extends DrawingCommand {
   static VariableCommand fromJson(Map<String, dynamic> json) {
     return VariableCommand(
       id: json['id'] as String, 
+      version: 0,
       label: json['label'] as String,
       formula: json['formula'] as String,
     );
@@ -113,6 +123,7 @@ class VariableCommand extends DrawingCommand {
       other is VariableCommand &&
       runtimeType == other.runtimeType &&
       id == other.id &&
+      version == other.version &&
       label == other.label &&
       formula == other.formula &&
       valid == other.valid &&
@@ -124,7 +135,7 @@ class VariableCommand extends DrawingCommand {
   int get hashCode => super.hashCode ^ formula.hashCode ^ storedValue.hashCode;
 
   @override
-  DrawingCommand validate(Drawing drawing) {
+  VariableCommand validate(Drawing drawing) {
     bool isvalid = true;
     bool retryValidation = true;
     List<String> validationErrors = [];
