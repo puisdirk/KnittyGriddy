@@ -1,5 +1,6 @@
 enum FormulaFunction {
   linelength(insert: 'linelength(', signature: 'linelength(line)'),
+  distance(insert: 'distance(', signature: 'distance(point, point)'),
   cos(insert: 'cos(', signature: 'cos(angle)'),
   acos(insert: 'acos(', signature: 'acos(angle)'),
   sin(insert: 'sin(', signature: 'sin(angle)'),

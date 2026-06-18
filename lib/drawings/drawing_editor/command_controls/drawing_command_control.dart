@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/command_controls/curve_command_control.dart';
+import 'package:knitty_griddy/drawings/drawing_editor/command_controls/included_part_command_control.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/command_controls/line_command_control.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/command_controls/measurement_command_control.dart';
+import 'package:knitty_griddy/drawings/drawing_editor/command_controls/part_command_control.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/command_controls/point_command_control.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/command_controls/variable_command_control.dart';
 import 'package:knitty_griddy/drawings/model/commands/curve_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
+import 'package:knitty_griddy/drawings/model/commands/included_part_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/line_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/measurement_command.dart';
+import 'package:knitty_griddy/drawings/model/commands/part_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/variable_command.dart';
 import 'package:knitty_griddy/drawings/model/drawings_model.dart';
@@ -86,6 +90,22 @@ class _DrawingCommandControlState extends State<DrawingCommandControl> {
       );
     }
 
+    if (widget.command is PartCommand) {
+      return PartCommandControl(
+        command: widget.command as PartCommand, 
+        sorting: widget.sorting, 
+        editing: editing
+      );
+    }
+
+    if (widget.command is IncludedPartCommand) {
+      return IncludedPartCommandControl(
+        command: widget.command as IncludedPartCommand, 
+        sorting: widget.sorting, 
+        editing: editing
+      );
+    }
+
     return const Placeholder();
   }
 
@@ -98,9 +118,6 @@ class _DrawingCommandControlState extends State<DrawingCommandControl> {
               // Let focus-dependent controls do their thing
               FocusScope.of(context).unfocus();
       
-//              if (editing == true) {
-//                Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.setInitiallyClosed(), validate: false);
-//              }
               setState(() => editing = !editing);
             }, 
             icon: editing ? const Icon(Symbols.top_panel_close) : const Icon(Symbols.top_panel_open),
@@ -135,9 +152,6 @@ class _DrawingCommandControlState extends State<DrawingCommandControl> {
             // Let focus-dependent controls do their thing
             FocusScope.of(context).unfocus();
     
-//            if (editing == true) {
-//              Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.setInitiallyClosed(), validate: false);
-//            }
             setState(() => editing = !editing);
           }, 
           icon: editing ? const Icon(Symbols.top_panel_close) : const Icon(Symbols.top_panel_open),

@@ -3,8 +3,10 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
+import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
 import 'package:knitty_griddy/drawings/model/drawing.dart';
 import 'package:knitty_griddy/drawings/model/drawings_model.dart';
+import 'package:knitty_griddy/utils/constants.dart';
 import 'package:provider/provider.dart';
   
 class DrawingViewer extends StatelessWidget {
@@ -68,14 +70,17 @@ class DrawingPainter extends CustomPainter {
 
     // Scale to show the complete drawing
     Rect bbox = drawing.getBoundingBox();
+
     // Draw somewhat away from the edges
-    bbox = bbox.inflate(20);
+    bbox = bbox.inflate(40);
     bbox = Rect.fromLTWH(bbox.left, -bbox.bottom, bbox.width, bbox.height);
+
     double missingLeftSide = -(size.width / 2) - bbox.left;
     double missingRightSide = bbox.right - (size.width / 2);
     double missingAtTop = -(size.height / 2) - bbox.top;
     double missingAtBottom = bbox.bottom - (size.height / 2);
     
+    // Drawing with origin in middle and scaled to include everything
     double horMissing = 0;
     if (missingLeftSide > horMissing) horMissing = missingLeftSide;
     if (missingRightSide > horMissing) horMissing = missingRightSide;
@@ -95,8 +100,16 @@ class DrawingPainter extends CustomPainter {
     _printTiming('got bbox (${stopwatch.elapsedMilliseconds - lastTick})');
     lastTick = stopwatch.elapsedMilliseconds;
 
+    // Draw origin
+    Color originColor = Colors.grey.shade700;
+    if (drawing.parts.any((p) => p.anchorPointId == originId)) {
+      originColor = partColor;
+    }
+    if (drawing.parts.any((p) => p.anchorPointId == originId && p.id == selectedCommandId)) {
+      originColor = selectedColor;
+    }
     Offset middle = Offset(size.width / 2, size.height / 2);
-    canvas.drawCircle(middle, 2, Paint()..color = Colors.grey.shade700..style = PaintingStyle.stroke);
+    canvas.drawCircle(middle, 2, Paint()..color = originColor..style = PaintingStyle.stroke);
 
     // draw point label
     var style = TextStyle(color: Colors.grey[400]);
@@ -129,7 +142,7 @@ class DrawingPainter extends CustomPainter {
         lastTick = stopwatch.elapsedMilliseconds;
       }
     }
-    if (selectedCommandId != null) {
+    if (selectedCommandId != null && drawing.commands.any((c) => c.id == selectedCommandId)) {
       _printTiming('start drawing selected command (${stopwatch.elapsedMilliseconds - lastTick})');
       lastTick = stopwatch.elapsedMilliseconds;
       drawing.commands.firstWhere((c) => c.id == selectedCommandId).paint(canvas, size, drawing, true);

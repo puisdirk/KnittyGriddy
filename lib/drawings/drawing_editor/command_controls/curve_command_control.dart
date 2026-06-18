@@ -30,7 +30,7 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
 
   void curveLabelChanged(String newText) {
     if (widget.command.label != newText) {
-      Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(label: newText));
+      Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommandLabel(widget.command.copyWith(label: newText), widget.command.label);
     }
   }
 
@@ -211,7 +211,7 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
             SmallLabel(label: 'Label', width: labelWidth,),
             hspacing,
             SmallTextField(
-              key: GlobalObjectKey('${widget.command.id}-label'),
+              key: GlobalObjectKey('${widget.command.id}-${widget.command.version}-label'),
               initialText: widget.command.label,
               width: 100,
               onTextChanged: curveLabelChanged,
@@ -285,7 +285,7 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
                   SmallLabel(label: 'Amplitude', width: labelWidth,),
                   hspacing,
                   FormulaFieldControl(
-                    key: GlobalObjectKey('${widget.command.id}-qamp'),
+                    key: GlobalObjectKey('${widget.command.id}-${widget.command.version}-qamp'),
                     formula: widget.command.quadAmplitudeFormula, 
                     width: 240, 
                     excludeCommand: widget.command, 
@@ -299,7 +299,7 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
                   SmallLabel(label: 'Slant', width: labelWidth,),
                   hspacing,
                   FormulaFieldControl(
-                    key: GlobalObjectKey('${widget.command.id}-qslant'),
+                    key: GlobalObjectKey('${widget.command.id}-${widget.command.version}-qslant'),
                     formula: widget.command.quadSlantFormula, 
                     width: 240, 
                     excludeCommand: widget.command,
@@ -317,7 +317,7 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
                   SmallLabel(label: 'Amplitude 1', width: labelWidth,),
                   hspacing,
                   FormulaFieldControl(
-                    key: GlobalObjectKey('${widget.command.id}-camp1'),
+                    key: GlobalObjectKey('${widget.command.id}-${widget.command.version}-camp1'),
                     formula: widget.command.cubicAmplitudeFormula1, 
                     width: 240, 
                     excludeCommand: widget.command, 
@@ -331,7 +331,7 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
                   SmallLabel(label: 'Slant 1', width: labelWidth,),
                   hspacing,
                   FormulaFieldControl(
-                    key: GlobalObjectKey('${widget.command.id}-cslant1'),
+                    key: GlobalObjectKey('${widget.command.id}-${widget.command.version}-cslant1'),
                     formula: widget.command.cubicSlantFormula1, 
                     width: 240, 
                     excludeCommand: widget.command,
@@ -345,7 +345,7 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
                   SmallLabel(label: 'Amplitude 2', width: labelWidth,),
                   hspacing,
                   FormulaFieldControl(
-                    key: GlobalObjectKey('${widget.command.id}-camp2'),
+                    key: GlobalObjectKey('${widget.command.id}-${widget.command.version}-camp2'),
                     formula: widget.command.cubicAmplitudeFormula2, 
                     width: 240, 
                     excludeCommand: widget.command, 
@@ -359,7 +359,7 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
                   SmallLabel(label: 'Slant 2', width: labelWidth,),
                   hspacing,
                   FormulaFieldControl(
-                    key: GlobalObjectKey('${widget.command.id}-cslant1'),
+                    key: GlobalObjectKey('${widget.command.id}-${widget.command.version}-cslant1'),
                     formula: widget.command.cubicSlantFormula2, 
                     width: 240, 
                     excludeCommand: widget.command,

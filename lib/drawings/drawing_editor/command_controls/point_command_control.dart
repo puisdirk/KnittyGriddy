@@ -28,9 +28,10 @@ class PointCommandControl extends StatefulWidget {
 }
 
 class _PointCommandControlState extends State<PointCommandControl> {
+
   void pointLabelChanged(String newText) {
     if (widget.command.label != newText) {
-      Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(label: newText));
+      Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommandLabel(widget.command.copyWith(label: newText), widget.command.label);
     }
   }
 
@@ -198,7 +199,7 @@ class _PointCommandControlState extends State<PointCommandControl> {
             const SmallLabel(label: 'Label'),
             hspacing,
             SmallTextField(
-              key: GlobalObjectKey('${widget.command.id}-label'),
+              key: GlobalObjectKey('${widget.command.id}-${widget.command.version}-label'),
               initialText: widget.command.label,
               width: 100,
               onTextChanged: pointLabelChanged,
@@ -216,7 +217,7 @@ class _PointCommandControlState extends State<PointCommandControl> {
                   const SmallLabel(label: 'Distance'),
                   hspacing,
                   FormulaFieldControl(
-                    key: GlobalObjectKey('${widget.command.id}-dist'),
+                    key: GlobalObjectKey('${widget.command.id}-${widget.command.version}-${widget.command.version}-dist'),
                     formula: widget.command.distanceFormula,
                     width: 240, 
                     excludeCommand: widget.command,
@@ -251,7 +252,7 @@ class _PointCommandControlState extends State<PointCommandControl> {
                   hspacing,
                   if (widget.command.direction == RelativePointDirection.angle)
                     FormulaFieldControl(
-                      key: GlobalObjectKey('${widget.command.id}-angle'),
+                      key: GlobalObjectKey('${widget.command.id}-${widget.command.version}-angle'),
                       formula: widget.command.directionAngleFormula,
                       width: 155, 
                       excludeCommand: widget.command,
@@ -327,7 +328,7 @@ class _PointCommandControlState extends State<PointCommandControl> {
                   const SmallLabel(label: 'Fraction'),
                   hspacing,
                   FormulaFieldControl(
-                    key: GlobalObjectKey('${widget.command.id}-linefrac'),
+                    key: GlobalObjectKey('${widget.command.id}-${widget.command.version}-linefrac'),
                     formula: widget.command.onLineFractionFormula,
                     width: 240, 
                     excludeCommand: widget.command,
@@ -372,7 +373,7 @@ class _PointCommandControlState extends State<PointCommandControl> {
                   const SmallLabel(label: 'Fraction'),
                   hspacing,
                   FormulaFieldControl(
-                    key: GlobalObjectKey('${widget.command.id}-curvefrac'),
+                    key: GlobalObjectKey('${widget.command.id}-${widget.command.version}-curvefrac'),
                     formula: widget.command.onCurveFractionFormula,
                     width: 240, 
                     excludeCommand: widget.command,

@@ -12,7 +12,7 @@ import 'package:knitty_griddy/utils/constants.dart';
 import 'package:knitty_griddy/utils/math_utitilies.dart';
 
 const String originId = '063f22af-bc7f-4e77-bc8b-60e48c821259';
-const PointCommand origin = PointCommand(id: originId, label: 'origin', valid: true, );
+const PointCommand origin = PointCommand(id: originId, label: 'origin', validated: true, valid: true, );
 
 enum PointDefinitionType {
   relativeToPoint(label: 'Relative to a point'),
@@ -65,6 +65,7 @@ class PointCommand extends DrawingCommand {
 
   const PointCommand({
     required super.id,
+    super.version = 0,
     required super.label,
     PointDefinitionType? pointDefinitionType,
     this.fromPointId = '',
@@ -107,6 +108,7 @@ class PointCommand extends DrawingCommand {
   }) {
     return PointCommand(
       id: id,
+      version: version + 1,
       label: label?? this.label,
       pointDefinitionType: pointDefinitionType?? this.pointDefinitionType,
       fromPointId: fromPointId?? this.fromPointId,
@@ -182,6 +184,16 @@ class PointCommand extends DrawingCommand {
   }
 
   @override
+  PointCommand dependentLabelChanged(String oldLabel, String newLabel) {
+    return copyWith(
+      directionAngleFormula: directionAngleFormula.replaceAll(oldLabel, newLabel),
+      distanceFormula: distanceFormula.replaceAll(oldLabel, newLabel),
+      onCurveFractionFormula: onCurveFractionFormula.replaceAll(oldLabel, newLabel),
+      onLineFractionFormula: onLineFractionFormula.replaceAll(oldLabel, newLabel),
+    );
+  }
+
+  @override
   Map<String, Object> toJson() {
     return {
       'type': DrawingCommandTypes.pointCommand.name,
@@ -204,6 +216,7 @@ class PointCommand extends DrawingCommand {
   static PointCommand fromJson(Map<String, dynamic> json) {
     return PointCommand(
       id: json['id'] as String,
+      version: 0,
       label: json['label'] as String, 
       pointDefinitionType: PointDefinitionType.values.byName(json['pdt'] as String),
       fromPointId: json['frompointid'] as String,
@@ -225,6 +238,7 @@ class PointCommand extends DrawingCommand {
     other is PointCommand &&
     runtimeType == other.runtimeType &&
     id == other.id &&
+    version == other.version &&
     label == other.label &&
     pointDefinitionType == other.pointDefinitionType &&
     fromPointId == other.fromPointId &&
@@ -256,84 +270,10 @@ class PointCommand extends DrawingCommand {
     if (!valid) return null;
 
     return storedCoordinate;
-/*
-    switch (pointDefinitionType) {
-      case PointDefinitionType.relativeToPoint:
-        PointCommand? fromPoint = drawing.pointById(fromPointId);
-        if (fromPoint == null || !fromPoint.valid) return null;
-
-        Offset? coordinate =  fromPoint.getCoordinate(drawing);
-        if (coordinate == null) return null;
-        
-        double distance = 0;
-        FormulaParseResult res = FormulaExpression.validate(formula: distanceFormula, drawing: drawing, label: 'a distance');
-        if (res.isValid) {
-          distance = res.result!;
-        } else {
-          return null;
-        }
-
-        double offsetAngle = 0;
-        if (direction == RelativePointDirection.angle) {
-          FormulaParseResult res = FormulaExpression.validate(formula: directionAngleFormula, drawing: drawing, label: 'an angle');
-          if (res.isValid) {
-            offsetAngle = res.result!;
-          } else {
-            return null;
-          }
-        } else {
-          offsetAngle = direction.angleInDegrees;
-        }
-        coordinate += Offset.fromDirection(MathUtitilies.toRadians(offsetAngle), distance);
-        return coordinate;
-      case PointDefinitionType.onLine:
-        LineCommand? line = drawing.lineById(onLineId);
-        if (line == null || !line.valid) return null;
-        
-        double fraction = 0;
-        FormulaParseResult res = FormulaExpression.validate(formula: onLineFractionFormula, drawing: drawing, label: 'a fraction');
-        if (res.isValid) {
-          fraction = res.result!;
-        } else {
-          return null;
-        }
-
-        return line.pointOnLine(fraction, drawing);
-      case PointDefinitionType.onCurve:
-        CurveCommand? curve = drawing.curveById(onCurveId);
-        if (curve == null || !curve.valid) return null;
-
-        double fraction = 0;
-        FormulaParseResult res = FormulaExpression.validate(formula: onCurveFractionFormula, drawing: drawing, label: 'a fraction');
-        if (res.isValid) {
-          fraction = res.result!;
-        } else {
-          return null;
-        }
-
-        Path? p = curve.getPath(drawing, Offset.zero);
-        if (p == null) return null;
-        return curve.pointOnPath(p, fraction);
-      case PointDefinitionType.onIntersection:
-        LineCommand? line1 = drawing.lineById(intersectionLine1Id);
-        if (line1 == null) return null;
-        LineCommand? line2 = drawing.lineById(intersectionLine2Id);
-        if (line2 == null) return null;
-        List<Offset> intersections = line1.intersections(line2, drawing);
-        if (intersections.isEmpty) {
-          return line1.getStartCoordinate(drawing);
-        } else {
-          return intersections.first;
-        }
-      default:
-        // TODO: other def types
-        return null;
-    }
-*/
   }
 
   @override
-  void paint(Canvas canvas, Size size, Drawing drawing, bool selected) {
+  void paint(Canvas canvas, Size size, Drawing drawing, bool selected, {bool asPart = false}) {
     if (!valid) {
       return;
     }
@@ -351,7 +291,7 @@ class PointCommand extends DrawingCommand {
       coordinate, 
       2, 
       Paint()
-        ..color = selected ? selectedColor : Colors.grey.shade700
+        ..color = selected ? selectedColor : asPart ? partColor : Colors.grey.shade700
         ..style = PaintingStyle.stroke
         ..strokeWidth = selected ? 2 : 1);
 
@@ -376,7 +316,7 @@ class PointCommand extends DrawingCommand {
   }
 
   @override
-  DrawingCommand clearValidation() {
+  PointCommand clearValidation() {
     return copyWith(validated: false, valid: false, errors: const[], storedCoordinate: null);
   }
   
@@ -408,7 +348,7 @@ class PointCommand extends DrawingCommand {
   }
 
   @override
-  DrawingCommand validate(Drawing drawing) {
+  PointCommand validate(Drawing drawing) {
     bool isvalid = true;
     bool retryValidation = true;
     List<String> validationErrors = [];

@@ -27,6 +27,7 @@ class MeasurementCommand extends DrawingCommand {
 
   const MeasurementCommand({
     required super.id,
+    required super.version,
     required super.label,
     this.minValue = 0,
     this.maxValue = 100,
@@ -64,6 +65,7 @@ class MeasurementCommand extends DrawingCommand {
 //    }
     return MeasurementCommand(
       id: id, 
+      version: version + 1,
       label: label?? this.label,
       minValue: min,
       maxValue: max,
@@ -107,6 +109,7 @@ class MeasurementCommand extends DrawingCommand {
       other is MeasurementCommand &&
       runtimeType == other.runtimeType &&
       id == other.id &&
+      version == other.version &&
       label == other.label &&
       minValue == other.minValue &&
       maxValue == other.maxValue &&
@@ -122,7 +125,7 @@ class MeasurementCommand extends DrawingCommand {
     minValue.hashCode ^ maxValue.hashCode ^ value.hashCode ^ decimals.hashCode ^ unit.hashCode;
 
   @override
-  DrawingCommand clearValidation() {
+  MeasurementCommand clearValidation() {
     return copyWith(validated: false, valid: false, errors: const[]);
   }
 
@@ -132,12 +135,17 @@ class MeasurementCommand extends DrawingCommand {
   }
 
   @override
-  DrawingCommand deleteReference({required String commandId}) {
+  MeasurementCommand deleteReference({required String commandId}) {
     return this;
   }
 
   @override
-  void paint(Canvas canvas, Size size, Drawing drawing, bool selected) {
+  MeasurementCommand dependentLabelChanged(String oldLabel, String newLabel) {
+    return this;
+  }
+
+  @override
+  void paint(Canvas canvas, Size size, Drawing drawing, bool selected, {bool asPart = false}) {
   }
 
   @override
@@ -157,6 +165,7 @@ class MeasurementCommand extends DrawingCommand {
   static MeasurementCommand fromJson(Map<String, dynamic> json) {
     return MeasurementCommand(
       id: json['id'] as String, 
+      version: 0,
       label: json['label'] as String,
       minValue: json['min'] as double,
       maxValue: json['max'] as double,

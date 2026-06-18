@@ -28,7 +28,7 @@ class _VariableCommandControlState extends State<VariableCommandControl> {
   
   void labelChanged(String newText) {
     if (widget.command.label != newText) {
-      Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(label: newText));
+      Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommandLabel(widget.command.copyWith(label: newText), widget.command.label);
     }
   }
 
@@ -39,10 +39,6 @@ class _VariableCommandControlState extends State<VariableCommandControl> {
   }
 
   Widget createViewContent() {
-//    String content = '???';
-//    if (widget.command.valid) {
-//      content = widget.command.storedValue!.toString();
-//    }
     return Row(
       children: [
         const Icon(Symbols.settop_component),
@@ -80,7 +76,7 @@ class _VariableCommandControlState extends State<VariableCommandControl> {
             const SmallLabel(label: 'Label'),
             hspacing,
             SmallTextField(
-              key: GlobalObjectKey('${widget.command.id}-label'),
+              key: GlobalObjectKey('${widget.command.id}-${widget.command.version}-label'),
               initialText: widget.command.label,
               width: 100,
               onTextChanged: labelChanged,
@@ -93,7 +89,7 @@ class _VariableCommandControlState extends State<VariableCommandControl> {
             const SmallLabel(label: 'Formula'),
             hspacing,
             FormulaFieldControl(
-              key: GlobalObjectKey('${widget.command.id}-form'),
+              key: GlobalObjectKey('${widget.command.id}-${widget.command.version}-form'),
               excludeCommand: widget.command,
               width: 240,
               formula: widget.command.formula,

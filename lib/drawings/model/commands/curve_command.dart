@@ -43,6 +43,7 @@ class CurveCommand extends DrawingCommand {
   const CurveCommand({
     required super.id,
     required super.label,
+    required super.version,
     CurveDefinitionType? curveDefinitionType,
     this.startPointId = '',
     this.endPointId = '',
@@ -82,6 +83,7 @@ class CurveCommand extends DrawingCommand {
   }) {
     return CurveCommand(
       id: id,
+      version: version + 1,
       label: label?? this.label, 
       curveDefinitionType: curveDefinitionType?? this.curveDefinitionType,
       startPointId: startPointId?? this.startPointId, 
@@ -164,13 +166,25 @@ class CurveCommand extends DrawingCommand {
   }
 
   @override
-  DrawingCommand deleteReference({required String commandId}) {
+  CurveCommand deleteReference({required String commandId}) {
     return copyWith(
       startPointId: startPointId == commandId ? '' : startPointId,
       endPointId: endPointId == commandId ? '' : endPointId,
       quadCtrlPointId: quadCtrlPointId == commandId ? '' : quadCtrlPointId,
       cubicCtrlPointId1: cubicCtrlPointId1 == commandId ? '' : cubicCtrlPointId1,
       cubicCtrlPointId2: cubicCtrlPointId2 == commandId ? '' : cubicCtrlPointId2,
+    );
+  }
+
+  @override
+  CurveCommand dependentLabelChanged(String oldLabel, String newLabel) {
+    return copyWith(
+      cubicAmplitudeFormula1: cubicAmplitudeFormula1.replaceAll(oldLabel, newLabel),
+      cubicAmplitudeFormula2: cubicAmplitudeFormula2.replaceAll(oldLabel, newLabel),
+      cubicSlantFormula1: cubicSlantFormula1.replaceAll(oldLabel, newLabel),
+      cubicSlantFormula2: cubicSlantFormula2.replaceAll(oldLabel, newLabel),
+      quadAmplitudeFormula: quadAmplitudeFormula.replaceAll(oldLabel, newLabel),
+      quadSlantFormula: quadSlantFormula.replaceAll(oldLabel, newLabel),
     );
   }
 
@@ -198,6 +212,7 @@ class CurveCommand extends DrawingCommand {
   static CurveCommand fromJson(Map<String, dynamic> json) {
     return CurveCommand(
       id: json['id'] as String,
+      version: 0,
       label: json['label'] as String, 
       startPointId: json['from'] as String,
       endPointId: json['to'] as String, 
@@ -220,6 +235,7 @@ class CurveCommand extends DrawingCommand {
     other is CurveCommand &&
     runtimeType == other.runtimeType &&
     id == other.id &&
+    version == other.version &&
     label == other.label &&
     startPointId == other.startPointId &&
     endPointId == other.endPointId &&
@@ -340,7 +356,76 @@ class CurveCommand extends DrawingCommand {
   }
 
   @override
-  void paint(Canvas canvas, Size size, Drawing drawing, bool selected) {
+  String previewPath(Drawing drawing) {
+    if (!valid) return '';
+
+    Offset? startCoordinate = getStartCoordinate(drawing);
+    if (startCoordinate == null) return '';
+    startCoordinate = startCoordinate.scale(1, -1);
+
+    Offset? endCoordinate = getEndCoordinate(drawing);
+    if (endCoordinate == null) return '';
+    endCoordinate = endCoordinate.scale(1, -1);
+
+    switch (curveDefinitionType) {
+      case CurveDefinitionType.quadratic:
+        double? amplitude = getQuadAmplitude(drawing);
+        if (amplitude == null) return '';
+
+        double? slant = getQuadSlant(drawing);
+        if (slant == null) return '';
+
+        Offset controlCoordinate = getControlPointCoordinate(startCoordinate, endCoordinate, amplitude, slant);
+
+        return ' M${startCoordinate.dx},${startCoordinate.dy} Q${controlCoordinate.dx},${controlCoordinate.dy} ${endCoordinate.dx},${endCoordinate.dy}';
+      case CurveDefinitionType.quadraticFromPoints:
+        if (quadCtrlPointId.isEmpty) return '';
+        PointCommand? ctrlPointCmd = drawing.pointById(quadCtrlPointId);
+        if (ctrlPointCmd == null) return '';
+        Offset? ctrlPoint = ctrlPointCmd.getCoordinate(drawing);
+        if (ctrlPoint == null) return '';
+        ctrlPoint = ctrlPoint.scale(1, -1);
+
+        return ' M${startCoordinate.dx},${startCoordinate.dy} Q${ctrlPoint.dx},${ctrlPoint.dy} ${endCoordinate.dx},${endCoordinate.dy}';
+      case CurveDefinitionType.cubic:
+        double? amplitude1 = getCubicAmplitude1(drawing);
+        if (amplitude1 == null) return '';
+
+        double? slant1 = getCubicSlant1(drawing);
+        if (slant1 == null) return '';
+
+        double? amplitude2 = getCubicAmplitude2(drawing);
+        if (amplitude2 == null) return '';
+
+        double? slant2 = getCubicSlant2(drawing);
+        if (slant2 == null) return '';
+
+        Offset controlCoordinate1 = getControlPointCoordinate(startCoordinate, endCoordinate, amplitude1, slant1);
+        Offset controlCoordinate2 = getControlPointCoordinate(startCoordinate, endCoordinate, amplitude2, slant2);
+
+        return ' M${startCoordinate.dx},${startCoordinate.dy} C${controlCoordinate1.dx},${controlCoordinate1.dy} ${controlCoordinate2.dx},${controlCoordinate2.dy} ${endCoordinate.dx},${endCoordinate.dy}';
+      case CurveDefinitionType.cubicFromPoints:
+        if (cubicCtrlPointId1.isEmpty) return '';
+        PointCommand? ctrlPoint1Cmd = drawing.pointById(cubicCtrlPointId1);
+        if (ctrlPoint1Cmd == null) return '';
+        Offset? ctrlPoint1 = ctrlPoint1Cmd.getCoordinate(drawing);
+        if (ctrlPoint1 == null) return '';
+        ctrlPoint1 = ctrlPoint1.scale(1, -1);
+
+        if (cubicCtrlPointId2.isEmpty) return '';
+        PointCommand? ctrlPoint2Cmd = drawing.pointById(cubicCtrlPointId2);
+        if (ctrlPoint2Cmd == null) return '';
+        Offset? ctrlPoint2 = ctrlPoint2Cmd.getCoordinate(drawing);
+        if (ctrlPoint2 == null) return '';
+        ctrlPoint2 = ctrlPoint2.scale(1, -1);
+
+        return ' M${startCoordinate.dx},${startCoordinate.dy} C${ctrlPoint1.dx},${ctrlPoint1.dy} ${ctrlPoint2.dx},${ctrlPoint2.dy} ${endCoordinate.dx},${endCoordinate.dy}';
+    }
+
+  }
+
+  @override
+  void paint(Canvas canvas, Size size, Drawing drawing, bool selected, {bool asPart = false}) {
     if (!valid) return;
 
     Offset middle = Offset(size.width / 2, size.height / 2);
@@ -361,9 +446,9 @@ class CurveCommand extends DrawingCommand {
     canvas.drawPath(
       p, 
       Paint()
-        ..color = selected ? selectedColor : Colors.grey.shade700
+        ..color = selected ? selectedColor : asPart ? partColor : Colors.grey.shade700
         ..style = PaintingStyle.stroke
-        ..strokeWidth = selected ? 2 : 1);
+        ..strokeWidth = asPart || selected ? 2 : 1);
 
     // draw curve label
     TextStyle style = TextStyle(color: selected ? selectedColor : Colors.grey[400]);
@@ -497,12 +582,12 @@ class CurveCommand extends DrawingCommand {
   }
 
   @override
-  DrawingCommand clearValidation() {
+  CurveCommand clearValidation() {
     return copyWith(validated: false, valid: false, errors: const[]);
   }
   
   @override
-  DrawingCommand validate(Drawing drawing) {
+  CurveCommand validate(Drawing drawing) {
     bool isvalid = true;
     bool retryValidation = true;
     List<String> validationErrors = [];
