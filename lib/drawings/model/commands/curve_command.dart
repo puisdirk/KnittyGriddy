@@ -5,9 +5,9 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/drawings/formulas/formula_expression.dart';
+import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
 import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
-import 'package:knitty_griddy/drawings/model/drawing.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 import 'package:knitty_griddy/utils/math_utitilies.dart';
 
@@ -113,7 +113,7 @@ class CurveCommand extends DrawingCommand {
   }
 
   @override
-  Rect getBoundingBox(Drawing drawing) {
+  Rect getBoundingBox(AbstractDrawing drawing) {
     if (valid) {
       Path? p = getPath(drawing, Offset.zero);
       if (p != null) return p.getBounds();
@@ -136,7 +136,7 @@ class CurveCommand extends DrawingCommand {
   }
 
   @override
-  Set<String> dependencies(Drawing drawing) {
+  Set<String> dependencies(AbstractDrawing drawing) {
     Set<String> deps = {};
     
     if (startPointId.isNotEmpty) deps.add(startPointId);
@@ -260,7 +260,7 @@ class CurveCommand extends DrawingCommand {
     cubicAmplitudeFormula1.hashCode ^ cubicSlantFormula1.hashCode ^ cubicAmplitudeFormula2.hashCode ^ cubicSlantFormula2.hashCode ^ 
     cubicCtrlPointId1.hashCode ^ cubicCtrlPointId2.hashCode;
 
-  Path? getPath(Drawing drawing, Offset offset) {
+  Path? getPath(AbstractDrawing drawing, Offset offset) {
     if (!valid) return null;
 
     Offset? startCoordinate = getStartCoordinate(drawing);
@@ -356,7 +356,7 @@ class CurveCommand extends DrawingCommand {
   }
 
   @override
-  String previewPath(Drawing drawing) {
+  String previewPath(AbstractDrawing drawing) {
     if (!valid) return '';
 
     Offset? startCoordinate = getStartCoordinate(drawing);
@@ -425,7 +425,7 @@ class CurveCommand extends DrawingCommand {
   }
 
   @override
-  void paint(Canvas canvas, Size size, Drawing drawing, bool selected, {bool asPart = false}) {
+  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false}) {
     if (!valid) return;
 
     Offset middle = Offset(size.width / 2, size.height / 2);
@@ -528,37 +528,37 @@ class CurveCommand extends DrawingCommand {
     }
   }
 
-  double? getQuadAmplitude(Drawing drawing) {
+  double? getQuadAmplitude(AbstractDrawing drawing) {
     return FormulaExpression.validate(formula: quadAmplitudeFormula, drawing: drawing).result;
   }
 
-  double? getQuadSlant(Drawing drawing) {
+  double? getQuadSlant(AbstractDrawing drawing) {
     return FormulaExpression.validate(formula: quadSlantFormula, drawing: drawing).result;
   }
 
-  double? getCubicAmplitude1(Drawing drawing) {
+  double? getCubicAmplitude1(AbstractDrawing drawing) {
     return FormulaExpression.validate(formula: cubicAmplitudeFormula1, drawing: drawing).result;
   }
 
-  double? getCubicSlant1(Drawing drawing) {
+  double? getCubicSlant1(AbstractDrawing drawing) {
     return FormulaExpression.validate(formula: cubicSlantFormula1, drawing: drawing).result;
   }
 
-  double? getCubicAmplitude2(Drawing drawing) {
+  double? getCubicAmplitude2(AbstractDrawing drawing) {
     return FormulaExpression.validate(formula: cubicAmplitudeFormula2, drawing: drawing).result;
   }
 
-  double? getCubicSlant2(Drawing drawing) {
+  double? getCubicSlant2(AbstractDrawing drawing) {
     return FormulaExpression.validate(formula: cubicSlantFormula2, drawing: drawing).result;
   }
 
-  Offset? getStartCoordinate(Drawing drawing) {
+  Offset? getStartCoordinate(AbstractDrawing drawing) {
     PointCommand? startPoint = drawing.pointById(startPointId);
     if (startPoint == null) return null;
     return startPoint.getCoordinate(drawing);
   }
 
-  Offset? getEndCoordinate(Drawing drawing) {
+  Offset? getEndCoordinate(AbstractDrawing drawing) {
     PointCommand? endPoint = drawing.pointById(endPointId);
     if (endPoint == null) return null;
     return endPoint.getCoordinate(drawing);
@@ -587,7 +587,7 @@ class CurveCommand extends DrawingCommand {
   }
   
   @override
-  CurveCommand validate(Drawing drawing) {
+  CurveCommand validate(AbstractDrawing drawing) {
     bool isvalid = true;
     bool retryValidation = true;
     List<String> validationErrors = [];

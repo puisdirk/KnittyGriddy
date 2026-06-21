@@ -2,24 +2,28 @@ import 'package:flutter/material.dart';
 import 'package:knitty_griddy/drawings/formulas/formula_field_control.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/command_controls/small_label.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/command_controls/small_text_field.dart';
+import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
 import 'package:knitty_griddy/drawings/model/commands/curve_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/line_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
-import 'package:knitty_griddy/drawings/model/drawing.dart';
-import 'package:knitty_griddy/drawings/model/drawings_model.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 import 'package:material_symbols_icons/symbols.dart';
-import 'package:provider/provider.dart';
 
 class PointCommandControl extends StatefulWidget {
+  final AbstractDrawing drawing;
   final PointCommand command;
   final bool sorting;
   final bool editing;
+  final void Function(PointCommand newCommand, String oldLabel) onChangeLabel;
+  final void Function(PointCommand newCommand) onChanged;
 
   const PointCommandControl({
+    required this.drawing,
     required this.command,
     required this.sorting,
     required this.editing,
+    required this.onChangeLabel,
+    required this.onChanged,
     super.key
   });
 
@@ -31,31 +35,31 @@ class _PointCommandControlState extends State<PointCommandControl> {
 
   void pointLabelChanged(String newText) {
     if (widget.command.label != newText) {
-      Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommandLabel(widget.command.copyWith(label: newText), widget.command.label);
+      widget.onChangeLabel(widget.command.copyWith(label: newText), widget.command.label);
     }
   }
 
   void distanceFormulaChanged(String formula) {
     if (widget.command.distanceFormula != formula) {
-      Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(distanceFormula: formula));
+      widget.onChanged(widget.command.copyWith(distanceFormula: formula));
     }
   }
 
   void directionAngleFormulaChanged(String formula) {
     if (widget.command.directionAngleFormula != formula) {
-      Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(directionAngleFormula: formula));
+      widget.onChanged(widget.command.copyWith(directionAngleFormula: formula));
     }
   }
 
   void onLineFractionFormulaChanged(String formula) {
     if (widget.command.onLineFractionFormula != formula) {
-      Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(onLineFractionFormula: formula));
+      widget.onChanged(widget.command.copyWith(onLineFractionFormula: formula));
     }
   }
 
   void onCurveFractionFormulaChanged(String formula) {
     if (widget.command.onCurveFractionFormula != formula) {
-      Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(onCurveFractionFormula: formula));
+      widget.onChanged(widget.command.copyWith(onCurveFractionFormula: formula));
     }
   }
 
@@ -70,8 +74,6 @@ class _PointCommandControlState extends State<PointCommandControl> {
   }
 
   Widget createViewContent() {
-    final Drawing drawing = Provider.of<DrawingsModel>(context, listen: false).drawing;
-
     String content = ' Point ';
 
     if (widget.command.pointDefinitionType == PointDefinitionType.relativeToPoint) {
@@ -92,7 +94,7 @@ class _PointCommandControlState extends State<PointCommandControl> {
       }
 
       String fromPointLabel = '???';
-      PointCommand? fromPoint = drawing.pointById(widget.command.fromPointId);
+      PointCommand? fromPoint = widget.drawing.pointById(widget.command.fromPointId);
       if (fromPoint != null) {
         fromPointLabel = fromPoint.label;
       }
@@ -101,7 +103,7 @@ class _PointCommandControlState extends State<PointCommandControl> {
 
     } else if (widget.command.pointDefinitionType == PointDefinitionType.onLine) {
       String onlineLabel = '???';
-      LineCommand? line = drawing.lineById(widget.command.onLineId);
+      LineCommand? line = widget.drawing.lineById(widget.command.onLineId);
       if (line != null) {
         onlineLabel = line.label;
       }
@@ -114,7 +116,7 @@ class _PointCommandControlState extends State<PointCommandControl> {
       content += 'on line $onlineLabel at $fractionLabel';
     } else if (widget.command.pointDefinitionType == PointDefinitionType.onCurve) {
       String oncurveLabel = '???';
-      CurveCommand? curve = drawing.curveById(widget.command.onCurveId);
+      CurveCommand? curve = widget.drawing.curveById(widget.command.onCurveId);
       if (curve != null) {
         oncurveLabel = curve.label;
       }
@@ -127,13 +129,13 @@ class _PointCommandControlState extends State<PointCommandControl> {
       content += 'on curve $oncurveLabel at $fractionLabel';
     } else if (widget.command.pointDefinitionType == PointDefinitionType.onIntersection) {
       String l1label = '???';
-      LineCommand? l1 = drawing.lineById(widget.command.intersectionLine1Id);
+      LineCommand? l1 = widget.drawing.lineById(widget.command.intersectionLine1Id);
       if (l1 != null) {
         l1label = l1.label;
       }
       
       String l2label = '???';
-      LineCommand? l2 = drawing.lineById(widget.command.intersectionLine2Id);
+      LineCommand? l2 = widget.drawing.lineById(widget.command.intersectionLine2Id);
       if (l2 != null) {
         l2label = l2.label;
       }
@@ -161,8 +163,6 @@ class _PointCommandControlState extends State<PointCommandControl> {
   }
 
   Widget createEditContent() {
-    final Drawing drawing = Provider.of<DrawingsModel>(context, listen: false).drawing;
-
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -187,7 +187,7 @@ class _PointCommandControlState extends State<PointCommandControl> {
               value: widget.command.pointDefinitionType,
               onChanged: (value) {
                 if (value != widget.command.pointDefinitionType) {
-                  Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(pointDefinitionType: value));
+                  widget.onChanged(widget.command.copyWith(pointDefinitionType: value));
                 }
               },
             ),
@@ -244,7 +244,7 @@ class _PointCommandControlState extends State<PointCommandControl> {
                     ], 
                     onChanged: (value) {
                       if (value != widget.command.direction) {
-                        Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(direction: value));
+                        widget.onChanged(widget.command.copyWith(direction: value));
                       }
                     },
                     value: widget.command.direction,
@@ -277,12 +277,12 @@ class _PointCommandControlState extends State<PointCommandControl> {
                     items: [
                       const DropdownMenuItem(value: '', child: Text('')),
                       DropdownMenuItem(value: origin.id, child: Text(origin.label)),
-                      for (PointCommand point in drawing.points.where((p) => p.id != widget.command.id))
+                      for (PointCommand point in widget.drawing.points.where((p) => p.id != widget.command.id))
                         DropdownMenuItem(value: point.id, child: Text(point.label)),
                     ],
                     onChanged: (value) {
                       if (value != widget.command.fromPointId) {
-                        Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(fromPointId: value?? ''));
+                        widget.onChanged(widget.command.copyWith(fromPointId: value?? ''));
                       }
                     },
                     value: widget.command.fromPointId,
@@ -310,12 +310,12 @@ class _PointCommandControlState extends State<PointCommandControl> {
                     underline: Container(),
                     items: [
                       const DropdownMenuItem(value: '', child: Text('')),
-                      for (LineCommand line in drawing.lines)
+                      for (LineCommand line in widget.drawing.lines)
                         DropdownMenuItem(value: line.id, child: Text(line.label))
                     ], 
                     onChanged: (value) {
                       if (value != widget.command.onLineId) {
-                        Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(onLineId: value?? ''));
+                        widget.onChanged(widget.command.copyWith(onLineId: value?? ''));
                       }
                     },
                     value: widget.command.onLineId,
@@ -355,12 +355,12 @@ class _PointCommandControlState extends State<PointCommandControl> {
                     underline: Container(),
                     items: [
                       const DropdownMenuItem(value: '', child: Text('')),
-                      for (CurveCommand curve in drawing.curves)
+                      for (CurveCommand curve in widget.drawing.curves)
                         DropdownMenuItem(value: curve.id, child: Text(curve.label))
                     ], 
                     onChanged: (value) {
                       if (value != widget.command.onCurveId) {
-                        Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(onCurveId: value?? ''));
+                        widget.onChanged(widget.command.copyWith(onCurveId: value?? ''));
                       }
                     },
                     value: widget.command.onCurveId,
@@ -400,12 +400,12 @@ class _PointCommandControlState extends State<PointCommandControl> {
                     underline: Container(),
                     items: [
                       const DropdownMenuItem(value: '', child: Text('')),
-                      for (LineCommand line in drawing.lines.where((l) => l.id != widget.command.intersectionLine2Id))
+                      for (LineCommand line in widget.drawing.lines.where((l) => l.id != widget.command.intersectionLine2Id))
                         DropdownMenuItem(value: line.id, child: Text(line.label))
                     ], 
                     onChanged: (value) {
                       if (value != widget.command.intersectionLine1Id) {
-                        Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(intersectionLine1Id: value?? ''));
+                        widget.onChanged(widget.command.copyWith(intersectionLine1Id: value?? ''));
                       }
                     },
                     value: widget.command.intersectionLine1Id,
@@ -427,12 +427,12 @@ class _PointCommandControlState extends State<PointCommandControl> {
                     underline: Container(),
                     items: [
                       const DropdownMenuItem(value: '', child: Text('')),
-                      for (LineCommand line in drawing.lines.where((l) => l.id != widget.command.intersectionLine1Id))
+                      for (LineCommand line in widget.drawing.lines.where((l) => l.id != widget.command.intersectionLine1Id))
                         DropdownMenuItem(value: line.id, child: Text(line.label))
                     ], 
                     onChanged: (value) {
                       if (value != widget.command.intersectionLine2Id) {
-                        Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(intersectionLine2Id: value?? ''));
+                        widget.onChanged(widget.command.copyWith(intersectionLine2Id: value?? ''));
                       }
                     },
                     value: widget.command.intersectionLine2Id,

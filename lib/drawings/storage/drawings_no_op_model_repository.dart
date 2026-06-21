@@ -1,6 +1,8 @@
 
 import 'package:knitty_griddy/drawings/model/drawing.dart';
 import 'package:knitty_griddy/drawings/model/drawing_info.dart';
+import 'package:knitty_griddy/drawings/model/part_drawing.dart';
+import 'package:knitty_griddy/drawings/partrepo/part_set.dart';
 import 'package:knitty_griddy/drawings/storage/drawings_model_repository.dart';
 
 class DrawingsNoOpModelRepository implements DrawingsModelRepository {
@@ -36,5 +38,32 @@ class DrawingsNoOpModelRepository implements DrawingsModelRepository {
 
   @override
   Future<void> saveDrawingInfos(List<DrawingInfo> drawingInfos) async {
+  }
+
+  @override
+  Future<void> exportPartSet(PartSet partSet) async {
+  }
+
+  @override
+  Future<PartSet?> importPartSet() async {
+    return null;
+  }
+
+  @override
+  Future<List<PartSet>> loadPartSets() async {
+    return [];
+  }
+
+  @override
+  Future<void> savePartSets(List<PartSet> partSets) async {
+  }
+
+  @override
+  Future<void> exportPartDrawing(PartDrawing partDrawing) async {
+  }
+
+  @override
+  Future<PartDrawing?> importPartDrawing() async {
+    return null;
   }
 }

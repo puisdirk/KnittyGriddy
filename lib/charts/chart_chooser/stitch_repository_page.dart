@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/charts/chart_chooser/stitch_set_name_control.dart';
 import 'package:knitty_griddy/charts/chart_chooser/stitch_set_panel.dart';
+import 'package:knitty_griddy/charts/stitch_icon.dart';
 import 'package:knitty_griddy/charts/stitchrepo/basic_stitches_set.dart';
 import 'package:knitty_griddy/charts/stitchrepo/stitch_repository.dart';
 import 'package:knitty_griddy/charts/stitchrepo/stitch_set.dart';
 import 'package:knitty_griddy/charts/model/charts_model.dart';
+import 'package:knitty_griddy/utils/constants.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
@@ -62,7 +64,14 @@ class _StitchRepositoryPageState extends State<StitchRepositoryPage> with Ticker
         }
         return Scaffold(
           appBar: AppBar(
-            title: const Text('Stitch Repository'),
+            title: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                StitchIcon(stitchDefinition: BasicStitchesSet.sssp, iconSize: 32,),
+                hspacing,
+                Text('Stitch Repository'),
+              ],
+            ),
             backgroundColor: Colors.grey.shade300,
             bottom: PreferredSize(
               preferredSize: const Size(2000, 100), 

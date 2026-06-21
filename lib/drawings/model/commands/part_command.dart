@@ -1,12 +1,8 @@
-import 'dart:ui';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
-import 'package:knitty_griddy/drawings/model/commands/line_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
-import 'package:knitty_griddy/drawings/model/drawing.dart';
-import 'package:knitty_griddy/drawings/model/part_info.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 
 class PartCommand extends DrawingCommand {
@@ -48,17 +44,8 @@ class PartCommand extends DrawingCommand {
     );
   }
 
-  PartInfo getInfo(Drawing drawing) {
-    return PartInfo(
-      id: id, 
-      drawingId: drawing.id,
-      name: label, 
-      previewPath: previewPath(drawing)
-    );
-  }
-
   @override
-  String previewPath(Drawing drawing) {
+  String previewPath(AbstractDrawing drawing) {
     if (validated && valid) {
       String p = '';
       for (String cmdId in commandIds) {
@@ -75,7 +62,7 @@ class PartCommand extends DrawingCommand {
   double get editHeight => 300;
 
   @override
-  Rect getBoundingBox(Drawing drawing) {
+  Rect getBoundingBox(AbstractDrawing drawing) {
     return Rect.zero;
   }
 
@@ -94,7 +81,7 @@ class PartCommand extends DrawingCommand {
   }
 
   @override
-  Set<String> dependencies(Drawing drawing) {
+  Set<String> dependencies(AbstractDrawing drawing) {
     return commandIds;
   }
 
@@ -121,7 +108,7 @@ class PartCommand extends DrawingCommand {
   }
 
   @override
-  void paint(Canvas canvas, Size size, Drawing drawing, bool selected, {bool asPart = false}) {
+  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false}) {
     for (String commandId in commandIds) {
       DrawingCommand command = drawing.commandById(commandId);
       command.paint(canvas, size, drawing, selected, asPart: true);
@@ -189,7 +176,7 @@ class PartCommand extends DrawingCommand {
   int get hashCode => super.hashCode ^ commandIds.hashCode ^ anchorPointId.hashCode;
 
   @override
-  PartCommand validate(Drawing drawing) {
+  PartCommand validate(AbstractDrawing drawing) {
     bool isvalid = true;
     bool retryValidation = true;
     List<String> validationErrors = [];

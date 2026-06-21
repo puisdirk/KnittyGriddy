@@ -5,6 +5,8 @@ import 'package:knitty_griddy/charts/chart_chooser/chart_card.dart';
 import 'package:knitty_griddy/charts/chart_chooser/stitch_repository_page.dart';
 import 'package:knitty_griddy/charts/model/charts_model.dart';
 import 'package:knitty_griddy/charts/model/chart_info.dart';
+import 'package:knitty_griddy/charts/stitch_icon.dart';
+import 'package:knitty_griddy/charts/stitchrepo/basic_stitches_set.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
@@ -70,7 +72,7 @@ class _ChartChooserViewState extends State<ChartChooserView> {
                 context, MaterialPageRoute(
                   builder: (context) => const StitchRepositoryPage(),)),
               label: const Text('Stitches'),
-              icon: const Icon(Symbols.auto_stories, weight: 700,),
+              icon: const StitchIcon(stitchDefinition: BasicStitchesSet.sssp, iconSize: 32, iconColor: Color.fromARGB(255, 41, 99, 138),) // const Icon(Symbols.auto_stories, weight: 700,),
             ),
             const SizedBox(width: 10,)
           ],

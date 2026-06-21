@@ -6,6 +6,8 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:knitty_griddy/drawings/model/drawing.dart';
 import 'package:knitty_griddy/drawings/model/drawing_info.dart';
+import 'package:knitty_griddy/drawings/model/part_drawing.dart';
+import 'package:knitty_griddy/drawings/partrepo/part_set.dart';
 
 import 'package:knitty_griddy/drawings/storage/drawings_model_repository.dart';
 import 'package:path_provider/path_provider.dart';
@@ -171,6 +173,126 @@ class DrawingsJsonFilesModelRepository implements DrawingsModelRepository {
     } catch(e) {
       debugPrint('Error while exporting Drawing: $e');
     }
-
   }
+
+  @override
+  Future<List<PartSet>> loadPartSets() async {
+    await _initAppDirectoryPath();
+
+    List<PartSet> sets = [];
+
+    File partSetsFile = File(p.join(appDirectoryPath!, 'partSets.json'));
+
+    if (partSetsFile.existsSync()) {
+      String jsonContents = partSetsFile.readAsStringSync();
+
+      try {
+        Map<String, dynamic> jsonObject = jsonDecode(jsonContents);
+
+        if (jsonObject.containsKey('partSets')) {
+          List<Map<String, dynamic>> partSetObjects = 
+            (jsonObject['partSets'] as List).map((s) => s as Map<String, dynamic>).toList();
+          for (Map<String, dynamic> partSetObject in partSetObjects) {
+            sets.add(PartSet.fromJson(partSetObject));
+          }
+        }
+      } catch (e) {
+        debugPrint('Error while loading part sets: $e');
+      }
+    }
+
+    return sets;
+  }
+
+  @override
+  Future<void> savePartSets(List<PartSet> partSets) async {
+    await _initAppDirectoryPath();
+
+    Map<String, Object> jsonObject = {'partSets': partSets.map((s) => s.toJson()).toList()};
+    try {
+      String jsonString = codec.encode(jsonObject);
+      File partSetsFile = File(p.join(appDirectoryPath!, 'partSets.json'));
+      partSetsFile.writeAsStringSync(jsonString);
+    } catch (e) {
+      debugPrint('Error while saving part sets: $e');
+    }
+  }
+
+  @override
+  Future<void> exportPartSet(PartSet partSet) async {
+    Map<String, Object> jsonObject = partSet.toJson();
+
+    try {
+      String jsonString = jsonEncode(jsonObject);
+
+      await FilePicker.platform.saveFile(
+        dialogTitle: 'Where do you want to store the output?',
+        fileName: '${partSet.name}.kps',
+        bytes: utf8.encode(jsonString),
+      );
+    } catch(e) {
+      debugPrint('Error while exporting part set: $e');
+    }
+  }
+
+  @override
+  Future<PartSet?> importPartSet() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      dialogTitle: 'Load a part set (kps)',
+      allowMultiple: false,
+      allowedExtensions: ['kps'],
+      withData: true,
+    );
+
+    if (result != null && result.files.isNotEmpty) {
+      try {
+        String jsonString = utf8.decode(result.files.first.bytes!);
+        Map<String, dynamic> jsonObject = jsonDecode(jsonString);
+        PartSet partSet = PartSet.fromJson(jsonObject);
+        return partSet;
+      } catch (e) {
+        debugPrint('Error while importing part set: $e');
+      }
+    }
+
+    return null;
+  }
+
+  @override
+  Future<void> exportPartDrawing(PartDrawing partDrawing) async {
+    Map<String, Object> jsonObject = partDrawing.toJson();
+    try {
+      String jsonString = jsonEncode(jsonObject);
+      await FilePicker.platform.saveFile(
+        dialogTitle: 'Where do you want to store the output?',
+        fileName: '${partDrawing.name}.kpd',
+        bytes: utf8.encode(jsonString),
+      );
+    } catch (e) {
+      debugPrint('Error while exporting part drawing: $e');
+    }
+  }
+
+  @override
+  Future<PartDrawing?> importPartDrawing() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      dialogTitle: 'Load a drawing (kpd)',
+      allowMultiple: false,
+      withData: true,
+    );
+
+    if (result != null && result.files.isNotEmpty) {
+      try {
+        String jsonString = utf8.decode(result.files.first.bytes!);
+        Map<String, dynamic> jsonObject = jsonDecode(jsonString);
+        PartDrawing partdrawing = PartDrawing.fromJson(jsonObject);
+        return partdrawing;
+      } catch (e) {
+        debugPrint('Error while importing part drawing: $e');
+      }
+    }
+
+    return null;
+  }
+  
 }

@@ -179,20 +179,13 @@ class _StitchSetPanelState extends State<StitchSetPanel> {
                                   onPressed: () => Navigator.pop(context), 
                                   child: const Text('Cancel')
                                 ),
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                      Provider.of<ChartsModel>(context, listen: false).deleteStitch(def);
-                                    },
-                                    child: const Text('Yes')
-                                  ),
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                      Provider.of<ChartsModel>(context, listen: false).deleteStitch(def);
-                                    }, 
-                                    child: const Text('Delete Permanently')
-                                  )
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                    Provider.of<ChartsModel>(context, listen: false).deleteStitch(def);
+                                  }, 
+                                  child: const Text('Delete')
+                                )
                               ],
                             );
                           });

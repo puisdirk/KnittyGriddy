@@ -102,22 +102,6 @@ class _FormulaFieldControlState extends State<FormulaFieldControl> {
             );
           },
         )
-        // TODO: add function names on #
-/*        AutocompleteTrigger(
-          trigger: '\$', 
-          optionsViewBuilder: (context, autocompleteQuery, textEditingController) {
-            return DrawingCommandsChooser(
-              forCommand: excludeCommand,
-              query: autocompleteQuery.query,
-              onChooseCommand: (DrawingCommand command) {
-                final MultiTriggerAutocompleteState autocomplete = MultiTriggerAutocomplete.of(context);
-                autocomplete.acceptAutocompleteOption(command.label);
-                // TODO: add a $<label>. trigger for the properties
-              }
-            );
-          },
-        )
-*/
       ],
       fieldViewBuilder: (context, textEditingController, focusNode) {
         return SizedBox(

@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
-import 'package:knitty_griddy/drawings/drawing_editor/drawing_editor_page.dart';
+import 'package:knitty_griddy/drawings/drawing_editor/editor/edit_drawing_page.dart';
+import 'package:knitty_griddy/drawings/model/drawing.dart';
 import 'package:knitty_griddy/drawings/model/drawing_info.dart';
 import 'package:knitty_griddy/drawings/model/drawings_model.dart';
 import 'package:provider/provider.dart';
@@ -46,7 +47,12 @@ class DrawingCard extends StatelessWidget {
             Navigator.push(
               context, 
               MaterialPageRoute(
-                builder: (context) => const DrawingEditorPage(),
+                builder: (context) => Selector<DrawingsModel, Drawing>(
+                  selector: (_, model) => model.drawing,
+                  builder: (context, drawing, _) {
+                    return EditDrawingPage(drawing: drawing,);
+                  }
+                ),
               )
             );
           }

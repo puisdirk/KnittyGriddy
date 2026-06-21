@@ -2,23 +2,27 @@
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/command_controls/small_label.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/command_controls/small_text_field.dart';
+import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/part_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
-import 'package:knitty_griddy/drawings/model/drawing.dart';
-import 'package:knitty_griddy/drawings/model/drawings_model.dart';
 import 'package:knitty_griddy/utils/constants.dart';
-import 'package:provider/provider.dart';
 
 class PartCommandControl extends StatefulWidget {
+  final AbstractDrawing drawing;
   final PartCommand command;
   final bool sorting;
   final bool editing;
+  final void Function(PartCommand newCommand, String oldLabel) onChangeLabel;
+  final void Function(PartCommand newCommand) onChanged;
   
   const PartCommandControl({
+    required this.drawing,
     required this.command,
     required this.sorting,
     required this.editing,
+    required this.onChangeLabel,
+    required this.onChanged,
     super.key
   });
 
@@ -30,20 +34,18 @@ class _PartCommandControlState extends State<PartCommandControl> {
 
   void labelChanged(String newText) {
     if (widget.command.label != newText) {
-      Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommandLabel(widget.command.copyWith(label: newText), widget.command.label);
+      widget.onChangeLabel(widget.command.copyWith(label: newText), widget.command.label);
     }
   }
 
   Widget createViewContent() {
-    final Drawing drawing = Provider.of<DrawingsModel>(context, listen: false).drawing;
-
     String content = ' Part with';
     String partLabels = '???';
 
     if (widget.command.commandIds.isNotEmpty) {
       partLabels = '';
       for (String id in widget.command.commandIds) {
-        partLabels += drawing.commandById(id).label;
+        partLabels += widget.drawing.commandById(id).label;
         partLabels += ', ';
       }
     }
@@ -69,8 +71,6 @@ class _PartCommandControlState extends State<PartCommandControl> {
   }
 
   Widget createEditContent() {
-    final Drawing drawing = Provider.of<DrawingsModel>(context, listen: false).drawing;
-
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -105,13 +105,13 @@ class _PartCommandControlState extends State<PartCommandControl> {
               underline: Container(),
               items: [
                 DropdownMenuItem(value: origin.id, child: Text(origin.label)),
-                for (PointCommand point in drawing.points.where((p) => p.id != widget.command.id))
+                for (PointCommand point in widget.drawing.points.where((p) => p.id != widget.command.id))
                   DropdownMenuItem(value: point.id, child: Text(point.label)),
               ],
               value: widget.command.anchorPointId,
               onChanged: (value) {
                 if (value != null && value != widget.command.anchorPointId) {
-                  Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(anchorPointId: value));
+                  widget.onChanged(widget.command.copyWith(anchorPointId: value));
                 }
               },
             ),
@@ -146,21 +146,20 @@ class _PartCommandControlState extends State<PartCommandControl> {
                         focusColor: Colors.transparent,
                         underline: Container(),
                         items: [
-                          for (DrawingCommand cmd in drawing.linesAndCurves.where((c) => !widget.command.commandIds.contains(c.id)))
+                          for (DrawingCommand cmd in widget.drawing.linesAndCurves.where((c) => !widget.command.commandIds.contains(c.id)))
                             DropdownMenuItem(value: cmd, child: Text(cmd.label)),
                         ], 
                         onChanged: (value) {
                           if (value != null) {
-                            Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(
-                              widget.command.copyWith(commandIds: {...widget.command.commandIds, value.id}));
+                            widget.onChanged(widget.command.copyWith(commandIds: {...widget.command.commandIds, value.id}));
                           }
                         },
                         value: null,
                       ),
                       for (String id in widget.command.commandIds)
                         Chip(
-                          label: Text(drawing.commandLabel(id), style: smallStyle,),
-                          onDeleted: () => Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(
+                          label: Text(widget.drawing.commandLabel(id), style: smallStyle,),
+                          onDeleted: () => widget.onChanged(
                             widget.command.copyWith(commandIds: widget.command.commandIds.where((c) => c != id).toSet())
                           ),
                         ),

@@ -2,21 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/command_controls/small_label.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/command_controls/small_text_field.dart';
 import 'package:knitty_griddy/drawings/formulas/formula_field_control.dart';
+import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
 import 'package:knitty_griddy/drawings/model/commands/variable_command.dart';
-import 'package:knitty_griddy/drawings/model/drawings_model.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 import 'package:material_symbols_icons/symbols.dart';
-import 'package:provider/provider.dart';
 
 class VariableCommandControl extends StatefulWidget {
+  final AbstractDrawing drawing;
   final VariableCommand command;
   final bool sorting;
   final bool editing;
+  final void Function(VariableCommand newCommand, String oldLabel) onChangeLabel;
+  final void Function(VariableCommand newCommand) onChanged;
 
   const VariableCommandControl({
+    required this.drawing,
     required this.command,
     required this.sorting,
     required this.editing,
+    required this.onChangeLabel,
+    required this.onChanged,
     super.key
   });
 
@@ -28,13 +33,13 @@ class _VariableCommandControlState extends State<VariableCommandControl> {
   
   void labelChanged(String newText) {
     if (widget.command.label != newText) {
-      Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommandLabel(widget.command.copyWith(label: newText), widget.command.label);
+      widget.onChangeLabel(widget.command.copyWith(label: newText), widget.command.label);
     }
   }
 
   void formulaChanged(String newFormula) {
     if (widget.command.formula != newFormula) {
-      Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(formula: newFormula));
+      widget.onChanged(widget.command.copyWith(formula: newFormula));
     }
   }
 

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/drawings/drawing_chooser/drawing_card.dart';
-import 'package:knitty_griddy/drawings/drawing_editor/drawing_editor_page.dart';
+import 'package:knitty_griddy/drawings/partrepo/part_repository_page.dart';
+import 'package:knitty_griddy/drawings/drawing_editor/editor/edit_drawing_page.dart';
+import 'package:knitty_griddy/drawings/model/drawing.dart';
 import 'package:knitty_griddy/drawings/model/drawing_info.dart';
 import 'package:knitty_griddy/drawings/model/drawings_model.dart';
+import 'package:knitty_griddy/utils/constants.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
@@ -35,7 +38,14 @@ class _DrawingChooserViewState extends State<DrawingChooserView> {
           splashColor: Colors.blue.withAlpha(30),
           onTap: () {
             Provider.of<DrawingsModel>(context, listen: false).createNewDrawing('Unnamed');
-            Navigator.push(context, MaterialPageRoute(builder: (context) => const DrawingEditorPage(),));
+            Navigator.push(context, MaterialPageRoute(builder: (context) => 
+              Selector<DrawingsModel, Drawing>(
+                selector: (_, model) => model.drawing,
+                builder: (context, drawing, _) {
+                  return EditDrawingPage(drawing: drawing,);
+                }
+              ),
+            ));
           },
           child: const Center(
             child:  Icon(Icons.add, size: 48,)
@@ -62,7 +72,15 @@ class _DrawingChooserViewState extends State<DrawingChooserView> {
               label: const Text('Import Drawing'),
               icon: const Icon(Symbols.download, weight: 700,),
             ),
-            const SizedBox(width: 10,),
+            hspacing,
+            OutlinedButton.icon(
+              onPressed: () => Navigator.push(
+                context, MaterialPageRoute(
+                  builder: (context) => const PartRepositoryPage(),)), 
+              label: const Text('Parts'),
+              icon: const Icon(Symbols.apparel),
+            ),
+            hspacing,
           ],
         ),
         Expanded(
