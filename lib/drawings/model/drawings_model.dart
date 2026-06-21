@@ -1,21 +1,15 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
 import 'package:id_gen/id_gen.dart';
-import 'package:knitty_griddy/drawings/model/commands/curve_command.dart';
-import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
-import 'package:knitty_griddy/drawings/model/commands/included_part_command.dart';
-import 'package:knitty_griddy/drawings/model/commands/line_command.dart';
-import 'package:knitty_griddy/drawings/model/commands/measurement_command.dart';
-import 'package:knitty_griddy/drawings/model/commands/part_command.dart';
-import 'package:knitty_griddy/drawings/model/commands/variable_command.dart';
+import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
 import 'package:knitty_griddy/drawings/model/drawing.dart';
 import 'package:knitty_griddy/drawings/model/drawing_info.dart';
 import 'package:knitty_griddy/drawings/model/drawings_model_object.dart';
 import 'package:knitty_griddy/drawings/model/drawings_save_model_object.dart';
-import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
-import 'package:knitty_griddy/drawings/model/part_info.dart';
+import 'package:knitty_griddy/drawings/model/part_drawing.dart';
+import 'package:knitty_griddy/drawings/model/part_set_info.dart';
+import 'package:knitty_griddy/drawings/partrepo/part_repository.dart';
+import 'package:knitty_griddy/drawings/partrepo/part_set.dart';
 import 'package:knitty_griddy/drawings/storage/drawings_model_repository.dart';
-import 'package:knitty_griddy/utils/undo_redo_manager.dart';
 
 class DrawingsModel extends ChangeNotifier {
 
@@ -23,61 +17,136 @@ class DrawingsModel extends ChangeNotifier {
 
   DrawingsModelObject _drawingsModelObject;
 
-  final UndoRedoManager<Drawing> _undoRedoManager;
-
   DrawingsSaveModelObject? _lastSaved;
 
   DrawingsModel({
     required DrawingsModelRepository repository,
   }) :
     _repository = repository,
-    _drawingsModelObject = const DrawingsModelObject(),
-    _undoRedoManager = UndoRedoManager() {
-      _storeForUndo();
-    }
+    _drawingsModelObject = const DrawingsModelObject();
 
-  void clearUndoRedo() {
-    _undoRedoManager.clear();
+  // ====================== Part repo =========================
+
+  PartDrawing addPartDrawing({required String category, required String partSetId}) {
+    PartDrawing pd = PartDrawing(
+      id: const UuidV4Gen().get(), 
+      name: 'Unnamed',
+      category: category,
+    );
+
+    PartRepository.addPartDrawingToSet(pd, partSetId);
+
+    notifyListeners();
+
+    return pd;
   }
 
-  void _storeForUndo() {
-    if (_drawingsModelObject.drawing != placeholderDrawing) {
-      _undoRedoManager.store(_drawingsModelObject.drawing.copyWith());
+  List<PartSet> filteredPartSets(String filter) {
+    return PartRepository.filteredPartSets(filter);
+  }
+  
+  List<PartSetInfo> filteredPartSetInfos(String filter) {
+    return PartRepository.filteredPartSetInfos(filter);
+  }
+
+  String createPartSet(String name, List<PartDrawing> parts) {
+    String id = PartRepository.createPartSet(name, parts);
+    notifyListeners();
+    return id;
+  }
+
+  void renamePartSet(String id, String newName) {
+    PartRepository.renamePartSet(id, newName);
+    notifyListeners();
+  }
+
+  Future<void> exportPartSet(PartSet partSet) async {
+    await _repository.exportPartSet(partSet);
+  }
+
+  Future<String?> importPartSet() async {
+    PartSet? importedSet = await _repository.importPartSet();
+
+    if (importedSet != null) {
+      if (!PartRepository.hasPartSet(importedSet.id)) {
+        PartRepository.addPartSet(importedSet);
+        notifyListeners();
+      }
+      return importedSet.id;
+    }
+
+    return null;
+  }
+
+  Future<void> importPartDrawing(String partSetId) async {
+    PartDrawing? importedPartDrawing = await _repository.importPartDrawing();
+
+    if (importedPartDrawing != null) {
+      importedPartDrawing = importedPartDrawing.validate();
+      if (!PartRepository.hasPartDrawing(importedPartDrawing)) {
+        PartRepository.addPartDrawingToSet(importedPartDrawing, partSetId);
+        notifyListeners();
+      }
     }
   }
 
-  bool get canUndo => _undoRedoManager.canUndo();
-  bool get canRedo => _undoRedoManager.canRedo();
+  void restoreBasicPartSet() {
+    PartRepository.restoreBasicPartSet();
+    notifyListeners();
+  }
 
-  void undo() {
-    if (_undoRedoManager.canUndo()) {
-      _drawingsModelObject = _drawingsModelObject.copyWith(drawing: _undoRedoManager.undo());
+  void deletePartSet(String id) {
+    PartRepository.deletePartSet(id);
+    notifyListeners();
+  }
+
+  void movePartToSet({
+    required PartDrawing partDrawing,
+    required String sourceSetId,
+    required String targetSetId}) {
+    PartRepository.movePartToSet(partDrawing, sourceSetId, targetSetId);
+    notifyListeners();
+  }
+
+  void addPartToSet({required PartSet targetPartSet, required PartDrawing part}) {
+    PartRepository.addPartDrawingToSet(part, targetPartSet.id);
+    notifyListeners();
+  }
+
+  void deletePartDrawing(PartDrawing partDrawing) {
+    PartRepository.deletePart(partDrawing);
+    notifyListeners();
+  }
+
+  void updateDrawing({
+    required AbstractDrawing oldDrawing,
+    required AbstractDrawing newDrawing,
+  }) {
+    if (oldDrawing is PartDrawing && newDrawing is PartDrawing) {
+      PartRepository.updatePartDrawing(oldDrawing, newDrawing);
       notifyListeners();
+    } else {
+      _drawingsModelObject = _drawingsModelObject.copyWith(drawing: newDrawing as Drawing);
     }
+
+    notifyListeners();
   }
 
-  void redo() {
-    if (_undoRedoManager.canRedo()) {
-      _drawingsModelObject = _drawingsModelObject.copyWith(drawing: _undoRedoManager.redo());
-      notifyListeners();
-    }
-  }
+  // ===================== Drawing infos =======================
 
   List<DrawingInfo> get drawingInfos => _drawingsModelObject.drawingInfos;
-  Drawing get drawing => _drawingsModelObject.drawing;
-  List<PartInfo> get partInfos {
-    List<PartInfo> infos = [];
-    for (DrawingInfo info in _drawingsModelObject.drawingInfos) {
-      infos.addAll(info.partInfos);
-    }
-    return infos;
-  }
 
+  Drawing get drawing => _drawingsModelObject.drawing;
+  
   void loadOnStartup() {
     _repository.loadDrawingInfos().then((List<DrawingInfo> drawingInfos) {
      _drawingsModelObject =  _drawingsModelObject.copyWith(
       drawingInfos: drawingInfos,
      );
+     _repository.loadPartSets().then((List<PartSet> partSets) {
+       PartRepository.loadInitialPartSets(partSets);
+       notifyListeners();
+     },);
     });
   }
 
@@ -86,6 +155,7 @@ class DrawingsModel extends ChangeNotifier {
       _lastSaved = DrawingsSaveModelObject(
         drawing: _drawingsModelObject.drawing,
         drawingInfos: _drawingsModelObject.drawingInfos,
+        partSets: List.from(PartRepository.instance.sets),
       );
       return;
     }
@@ -94,10 +164,15 @@ class DrawingsModel extends ChangeNotifier {
     _lastSaved = _lastSaved!.copyWith(
       drawing: _drawingsModelObject.drawing,
       drawingInfos: _drawingsModelObject.drawingInfos,
+      partSets: List.from(PartRepository.instance.sets),
     );
 
     if (!listEquals(oldModel.drawingInfos, _lastSaved!.drawingInfos)) {
       await _repository.saveDrawingInfos(_lastSaved!.drawingInfos);
+    }
+
+    if (!listEquals(oldModel.partSets, _lastSaved!.partSets)) {
+      await _repository.savePartSets(_lastSaved!.partSets);
     }
 
     if (oldModel.drawing != _lastSaved!.drawing) {
@@ -110,7 +185,8 @@ class DrawingsModel extends ChangeNotifier {
 
     _drawingsModelObject = _drawingsModelObject.copyWith(
       drawingInfos: drawingInfos.map((di) => di.id != drawing.id ? di : di.copyWith(
-        partInfos: _drawingsModelObject.drawing.partInfos
+        name: _drawingsModelObject.drawing.name,
+        description: _drawingsModelObject.drawing.description
       )).toList()
     );
 
@@ -130,12 +206,15 @@ class DrawingsModel extends ChangeNotifier {
     );
 
     await autoSave();
-    _storeForUndo();
     notifyListeners();
   }
 
-  Future<void> exportDrawing() async {
-    await _repository.exportDrawing(_drawingsModelObject.drawing);
+  Future<void> exportDrawing(AbstractDrawing drawing) async {
+    if (drawing is PartDrawing) {
+      await _repository.exportPartDrawing(drawing);
+    } else {
+      await _repository.exportDrawing(_drawingsModelObject.drawing);
+    }
   }
 
   Future<void> importDrawing() async {
@@ -147,7 +226,6 @@ class DrawingsModel extends ChangeNotifier {
           id: drawing.id, 
           name: drawing.name, 
           description: drawing.description,
-          partInfos: drawing.partInfos,
         )],
       );
 
@@ -169,241 +247,38 @@ class DrawingsModel extends ChangeNotifier {
   Future<void> loadDrawing(String drawingId) async {
     Drawing drawing = await _repository.loadDrawing(drawingId);
 
-    _drawingsModelObject = _drawingsModelObject.copyWith(
-      drawing: drawing
-    );
-
-    _drawingsModelObject = _drawingsModelObject.copyWith(
-      drawing: _drawingsModelObject.drawing.validate()
-    );
-      
-    _storeForUndo();
-    notifyListeners();
-  }
-
-  void setDrawingName(String newName) {
-    _drawingsModelObject = _drawingsModelObject.copyWith(
-      drawing: _drawingsModelObject.drawing.copyWith(
-        name: newName,
-      ),
-      drawingInfos: _drawingsModelObject.drawingInfos.map((di) => di.id != _drawingsModelObject.drawing.id ? di : di.copyWith(
-        name: newName,
-      )).toList()
-    );
-
-    _saveDrawingInfos();
-    notifyListeners();
-  }
-
-  void setDrawingDescription(String newDescription) {
-    _drawingsModelObject = _drawingsModelObject.copyWith(
-      drawing: _drawingsModelObject.drawing.copyWith(
-        description: newDescription,
-      ),
-      drawingInfos: _drawingsModelObject.drawingInfos.map((di) => di.id != _drawingsModelObject.drawing.id ? di : di.copyWith(
-        description: newDescription,
-      )).toList()
-    );
-
-    _saveDrawingInfos();
-    notifyListeners();
-  }
-
-  //==================== Commands =====================
-
-  String addMeasurementCommand() {
-    String id = const UuidV4Gen().get();
-    _drawingsModelObject = _drawingsModelObject.copyWith(
-      drawing: _drawingsModelObject.drawing.copyWith(
-        commands: [..._drawingsModelObject.drawing.commands, 
-          MeasurementCommand(id: id, version: 0, label: _drawingsModelObject.drawing.nextMeasurementLabel, initiallyOpen: true)]
-      )
-    );
-
-    _drawingsModelObject = _drawingsModelObject.copyWith(
-      drawing: _drawingsModelObject.drawing.validate()
-    );
-
-    _storeForUndo();
-    notifyListeners();
-    return id;
-  }
-
-  String addVariableCommand() {
-    String id = const UuidV4Gen().get();
-    _drawingsModelObject = _drawingsModelObject.copyWith(
-      drawing: _drawingsModelObject.drawing.copyWith(
-        commands: [..._drawingsModelObject.drawing.commands, 
-          VariableCommand(id: id, version: 0, label: _drawingsModelObject.drawing.nextVariableLabel, initiallyOpen: true)]
-      )
-    );
-
-    _drawingsModelObject = _drawingsModelObject.copyWith(
-      drawing: _drawingsModelObject.drawing.validate()
-    );
-
-    _storeForUndo();
-    notifyListeners();
-    return id;
-  }
-
-  String addPointCommand() {
-    String id = const UuidV4Gen().get();
-    _drawingsModelObject = _drawingsModelObject.copyWith(
-      drawing: _drawingsModelObject.drawing.copyWith(
-        commands: [..._drawingsModelObject.drawing.commands, 
-          PointCommand(id: id, label: _drawingsModelObject.drawing.nextPointLabel, initiallyOpen: true)]
-      )
-    );
-
-    _drawingsModelObject = _drawingsModelObject.copyWith(
-      drawing: _drawingsModelObject.drawing.validate()
-    );
-
-    _storeForUndo();
-    notifyListeners();
-    return id;
-  }
-
-  String addLineCommand() {
-    String id = const UuidV4Gen().get();
-    _drawingsModelObject = _drawingsModelObject.copyWith(
-      drawing: _drawingsModelObject.drawing.copyWith(
-        commands: [..._drawingsModelObject.drawing.commands, 
-          LineCommand(id: id, version: 0, label: _drawingsModelObject.drawing.nextLineLabel, initiallyOpen: true)]
-      )
-    );
-
-    _drawingsModelObject = _drawingsModelObject.copyWith(
-      drawing: _drawingsModelObject.drawing.validate()
-    );
-
-    _storeForUndo();
-    notifyListeners();
-    return id;
-  }
-
-  String addCurveCommand() {
-    String id = const UuidV4Gen().get();
-    _drawingsModelObject = _drawingsModelObject.copyWith(
-      drawing: _drawingsModelObject.drawing.copyWith(
-        commands: [..._drawingsModelObject.drawing.commands,
-          CurveCommand(id: id, version: 0, label: _drawingsModelObject.drawing.nextCurveLabel, initiallyOpen: true)]
-      )
-    );
-
-    _drawingsModelObject = _drawingsModelObject.copyWith(
-      drawing: _drawingsModelObject.drawing.validate()
-    );
-
-    _storeForUndo();
-    notifyListeners();
-    return id;
-  }
-
-  String addPartCommand() {
-    String id = const UuidV4Gen().get();
-    _drawingsModelObject = _drawingsModelObject.copyWith(
-      drawing: _drawingsModelObject.drawing.copyWith(
-        commands: [..._drawingsModelObject.drawing.commands,
-          PartCommand(id: id, version: 0, label: _drawingsModelObject.drawing.nextPartLabel, initiallyOpen: true)]
-      )
-    );
-
-    _drawingsModelObject = _drawingsModelObject.copyWith(
-      drawing: _drawingsModelObject.drawing.validate()
-    );
-
-    _storeForUndo();
-    notifyListeners();
-    return id;
-  }
-
-  String addIncludedPartCommand() {
-    String id = const UuidV4Gen().get();
-    _drawingsModelObject = _drawingsModelObject.copyWith(
-      drawing: _drawingsModelObject.drawing.copyWith(
-        commands: [..._drawingsModelObject.drawing.commands,
-          IncludedPartCommand(id: id, version: 0, label: _drawingsModelObject.drawing.nextIncludedPartLabel, initiallyOpen: true)]
-      )
-    );
-
-    _drawingsModelObject = _drawingsModelObject.copyWith(
-      drawing: _drawingsModelObject.drawing.validate()
-    );
-
-    _storeForUndo();
-    notifyListeners();
-    return id;
-  }
-
-  void changeDrawingCommandLabel(DrawingCommand newCommand, String oldLabel) {
-    // We don't tell other commands about this if the change was a double-label correction
-    if (_drawingsModelObject.drawing.commands.any((c) => c.id != newCommand.id && c.label == oldLabel)){
-      changeDrawingCommand(newCommand);
-      return;
+    // Import unknown parts
+    for (PartDrawing partDrawing in drawing.usedPartDrawings) {
+      if (!PartRepository.hasPartDrawing(partDrawing)) {
+        PartDrawing? samedrawingcontent = PartRepository.getPartByContent(partDrawing);
+        if (samedrawingcontent != null) {
+          // We have a partdrawing in the repo that is the same except for the id. So use that instead
+          drawing = drawing.copyWith(
+            usedPartDrawings: drawing.usedPartDrawings.map((pd) => pd != partDrawing ? pd : samedrawingcontent).toList()
+          );
+        } else {
+          PartRepository.addPartDrawingToImportedSet(partDrawing);
+        }
+      }
     }
 
     _drawingsModelObject = _drawingsModelObject.copyWith(
-      drawing: _drawingsModelObject.drawing.copyWith(
-        commands: _drawingsModelObject.drawing.commands.map((c) => c.id != newCommand.id ? 
-          c.dependentLabelChanged(oldLabel.replaceAll(' ', '_'), newCommand.label.replaceAll(' ', '_')) : 
-          newCommand.setInitiallyClosed()).toList()
-      )
+      drawing: drawing.validate()
     );
 
-    _drawingsModelObject = _drawingsModelObject.copyWith(
-      drawing: _drawingsModelObject.drawing.validate()
-    );
-    
-    _storeForUndo();
     notifyListeners();
   }
 
-  void changeDrawingCommand(DrawingCommand newCommand) {
+  void updateDrawingInfo() {
     _drawingsModelObject = _drawingsModelObject.copyWith(
-      drawing: _drawingsModelObject.drawing.copyWith(
-        commands: _drawingsModelObject.drawing.commands.map((c) => c.id != newCommand.id ? c : newCommand.setInitiallyClosed()).toList()
-      )
+      drawingInfos: _drawingsModelObject.drawingInfos.map((di) => di.id != _drawingsModelObject.drawing.id ? di : di.copyWith(
+        name: _drawingsModelObject.drawing.name,
+        description: _drawingsModelObject.drawing.description
+      )).toList()
     );
 
-    _drawingsModelObject = _drawingsModelObject.copyWith(
-      drawing: _drawingsModelObject.drawing.validate()
-    );
-    
-    _storeForUndo();
+    _saveDrawingInfos();
     notifyListeners();
   }
 
-  void deleteCommand({required String commandId}) {
-    _drawingsModelObject = _drawingsModelObject.copyWith(
-      drawing: _drawingsModelObject.drawing.copyWith(
-        commands: _drawingsModelObject.drawing.commands
-          .where((c) => c.id != commandId)
-          .map((c) => c.deleteReference(commandId: commandId)).toList()
-      )
-    );
-
-    _drawingsModelObject = _drawingsModelObject.copyWith(
-      drawing: _drawingsModelObject.drawing.validate()
-    );
-
-    _storeForUndo();
-    notifyListeners();
-  }
-
-  void reorderCommands(int oldIndex, int newIndex) {
-    List<DrawingCommand> newCommands = List.from(_drawingsModelObject.drawing.commands);
-    DrawingCommand temp = newCommands.removeAt(oldIndex);
-    newCommands.insert(newIndex, temp);
-
-    _drawingsModelObject = _drawingsModelObject.copyWith(
-      drawing: _drawingsModelObject.drawing.copyWith(
-        commands: newCommands
-      )
-    );
-
-    _storeForUndo();
-    notifyListeners();
-  }
 }

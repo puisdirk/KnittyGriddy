@@ -109,6 +109,47 @@ static const StitchDefinition knit = StitchDefinition(
     category: 'General',
   );
 
+  // Defined here to use as icon
+  static const StitchDefinition sssp = StitchDefinition(
+    id: '6b8dd2bb-32a0-4e40-b2ff-3fb65f3df71c',
+    name: 'SSSP',
+    abbreviation: 'sssp',
+    symbols: [
+      KnittingSymbol(
+        name: 'sssp',
+        parts: [
+          KnittingSymbolRectangle(
+            name: 'r',
+            height: 3,
+            width: 28,
+            rotationRad: -0.7853981633974483,
+          ), 
+          KnittingSymbolRectangle(
+            name: 'r2',
+            height: 3,
+            width: 14,
+            translation: Offset(5, 5),
+            rotationRad: 0.7853981633974483,
+          ), 
+          KnittingSymbolRectangle(
+            name: 'r3',
+            height: 12,
+            width: 3,
+            translation: Offset(0, 5),
+          ), 
+          KnittingSymbolArc(
+            name: 'arc',
+            height: 5,
+            width: 5,
+            translation: Offset(-5, -5),
+          ), 
+        ],
+        scale: Offset(-1, 1),
+      ), 
+    ],
+    category: 'Decrease',
+  );
+
   BasicStitchesSet() : super(
     id: basicStitchSetId,
     name: 'Basic Set',
@@ -594,46 +635,7 @@ static const StitchDefinition knit = StitchDefinition(
       ],
       category: 'Decrease',
     ),
-    const StitchDefinition(
-      id: '6b8dd2bb-32a0-4e40-b2ff-3fb65f3df71c',
-      name: 'SSSP',
-      abbreviation: 'sssp',
-      symbols: [
-        KnittingSymbol(
-          name: 'sssp',
-          parts: [
-            KnittingSymbolRectangle(
-              name: 'r',
-              height: 3,
-              width: 28,
-              rotationRad: -0.7853981633974483,
-            ), 
-            KnittingSymbolRectangle(
-              name: 'r2',
-              height: 3,
-              width: 14,
-              translation: Offset(5, 5),
-              rotationRad: 0.7853981633974483,
-            ), 
-            KnittingSymbolRectangle(
-              name: 'r3',
-              height: 12,
-              width: 3,
-              translation: Offset(0, 5),
-            ), 
-            KnittingSymbolArc(
-              name: 'arc',
-              height: 5,
-              width: 5,
-              translation: Offset(-5, -5),
-            ), 
-          ],
-          scale: Offset(-1, 1),
-        ), 
-      ],
-      category: 'Decrease',
-    ),
-
+    sssp,
     const StitchDefinition(
       id: '574bb150-5787-4a84-8427-3c13fe0b08e4',
       name: 'Dec 5-to-1',

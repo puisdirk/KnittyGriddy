@@ -3,24 +3,29 @@ import 'package:flutter/material.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/command_controls/small_label.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/command_controls/small_text_field.dart';
 import 'package:knitty_griddy/drawings/drawing_part_icon.dart';
+import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
 import 'package:knitty_griddy/drawings/model/commands/included_part_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
-import 'package:knitty_griddy/drawings/model/drawing.dart';
-import 'package:knitty_griddy/drawings/model/drawings_model.dart';
+import 'package:knitty_griddy/drawings/model/part_chooser.dart';
 import 'package:knitty_griddy/drawings/model/part_info.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 import 'package:material_symbols_icons/symbols.dart';
-import 'package:provider/provider.dart';
 
 class IncludedPartCommandControl extends StatefulWidget {
+  final AbstractDrawing drawing;
   final IncludedPartCommand command;
   final bool sorting;
   final bool editing;
+  final void Function(IncludedPartCommand newCommand, String oldLabel) onChangeLabel;
+  final void Function(IncludedPartCommand newCommand) onChanged;
 
   const IncludedPartCommandControl({
+    required this.drawing,
     required this.command,
     required this.sorting,
     required this.editing,
+    required this.onChangeLabel,
+    required this.onChanged,
     super.key
   });
 
@@ -33,12 +38,18 @@ class _IncludedPartCommandControlState extends State<IncludedPartCommandControl>
   void labelChanged(String newText) {
     if (widget.command.label != newText) {
       // Included part labels are never used in formula's, so we don't need to call changeDrawingCommandLabel
-      Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(label: newText));
+      widget.onChanged(widget.command.copyWith(label: newText));
     }
   }
 
   Widget createViewContent() {
-    String content = ' Included part ???';
+    String content = ' Included part ';
+
+    if (widget.command.partInfo != null) {
+      content += widget.command.partInfo!.partLabel;
+    } else {
+      content += '???';
+    }
 
     return Row(
       children: [
@@ -61,9 +72,6 @@ class _IncludedPartCommandControlState extends State<IncludedPartCommandControl>
   }
 
   Widget createEditContent() {
-    Drawing drawing = Provider.of<DrawingsModel>(context, listen: false).drawing;
-    List<PartInfo> partInfos = Provider.of<DrawingsModel>(context, listen: false).partInfos;
-
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -92,38 +100,29 @@ class _IncludedPartCommandControlState extends State<IncludedPartCommandControl>
           children: [
             const SmallLabel(label: 'Part'),
             hspacing,
-            if (partInfos.isEmpty)
-              const Text('No parts found', style: smallStyle,),
-            if (partInfos.isNotEmpty)
-              DropdownButton<String>(
-                key: GlobalObjectKey('${widget.command.id}-part'),
-                isDense: true,
-                autofocus: false,
-                style: smallStyle,
-                itemHeight: kMinInteractiveDimension,
-                focusColor: Colors.transparent,
-                underline: Container(),
-                items: [
-                  const DropdownMenuItem(value: '', child: Text('')),
-                  for (PartInfo partInfo in partInfos.where((p) => p.drawingId != drawing.id))
-                    DropdownMenuItem(
-                      value: partInfo.id, 
-                      child: Row(
-                        children: [
-                          DrawingPartIcon(partInfo: partInfo,),
-                          hspacing,
-                          Text(partInfo.name),
-                        ],
-                      ),
-                    ),
-                ],
-                onChanged: (value) {
-                  if (value != widget.command.partId) {
-                    Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(partId: value?? ''));
-                  }
-                },
-                value: widget.command.partId,
-              ),
+            Row(
+              children: [
+                if (widget.command.partInfo != null)
+                  DrawingPartIcon(partInfo: widget.command.partInfo!, size: 32,),
+                hspacing,
+                if (widget.command.partInfo == null)
+                  const Text('no part selected', style: smallStyle,),
+                if (widget.command.partInfo != null)
+                  Text(widget.command.partInfo!.partLabel, style: smallStyle,),
+                hspacing,
+                IconButton(
+                  onPressed: () async {
+                    PartInfo? partInfo = await showDialog(context: context, builder: (context) => 
+                      PartChooser(selectedPartInfo: widget.command.partInfo),
+                    );
+                    if (partInfo != widget.command.partInfo) {
+                      widget.onChanged(widget.command.copyWith(partInfo: partInfo));
+                    } 
+                  },
+                  icon: const Icon(Icons.edit, size: 16,)
+                )
+              ],
+            ),
           ]
         ),
         vspacing,
@@ -143,12 +142,12 @@ class _IncludedPartCommandControlState extends State<IncludedPartCommandControl>
               items: [
                 const DropdownMenuItem(value: '', child: Text('')),
                 DropdownMenuItem(value: origin.id, child: Text(origin.label)),
-                for (PointCommand point in drawing.points)
+                for (PointCommand point in widget.drawing.points)
                   DropdownMenuItem(value: point.id, child: Text(point.label)),
               ],
               onChanged: (value) {
                 if (value != widget.command.anchorPointId) {
-                  Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(anchorPointId: value?? ''));
+                  widget.onChanged(widget.command.copyWith(anchorPointId: value?? ''));
                 }
               },
               value: widget.command.anchorPointId,

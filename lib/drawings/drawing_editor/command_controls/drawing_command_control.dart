@@ -6,6 +6,7 @@ import 'package:knitty_griddy/drawings/drawing_editor/command_controls/measureme
 import 'package:knitty_griddy/drawings/drawing_editor/command_controls/part_command_control.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/command_controls/point_command_control.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/command_controls/variable_command_control.dart';
+import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
 import 'package:knitty_griddy/drawings/model/commands/curve_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/included_part_command.dart';
@@ -14,24 +15,28 @@ import 'package:knitty_griddy/drawings/model/commands/measurement_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/part_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/variable_command.dart';
-import 'package:knitty_griddy/drawings/model/drawings_model.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 import 'package:material_symbols_icons/symbols.dart';
-import 'package:provider/provider.dart';
 
 class DrawingCommandControl extends StatefulWidget {
+  final AbstractDrawing drawing;
   final DrawingCommand command;
   final bool sorting;
   final bool selected;
   final void Function() onSelect;
   final void Function() onDelete;
+  final void Function(DrawingCommand newCommand, String oldLabel) onChangeLabel;
+  final void Function(DrawingCommand newCommand) onChanged;
 
   const DrawingCommandControl({
+    required this.drawing,
     required this.command,
     required this.sorting,
     required this.selected,
     required this.onSelect,
     required this.onDelete,
+    required this.onChangeLabel,
+    required this.onChanged,
     super.key
   });
 
@@ -52,57 +57,78 @@ class _DrawingCommandControlState extends State<DrawingCommandControl> {
   Widget createCommandControl() {
     if (widget.command is PointCommand) {
       return PointCommandControl(
+        drawing: widget.drawing,
         command: widget.command as PointCommand, 
         sorting: widget.sorting,
         editing: editing,
+        onChangeLabel: widget.onChangeLabel,
+        onChanged: widget.onChanged,
       );
     }
 
     if (widget.command is LineCommand) {
       return LineCommandControl(
+        drawing: widget.drawing,
         command: widget.command as LineCommand, 
         sorting: widget.sorting,
         editing:editing,
+        onChangeLabel: widget.onChangeLabel,
+        onChanged: widget.onChanged,
       );
     }
     
     if (widget.command is CurveCommand) {
       return CurveCommandControl(
+        drawing: widget.drawing,
         command: widget.command as CurveCommand, 
         sorting: widget.sorting,
         editing: editing,
+        onChangeLabel: widget.onChangeLabel,
+        onChanged: widget.onChanged,
       );
     }
     
     if (widget.command is MeasurementCommand) {
       return MeasurementCommandControl(
+        drawing: widget.drawing,
         command: widget.command as MeasurementCommand, 
         sorting: widget.sorting,
         editing: editing,
+        onChangeLabel: widget.onChangeLabel,
+        onChanged: widget.onChanged,
       );
     }
 
     if (widget.command is VariableCommand) {
       return VariableCommandControl(
+        drawing: widget.drawing,
         command: widget.command as VariableCommand, 
         sorting: widget.sorting,
         editing: editing,
+        onChangeLabel: widget.onChangeLabel,
+        onChanged: widget.onChanged,
       );
     }
 
     if (widget.command is PartCommand) {
       return PartCommandControl(
+        drawing: widget.drawing,
         command: widget.command as PartCommand, 
         sorting: widget.sorting, 
-        editing: editing
+        editing: editing,
+        onChangeLabel: widget.onChangeLabel,
+        onChanged: widget.onChanged,
       );
     }
 
     if (widget.command is IncludedPartCommand) {
       return IncludedPartCommandControl(
+        drawing: widget.drawing,
         command: widget.command as IncludedPartCommand, 
         sorting: widget.sorting, 
-        editing: editing
+        editing: editing,
+        onChangeLabel: widget.onChangeLabel,
+        onChanged: widget.onChanged,
       );
     }
 
@@ -119,6 +145,8 @@ class _DrawingCommandControlState extends State<DrawingCommandControl> {
               FocusScope.of(context).unfocus();
       
               setState(() => editing = !editing);
+              // Make sure the control stays closed
+              widget.onChanged(widget.command);
             }, 
             icon: editing ? const Icon(Symbols.top_panel_close) : const Icon(Symbols.top_panel_open),
           ),

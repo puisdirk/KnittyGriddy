@@ -1,7 +1,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:knitty_griddy/drawings/model/drawing.dart';
+import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
 
 enum DrawingCommandTypes {
   pointCommand,
@@ -38,24 +38,24 @@ abstract class DrawingCommand {
   double get editHeight;
   
   Map<String, Object> toJson();  
-  void paint(Canvas canvas, Size size, Drawing drawing, bool selected, {bool asPart = false});
+  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false});
   
-  Rect getBoundingBox(Drawing drawing);
+  Rect getBoundingBox(AbstractDrawing drawing);
 
   DrawingCommand deleteReference({required String commandId});
   DrawingCommand dependentLabelChanged(String oldLabel, String newLabel);
   DrawingCommand setInitiallyClosed();
 
   DrawingCommand clearValidation();
-  DrawingCommand validate(Drawing drawing);
+  DrawingCommand validate(AbstractDrawing drawing);
 
   // Get the Ids of dependent commands
-  Set<String> dependencies(Drawing drawing);
+  Set<String> dependencies(AbstractDrawing drawing);
 
   DrawingCommand markAsCyclic(String cycleDescription);
   bool get hasErrors => validated && !valid && errors.isNotEmpty;
 
-  String previewPath(Drawing drawing) { return ''; }
+  String previewPath(AbstractDrawing drawing) { return ''; }
 
   @override
   int get hashCode => id.hashCode ^ label.hashCode ^ valid.hashCode ^ validated.hashCode ^ errors.hashCode;

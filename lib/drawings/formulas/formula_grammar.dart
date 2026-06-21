@@ -1,11 +1,11 @@
 
 import 'dart:math';
 
+import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
 import 'package:knitty_griddy/drawings/model/commands/line_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/measurement_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/variable_command.dart';
-import 'package:knitty_griddy/drawings/model/drawing.dart';
 import 'package:knitty_griddy/utils/math_utitilies.dart';
 import 'package:petitparser/petitparser.dart';
 
@@ -25,7 +25,7 @@ class FormulaException {
 
 class FormulaGrammar extends GrammarDefinition {
 
-  final Drawing drawing;
+  final AbstractDrawing drawing;
 
   const FormulaGrammar({
     required this.drawing

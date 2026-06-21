@@ -300,7 +300,7 @@ class StitchDefinition {
     return this == other ||
       name == other.name &&
       abbreviation == other.abbreviation &&
-      symbols == other.symbols &&
+      listEquals(symbols, other.symbols) &&
       category == other.category &&
       description == other.description &&
       consumes == other.consumes &&

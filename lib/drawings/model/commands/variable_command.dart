@@ -2,8 +2,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:knitty_griddy/drawings/formulas/formula_expression.dart';
+import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
-import 'package:knitty_griddy/drawings/model/drawing.dart';
 
 class VariableCommand extends DrawingCommand {
   final String formula;
@@ -49,7 +49,7 @@ class VariableCommand extends DrawingCommand {
   double get editHeight => 165;
 
   @override
-  Rect getBoundingBox(Drawing drawing) {
+  Rect getBoundingBox(AbstractDrawing drawing) {
     return Rect.zero;
   }
 
@@ -68,7 +68,7 @@ class VariableCommand extends DrawingCommand {
   }
 
   @override
-  Set<String> dependencies(Drawing drawing) {
+  Set<String> dependencies(AbstractDrawing drawing) {
     return FormulaExpression.dependencies(formula: formula, drawing: drawing);
   }
 
@@ -89,13 +89,13 @@ class VariableCommand extends DrawingCommand {
     );
   }
 
-  double? value(Drawing drawing) {
+  double? value(AbstractDrawing drawing) {
     return storedValue;
 //    return FormulaExpression.validate(formula: formula, drawing: drawing).result;
   }
 
   @override
-  void paint(Canvas canvas, Size size, Drawing drawing, bool selected, {bool asPart = false}) {
+  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false}) {
   }
 
   @override
@@ -135,7 +135,7 @@ class VariableCommand extends DrawingCommand {
   int get hashCode => super.hashCode ^ formula.hashCode ^ storedValue.hashCode;
 
   @override
-  VariableCommand validate(Drawing drawing) {
+  VariableCommand validate(AbstractDrawing drawing) {
     bool isvalid = true;
     bool retryValidation = true;
     List<String> validationErrors = [];

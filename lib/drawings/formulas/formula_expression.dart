@@ -1,8 +1,8 @@
 
 import 'package:knitty_griddy/drawings/formulas/formula_grammar.dart';
+import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
 import 'package:knitty_griddy/drawings/model/commands/measurement_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/variable_command.dart';
-import 'package:knitty_griddy/drawings/model/drawing.dart';
 import 'package:petitparser/petitparser.dart';
 
 class FormulaParseResult {
@@ -32,7 +32,7 @@ class FormulaExpression {
   static final RegExp _variablergx = RegExp(r'!\w*');
   static final RegExp _measurementrgx = RegExp(r'@\w*');
 
-  static Set<String> dependencies({required String formula, required Drawing drawing}) {
+  static Set<String> dependencies({required String formula, required AbstractDrawing drawing}) {
     Set<String> deps = {};
 
     if (formula.isNotEmpty) {
@@ -56,7 +56,7 @@ class FormulaExpression {
     return deps;
   }
 
-  static FormulaParseResult validate({required String formula, required Drawing drawing, String? label}) {
+  static FormulaParseResult validate({required String formula, required AbstractDrawing drawing, String? label}) {
     if (formula.isEmpty) {
       return FormulaParseResult.error(errorMessage: 'Requires ${label?? 'a value'}');
     }

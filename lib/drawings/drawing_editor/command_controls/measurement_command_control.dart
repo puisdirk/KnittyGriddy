@@ -4,21 +4,26 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinbox/material.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/command_controls/small_label.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/command_controls/small_text_field.dart';
+import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
 import 'package:knitty_griddy/drawings/model/commands/measurement_command.dart';
-import 'package:knitty_griddy/drawings/model/drawings_model.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 import 'package:material_symbols_icons/symbols.dart';
-import 'package:provider/provider.dart';
 
 class MeasurementCommandControl extends StatefulWidget {
+  final AbstractDrawing drawing;
   final MeasurementCommand command;
   final bool sorting;
   final bool editing;
+  final void Function(MeasurementCommand newCommand, String oldLabel) onChangeLabel;
+  final void Function(MeasurementCommand newCommand) onChanged;
 
   const MeasurementCommandControl({
+    required this.drawing,
     required this.command,
     required this.sorting,
     required this.editing,
+    required this.onChangeLabel,
+    required this.onChanged,
     super.key
   });
 
@@ -30,7 +35,7 @@ class _MeasurementCommandControlState extends State<MeasurementCommandControl> {
 
   void labelChanged(String newText) {
     if (widget.command.label != newText) {
-      Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommandLabel(widget.command.copyWith(label: newText), widget.command.label);
+      widget.onChangeLabel(widget.command.copyWith(label: newText), widget.command.label);
     }
   }
 
@@ -108,7 +113,7 @@ class _MeasurementCommandControlState extends State<MeasurementCommandControl> {
               value: widget.command.unit,
               onChanged: (value) {
                 if (value != widget.command.unit) {
-                  Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(unit: value));
+                  widget.onChanged(widget.command.copyWith(unit: value));
                 }
               },
             ),
@@ -127,7 +132,7 @@ class _MeasurementCommandControlState extends State<MeasurementCommandControl> {
                 textStyle: smallStyle,
                 onChanged: (value) {
                   if (value != widget.command.decimals.toDouble()) {
-                    Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(decimals: value.toInt()));
+                    widget.onChanged(widget.command.copyWith(decimals: value.toInt()));
                   }
                 },
                 min: 0,
@@ -149,7 +154,7 @@ class _MeasurementCommandControlState extends State<MeasurementCommandControl> {
                 textStyle: smallStyle,
                 onChanged: (value) {
                   if (value != widget.command.minValue) {
-                    Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(minValue: value));
+                    widget.onChanged(widget.command.copyWith(minValue: value));
                   }
                 },
                 step: 1 / pow(10, widget.command.decimals),
@@ -173,7 +178,7 @@ class _MeasurementCommandControlState extends State<MeasurementCommandControl> {
                 textStyle: smallStyle,
                 onChanged:(value) {
                   if (value != widget.command.maxValue) {
-                    Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(maxValue: value));
+                    widget.onChanged(widget.command.copyWith(maxValue: value));
                   }
                 },
                 step: 1 / pow(10, widget.command.decimals),
@@ -197,7 +202,7 @@ class _MeasurementCommandControlState extends State<MeasurementCommandControl> {
                 textStyle: smallStyle,
                 onChanged: (value) {
                   if (value != widget.command.decimals) {
-                    Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(value: value));
+                    widget.onChanged(widget.command.copyWith(value: value));
                   }
                 },
                 step: 1 / pow(10, widget.command.decimals),

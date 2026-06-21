@@ -1,21 +1,22 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
-import 'package:knitty_griddy/drawings/model/drawing.dart';
+import 'package:knitty_griddy/drawings/model/part_info.dart';
 
 @immutable
 class IncludedPartCommand extends DrawingCommand {
 
-  final String partId;
+  final PartInfo? partInfo;
   final String anchorPointId;
 
   const IncludedPartCommand({
     required super.id,
     required super.label,
     required super.version,
-    this.partId = '',
+    this.partInfo,
     this.anchorPointId = '',
     super.validated,
     super.valid,
@@ -25,7 +26,7 @@ class IncludedPartCommand extends DrawingCommand {
 
   IncludedPartCommand copyWith({
     String? label,
-    String? partId,
+    PartInfo? partInfo,
     String? anchorPointId,
     bool? validated,
     bool? valid,
@@ -36,7 +37,7 @@ class IncludedPartCommand extends DrawingCommand {
       id: id,
       version: version + 1,
       label: label?? this.label, 
-      partId: partId?? this.partId,
+      partInfo: partInfo?? this.partInfo,
       anchorPointId: anchorPointId?? this.anchorPointId,
       validated: validated?? this.validated,
       valid: valid?? this.valid,
@@ -49,7 +50,7 @@ class IncludedPartCommand extends DrawingCommand {
   double get editHeight => 200;
 
   @override
-  Rect getBoundingBox(Drawing drawing) {
+  Rect getBoundingBox(AbstractDrawing drawing) {
     // TODO: implement getBoundingBox
     return Rect.zero;
   }
@@ -69,7 +70,7 @@ class IncludedPartCommand extends DrawingCommand {
   }
 
   @override
-  Set<String> dependencies(Drawing drawing) {
+  Set<String> dependencies(AbstractDrawing drawing) {
     return {anchorPointId};
   }
 
@@ -92,7 +93,7 @@ class IncludedPartCommand extends DrawingCommand {
       'type': DrawingCommandTypes.includedPartCommand.name,
       'id': id,
       'label': label,
-      'partid': partId,
+      'partinfo': partInfo == null ? {} : partInfo!.toJson(),
       'anchor': anchorPointId,
     };
   }
@@ -102,7 +103,7 @@ class IncludedPartCommand extends DrawingCommand {
       id: json['id'] as String, 
       label: json['label'] as String, 
       version: 0,
-      partId: json['partid'] as String,
+      partInfo: (json['partinfo'] as Map<String, dynamic>).isEmpty ? null : PartInfo.fromJson(json['partinfo'] as Map<String, dynamic>),
       anchorPointId: json['anchor'] as String,
     );
   }
@@ -115,14 +116,14 @@ class IncludedPartCommand extends DrawingCommand {
       id == other.id &&
       label == other.label &&
       version == other.version &&
-      partId == other.partId &&
+      partInfo == other.partInfo &&
       anchorPointId == other.anchorPointId &&
       validated == other.validated &&
       valid == other.valid &&
       listEquals(errors, other.errors);
 
   @override
-  int get hashCode => super.hashCode ^ partId.hashCode ^ anchorPointId.hashCode;
+  int get hashCode => super.hashCode ^ partInfo.hashCode ^ anchorPointId.hashCode;
 
   @override
   IncludedPartCommand clearValidation() {
@@ -130,12 +131,12 @@ class IncludedPartCommand extends DrawingCommand {
   }
 
   @override
-  void paint(Canvas canvas, Size size, Drawing drawing, bool selected, {bool asPart = false}) {
+  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false}) {
     // TODO: implement paint
   }
 
   @override
-  DrawingCommand validate(Drawing drawing) {
+  DrawingCommand validate(AbstractDrawing drawing) {
     bool isvalid = true;
     bool retryValidation = true;
     List<String> validationErrors = [];
@@ -143,12 +144,12 @@ class IncludedPartCommand extends DrawingCommand {
     if (label.isEmpty) { isvalid = false; retryValidation = false; validationErrors.add('Requires a label'); }
     if (drawing.commands.any((c) => c.id != id && c.label == label)) { isvalid = false; retryValidation = false; validationErrors.add('Label should be unique'); }
 
-    if (partId.isEmpty) {
+    if (partInfo == null) {
       isvalid = false;
       retryValidation = false;
       validationErrors.add('Requires a part');
     } else {
-      // TODO: should check if the part exists and is validated && valid
+      // TODO: should check if the part exists and is validated && valid, but not sure if it can ever occur
     }
 
     if (anchorPointId.isEmpty) {

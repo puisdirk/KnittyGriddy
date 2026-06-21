@@ -2,23 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:knitty_griddy/drawings/formulas/formula_field_control.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/command_controls/small_label.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/command_controls/small_text_field.dart';
+import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
 import 'package:knitty_griddy/drawings/model/commands/curve_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
-import 'package:knitty_griddy/drawings/model/drawing.dart';
-import 'package:knitty_griddy/drawings/model/drawings_model.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 import 'package:material_symbols_icons/symbols.dart';
-import 'package:provider/provider.dart';
 
 class CurveCommandControl extends StatefulWidget {
+  final AbstractDrawing drawing;
   final CurveCommand command;
   final bool sorting;
   final bool editing;
+  final void Function(CurveCommand newCommand, String oldLabel) onChangeLabel;
+  final void Function(CurveCommand newCommand) onChanged;
 
   const CurveCommandControl({
+    required this.drawing,
     required this.command,
     required this.sorting,
     required this.editing,
+    required this.onChangeLabel,
+    required this.onChanged,
     super.key
   });
 
@@ -30,43 +34,43 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
 
   void curveLabelChanged(String newText) {
     if (widget.command.label != newText) {
-      Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommandLabel(widget.command.copyWith(label: newText), widget.command.label);
+      widget.onChangeLabel(widget.command.copyWith(label: newText), widget.command.label);
     }
   }
 
   void quadAmplitudeFormulaChanged(String formula) {
     if (widget.command.quadAmplitudeFormula != formula) {
-      Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(quadAmplitudeFormula: formula));
+      widget.onChanged(widget.command.copyWith(quadAmplitudeFormula: formula));
     }
   }
 
   void quadSlantFormulaChanged(String formula) {
     if (widget.command.quadSlantFormula != formula) {
-      Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(quadSlantFormula: formula));
+      widget.onChanged(widget.command.copyWith(quadSlantFormula: formula));
     }
   }
 
   void cubicAmplitude1FormulaChanged(String formula) {
     if (widget.command.cubicAmplitudeFormula1 != formula) {
-      Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(cubicAmplitudeFormula1: formula));
+      widget.onChanged(widget.command.copyWith(cubicAmplitudeFormula1: formula));
     }
   }
 
   void cubicSlant1FormulaChanged(String formula) {
     if (widget.command.cubicSlantFormula1 != formula) {
-      Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(cubicSlantFormula1: formula));
+      widget.onChanged(widget.command.copyWith(cubicSlantFormula1: formula));
     }
   }
 
   void cubicAmplitude2FormulaChanged(String formula) {
     if (widget.command.cubicAmplitudeFormula2 != formula) {
-      Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(cubicAmplitudeFormula2: formula));
+      widget.onChanged(widget.command.copyWith(cubicAmplitudeFormula2: formula));
     }
   }
 
   void cubicSlant2FormulaChanged(String formula) {
     if (widget.command.cubicSlantFormula2 != formula) {
-      Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(cubicSlantFormula2: formula));
+      widget.onChanged(widget.command.copyWith(cubicSlantFormula2: formula));
     }
   }
 
@@ -81,18 +85,16 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
   }
 
   Widget createViewContent() {
-    final Drawing drawing = Provider.of<DrawingsModel>(context, listen: false).drawing;
-
     String content = ' Curve ';
 
     String startPointLabel = '???';
-    PointCommand? startPoint = drawing.pointById(widget.command.startPointId);
+    PointCommand? startPoint = widget.drawing.pointById(widget.command.startPointId);
     if (startPoint != null) {
       startPointLabel = startPoint.label;
     }
 
     String endPointLabel = '???';
-    PointCommand? endPoint = drawing.pointById(widget.command.endPointId);
+    PointCommand? endPoint = widget.drawing.pointById(widget.command.endPointId);
     if (endPoint != null) {
       endPointLabel = endPoint.label;
     }
@@ -128,7 +130,7 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
         break;
       case CurveDefinitionType.quadraticFromPoints:
         String ctrlPointLabel = '???';
-        PointCommand? ctrlPoint = drawing.pointById(widget.command.quadCtrlPointId);
+        PointCommand? ctrlPoint = widget.drawing.pointById(widget.command.quadCtrlPointId);
         if (ctrlPoint != null) {
           ctrlPointLabel = ctrlPoint.label;
         }
@@ -138,11 +140,11 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
       case CurveDefinitionType.cubicFromPoints:
         String ctrlPoint1Label = '???';
         String ctrlPoint2Label = '???';
-        PointCommand? ctrlPoint1 = drawing.pointById(widget.command.cubicCtrlPointId1);
+        PointCommand? ctrlPoint1 = widget.drawing.pointById(widget.command.cubicCtrlPointId1);
         if (ctrlPoint1 != null) {
           ctrlPoint1Label = ctrlPoint1.label;
         }
-        PointCommand? ctrlPoint2 = drawing.pointById(widget.command.cubicCtrlPointId2);
+        PointCommand? ctrlPoint2 = widget.drawing.pointById(widget.command.cubicCtrlPointId2);
         if (ctrlPoint2 != null) {
           ctrlPoint2Label = ctrlPoint2.label;
         }
@@ -172,7 +174,6 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
   }
 
   Widget createEditContent() {
-    final Drawing drawing = Provider.of<DrawingsModel>(context, listen: false).drawing;
     final double labelWidth = widget.command.curveDefinitionType == CurveDefinitionType.cubicFromPoints ? 90 : 70;
 
     return Column(
@@ -199,7 +200,7 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
               value: widget.command.curveDefinitionType,
               onChanged: (value) {
                 if (value != widget.command.curveDefinitionType) {
-                  Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(curveDefinitionType: value));
+                  widget.onChanged(widget.command.copyWith(curveDefinitionType: value));
                 }
               },
             ),            
@@ -235,12 +236,12 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
                 const DropdownMenuItem(value: '', child: Text('')),
                 if (widget.command.endPointId != origin.id)
                   DropdownMenuItem(value: origin.id, child: Text(origin.label)),
-                for (PointCommand point in drawing.points.where((p) => p.id != widget.command.endPointId))
+                for (PointCommand point in widget.drawing.points.where((p) => p.id != widget.command.endPointId))
                   DropdownMenuItem(value: point.id, child: Text(point.label)),
               ],
               onChanged: (value) {
                 if (value != widget.command.startPointId) {
-                  Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(startPointId: value?? ''));
+                  widget.onChanged(widget.command.copyWith(startPointId: value?? ''));
                 }
               },
               value: widget.command.startPointId,
@@ -264,12 +265,12 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
                 const DropdownMenuItem(value: '', child: Text('')),
                 if (widget.command.startPointId != origin.id)
                   DropdownMenuItem(value: origin.id, child: Text(origin.label)),
-                for (PointCommand point in drawing.points.where((p) => p.id != widget.command.startPointId))
+                for (PointCommand point in widget.drawing.points.where((p) => p.id != widget.command.startPointId))
                   DropdownMenuItem(value: point.id, child: Text(point.label)),
               ],
               onChanged: (value) {
                 if (value != widget.command.endPointId) {
-                  Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(endPointId: value?? ''));
+                  widget.onChanged(widget.command.copyWith(endPointId: value?? ''));
                 }
               },
               value: widget.command.endPointId,
@@ -386,12 +387,12 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
                   const DropdownMenuItem(value: '', child: Text('')),
                   if (widget.command.quadCtrlPointId != origin.id)
                     DropdownMenuItem(value: origin.id, child: Text(origin.label)),
-                  for (PointCommand point in drawing.points)
+                  for (PointCommand point in widget.drawing.points)
                     DropdownMenuItem(value: point.id, child: Text(point.label)),
                 ],
                 onChanged: (value) {
                   if (value != widget.command.quadCtrlPointId) {
-                    Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(quadCtrlPointId: value?? ''));
+                    widget.onChanged(widget.command.copyWith(quadCtrlPointId: value?? ''));
                   }
                 },
                 value: widget.command.quadCtrlPointId,
@@ -416,12 +417,12 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
                     items: [
                       const DropdownMenuItem(value: '', child: Text('')),
                       DropdownMenuItem(value: origin.id, child: Text(origin.label)),
-                      for (PointCommand point in drawing.points)
+                      for (PointCommand point in widget.drawing.points)
                         DropdownMenuItem(value: point.id, child: Text(point.label)),
                     ],
                     onChanged: (value) {
                       if (value != widget.command.cubicCtrlPointId1) {
-                        Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(cubicCtrlPointId1: value?? ''));
+                        widget.onChanged(widget.command.copyWith(cubicCtrlPointId1: value?? ''));
                       }
                     },
                     value: widget.command.cubicCtrlPointId1,
@@ -444,12 +445,12 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
                     items: [
                       const DropdownMenuItem(value: '', child: Text('')),
                       DropdownMenuItem(value: origin.id, child: Text(origin.label)),
-                      for (PointCommand point in drawing.points)
+                      for (PointCommand point in widget.drawing.points)
                         DropdownMenuItem(value: point.id, child: Text(point.label)),
                     ],
                     onChanged: (value) {
                       if (value != widget.command.cubicCtrlPointId2) {
-                        Provider.of<DrawingsModel>(context, listen: false).changeDrawingCommand(widget.command.copyWith(cubicCtrlPointId2: value?? ''));
+                        widget.onChanged(widget.command.copyWith(cubicCtrlPointId2: value?? ''));
                       }
                     },
                     value: widget.command.cubicCtrlPointId2,

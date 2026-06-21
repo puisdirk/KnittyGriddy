@@ -1,61 +1,49 @@
 
-import 'package:flutter/foundation.dart';
-
-@immutable
 class PartInfo {
-  final String id;
-  final String drawingId;
-  final String name;
-  final String previewPath;
+  final String partDrawingId;
+  final String category;
+  final String partId;
+  final String partLabel;
 
   const PartInfo({
-    required this.id,
-    required this.drawingId,
-    required this.name,
-    required this.previewPath,
+    required this.partDrawingId,
+    required this.category,
+    required this.partId,
+    required this.partLabel,
   });
-
-  PartInfo copyWith({
-    String? name,
-    String? previewPath,
-  }) {
-    return PartInfo(
-      id: id, 
-      drawingId: drawingId,
-      name: name?? this.name, 
-      previewPath: previewPath?? this.previewPath
-    );
-  }
 
   @override
   bool operator ==(Object other) =>
     identical(this, other) ||
       other is PartInfo &&
       runtimeType == other.runtimeType &&
-      id == other.id &&
-      drawingId == other.drawingId &&
-      name == other.name &&
-      previewPath == other.previewPath;
+      partDrawingId == other.partDrawingId &&
+      category == other.category &&
+      partId == other.partId &&
+      partLabel == other.partLabel;
 
   @override
-  int get hashCode => id.hashCode ^ drawingId.hashCode ^ name.hashCode ^ previewPath.hashCode;
+  int get hashCode => super.hashCode ^ partDrawingId.hashCode ^ category.hashCode ^ partId.hashCode ^ partLabel.hashCode;
+  
+  bool passesFilter(String filter) {
+    return category.toLowerCase().contains(filter.toLowerCase()) || partLabel.toLowerCase().contains(filter.toLowerCase());
+  }
 
-  Map<String, dynamic> toJson() {
+  Map<String, Object> toJson() {
     return {
-      'id': id,
-      'drawingid': drawingId,
-      'name': name,
-      'preview': previewPath,
+      'partdrawingid': partDrawingId,
+      'partid': partId,
+      'category': category,
+      'partlabel': partLabel
     };
   }
 
   static PartInfo fromJson(Map<String, dynamic> json) {
     return PartInfo(
-      id: json['id'] as String, 
-      drawingId: json['drawingid'] as String,
-      name: json['name'] as String, 
-      previewPath: json['previewPath'] as String, 
+      partDrawingId: json['partdrawingid'], 
+      category: json['category'], 
+      partId: json['partid'], 
+      partLabel: json['partlabel']
     );
   }
-
 }

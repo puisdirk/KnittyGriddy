@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
 
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
-import 'package:knitty_griddy/drawings/model/drawing.dart';
 import 'package:knitty_griddy/utils/math_utitilies.dart';
 
 enum Unit {
@@ -83,7 +83,7 @@ class MeasurementCommand extends DrawingCommand {
   double get editHeight => 320;
 
   @override
-  Rect getBoundingBox(Drawing drawing) {
+  Rect getBoundingBox(AbstractDrawing drawing) {
     return Rect.zero;
   }
 
@@ -97,7 +97,7 @@ class MeasurementCommand extends DrawingCommand {
   }
 
   @override
-  Set<String> dependencies(Drawing drawing) {
+  Set<String> dependencies(AbstractDrawing drawing) {
     return {};
   }
 
@@ -145,7 +145,7 @@ class MeasurementCommand extends DrawingCommand {
   }
 
   @override
-  void paint(Canvas canvas, Size size, Drawing drawing, bool selected, {bool asPart = false}) {
+  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false}) {
   }
 
   @override
@@ -176,7 +176,7 @@ class MeasurementCommand extends DrawingCommand {
   }
 
   @override
-  MeasurementCommand validate(Drawing drawing) {
+  MeasurementCommand validate(AbstractDrawing drawing) {
     bool isvalid = true;
     bool retryValidation = true;
     List<String> validationErrors = [];

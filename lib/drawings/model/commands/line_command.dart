@@ -2,10 +2,10 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
 
 import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
-import 'package:knitty_griddy/drawings/model/drawing.dart';
 import 'package:knitty_griddy/drawings/model/infinite_line.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 import 'package:knitty_griddy/utils/math_utitilies.dart';
@@ -64,7 +64,7 @@ class LineCommand extends DrawingCommand {
   double get editHeight => 170;
 
   @override
-  Rect getBoundingBox(Drawing drawing) {
+  Rect getBoundingBox(AbstractDrawing drawing) {
     if (valid) {
       Offset? start = getStartCoordinate(drawing);
       Offset? end = getEndCoordinate(drawing);
@@ -91,7 +91,7 @@ class LineCommand extends DrawingCommand {
   }
 
   @override
-  Set<String> dependencies(Drawing drawing) {
+  Set<String> dependencies(AbstractDrawing drawing) {
     Set<String> deps = {};
 
     if (fromPointId.isNotEmpty) deps.add(fromPointId);
@@ -154,7 +154,7 @@ class LineCommand extends DrawingCommand {
   int get hashCode => super.hashCode ^ fromPointId.hashCode ^ toPointId.hashCode ^
     storedStartCoordinate.hashCode ^ storedEndCoordinate.hashCode;
 
-  double? lengthInMM(Drawing drawing) {
+  double? lengthInMM(AbstractDrawing drawing) {
     Offset? startOffset = getStartCoordinate(drawing);
     if (startOffset == null) return null;
     Offset? endOffset = getEndCoordinate(drawing);
@@ -162,9 +162,9 @@ class LineCommand extends DrawingCommand {
     return MathUtitilies.distance(startOffset, endOffset);
   }
 
-  Offset? middle(Drawing drawing) => pointOnLine(0.5, drawing);
+  Offset? middle(AbstractDrawing drawing) => pointOnLine(0.5, drawing);
 
-  Offset? pointOnLine(double fraction, Drawing drawing) {
+  Offset? pointOnLine(double fraction, AbstractDrawing drawing) {
     Offset? startOffset = getStartCoordinate(drawing);
     if (startOffset == null) return null;
     Offset? endOffset = getEndCoordinate(drawing);
@@ -176,12 +176,12 @@ class LineCommand extends DrawingCommand {
     );
   }
 
-  List<Offset> intersections(LineCommand otherSegment, Drawing drawing) {
+  List<Offset> intersections(LineCommand otherSegment, AbstractDrawing drawing) {
     if (!valid || !otherSegment.valid) return const[];
     return _intersections(otherSegment, drawing).map((v) => Offset(v.x, v.y)).toList();
   } 
 
-  List<vec.Vector2> _intersections(LineCommand otherSegment, Drawing drawing) {
+  List<vec.Vector2> _intersections(LineCommand otherSegment, AbstractDrawing drawing) {
     Offset? startPoint = getStartCoordinate(drawing);
     if (startPoint == null) return const[];
     Offset? endPoint = getEndCoordinate(drawing);
@@ -224,7 +224,6 @@ class LineCommand extends DrawingCommand {
     return [];
   }
 
-  // TODO: move to MathUtils?
   bool containsPoint(vec.Vector2 from, vec.Vector2 to, vec.Vector2 point, {double epsilon = 0.000001}) {
     final delta = to - from;
     final crossProduct =
@@ -249,16 +248,16 @@ class LineCommand extends DrawingCommand {
     return true;
   }
 
-  Offset? getStartCoordinate(Drawing drawing) {
+  Offset? getStartCoordinate(AbstractDrawing drawing) {
     return storedStartCoordinate;
   }
 
-  Offset? getEndCoordinate(Drawing drawing) {
+  Offset? getEndCoordinate(AbstractDrawing drawing) {
     return storedEndCoordinate;
   }
 
   @override
-  String previewPath(Drawing drawing) {
+  String previewPath(AbstractDrawing drawing) {
     if (!valid) return '';
 
     Offset? start = getStartCoordinate(drawing);
@@ -277,7 +276,7 @@ class LineCommand extends DrawingCommand {
   }
 
   @override
-  void paint(Canvas canvas, Size size, Drawing drawing, bool selected, {bool asPart = false}) {
+  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false}) {
     if (!valid) {
       return;
     }
@@ -338,7 +337,7 @@ class LineCommand extends DrawingCommand {
   }
   
   @override
-  LineCommand validate(Drawing drawing) {
+  LineCommand validate(AbstractDrawing drawing) {
     bool isvalid = true;
     bool retryValidation = true;
     List<String> validationErrors = [];

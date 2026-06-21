@@ -4,10 +4,10 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/drawings/formulas/formula_expression.dart';
+import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
 import 'package:knitty_griddy/drawings/model/commands/curve_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/line_command.dart';
-import 'package:knitty_griddy/drawings/model/drawing.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 import 'package:knitty_griddy/utils/math_utitilies.dart';
 
@@ -19,7 +19,6 @@ enum PointDefinitionType {
   onLine(label: 'On a line'),
   onCurve(label: 'On a curve'),
   onIntersection(label: 'On intersection');
-  // TODO: as adjacent?
 
   final String label;
 
@@ -148,7 +147,7 @@ class PointCommand extends DrawingCommand {
   }
 
   @override
-  Rect getBoundingBox(Drawing drawing) {
+  Rect getBoundingBox(AbstractDrawing drawing) {
     if (valid) {
       Offset? coord = getCoordinate(drawing);
       if (coord != null) {
@@ -264,7 +263,7 @@ class PointCommand extends DrawingCommand {
     intersectionLine1Id.hashCode ^ intersectionLine2Id.hashCode ^
     storedCoordinate.hashCode;
 
-  Offset? getCoordinate(Drawing drawing) {
+  Offset? getCoordinate(AbstractDrawing drawing) {
     if (id == originId) return Offset.zero;
 
     if (!valid) return null;
@@ -273,7 +272,7 @@ class PointCommand extends DrawingCommand {
   }
 
   @override
-  void paint(Canvas canvas, Size size, Drawing drawing, bool selected, {bool asPart = false}) {
+  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false}) {
     if (!valid) {
       return;
     }
@@ -321,7 +320,7 @@ class PointCommand extends DrawingCommand {
   }
   
   @override
-  Set<String> dependencies(Drawing drawing) {
+  Set<String> dependencies(AbstractDrawing drawing) {
     Set<String> deps = {};
 
     switch (pointDefinitionType) {
@@ -348,7 +347,7 @@ class PointCommand extends DrawingCommand {
   }
 
   @override
-  PointCommand validate(Drawing drawing) {
+  PointCommand validate(AbstractDrawing drawing) {
     bool isvalid = true;
     bool retryValidation = true;
     List<String> validationErrors = [];
