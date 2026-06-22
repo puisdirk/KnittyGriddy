@@ -264,7 +264,7 @@ class PointCommand extends DrawingCommand {
     storedCoordinate.hashCode;
 
   Offset? getCoordinate(AbstractDrawing drawing) {
-    if (id == originId) return Offset.zero;
+    if (id == originId) return Offset.zero + drawing.offset;
 
     if (!valid) return null;
 

@@ -18,22 +18,25 @@ abstract class AbstractDrawing {
   final String name;
   final String description;
   final List<DrawingCommand> commands;
+  final Offset offset;
 
   const AbstractDrawing({
     required this.id,
     required this.name,
     this.description = '',
     this.commands = const[],
+    this.offset = Offset.zero,
   });
 
   AbstractDrawing abstractCopyWith({
     String? name,
     String? description,
     List<DrawingCommand>? commands,
+    Offset? offset,
   });
 
   @override
-  int get hashCode => id.hashCode ^ name.hashCode ^ description.hashCode ^ commands.hashCode;
+  int get hashCode => id.hashCode ^ name.hashCode ^ description.hashCode ^ commands.hashCode ^ offset.hashCode;
 
     @override
   bool operator ==(Object other) =>
@@ -43,7 +46,8 @@ abstract class AbstractDrawing {
       id == other.id &&
       name == other.name &&
       description == other.description &&
-      listEquals(commands, other.commands);
+      listEquals(commands, other.commands) &&
+      offset == other.offset;
 
   AbstractDrawing validate();
 

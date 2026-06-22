@@ -5,7 +5,7 @@ import 'package:id_gen/id_gen.dart';
 import 'package:knitty_griddy/drawings/drawing_part_icon.dart';
 import 'package:knitty_griddy/drawings/model/part_info.dart';
 import 'package:knitty_griddy/drawings/partrepo/move_part_drawing_to_set_menu.dart';
-import 'package:knitty_griddy/drawings/drawing_editor/editor/edit_drawing_page.dart';
+import 'package:knitty_griddy/drawings/drawing_editor/edit_drawing_page.dart';
 import 'package:knitty_griddy/drawings/model/drawings_model.dart';
 import 'package:knitty_griddy/drawings/model/part_drawing.dart';
 import 'package:knitty_griddy/drawings/partrepo/part_repository.dart';

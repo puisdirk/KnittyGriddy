@@ -70,4 +70,18 @@ class MathUtitilies {
     }
   }
 
+  static double valueInUnit(double valueInMM, Unit unit) {
+    switch (unit) {
+      case Unit.mm:
+        return valueInMM;
+      case Unit.cm:
+        return valueInMM / 10;
+      case Unit.meter:
+        return valueInMM / 1000;
+      case Unit.inches:
+        return valueInMM / 25.4;
+      case Unit.feet:
+        return valueInMM / 304.8;
+    }
+  }
 }

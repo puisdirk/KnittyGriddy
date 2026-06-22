@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/command_controls/small_label.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/command_controls/small_text_field.dart';
 import 'package:knitty_griddy/drawings/drawing_part_icon.dart';
+import 'package:knitty_griddy/drawings/formulas/formula_field_control.dart';
 import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
 import 'package:knitty_griddy/drawings/model/commands/included_part_command.dart';
+import 'package:knitty_griddy/drawings/model/commands/meaurement_override.dart';
 import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
-import 'package:knitty_griddy/drawings/model/part_chooser.dart';
+import 'package:knitty_griddy/drawings/drawing_editor/part_chooser.dart';
 import 'package:knitty_griddy/drawings/model/part_info.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -71,6 +73,13 @@ class _IncludedPartCommandControlState extends State<IncludedPartCommandControl>
     );
   }
 
+  void setMeasurementOverrideFormula(MeasurementOverride moverride, String newFormula) {
+    widget.onChanged(widget.command.copyWith(
+      measurementOverrides: widget.command.measurementOverrides.map((m) => 
+        m.measurementId != moverride.measurementId ? m : m.copyWith(formula: newFormula)).toList()
+    ));
+  }
+
   Widget createEditContent() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
@@ -100,7 +109,22 @@ class _IncludedPartCommandControlState extends State<IncludedPartCommandControl>
           children: [
             const SmallLabel(label: 'Part'),
             hspacing,
-            Row(
+            if (widget.command.partInfo != null)
+              DrawingPartIcon(partInfo: widget.command.partInfo!, size: 32,),
+            OutlinedButton.icon(
+              iconAlignment: IconAlignment.end,
+              onPressed: () async {
+                PartInfo? partInfo = await showDialog(context: context, builder: (context) => 
+                  PartChooser(selectedPartInfo: widget.command.partInfo),
+                );
+                if (partInfo != widget.command.partInfo) {
+                  widget.onChanged(widget.command.copyWith(partInfo: partInfo));
+                } 
+              },
+              icon: const Icon(Icons.edit, size: 16,),
+              label: Text(widget.command.partInfo == null ? 'No part selected' : widget.command.partInfo!.partLabel, style: smallStyle,)
+            ),
+/*            Row(
               children: [
                 if (widget.command.partInfo != null)
                   DrawingPartIcon(partInfo: widget.command.partInfo!, size: 32,),
@@ -122,7 +146,7 @@ class _IncludedPartCommandControlState extends State<IncludedPartCommandControl>
                   icon: const Icon(Icons.edit, size: 16,)
                 )
               ],
-            ),
+            ),*/
           ]
         ),
         vspacing,
@@ -154,6 +178,29 @@ class _IncludedPartCommandControlState extends State<IncludedPartCommandControl>
             ),
           ],
         ),
+        vspacing,
+        Column(
+          children: [
+            for (MeasurementOverride moverride in widget.command.measurementOverrides)
+              Column(
+                children: [
+                  Row(
+                    children: [
+                      SmallLabel(label: moverride.measurementLabel, width: 100,),
+                      hspacing,
+                      FormulaFieldControl(
+                        formula: moverride.formula, 
+                        width: 200, 
+                        excludeCommand: widget.command, 
+                        onFormulaChanged: (newFormula) => setMeasurementOverrideFormula(moverride, newFormula),
+                      )
+                    ],
+                  ),
+                  vspacing,
+                ],
+              )
+          ],
+        )
       ],
     );
   }
