@@ -1,6 +1,7 @@
 
 import 'package:directed_graph/directed_graph.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/part_command.dart';
@@ -15,6 +16,7 @@ class PartDrawing extends AbstractDrawing {
     required super.name,
     super.description,
     super.commands,
+    super.offset,
     String? category,
   }) : category = category?? '';
 
@@ -24,6 +26,7 @@ class PartDrawing extends AbstractDrawing {
     String? description,
     List<DrawingCommand>? commands,
     String? category,
+    Offset? offset,
   }) {
     return PartDrawing(
       id: id?? this.id, 
@@ -31,6 +34,7 @@ class PartDrawing extends AbstractDrawing {
       description: description?? this.description,
       commands: commands?? this.commands,
       category: category?? this.category,
+      offset: offset?? this.offset,
     );
   }
 
@@ -38,13 +42,15 @@ class PartDrawing extends AbstractDrawing {
   AbstractDrawing abstractCopyWith({
     String? name, 
     String? description, 
-    List<DrawingCommand>? commands
+    List<DrawingCommand>? commands,
+    Offset? offset,
   }) {
     return PartDrawing(
       id: id, 
       name: name?? this.name,
       description: description?? this.description,
       commands: commands?? this.commands,
+      offset: offset?? this.offset,
       category: category,
     );
   }

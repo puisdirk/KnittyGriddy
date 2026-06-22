@@ -6,7 +6,7 @@ import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
 
 import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
-import 'package:knitty_griddy/drawings/model/infinite_line.dart';
+import 'package:knitty_griddy/utils/infinite_line.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 import 'package:knitty_griddy/utils/math_utitilies.dart';
 import 'package:vector_math/vector_math_64.dart' as vec;

@@ -360,7 +360,7 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
                   SmallLabel(label: 'Slant 2', width: labelWidth,),
                   hspacing,
                   FormulaFieldControl(
-                    key: GlobalObjectKey('${widget.command.id}-${widget.command.version}-cslant1'),
+                    key: GlobalObjectKey('${widget.command.id}-${widget.command.version}-cslant2'),
                     formula: widget.command.cubicSlantFormula2, 
                     width: 240, 
                     excludeCommand: widget.command,

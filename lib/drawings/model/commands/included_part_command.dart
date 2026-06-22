@@ -1,23 +1,31 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:knitty_griddy/drawings/formulas/formula_expression.dart';
 import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
+import 'package:knitty_griddy/drawings/model/commands/measurement_command.dart';
+import 'package:knitty_griddy/drawings/model/commands/meaurement_override.dart';
+import 'package:knitty_griddy/drawings/model/commands/part_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
+import 'package:knitty_griddy/drawings/model/part_drawing.dart';
 import 'package:knitty_griddy/drawings/model/part_info.dart';
+import 'package:knitty_griddy/drawings/partrepo/part_repository.dart';
 
 @immutable
 class IncludedPartCommand extends DrawingCommand {
 
   final PartInfo? partInfo;
   final String anchorPointId;
+  final List<MeasurementOverride> measurementOverrides;
 
   const IncludedPartCommand({
     required super.id,
     required super.label,
     required super.version,
     this.partInfo,
-    this.anchorPointId = '',
+    this.anchorPointId = originId,
+    this.measurementOverrides = const[],
     super.validated,
     super.valid,
     super.errors,
@@ -32,6 +40,7 @@ class IncludedPartCommand extends DrawingCommand {
     bool? valid,
     List<String>? errors,
     bool? initiallyOpen,
+    List<MeasurementOverride>? measurementOverrides,
   }) {
     return IncludedPartCommand(
       id: id,
@@ -39,6 +48,7 @@ class IncludedPartCommand extends DrawingCommand {
       label: label?? this.label, 
       partInfo: partInfo?? this.partInfo,
       anchorPointId: anchorPointId?? this.anchorPointId,
+      measurementOverrides: measurementOverrides?? this.measurementOverrides,
       validated: validated?? this.validated,
       valid: valid?? this.valid,
       errors: errors?? this.errors,
@@ -47,7 +57,7 @@ class IncludedPartCommand extends DrawingCommand {
   }
 
   @override
-  double get editHeight => 200;
+  double get editHeight => 200 + (measurementOverrides.length * 50);
 
   @override
   Rect getBoundingBox(AbstractDrawing drawing) {
@@ -79,11 +89,13 @@ class IncludedPartCommand extends DrawingCommand {
     if (anchorPointId == commandId) {
       return copyWith(anchorPointId: '');
     }
+    // TODO: may need to clean measurementoverrides
     return this;
   }
 
   @override
   IncludedPartCommand dependentLabelChanged(String oldLabel, String newLabel) {
+    // TODO: may need to clean measurementoverrides
     return this;
   }
 
@@ -95,16 +107,24 @@ class IncludedPartCommand extends DrawingCommand {
       'label': label,
       'partinfo': partInfo == null ? {} : partInfo!.toJson(),
       'anchor': anchorPointId,
+      'moverrides': measurementOverrides.map((m) => m.toJson()).toList(),
     };
   }
 
   static IncludedPartCommand fromJson(Map<String, dynamic> json) {
+    List<MeasurementOverride> moverrides = [];
+    List<Map<String, dynamic>> moverrideObjects = (json['moverrides'] as List).map((o) => o as Map<String, dynamic>).toList();
+    for (Map<String, dynamic> moverrideObject in moverrideObjects) {
+      moverrides.add(MeasurementOverride.fromJson(moverrideObject));
+    }
+
     return IncludedPartCommand(
       id: json['id'] as String, 
       label: json['label'] as String, 
       version: 0,
       partInfo: (json['partinfo'] as Map<String, dynamic>).isEmpty ? null : PartInfo.fromJson(json['partinfo'] as Map<String, dynamic>),
       anchorPointId: json['anchor'] as String,
+      measurementOverrides: moverrides,
     );
   }
 
@@ -118,12 +138,13 @@ class IncludedPartCommand extends DrawingCommand {
       version == other.version &&
       partInfo == other.partInfo &&
       anchorPointId == other.anchorPointId &&
+      listEquals(measurementOverrides, other.measurementOverrides) &&
       validated == other.validated &&
       valid == other.valid &&
       listEquals(errors, other.errors);
 
   @override
-  int get hashCode => super.hashCode ^ partInfo.hashCode ^ anchorPointId.hashCode;
+  int get hashCode => super.hashCode ^ partInfo.hashCode ^ anchorPointId.hashCode ^ measurementOverrides.hashCode;
 
   @override
   IncludedPartCommand clearValidation() {
@@ -132,7 +153,39 @@ class IncludedPartCommand extends DrawingCommand {
 
   @override
   void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false}) {
-    // TODO: implement paint
+    if (!valid) return;
+
+    PartDrawing? partDrawing = PartRepository.getPartDrawingById(partInfo!.partDrawingId);
+    if (partDrawing == null) return;
+
+    // Copy the measurement override values into the partDrawing
+    partDrawing = partDrawing.copyWith(
+      commands: partDrawing.commands.map((c) {
+        if (c is! MeasurementCommand) {
+          return c;
+        } else {
+          MeasurementOverride mo = measurementOverrides.firstWhere((mo) => mo.measurementId == c.id);
+          FormulaParseResult res = FormulaExpression.validate(formula: mo.formula, drawing: drawing);
+          return c.copyWith(value: res.result!);
+        }
+      }).toList()
+    ).validate();
+
+    PartCommand partCommand = partDrawing.parts.firstWhere((p) => p.id == partInfo!.partId);
+
+    // Calculate the offset needed
+    PointCommand? ownAnchorPoint = drawing.pointById(anchorPointId);
+    if (ownAnchorPoint == null) return;
+    PointCommand? partAnchorPoint = partDrawing.pointById(partCommand.anchorPointId);
+    if (partAnchorPoint == null) return;
+    Offset? ownOffset = ownAnchorPoint.getCoordinate(drawing);
+    if (ownOffset == null) return;
+    Offset? partOffset = partAnchorPoint.getCoordinate(partDrawing);
+    if (partOffset == null) return;
+
+    partDrawing = (partDrawing.abstractCopyWith(offset: ownOffset - partOffset) as PartDrawing).validate();
+
+    partCommand.paint(canvas, size, partDrawing, selected);
   }
 
   @override
@@ -150,6 +203,16 @@ class IncludedPartCommand extends DrawingCommand {
       validationErrors.add('Requires a part');
     } else {
       // TODO: should check if the part exists and is validated && valid, but not sure if it can ever occur
+    }
+
+    // Check if the measurement overrides have valid formula's
+    for (MeasurementOverride mo in measurementOverrides) {
+        FormulaParseResult res = FormulaExpression.validate(formula: mo.formula, drawing: drawing, label: 'a value');
+        if (res.isInvalid) {
+          isvalid = false;
+          if (!res.shouldRetry) retryValidation = false;
+          validationErrors.add('measurement ${mo.measurementLabel}: ${res.errorMessage}');
+        }
     }
 
     if (anchorPointId.isEmpty) {

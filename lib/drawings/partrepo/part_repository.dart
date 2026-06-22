@@ -36,14 +36,15 @@ class PartRepository {
 
   static void loadInitialPartSets(List<PartSet> partSets) {
     if (partSets.isEmpty) {
-      instance.sets = [const BasicPartsSet()];
+      BasicPartsSet.loadFromAssets().then((set) => instance.sets = [set]);
     } else {
       instance.sets = List.from(partSets);
     }
   }
 
   static void restoreBasicPartSet() {
-    instance.sets = [const BasicPartsSet(), ...instance.sets];
+    BasicPartsSet.loadFromAssets().then((set) => 
+      instance.sets = [set, ...instance.sets]);
   }
 
   static void addPartDrawingToSet(PartDrawing part, String partSetId) {

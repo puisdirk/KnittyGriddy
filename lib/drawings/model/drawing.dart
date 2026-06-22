@@ -1,6 +1,7 @@
 
 import 'package:directed_graph/directed_graph.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/included_part_command.dart';
@@ -22,6 +23,7 @@ class Drawing extends AbstractDrawing {
     required super.name,
     super.description,
     super.commands,
+    super.offset,
     this.usedPartDrawings = const[],
   });
 
@@ -29,17 +31,21 @@ class Drawing extends AbstractDrawing {
   AbstractDrawing abstractCopyWith({
     String? name, 
     String? description, 
-    List<DrawingCommand>? commands
+    List<DrawingCommand>? commands,
+    Offset? offset,
   }) {
     return Drawing(
       id: id, 
       name: name?? this.name,
       description: description?? this.description,
       commands: commands?? this.commands,
+      offset: offset?? this.offset,
       usedPartDrawings: usedPartDrawings
     );
   }
 
+  // We store the drawings of included parts inside the drawing. If the part gets
+  // deleted, we will restore the drawing of the included part into the imported partset
   Drawing updateIncludedDrawings() {
     Set<PartDrawing> includedDrawings = {};
     for (IncludedPartCommand cmd in commands.whereType()) {
@@ -58,6 +64,7 @@ class Drawing extends AbstractDrawing {
     String? name,
     String? description,
     List<DrawingCommand>? commands,
+    Offset? offset,
     List<PartDrawing>? usedPartDrawings,
   }) {
     return Drawing(
@@ -65,6 +72,7 @@ class Drawing extends AbstractDrawing {
       name: name?? this.name,
       description: description?? this.description,
       commands: commands?? this.commands,
+      offset: offset?? this.offset,
       usedPartDrawings: usedPartDrawings?? this.usedPartDrawings,
     );
   }
