@@ -138,76 +138,81 @@ class _PartSetPanelState extends State<PartSetPanel> {
             data: widget.partSet.partDrawings, 
             itemBuilder: (context, partDrawing) {
               PartInfo? partInfo = partDrawing.firstValidPartInfo;
-              return GestureDetector(
-                onTap: null, //() => toggleStitchSelection(def),
-                child: Container(
-                  decoration: BoxDecoration(
-                    border: Border(bottom: BorderSide(color: Colors.grey.shade300)),
-                    color: selectedPartDrawings.contains(partDrawing) ? Colors.blue.withAlpha(60) : null,
+              return Column(
+                children: [
+                  for (PartInfo partInfo in partDrawing.validPartInfos)
+                  GestureDetector(
+                    onTap: null, //() => toggleStitchSelection(def),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        border: Border(bottom: BorderSide(color: Colors.grey.shade300)),
+                        color: selectedPartDrawings.contains(partDrawing) ? Colors.blue.withAlpha(60) : null,
+                      ),
+                      constraints: const BoxConstraints.tightFor(height: 50),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          const SizedBox(width: 10,),
+                          if (partInfo != null)
+                            DrawingPartIcon(partInfo: partInfo),
+                          if (partInfo == null)
+                            const Icon(Symbols.apparel),
+                          const SizedBox(width: 20,),
+                          Text('${partInfo.partLabel} (${partDrawing.name})'),
+                          const SizedBox(width: 20,),
+                          if (partDrawing.description.isNotEmpty)
+                            Text(partDrawing.description.replaceAll('\n', ' '), overflow: TextOverflow.ellipsis,),
+                          const Spacer(),
+                          IconButton(
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(builder: (context) => EditDrawingPage(drawing: partDrawing)),
+                              );
+                            }, 
+                            icon: const Icon(Icons.edit)
+                          ),
+                          if (PartRepository.instance.sets.length > 1)
+                            MovePartDrawingToSetMenu(partDrawing: partDrawing, currentPartSet: widget.partSet),
+                          IconButton(
+                            onPressed: () {
+                              PartDrawing newDrawing = partDrawing.copyWith(id: const UuidV4Gen().get());
+                              Provider.of<DrawingsModel>(context, listen: false).addPartToSet(
+                                targetPartSet: widget.partSet, 
+                                part: newDrawing
+                              );
+                            }, 
+                            icon: const Icon(Symbols.content_copy, weight: 700,)
+                          ),
+                          IconButton(
+                            onPressed: () {
+                              showDialog(context: context, builder: (context) {
+                                return AlertDialog(
+                                  title: const Text('Delete part'),
+                                  content: const Text('Are you sure you want to delete the part? This action cannot be undone'),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(context), 
+                                      child: const Text('Cancel')
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                        Provider.of<DrawingsModel>(context, listen: false).deletePartDrawing(partDrawing);
+                                      },
+                                      child: const Text('Delete')
+                                    ),
+                                  ],
+                                );
+                              });
+                            }, 
+                            icon: const Icon(Icons.delete),
+                          ),
+                          const SizedBox(width: 10,),
+                        ],
+                      ),
+                    ),
                   ),
-                  constraints: const BoxConstraints.tightFor(height: 50),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      const SizedBox(width: 10,),
-                      if (partInfo != null)
-                        DrawingPartIcon(partInfo: partInfo),
-                      if (partInfo == null)
-                        const Icon(Symbols.apparel),
-                      const SizedBox(width: 20,),
-                      Text(partDrawing.name),
-                      const SizedBox(width: 20,),
-                      if (partDrawing.description.isNotEmpty)
-                        Text(partDrawing.description.replaceAll('\n', ' '), overflow: TextOverflow.ellipsis,),
-                      const Spacer(),
-                      IconButton(
-                        onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(builder: (context) => EditDrawingPage(drawing: partDrawing)),
-                          );
-                        }, 
-                        icon: const Icon(Icons.edit)
-                      ),
-                      if (PartRepository.instance.sets.length > 1)
-                        MovePartDrawingToSetMenu(partDrawing: partDrawing, currentPartSet: widget.partSet),
-                      IconButton(
-                        onPressed: () {
-                          PartDrawing newDrawing = partDrawing.copyWith(id: const UuidV4Gen().get());
-                          Provider.of<DrawingsModel>(context, listen: false).addPartToSet(
-                            targetPartSet: widget.partSet, 
-                            part: newDrawing
-                          );
-                        }, 
-                        icon: const Icon(Symbols.content_copy, weight: 700,)
-                      ),
-                      IconButton(
-                        onPressed: () {
-                          showDialog(context: context, builder: (context) {
-                            return AlertDialog(
-                              title: const Text('Delete part'),
-                              content: const Text('Are you sure you want to delete the part? This action cannot be undone'),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context), 
-                                  child: const Text('Cancel')
-                                ),
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                    Provider.of<DrawingsModel>(context, listen: false).deletePartDrawing(partDrawing);
-                                  },
-                                  child: const Text('Delete')
-                                ),
-                              ],
-                            );
-                          });
-                        }, 
-                        icon: const Icon(Icons.delete),
-                      ),
-                      const SizedBox(width: 10,),
-                    ],
-                  ),
-                ),
+                ],
               );
             },
           ),

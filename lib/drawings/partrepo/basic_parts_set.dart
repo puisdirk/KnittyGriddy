@@ -10,6 +10,7 @@ class BasicPartsSet extends PartSet {
 
   static const List<String> _basicPartSetResources = [
     'AldrichSleeve.kpd',
+    'AldrichBodice.kpd',
   ];
 
   const BasicPartsSet() : super(

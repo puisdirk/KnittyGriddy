@@ -8,8 +8,8 @@ import 'package:provider/provider.dart';
 
 class DrawingToolbar extends StatefulWidget {
   final AbstractDrawing drawing;
-  final bool showDrawingNameAndDescription;
-  final void Function(AbstractDrawing newDrawing) onDrawingChanged;
+  final bool showToolbarContents;
+  final void Function(AbstractDrawing? newDrawing) onDrawingChanged;
   final bool canUndo;
   final bool canRedo;
   final void Function() undo;
@@ -17,7 +17,7 @@ class DrawingToolbar extends StatefulWidget {
 
   const DrawingToolbar({
     required this.drawing,
-    required this.showDrawingNameAndDescription,
+    required this.showToolbarContents,
     required this.onDrawingChanged,
     required this.canUndo,
     required this.canRedo,
@@ -35,36 +35,35 @@ class _DrawingToolbarState extends State<DrawingToolbar> {
   late TextEditingController descriptionController;
   late TextEditingController categoryController;
 
+  late String name;
+  late String description;
+  late String category;
+
   void _nameChanged() {
-    widget.onDrawingChanged(widget.drawing.abstractCopyWith(name: nameController.text));
-    if (widget.drawing is Drawing) {
-      Provider.of<DrawingsModel>(context, listen: false).updateDrawingInfo();
-    }
+    setState(() => name = nameController.text);
   }
 
   void _descriptionChanged() {
-    widget.onDrawingChanged(widget.drawing.abstractCopyWith(description: descriptionController.text));
-    if (widget.drawing is Drawing) {
-      Provider.of<DrawingsModel>(context, listen: false).updateDrawingInfo();
-    }
+    setState(() => description = descriptionController.text);
   }
 
   void _categoryChanged() {
-    if (widget.drawing is PartDrawing) {
-      widget.onDrawingChanged((widget.drawing as PartDrawing).copyWith(category: categoryController.text));
-    }
+    setState(() => category = categoryController.text);
   }
 
   @override
   void initState() {
-    nameController = TextEditingController(text: widget.drawing.name);
+    name = widget.drawing.name;
+    nameController = TextEditingController(text: name);
     nameController.addListener(_nameChanged);
 
-    descriptionController = TextEditingController(text: widget.drawing.description);
+    description = widget.drawing.description;
+    descriptionController = TextEditingController(text: description);
     descriptionController.addListener(_descriptionChanged);
 
     if (widget.drawing is PartDrawing) {
-      categoryController = TextEditingController(text: (widget.drawing as PartDrawing).category);
+      category = (widget.drawing as PartDrawing).category;
+      categoryController = TextEditingController(text: category);
       categoryController.addListener(_categoryChanged);
     }
 
@@ -103,9 +102,9 @@ class _DrawingToolbarState extends State<DrawingToolbar> {
             label: const Text('Redo'),
             icon: const Icon(Icons.redo),
           ),
-          if (widget.showDrawingNameAndDescription)
+          if (widget.showToolbarContents)
             const SizedBox(width: 20,),
-          if (widget.showDrawingNameAndDescription)
+          if (widget.showToolbarContents)
             Column(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -131,7 +130,48 @@ class _DrawingToolbarState extends State<DrawingToolbar> {
                             child: TextField(controller: categoryController,),
                           ),
                         ],
-                      )
+                      ),
+                    hspacing,
+                    hspacing,
+                    Row(
+                      children: [
+                        IconButton.outlined(
+                          onPressed: () {
+                            if (widget.drawing is Drawing) {
+                              widget.onDrawingChanged(widget.drawing.abstractCopyWith(
+                                name: name,
+                                description: description,
+                              ));
+                              Provider.of<DrawingsModel>(context, listen: false).updateDrawingInfo();
+                            } else {
+                              widget.onDrawingChanged((widget.drawing as PartDrawing).copyWith(
+                                name: name,
+                                description: description,
+                                category: category,
+                              ));
+                            }
+                           },
+                          icon: const Icon(Icons.check)
+                        ),
+                        hspacing,
+                        IconButton.outlined(
+                          onPressed: () {
+                            setState(() {
+                              name = widget.drawing.name;
+                              nameController.text = widget.drawing.name;
+                              description = widget.drawing.description;
+                              descriptionController.text = widget.drawing.description;
+                              if (widget.drawing is PartDrawing) {
+                                category = (widget.drawing as PartDrawing).category;
+                                categoryController.text = (widget.drawing as PartDrawing).category;
+                              }
+                            });
+                            widget.onDrawingChanged(null);
+                          },
+                          icon: const Icon(Icons.close)
+                        ),
+                      ],
+                    ),
                   ],
                 ),
                 vspacing,

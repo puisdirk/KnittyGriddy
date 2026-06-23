@@ -26,7 +26,7 @@ class EditDrawingPage extends StatefulWidget {
 class _EditDrawingPageState extends State<EditDrawingPage> {
   late AbstractDrawing drawing;
   late FocusNode _focusNode;
-  bool showDrawingNameAndDescription = false;
+  bool showToolbarContents = false;
 
   final UndoRedoManager<AbstractDrawing> _undoRedoManager = UndoRedoManager();
 
@@ -87,25 +87,31 @@ class _EditDrawingPageState extends State<EditDrawingPage> {
         title: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('${(widget.drawing is PartDrawing) ? 'Part' : 'Drawing'} - ${drawing.name}'),
+            Text('${(widget.drawing is PartDrawing) ? 'Part Drawing' : 'Drawing'} - ${drawing.name}'),
             hspacing,
-            IconButton(
-              onPressed: () => setState(() => showDrawingNameAndDescription = !showDrawingNameAndDescription),
-              icon: Icon(showDrawingNameAndDescription ? Icons.check : Icons.edit)
-            ),
+            if (!showToolbarContents)
+              IconButton(
+                onPressed: () => setState(() => showToolbarContents = true),
+                icon: const Icon(Icons.edit)
+              ),
           ],
         ),
         backgroundColor: Colors.grey.shade300,
         bottom: PreferredSize(
-          preferredSize: Size(2000, showDrawingNameAndDescription ? 160 : 40), 
+          preferredSize: Size(2000, showToolbarContents ? 160 : 40), 
           child: DrawingToolbar(
             drawing: drawing,
-            showDrawingNameAndDescription: showDrawingNameAndDescription,
+            showToolbarContents: showToolbarContents,
             canUndo: _undoRedoManager.canUndo(),
             canRedo: _undoRedoManager.canRedo(),
             undo: _undo,
             redo: _redo,
-            onDrawingChanged: (newDrawing) => _storeAndSetDrawing(newDrawing.validate()),
+            onDrawingChanged: (newDrawing) {
+              setState(() => showToolbarContents = false);
+              if (newDrawing != null) {
+                _storeAndSetDrawing(newDrawing.validate());
+              }
+            }
           ),
         ),
         actions: [
