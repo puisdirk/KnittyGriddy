@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/drawing_viewer.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/drawing_commands_list.dart';
 import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
+import 'package:knitty_griddy/utils/constants.dart';
 
 class DrawingEditorControl extends StatefulWidget {
   final AbstractDrawing drawing;
@@ -31,7 +32,7 @@ class _DrawingEditorControlState extends State<DrawingEditorControl> {
           )
         ),
         SizedBox(
-          width: 400,
+          width: 410,
           child: DrawingCommandsList(
             drawing: widget.drawing,
             selectedCommandId: selectedCommandId,

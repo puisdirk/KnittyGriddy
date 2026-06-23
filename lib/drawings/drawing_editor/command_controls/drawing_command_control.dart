@@ -173,8 +173,6 @@ class _DrawingCommandControlState extends State<DrawingCommandControl> {
             message: widget.command.errors.join('\n'),
             child: const Icon(Icons.error_outline),
           ),
-        if (widget.command.validated && !widget.command.valid && widget.command.errors.isNotEmpty)
-          hspacing,
         IconButton(
           onPressed: () {
             // Let focus-dependent controls do their thing
@@ -199,21 +197,24 @@ class _DrawingCommandControlState extends State<DrawingCommandControl> {
       onTap: widget.onSelect,
       child: SizedBox(
         height: controlHeight,
-        child: Container(
-          decoration: BoxDecoration(
-            color: (widget.command.validated && !widget.command.valid) ? Colors.red.withAlpha(20) : Colors.grey.shade100,
-            border: Border.all(color: widget.selected ? selectedColor : Colors.grey),
-            borderRadius: const BorderRadius.all(Radius.circular(5)),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(8),
-            child: Row(
-              children: [
-                createCommandControl(),
-                const Spacer(),
-                if (!widget.sorting)
-                  createStatusControls(),
-              ],
+        child: Padding(
+          padding: const EdgeInsets.only(right: 8.0),
+          child: Container(
+            decoration: BoxDecoration(
+              color: (widget.command.validated && !widget.command.valid) ? Colors.red.withAlpha(20) : Colors.grey.shade100,
+              border: Border.all(color: widget.selected ? selectedColor : Colors.grey, width: widget.selected ? 2 : 1),
+              borderRadius: const BorderRadius.all(Radius.circular(5)),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(8),
+              child: Row(
+                children: [
+                  createCommandControl(),
+                  const Spacer(),
+                  if (!widget.sorting)
+                    createStatusControls(),
+                ],
+              ),
             ),
           ),
         ),
