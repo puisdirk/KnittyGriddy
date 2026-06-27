@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/edit_drawing_page.dart';
 import 'package:knitty_griddy/drawings/model/drawing.dart';
 import 'package:knitty_griddy/drawings/model/drawing_info.dart';
+import 'package:knitty_griddy/drawings/model/drawing_operation_exception.dart';
 import 'package:knitty_griddy/drawings/model/drawings_model.dart';
 import 'package:provider/provider.dart';
 
@@ -42,19 +43,36 @@ class DrawingCard extends StatelessWidget {
       child: InkWell(
         splashColor: Colors.blue.withAlpha(30),
         onTap: () async {
-          await Provider.of<DrawingsModel>(context, listen: false).loadDrawing(drawingInfo.id);
-          if (context.mounted) {
-            Navigator.push(
-              context, 
-              MaterialPageRoute(
-                builder: (context) => Selector<DrawingsModel, Drawing>(
-                  selector: (_, model) => model.drawing,
-                  builder: (context, drawing, _) {
-                    return EditDrawingPage(drawing: drawing,);
-                  }
-                ),
-              )
-            );
+          try {
+            await Provider.of<DrawingsModel>(context, listen: false).loadDrawing(drawingInfo.id);
+
+            if (context.mounted) {
+              Navigator.push(
+                context, 
+                MaterialPageRoute(
+                  builder: (context) => Selector<DrawingsModel, Drawing>(
+                    selector: (_, model) => model.drawing,
+                    builder: (context, drawing, _) {
+                      return EditDrawingPage(drawing: drawing,);
+                    }
+                  ),
+                )
+              );
+            }
+          } on DrawingOperationException catch(e) {
+            if (context.mounted) {
+              showDialog(context: context, builder: (context) => 
+                AlertDialog(
+                  content: SizedBox(width: 400, height: 50, child: Text(e.message)),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context), 
+                      child: const Text('Close'),
+                    ),
+                  ],
+                )  
+              );
+            }
           }
         },
         child: SizedBox(

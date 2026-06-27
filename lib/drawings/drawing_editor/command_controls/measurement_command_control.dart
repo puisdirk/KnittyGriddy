@@ -81,7 +81,8 @@ class _MeasurementCommandControlState extends State<MeasurementCommandControl> {
         const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Measurement', style: smallStyle,)
+            Icon(Symbols.square_foot),
+            hspacing,
           ],
         ),
         vspacing,
@@ -113,7 +114,11 @@ class _MeasurementCommandControlState extends State<MeasurementCommandControl> {
               value: widget.command.unit,
               onChanged: (value) {
                 if (value != widget.command.unit) {
-                  widget.onChanged(widget.command.copyWith(unit: value));
+                  if (value == Unit.angle) {
+                    widget.onChanged(widget.command.copyWith(unit: value, minValue: -360, maxValue: 360));
+                  } else {
+                    widget.onChanged(widget.command.copyWith(unit: value));
+                  }
                 }
               },
             ),
@@ -160,8 +165,8 @@ class _MeasurementCommandControlState extends State<MeasurementCommandControl> {
                 step: 1 / pow(10, widget.command.decimals),
                 decimals: widget.command.decimals,
                 value: widget.command.minValue,
-                min: -100000,
-                max: widget.command.maxValue,
+                min: widget.command.unit == Unit.angle ? -360 : -100000,
+                max: widget.command.unit == Unit.angle ? 360 : widget.command.maxValue,
               ),
             )
           ],
@@ -184,8 +189,8 @@ class _MeasurementCommandControlState extends State<MeasurementCommandControl> {
                 step: 1 / pow(10, widget.command.decimals),
                 decimals: widget.command.decimals,
                 value: widget.command.maxValue,
-                min: widget.command.minValue,
-                max: 100000,
+                min: widget.command.unit == Unit.angle ? -360 : widget.command.minValue,
+                max: widget.command.unit == Unit.angle ? 360 : 100000,
               ),
             )
           ],
@@ -208,8 +213,8 @@ class _MeasurementCommandControlState extends State<MeasurementCommandControl> {
                 step: 1 / pow(10, widget.command.decimals),
                 decimals: widget.command.decimals,
                 value: widget.command.value,
-                min: widget.command.minValue,
-                max: widget.command.maxValue,
+                min: widget.command.unit == Unit.angle ? -360 : widget.command.minValue,
+                max: widget.command.unit == Unit.angle ? 360 : widget.command.maxValue,
               ),
             )
           ],

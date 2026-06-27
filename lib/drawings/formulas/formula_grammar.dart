@@ -135,7 +135,7 @@ class FormulaGrammar extends GrammarDefinition {
     return v.value(drawing);
   });
 
-  Parser unitDouble() => (pDouble() & (string('mm') | string('cm') | string('m') | string('"') | string('ft')).trim()).map((p) {
+  Parser unitDouble() => (pDouble() & (string('mm') | string('cm') | string('m') | string('"') | string('ft') | string('deg')).trim()).map((p) {
     Unit unit = Unit.values.byName(p[1]);
     return MathUtitilies.valueInMM(p[0], unit);
   });

@@ -5,7 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/included_part_command.dart';
+import 'package:knitty_griddy/drawings/model/commands/measurement_command.dart';
+import 'package:knitty_griddy/drawings/model/commands/meaurement_override.dart';
+import 'package:knitty_griddy/drawings/model/commands/part_command.dart';
 import 'package:knitty_griddy/drawings/model/part_drawing.dart';
+import 'package:knitty_griddy/drawings/model/part_info.dart';
 import 'package:knitty_griddy/drawings/partrepo/part_repository.dart';
 
 const String placeholderDrawingId = '_placeholder_drawing_id_';
@@ -74,6 +78,50 @@ class Drawing extends AbstractDrawing {
       commands: commands?? this.commands,
       offset: offset?? this.offset,
       usedPartDrawings: usedPartDrawings?? this.usedPartDrawings,
+    );
+  }
+
+  Drawing fixMeasurementOverrides() {
+    return copyWith(
+      commands: commands.map((cmd) {
+        if (cmd is! IncludedPartCommand) return cmd;
+        if (cmd.partInfo == null) return cmd;
+        PartDrawing? partDrawing = PartRepository.getPartDrawingById(cmd.partInfo!.partDrawingId);
+        if (partDrawing == null) return cmd;
+        PartCommand? partCommand = partDrawing.partById(cmd.partInfo!.partId);
+        if (partCommand == null) return cmd;
+
+        // delete measurements that are no longer in the part
+        Map<String, MeasurementOverride> newOverrides = {};
+        for (MeasurementOverride oldOverride in cmd.measurementOverrides) {
+          // does the partdrawing still have this measurement?
+          MeasurementCommand? mcmd = partDrawing.measurementById(oldOverride.measurementId);
+          if (mcmd != null) {
+            // Unit or label may have changed
+            newOverrides[oldOverride.measurementId] = oldOverride.copyWith(unit: mcmd.unit, measurementLabel: mcmd.label);
+          }
+        }
+
+        // add measurement overrides for new measurements in the part if there are any
+        for (MeasurementCommand mcmd in partDrawing.measurements) {
+          if (!newOverrides.containsKey(mcmd.id)) {
+            String formula = mcmd.value.toString();
+            if (measurements.any((m) => m.label == mcmd.label)) {
+              formula = '@${mcmd.label.replaceAll(' ', '_')}';
+            }
+            newOverrides[mcmd.id] = MeasurementOverride(
+              measurementId: mcmd.id, 
+              measurementLabel: mcmd.label, 
+              formula: formula, 
+              unit: mcmd.unit
+            );
+          }
+        }
+
+        return cmd.copyWith(
+          measurementOverrides: newOverrides.values.toList()
+        );
+      }).toList()
     );
   }
 

@@ -74,7 +74,7 @@ class _PointCommandControlState extends State<PointCommandControl> {
   }
 
   Widget createViewContent() {
-    String content = ' Point ';
+    String content = ' ';
 
     if (widget.command.pointDefinitionType == PointDefinitionType.relativeToPoint) {
       String distanceLabel = '???';
@@ -170,7 +170,7 @@ class _PointCommandControlState extends State<PointCommandControl> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text('Point', style: smallStyle,),
+            const Icon(Symbols.line_start_circle),
             hspacing,
             DropdownButton<PointDefinitionType>(
               key: GlobalObjectKey('${widget.command.id}-pdt'),

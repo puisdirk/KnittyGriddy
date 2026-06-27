@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:knitty_griddy/drawings/model/drawing_operation_exception.dart';
 import 'package:knitty_griddy/drawings/partrepo/part_set_name_control.dart';
 import 'package:knitty_griddy/drawings/partrepo/part_set_panel.dart';
 import 'package:knitty_griddy/drawings/model/drawings_model.dart';
@@ -93,11 +94,27 @@ class _PartRepositoryPageState extends State<PartRepositoryPage> with TickerProv
                       const SizedBox(width: 10,),
                       OutlinedButton.icon(
                         onPressed: () async {
-                          String? id = await Provider.of<DrawingsModel>(context, listen: false).importPartSet();
-                          if (id != null) {
-                            int newTabIdx = PartRepository.indexOfSet(id);
-                            if (newTabIdx != -1) {
-                              setState(() => tabIdx = newTabIdx);
+                          try {
+                            String? id = await Provider.of<DrawingsModel>(context, listen: false).importPartSet();
+                            if (id != null) {
+                              int newTabIdx = PartRepository.indexOfSet(id);
+                              if (newTabIdx != -1) {
+                                setState(() => tabIdx = newTabIdx);
+                              }
+                            }
+                          } on DrawingOperationException catch (e) {
+                            if (context.mounted) {
+                              showDialog(context: context, builder: (context) => 
+                                AlertDialog(
+                                  content: SizedBox(width: 400, height: 50, child: Text(e.message)),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(context), 
+                                      child: const Text('Close'),
+                                    ),
+                                  ],
+                                )  
+                              );
                             }
                           }
                         }, 

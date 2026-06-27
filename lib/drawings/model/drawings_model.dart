@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:id_gen/id_gen.dart';
 import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
+import 'package:knitty_griddy/drawings/model/commands/included_part_command.dart';
 import 'package:knitty_griddy/drawings/model/drawing.dart';
 import 'package:knitty_griddy/drawings/model/drawing_info.dart';
 import 'package:knitty_griddy/drawings/model/drawings_model_object.dart';
@@ -257,13 +258,23 @@ class DrawingsModel extends ChangeNotifier {
             usedPartDrawings: drawing.usedPartDrawings.map((pd) => pd != partDrawing ? pd : samedrawingcontent).toList()
           );
         } else {
-          PartRepository.addPartDrawingToImportedSet(partDrawing);
+          String newId = const UuidV4Gen().get();
+          PartRepository.addPartDrawingToImportedSet(
+            partDrawing.copyWith(
+              id: newId,
+            )
+          );
+          drawing = drawing.copyWith(
+            commands: drawing.commands.map((c) => c is! IncludedPartCommand ? c : c.copyWith(
+              partInfo: c.partInfo?.copyWith(partDrawingId: newId)
+            )).toList()
+          );
         }
       }
     }
 
     _drawingsModelObject = _drawingsModelObject.copyWith(
-      drawing: drawing.validate()
+      drawing: drawing.fixMeasurementOverrides().validate()
     );
 
     notifyListeners();

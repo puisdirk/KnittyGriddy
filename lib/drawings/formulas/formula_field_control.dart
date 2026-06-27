@@ -119,6 +119,7 @@ class _FormulaFieldControlState extends State<FormulaFieldControl> {
                   style: smallStyle,
                   focusNode: focusNode,
                   controller: textEditingController,
+                  onTapOutside: (_) => widget.onFormulaChanged(controller.text),
                 ),
               ),
               const Positioned(
@@ -130,7 +131,7 @@ class _FormulaFieldControlState extends State<FormulaFieldControl> {
               if (widget.unitLabel != null)
                 Positioned(
                   right: 5,
-                  child: Text(widget.unitLabel!, style: const TextStyle(fontSize: 24)),
+                  child: Text(widget.unitLabel!, style: TextStyle(fontSize: widget.unitLabel == '°' ? 14 : 10)),
                 ),
             ]
           ),

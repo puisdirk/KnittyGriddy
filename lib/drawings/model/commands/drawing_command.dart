@@ -4,11 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
 
 enum DrawingCommandTypes {
+  commentCommand,
+  measurementCommand,
+  variableCommand,
   pointCommand,
   lineCommand,
   curveCommand,
-  measurementCommand,
-  variableCommand,
   partCommand,
   includedPartCommand,
 }

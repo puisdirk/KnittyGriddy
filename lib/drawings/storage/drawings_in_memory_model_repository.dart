@@ -2,9 +2,9 @@
 import 'dart:convert';
 
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/material.dart';
 import 'package:knitty_griddy/drawings/model/drawing.dart';
 import 'package:knitty_griddy/drawings/model/drawing_info.dart';
+import 'package:knitty_griddy/drawings/model/drawing_operation_exception.dart';
 import 'package:knitty_griddy/drawings/model/part_drawing.dart';
 import 'package:knitty_griddy/drawings/partrepo/part_set.dart';
 import 'package:knitty_griddy/drawings/storage/drawings_model_repository.dart';
@@ -54,7 +54,7 @@ class DrawingsInMemoryModelRepository implements DrawingsModelRepository {
         bytes: utf8.encode(jsonString),
       );
     } catch (e) {
-      debugPrint('Error while exporting drawing: $e');
+      throw DrawingOperationException(message: 'Error while exporting drawing: $e');
     }
   }
 
@@ -67,13 +67,17 @@ class DrawingsInMemoryModelRepository implements DrawingsModelRepository {
     );
 
     if (result != null && result.files.isNotEmpty) {
+      if (result.files.first.extension != 'kgd') {
+        throw DrawingOperationException(message: '${result.files.first.name} is not a drawing (.kgd)');
+      }
+
       try {
         String jsonString = utf8.decode(result.files.first.bytes!);
         Map<String, dynamic> jsonObject = jsonDecode(jsonString);
         Drawing drawing = Drawing.fromJson(jsonObject);
         return drawing;
       } catch (e) {
-        debugPrint('Error while importing drawing: $e');
+        throw DrawingOperationException(message: 'Error while importing drawing: $e');
       }
     }
 
@@ -91,7 +95,7 @@ class DrawingsInMemoryModelRepository implements DrawingsModelRepository {
         bytes: utf8.encode(jsonString),
       );
     } catch (e) {
-      debugPrint('Error while exporting part drawing: $e');
+      throw DrawingOperationException(message: 'Error while exporting part drawing: $e');
     }
   }
 
@@ -104,13 +108,16 @@ class DrawingsInMemoryModelRepository implements DrawingsModelRepository {
     );
 
     if (result != null && result.files.isNotEmpty) {
+      if (result.files.first.extension != 'kpd') {
+        throw DrawingOperationException(message: '${result.files.first.name} is not a part drawing (.kpd)');
+      }
       try {
         String jsonString = utf8.decode(result.files.first.bytes!);
         Map<String, dynamic> jsonObject = jsonDecode(jsonString);
         PartDrawing partdrawing = PartDrawing.fromJson(jsonObject);
         return partdrawing;
       } catch (e) {
-        debugPrint('Error while importing part drawing: $e');
+        throw DrawingOperationException(message: 'Error while importing part drawing: $e');
       }
     }
 
@@ -129,7 +136,7 @@ class DrawingsInMemoryModelRepository implements DrawingsModelRepository {
 
   @override
   Future<void> exportPartSet(PartSet partSet) async {
-  Map<String, Object> jsonObject = partSet.toJson();
+    Map<String, Object> jsonObject = partSet.toJson();
 
     try {
       String jsonString = jsonEncode(jsonObject);
@@ -140,8 +147,9 @@ class DrawingsInMemoryModelRepository implements DrawingsModelRepository {
         bytes: utf8.encode(jsonString),
       );
     } catch(e) {
-      debugPrint('Error while exporting PartSet: $e');
-    }  }
+      throw DrawingOperationException(message: 'Error while exporting part set: $e');
+    }
+  }
   
   @override
   Future<PartSet?> importPartSet() async {
@@ -154,13 +162,16 @@ class DrawingsInMemoryModelRepository implements DrawingsModelRepository {
     );
 
     if (result != null && result.files.isNotEmpty) {
+      if (result.files.first.extension != 'kps') {
+        throw DrawingOperationException(message: '${result.files.first.name} is not a part drawing set (.kps)');
+      }
       try {
         String jsonString = utf8.decode(result.files.first.bytes!);
         Map<String, dynamic> jsonObject = jsonDecode(jsonString);
         PartSet partSet = PartSet.fromJson(jsonObject);
         return partSet;
       } catch (e) {
-        debugPrint('Error while importing part set: $e');
+        throw DrawingOperationException(message: 'Error while importing part set: $e');
       }
     }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/charts/chart_chooser/stitch_set_name_control.dart';
 import 'package:knitty_griddy/charts/chart_chooser/stitch_set_panel.dart';
+import 'package:knitty_griddy/charts/model/chart_operation_exception.dart';
 import 'package:knitty_griddy/charts/stitch_icon.dart';
 import 'package:knitty_griddy/charts/stitchrepo/basic_stitches_set.dart';
 import 'package:knitty_griddy/charts/stitchrepo/stitch_repository.dart';
@@ -100,11 +101,27 @@ class _StitchRepositoryPageState extends State<StitchRepositoryPage> with Ticker
                       const SizedBox(width: 10,),
                       OutlinedButton.icon(
                         onPressed: () async {
-                          String? id = await Provider.of<ChartsModel>(context, listen: false).importStitchesSet();
-                          if (id != null) {
-                            int newTabIdx = StitchRepository.indexOfSet(id);
-                            if (newTabIdx != -1) {
-                              setState(() => tabIdx = newTabIdx);
+                          try {
+                            String? id = await Provider.of<ChartsModel>(context, listen: false).importStitchesSet();
+                            if (id != null) {
+                              int newTabIdx = StitchRepository.indexOfSet(id);
+                              if (newTabIdx != -1) {
+                                setState(() => tabIdx = newTabIdx);
+                              }
+                            }
+                          } on ChartOperationException catch(e) {
+                            if (context.mounted) {
+                              showDialog(context: context, builder: (context) => 
+                                AlertDialog(
+                                  content: SizedBox(width: 400, height: 50, child: Text(e.message)),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(context), 
+                                      child: const Text('Close'),
+                                    ),
+                                  ],
+                                )  
+                              );
                             }
                           }
                         }, 

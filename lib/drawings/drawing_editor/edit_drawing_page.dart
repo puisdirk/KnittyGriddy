@@ -4,6 +4,7 @@ import 'package:knitty_griddy/drawings/drawing_editor/drawing_editor_control.dar
 import 'package:knitty_griddy/drawings/drawing_editor/drawing_toolbar.dart';
 import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
 import 'package:knitty_griddy/drawings/model/drawing.dart';
+import 'package:knitty_griddy/drawings/model/drawing_operation_exception.dart';
 import 'package:knitty_griddy/drawings/model/drawings_model.dart';
 import 'package:knitty_griddy/drawings/model/part_drawing.dart';
 import 'package:knitty_griddy/utils/constants.dart';
@@ -116,8 +117,24 @@ class _EditDrawingPageState extends State<EditDrawingPage> {
         ),
         actions: [
           IconButton( 
-            onPressed: () {
-              Provider.of<DrawingsModel>(context, listen: false).exportDrawing(drawing);
+            onPressed: () async {
+              try {
+                await Provider.of<DrawingsModel>(context, listen: false).exportDrawing(drawing);
+              } on DrawingOperationException catch(e) {
+                if (context.mounted) {
+                  showDialog(context: context, builder: (context) => 
+                    AlertDialog(
+                      content: SizedBox(width: 400, height: 50, child: Text(e.message)),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context), 
+                          child: const Text('Close'),
+                        ),
+                      ],
+                    )  
+                  );
+                }
+              }
             }, 
             icon: const Icon(Icons.ios_share)
           )

@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/charts/maingrid/chart_page.dart';
+import 'package:knitty_griddy/charts/model/chart_operation_exception.dart';
 import 'package:knitty_griddy/charts/model/charts_model.dart';
 import 'package:knitty_griddy/charts/model/chart_info.dart';
 import 'package:provider/provider.dart';
@@ -41,14 +42,30 @@ class ChartCard extends StatelessWidget {
       child: InkWell(
         splashColor: Colors.blue.withAlpha(30),
         onTap: () async {
-          await Provider.of<ChartsModel>(context, listen: false).loadChart(chartInfo.id);
-          if (context.mounted) {
-            Navigator.push(
-              context, 
-              MaterialPageRoute(
-                builder: (context) => const ChartPage(),
-              )
-            );
+          try {
+            await Provider.of<ChartsModel>(context, listen: false).loadChart(chartInfo.id);
+            if (context.mounted) {
+              Navigator.push(
+                context, 
+                MaterialPageRoute(
+                  builder: (context) => const ChartPage(),
+                )
+              );
+            }
+          } on ChartOperationException catch(e) {
+            if (context.mounted) {
+              showDialog(context: context, builder: (context) => 
+                AlertDialog(
+                  content: SizedBox(width: 400, height: 50, child: Text(e.message)),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context), 
+                      child: const Text('Close'),
+                    ),
+                  ],
+                )  
+              );
+            }
           }
         },
         child: SizedBox(

@@ -59,8 +59,23 @@ class PartCommand extends DrawingCommand {
   }
 
   @override
-  double get editHeight => 300;
+  double get editHeight => 310;
 
+  Rect calculateBoundingBox(AbstractDrawing drawing) {
+    if (valid) {
+      Rect r = Rect.zero;
+      for (String commandId in commandIds) {
+        DrawingCommand command = drawing.commandById(commandId);
+        r = r.expandToInclude(command.getBoundingBox(drawing));
+      }
+      return r;
+    }
+
+    return Rect.zero;
+  }
+
+  // We avoid expensive calculation as we don't require this in a PartDrawing
+  // (existing lines and curves are already included)
   @override
   Rect getBoundingBox(AbstractDrawing drawing) {
     return Rect.zero;

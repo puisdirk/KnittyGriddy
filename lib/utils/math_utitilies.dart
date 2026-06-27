@@ -13,11 +13,11 @@ class MathUtitilies {
     return (pi / 180) * degrees;
   }
 
-  static Size textSize(String text, TextStyle style) {
+  static Size textSize(String text, TextStyle style, {int maxLines = 1, double minWidth = 0, double maxWidth = double.infinity,}) {
     final TextPainter textPainter = TextPainter(
-        text: TextSpan(text: text, style: style), maxLines: 1, textDirection: TextDirection.ltr
+        text: TextSpan(text: text, style: style), maxLines: maxLines, textDirection: TextDirection.ltr
     )
-    ..layout(minWidth: 0, maxWidth: double.infinity);
+    ..layout(minWidth: minWidth, maxWidth: maxWidth,);
     return textPainter.size;
   }
 
@@ -67,6 +67,8 @@ class MathUtitilies {
         return value * 25.4;
       case Unit.feet:
         return value * 304.8;
+      case Unit.angle:
+        return value;
     }
   }
 
@@ -82,6 +84,8 @@ class MathUtitilies {
         return valueInMM / 25.4;
       case Unit.feet:
         return valueInMM / 304.8;
+      case Unit.angle:
+        return valueInMM;
     }
   }
 }

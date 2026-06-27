@@ -29,6 +29,8 @@ class FormulaParseResult {
 }
 
 class FormulaExpression {
+//  static final RegExp _variablergx = RegExp(r'!\w*([\s)\*\/\-\+])');
+//  static final RegExp _measurementrgx = RegExp(r'(@\w*)([\s)\*\/\-\+])');
   static final RegExp _variablergx = RegExp(r'!\w*');
   static final RegExp _measurementrgx = RegExp(r'@\w*');
 
@@ -54,6 +56,22 @@ class FormulaExpression {
     }    
 
     return deps;
+  }
+
+  static String replaceDependentLabel({required String formula, required String oldLabel, required String newLabel}) {
+
+    // Greedy expression to skip e.g. #linelength(l14) when old label is l1
+    final RegExp regExp = RegExp(oldLabel + r'[\s\+\-\*\/\)]');
+
+    List<Match> matches = regExp.allMatches(formula).toList();
+    if (matches.isNotEmpty) {
+      String newFormula = formula;
+      for (Match match in matches) {
+        newFormula = newFormula.replaceRange(match.start, match.end - 1, newLabel);
+      }
+      return newFormula;
+    }
+    return formula;
   }
 
   static FormulaParseResult validate({required String formula, required AbstractDrawing drawing, String? label}) {

@@ -91,8 +91,6 @@ class PartDrawing extends AbstractDrawing {
       category == other.category;
   }
 
-  PartInfo? get firstValidPartInfo => validPartInfos.firstOrNull;
-
   List<PartInfo> get validPartInfos {
     List<PartInfo> partInfos = [];
     for (PartCommand cmd in commands.whereType()) {
