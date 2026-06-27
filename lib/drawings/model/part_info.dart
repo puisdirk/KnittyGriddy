@@ -12,6 +12,17 @@ class PartInfo {
     required this.partLabel,
   });
 
+  PartInfo copyWith({
+    String? partDrawingId,
+  }) {
+    return PartInfo(
+      partDrawingId: partDrawingId?? this.partDrawingId, 
+      category: category, 
+      partId: partId, 
+      partLabel: partLabel
+    );
+  }
+
   @override
   bool operator ==(Object other) =>
     identical(this, other) ||

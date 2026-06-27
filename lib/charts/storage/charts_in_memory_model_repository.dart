@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:knitty_griddy/charts/model/chart_operation_exception.dart';
 import 'package:knitty_griddy/charts/stitchrepo/stitch_set.dart';
 import 'package:knitty_griddy/charts/model/knitting_chart.dart';
 import 'package:knitty_griddy/charts/model/chart_info.dart';
@@ -65,7 +66,7 @@ class ChartsInMemoryModelRepository implements ChartsModelRepository {
         bytes: utf8.encode(jsonString),
       );
     } catch(e) {
-      debugPrint('Error while exporting StitchesSet: $e');
+      throw ChartOperationException(message: 'Error while exporting StitchesSet: $e');
     }
   }
   
@@ -80,13 +81,17 @@ class ChartsInMemoryModelRepository implements ChartsModelRepository {
     );
 
     if (result != null && result.files.isNotEmpty) {
+      if (result.files.first.extension != 'sts') {
+        throw ChartOperationException(message: '${result.files.first.name} is not a stitch set (.sts)');
+      }
+
       try {
         String jsonString = utf8.decode(result.files.first.bytes!);
         Map<String, dynamic> jsonObject = jsonDecode(jsonString);
         StitchSet stitchSet = StitchSet.fromJson(jsonObject);
         return stitchSet;
       } catch (e) {
-        debugPrint('Error while importing stitches set: $e');
+        throw ChartOperationException(message: 'Error while importing stitches set: $e');
       }
     }
 
@@ -104,7 +109,7 @@ class ChartsInMemoryModelRepository implements ChartsModelRepository {
         bytes: utf8.encode(jsonString),
       );
     } catch (e) {
-      debugPrint('Error while exporting chart: $e');
+      throw ChartOperationException(message: 'Error while exporting chart: $e');
     }
   }
 
@@ -117,13 +122,17 @@ class ChartsInMemoryModelRepository implements ChartsModelRepository {
     );
 
     if (result != null && result.files.isNotEmpty) {
+      if (result.files.first.extension != 'kgc') {
+        throw ChartOperationException(message: '${result.files.first.name} is not a chart (.kgc)');
+      }
+
       try {
         String jsonString = utf8.decode(result.files.first.bytes!);
         Map<String, dynamic> jsonObject = jsonDecode(jsonString);
         KnittingChart chart = KnittingChart.fromJson(jsonObject);
         return chart;
       } catch (e) {
-        debugPrint('Error while importing chart: $e');
+        throw ChartOperationException(message: 'Error while importing chart: $e');
       }
     }
 

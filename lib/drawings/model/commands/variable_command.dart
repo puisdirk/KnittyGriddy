@@ -85,13 +85,12 @@ class VariableCommand extends DrawingCommand {
   @override
   DrawingCommand dependentLabelChanged(String oldLabel, String newLabel) {
     return copyWith(
-      formula: formula.replaceAll(oldLabel, newLabel),
+      formula: FormulaExpression.replaceDependentLabel(formula: formula, oldLabel: oldLabel, newLabel: newLabel),
     );
   }
 
   double? value(AbstractDrawing drawing) {
     return storedValue;
-//    return FormulaExpression.validate(formula: formula, drawing: drawing).result;
   }
 
   @override

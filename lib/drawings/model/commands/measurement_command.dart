@@ -10,7 +10,8 @@ enum Unit {
   cm(label: 'Centimeter', shortLabel: 'cm'),
   meter(label: 'Meter', shortLabel: 'm'),
   inches(label: 'Inches', shortLabel: '"'),
-  feet(label: 'Feet', shortLabel: 'ft');
+  feet(label: 'Feet', shortLabel: 'ft'),
+  angle(label: 'Degrees', shortLabel: '°');
   
   final String label;
   final String shortLabel;
@@ -80,7 +81,7 @@ class MeasurementCommand extends DrawingCommand {
   }
 
   @override
-  double get editHeight => 320;
+  double get editHeight => 330;
 
   @override
   Rect getBoundingBox(AbstractDrawing drawing) {

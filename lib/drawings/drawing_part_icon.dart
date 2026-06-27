@@ -24,9 +24,11 @@ class DrawingPartIcon extends StatelessWidget {
     return SizedBox(
       width: size,
       height: size,
-      child: CustomPaint(
-        size: Size(size, size), 
-        painter: PartPathPainter(partInfo: partInfo, color: iconColor?? partColor),
+      child: Center(
+        child: CustomPaint(
+          size: Size(size, size), 
+          painter: PartPathPainter(partInfo: partInfo, color: iconColor?? partColor),
+        ),
       ),
     );
   }
@@ -50,9 +52,10 @@ class PartPathPainter extends CustomPainter {
         Matrix4 tr = Matrix4.identity();
         tr.scale(size.longestSide / r.longestSide);
         tr.translate(-r.left, -r.top);
+        // TODO: should center vertically
         p = p.transform(tr.storage);
 
-        canvas.drawPath(p, Paint()..color = color..style = PaintingStyle.stroke..strokeWidth = 2);
+        canvas.drawPath(p, Paint()..color = color..style = PaintingStyle.stroke..strokeWidth = 1);
       }
     }
   }

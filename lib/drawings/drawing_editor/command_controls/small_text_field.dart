@@ -60,6 +60,7 @@ class _SmallTextFieldState extends State<SmallTextField> {
         style: smallStyle,
         controller: controller,
         focusNode: focusNode,
+        onTapOutside: (_) => widget.onTextChanged(controller.text),
       ),
     );
   }

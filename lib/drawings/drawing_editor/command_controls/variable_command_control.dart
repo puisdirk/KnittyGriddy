@@ -54,8 +54,8 @@ class _VariableCommandControlState extends State<VariableCommandControl> {
             overflow: TextOverflow.ellipsis,
             text: TextSpan(
               children: [
-                TextSpan(text: widget.command.label, style: smallStyleBold,),
-                TextSpan(text: widget.command.formula, style: smallStyle)
+                TextSpan(text: '${widget.command.label} ', style: smallStyleBold,),
+                TextSpan(text: widget.command.formula.isEmpty ? '???' : widget.command.formula, style: smallStyle)
               ]
             )
           )
@@ -72,7 +72,8 @@ class _VariableCommandControlState extends State<VariableCommandControl> {
         const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Variable', style: smallStyle,)
+            Icon(Symbols.settop_component),
+            hspacing,
           ],
         ),
         vspacing,

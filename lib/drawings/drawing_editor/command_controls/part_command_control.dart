@@ -39,11 +39,9 @@ class _PartCommandControlState extends State<PartCommandControl> {
   }
 
   Widget createViewContent() {
-    String content = ' Part with';
-    String partLabels = '???';
+    String partLabels = '';
 
     if (widget.command.commandIds.isNotEmpty) {
-      partLabels = '';
       for (String id in widget.command.commandIds) {
         partLabels += widget.drawing.commandById(id).label;
         partLabels += ', ';
@@ -61,7 +59,7 @@ class _PartCommandControlState extends State<PartCommandControl> {
             text: TextSpan(
               children: [
                 TextSpan(text: widget.command.label, style: smallStyleBold),
-                TextSpan(text: '$content $partLabels', style: smallStyle,)
+                TextSpan(text: partLabels.isEmpty ? '???' : ' $partLabels', style: smallStyle,)
               ]  
             ),
           )
@@ -78,7 +76,8 @@ class _PartCommandControlState extends State<PartCommandControl> {
         const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Part', style: smallStyle,),
+            Icon(Icons.extension_outlined),
+            hspacing,
           ],
         ),
         vspacing,

@@ -61,7 +61,38 @@ class IncludedPartCommand extends DrawingCommand {
 
   @override
   Rect getBoundingBox(AbstractDrawing drawing) {
-    // TODO: implement getBoundingBox
+    if (valid) {
+      PartDrawing? partDrawing = PartRepository.getPartDrawingById(partInfo!.partDrawingId);
+      if (partDrawing == null) return Rect.zero;
+
+      // Copy the measurement override values into the partDrawing
+      partDrawing = partDrawing.copyWith(
+        commands: partDrawing.commands.map((c) {
+          if (c is! MeasurementCommand) {
+            return c;
+          } else {
+            MeasurementOverride mo = measurementOverrides.firstWhere((mo) => mo.measurementId == c.id);
+            FormulaParseResult res = FormulaExpression.validate(formula: mo.formula, drawing: drawing);
+            return c.copyWith(value: res.result!);
+          }
+        }).toList()
+      );
+
+      PartCommand partCommand = partDrawing.parts.firstWhere((p) => p.id == partInfo!.partId);
+
+      // Calculate the offset needed
+      PointCommand? ownAnchorPoint = drawing.pointById(anchorPointId);
+      if (ownAnchorPoint == null) return Rect.zero;
+      PointCommand? partAnchorPoint = partDrawing.pointById(partCommand.anchorPointId);
+      if (partAnchorPoint == null) return Rect.zero;
+      Offset? ownOffset = ownAnchorPoint.getCoordinate(drawing);
+      if (ownOffset == null) return Rect.zero;
+      Offset? partOffset = partAnchorPoint.getCoordinate(partDrawing);
+      if (partOffset == null) return Rect.zero;
+
+      return partCommand.calculateBoundingBox(partDrawing).translate(ownOffset.dx + partOffset.dx, ownOffset.dy + partOffset.dy);
+    }
+
     return Rect.zero;
   }
 
@@ -89,14 +120,18 @@ class IncludedPartCommand extends DrawingCommand {
     if (anchorPointId == commandId) {
       return copyWith(anchorPointId: '');
     }
-    // TODO: may need to clean measurementoverrides
+
     return this;
   }
 
   @override
   IncludedPartCommand dependentLabelChanged(String oldLabel, String newLabel) {
-    // TODO: may need to clean measurementoverrides
-    return this;
+    return copyWith(
+      measurementOverrides: measurementOverrides.map((mo) => 
+        mo.copyWith(
+          formula: FormulaExpression.replaceDependentLabel(
+            formula: mo.formula, oldLabel: oldLabel, newLabel: newLabel))).toList()
+    );
   }
 
   @override

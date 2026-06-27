@@ -106,7 +106,7 @@ class CurveCommand extends DrawingCommand {
 
   @override
   double get editHeight {
-    if (curveDefinitionType == CurveDefinitionType.cubic) return 360;
+    if (curveDefinitionType == CurveDefinitionType.cubic) return 370;
     if (curveDefinitionType == CurveDefinitionType.cubicFromPoints) return 240;
     if (curveDefinitionType == CurveDefinitionType.quadraticFromPoints) return 200;
     return 270;
@@ -179,12 +179,12 @@ class CurveCommand extends DrawingCommand {
   @override
   CurveCommand dependentLabelChanged(String oldLabel, String newLabel) {
     return copyWith(
-      cubicAmplitudeFormula1: cubicAmplitudeFormula1.replaceAll(oldLabel, newLabel),
-      cubicAmplitudeFormula2: cubicAmplitudeFormula2.replaceAll(oldLabel, newLabel),
-      cubicSlantFormula1: cubicSlantFormula1.replaceAll(oldLabel, newLabel),
-      cubicSlantFormula2: cubicSlantFormula2.replaceAll(oldLabel, newLabel),
-      quadAmplitudeFormula: quadAmplitudeFormula.replaceAll(oldLabel, newLabel),
-      quadSlantFormula: quadSlantFormula.replaceAll(oldLabel, newLabel),
+      cubicAmplitudeFormula1: FormulaExpression.replaceDependentLabel(formula: cubicAmplitudeFormula1, oldLabel: oldLabel, newLabel: newLabel),
+      cubicAmplitudeFormula2: FormulaExpression.replaceDependentLabel(formula: cubicAmplitudeFormula2, oldLabel: oldLabel, newLabel: newLabel),
+      cubicSlantFormula1: FormulaExpression.replaceDependentLabel(formula: cubicSlantFormula1, oldLabel: oldLabel, newLabel: newLabel),
+      cubicSlantFormula2: FormulaExpression.replaceDependentLabel(formula: cubicSlantFormula2, oldLabel: oldLabel, newLabel: newLabel),
+      quadAmplitudeFormula: FormulaExpression.replaceDependentLabel(formula: quadAmplitudeFormula, oldLabel: oldLabel, newLabel: newLabel),
+      quadSlantFormula: FormulaExpression.replaceDependentLabel(formula: quadSlantFormula, oldLabel: oldLabel, newLabel: newLabel),
     );
   }
 

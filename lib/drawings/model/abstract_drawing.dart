@@ -2,6 +2,7 @@
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
+import 'package:knitty_griddy/drawings/model/commands/comment_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/curve_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/included_part_command.dart';
@@ -85,6 +86,9 @@ abstract class AbstractDrawing {
     for (Map<String, dynamic> commandObject in commandObjects) {
       DrawingCommandTypes commandType = DrawingCommandTypes.values.byName(commandObject['type'] as String);
       switch (commandType) {
+        case DrawingCommandTypes.commentCommand:
+          commands.add(CommentCommand.fromJson(commandObject));
+          break;
         case DrawingCommandTypes.pointCommand:
           commands.add(PointCommand.fromJson(commandObject));
           break;
@@ -105,8 +109,6 @@ abstract class AbstractDrawing {
           break;
         case DrawingCommandTypes.includedPartCommand:
           commands.add(IncludedPartCommand.fromJson(commandObject));
-        default:
-          throw Exception('Unknown drawing element type ${commandObject['type']}');
       }
     }
     return commands;
@@ -162,6 +164,14 @@ abstract class AbstractDrawing {
   CurveCommand? curveById(String id) {
     try {
       return commands.firstWhere((c) => c.id == id && c is CurveCommand) as CurveCommand;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  MeasurementCommand? measurementById(String id) {
+    try {
+      return measurements.firstWhere((m) => m.id == id);
     } catch (_) {
       return null;
     }

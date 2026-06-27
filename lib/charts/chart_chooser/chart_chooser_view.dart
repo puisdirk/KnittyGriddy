@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:knitty_griddy/charts/maingrid/chart_page.dart';
 import 'package:knitty_griddy/charts/chart_chooser/chart_card.dart';
 import 'package:knitty_griddy/charts/chart_chooser/stitch_repository_page.dart';
+import 'package:knitty_griddy/charts/model/chart_operation_exception.dart';
 import 'package:knitty_griddy/charts/model/charts_model.dart';
 import 'package:knitty_griddy/charts/model/chart_info.dart';
 import 'package:knitty_griddy/charts/stitch_icon.dart';
@@ -60,8 +61,24 @@ class _ChartChooserViewState extends State<ChartChooserView> {
           children: [
             const Spacer(),
             OutlinedButton.icon(
-              onPressed: () {
-                Provider.of<ChartsModel>(context, listen: false).importChart();
+              onPressed: () async {
+                try {
+                  await Provider.of<ChartsModel>(context, listen: false).importChart();
+                } on ChartOperationException catch(e) {
+                  if (context.mounted) {
+                    showDialog(context: context, builder: (context) => 
+                      AlertDialog(
+                        content: SizedBox(width: 400, height: 50, child: Text(e.message)),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context), 
+                            child: const Text('Close'),
+                          ),
+                        ],
+                      )  
+                    );
+                  }
+                }
               }, 
               label: const Text('Import Chart'),
               icon: const Icon(Symbols.download, weight: 700,),

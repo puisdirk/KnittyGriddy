@@ -48,7 +48,7 @@ class _LineCommandControlState extends State<LineCommandControl> {
   }
 
   Widget createViewContent() {
-    String content = ' Line ';
+    String content = '';
 
     String point1label = '???';
     PointCommand? p1 = widget.drawing.pointById(widget.command.fromPointId);
@@ -75,7 +75,7 @@ class _LineCommandControlState extends State<LineCommandControl> {
             text: TextSpan(
               children: [
                 TextSpan(text: widget.command.label, style: smallStyleBold,),
-                TextSpan(text: content, style: smallStyle)
+                TextSpan(text: ' $content', style: smallStyle)
               ]  
             ),
           )
@@ -92,7 +92,8 @@ class _LineCommandControlState extends State<LineCommandControl> {
         const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Line', style: smallStyle,),
+            Icon(Symbols.pen_size_2),
+            hspacing,
           ],
         ),
         vspacing,

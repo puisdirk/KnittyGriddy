@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:grouped_scroll_view/grouped_scroll_view.dart';
 import 'package:id_gen/id_gen.dart';
 import 'package:knitty_griddy/charts/chart_chooser/move_stitch_to_set_menu.dart';
+import 'package:knitty_griddy/charts/model/chart_operation_exception.dart';
 import 'package:knitty_griddy/charts/stitch_icon.dart';
 import 'package:knitty_griddy/charts/stitcheditor/edit_stitch_page.dart';
 import 'package:knitty_griddy/charts/stitchrepo/stitch_definition.dart';
@@ -48,7 +49,23 @@ class _StitchSetPanelState extends State<StitchSetPanel> {
               const SizedBox(width: 10,),
               OutlinedButton.icon(
                 onPressed: () async {
-                  await Provider.of<ChartsModel>(context, listen: false).exportStitchesSet(widget.stitchSet);
+                  try {
+                    await Provider.of<ChartsModel>(context, listen: false).exportStitchesSet(widget.stitchSet);
+                  } on ChartOperationException catch(e) {
+                    if (context.mounted) {
+                      showDialog(context: context, builder: (context) => 
+                        AlertDialog(
+                          content: SizedBox(width: 400, height: 50, child: Text(e.message)),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context), 
+                              child: const Text('Close'),
+                            ),
+                          ],
+                        )  
+                      );
+                    }
+                  }
                 }, 
                 icon: const Icon(Symbols.upload, weight: 700,),
                 label: const Text('Export Set'),

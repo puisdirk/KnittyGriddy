@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:id_gen/id_gen.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/command_controls/drawing_command_control.dart';
 import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
+import 'package:knitty_griddy/drawings/model/commands/comment_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/curve_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/included_part_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/line_command.dart';
@@ -14,7 +15,6 @@ import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
 import 'package:knitty_griddy/drawings/model/drawing.dart';
 import 'package:knitty_griddy/drawings/model/part_drawing.dart';
 import 'package:knitty_griddy/drawings/partrepo/part_repository.dart';
-import 'package:knitty_griddy/utils/constants.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 class DrawingCommandsList extends StatefulWidget {
@@ -50,6 +50,30 @@ class _DrawingCommandsListState extends State<DrawingCommandsList> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Spacer(),
+                Tooltip(
+                  message: 'Add comment',
+                  child: IconButton(
+                    onPressed: () {
+                      widget.onDrawingChanged(widget.drawing.abstractCopyWith(
+                        commands: [
+                          ...widget.drawing.commands,
+                          CommentCommand(
+                            id: const UuidV4Gen().get(), 
+                            label: '', 
+                            version: 0, 
+                            comment: '',
+                            initiallyOpen: true,
+                          ),
+                        ]
+                      ));
+                    }, 
+                    icon: const Icon(Icons.comment_outlined),
+                  ),
+                ),
+                const SizedBox(
+                  height: 45,
+                  child: VerticalDivider(indent: 10, endIndent: 10)
+                ),
                 Tooltip(
                   message: 'Add measurement',
                   child: IconButton(
@@ -283,6 +307,7 @@ class _DrawingCommandsListState extends State<DrawingCommandsList> {
                                     measurementId: mcmd.id, 
                                     measurementLabel: mcmd.label,
                                     formula: formula,
+                                    unit: mcmd.unit,
                                   )
                                 );
                               }

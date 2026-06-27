@@ -8,6 +8,7 @@ import 'dart:ui' as ui;
 import 'package:knitty_griddy/charts/export/export_toolbar.dart';
 import 'package:knitty_griddy/charts/export/preview_legend.dart';
 import 'package:knitty_griddy/charts/export/preview_stitches_grid.dart';
+import 'package:knitty_griddy/charts/model/chart_operation_exception.dart';
 import 'package:knitty_griddy/charts/model/charts_model.dart';
 import 'package:knitty_griddy/utils/svg_service.dart';
 import 'package:provider/provider.dart';
@@ -38,7 +39,25 @@ class _ExportPageState extends State<ExportPage> {
             height: toolbarHeight, 
             exportSetting: exportSettings,
             settingsChanged: (newSettings) => setState(() => exportSettings = newSettings),
-            exportToChart: () => Provider.of<ChartsModel>(context, listen: false).exportChart(),
+            exportToChart: () async {
+              try {
+                await Provider.of<ChartsModel>(context, listen: false).exportChart();
+              } on ChartOperationException catch(e) {
+                if (context.mounted) {
+                  showDialog(context: context, builder: (context) => 
+                    AlertDialog(
+                      content: SizedBox(width: 400, height: 50, child: Text(e.message)),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context), 
+                          child: const Text('Close'),
+                        ),
+                      ],
+                    )  
+                  );
+                }
+              }
+            },
             exportToPNG: () async {
               RenderRepaintBoundary drawingBoundary = drawingBoundaryKey.currentContext!.findRenderObject()! as RenderRepaintBoundary;
                 ui.Image image = await drawingBoundary.toImage(pixelRatio: 3);

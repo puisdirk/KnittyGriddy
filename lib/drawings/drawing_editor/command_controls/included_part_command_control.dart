@@ -45,12 +45,10 @@ class _IncludedPartCommandControlState extends State<IncludedPartCommandControl>
   }
 
   Widget createViewContent() {
-    String content = ' Included part ';
+    String content = '';
 
     if (widget.command.partInfo != null) {
       content += widget.command.partInfo!.partLabel;
-    } else {
-      content += '???';
     }
 
     return Row(
@@ -64,7 +62,7 @@ class _IncludedPartCommandControlState extends State<IncludedPartCommandControl>
             text: TextSpan(
               children: [
                 TextSpan(text: widget.command.label, style: smallStyleBold,),
-                TextSpan(text: content, style: smallStyle,)
+                TextSpan(text: content.isEmpty ? ' ???' : ' $content', style: smallStyle,)
               ]
             )
           ),
@@ -87,7 +85,8 @@ class _IncludedPartCommandControlState extends State<IncludedPartCommandControl>
       children: [
         const Row(
           children: [
-            Text('Included part', style: smallStyle,),
+            Icon(Symbols.apparel),
+            hspacing,
           ],
         ),
         vspacing,
@@ -124,29 +123,6 @@ class _IncludedPartCommandControlState extends State<IncludedPartCommandControl>
               icon: const Icon(Icons.edit, size: 16,),
               label: Text(widget.command.partInfo == null ? 'No part selected' : widget.command.partInfo!.partLabel, style: smallStyle,)
             ),
-/*            Row(
-              children: [
-                if (widget.command.partInfo != null)
-                  DrawingPartIcon(partInfo: widget.command.partInfo!, size: 32,),
-                hspacing,
-                if (widget.command.partInfo == null)
-                  const Text('no part selected', style: smallStyle,),
-                if (widget.command.partInfo != null)
-                  Text(widget.command.partInfo!.partLabel, style: smallStyle,),
-                hspacing,
-                IconButton(
-                  onPressed: () async {
-                    PartInfo? partInfo = await showDialog(context: context, builder: (context) => 
-                      PartChooser(selectedPartInfo: widget.command.partInfo),
-                    );
-                    if (partInfo != widget.command.partInfo) {
-                      widget.onChanged(widget.command.copyWith(partInfo: partInfo));
-                    } 
-                  },
-                  icon: const Icon(Icons.edit, size: 16,)
-                )
-              ],
-            ),*/
           ]
         ),
         vspacing,
@@ -193,6 +169,7 @@ class _IncludedPartCommandControlState extends State<IncludedPartCommandControl>
                         width: 200, 
                         excludeCommand: widget.command, 
                         onFormulaChanged: (newFormula) => setMeasurementOverrideFormula(moverride, newFormula),
+                        unitLabel: moverride.unit.shortLabel,
                       )
                     ],
                   ),

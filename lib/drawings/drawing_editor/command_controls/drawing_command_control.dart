@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:knitty_griddy/drawings/drawing_editor/command_controls/comment_command_control.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/command_controls/curve_command_control.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/command_controls/included_part_command_control.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/command_controls/line_command_control.dart';
@@ -7,6 +8,7 @@ import 'package:knitty_griddy/drawings/drawing_editor/command_controls/part_comm
 import 'package:knitty_griddy/drawings/drawing_editor/command_controls/point_command_control.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/command_controls/variable_command_control.dart';
 import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
+import 'package:knitty_griddy/drawings/model/commands/comment_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/curve_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/included_part_command.dart';
@@ -55,6 +57,16 @@ class _DrawingCommandControlState extends State<DrawingCommandControl> {
   }
 
   Widget createCommandControl() {
+    if (widget.command is CommentCommand) {
+      return CommentCommandControl(
+        drawing: widget.drawing, 
+        command: widget.command as CommentCommand, 
+        sorting: widget.sorting, 
+        editing: editing, 
+        onChangeLabel: widget.onChangeLabel, 
+        onChanged: widget.onChanged);
+    }
+
     if (widget.command is PointCommand) {
       return PointCommandControl(
         drawing: widget.drawing,
@@ -141,12 +153,11 @@ class _DrawingCommandControlState extends State<DrawingCommandControl> {
         children: [
           IconButton(
             onPressed: () {
-              // Let focus-dependent controls do their thing
-              FocusScope.of(context).unfocus();
-      
-              setState(() => editing = !editing);
               // Make sure the control stays closed
-              widget.onChanged(widget.command);
+              if (editing) {
+                Future.delayed(const Duration(milliseconds: 250), () => widget.onChanged(widget.command.setInitiallyClosed()));
+              }
+              setState(() => editing = !editing);
             }, 
             icon: editing ? const Icon(Symbols.top_panel_close) : const Icon(Symbols.top_panel_open),
           ),
@@ -175,9 +186,10 @@ class _DrawingCommandControlState extends State<DrawingCommandControl> {
           ),
         IconButton(
           onPressed: () {
-            // Let focus-dependent controls do their thing
-            FocusScope.of(context).unfocus();
-    
+            // Make sure the control stays closed
+            if (editing) {
+              Future.delayed(const Duration(milliseconds: 250), () => widget.onChanged(widget.command.setInitiallyClosed()));
+            }
             setState(() => editing = !editing);
           }, 
           icon: editing ? const Icon(Symbols.top_panel_close) : const Icon(Symbols.top_panel_open),
@@ -197,24 +209,21 @@ class _DrawingCommandControlState extends State<DrawingCommandControl> {
       onTap: widget.onSelect,
       child: SizedBox(
         height: controlHeight,
-        child: Padding(
-          padding: const EdgeInsets.only(right: 8.0),
-          child: Container(
-            decoration: BoxDecoration(
-              color: (widget.command.validated && !widget.command.valid) ? Colors.red.withAlpha(20) : Colors.grey.shade100,
-              border: Border.all(color: widget.selected ? selectedColor : Colors.grey, width: widget.selected ? 2 : 1),
-              borderRadius: const BorderRadius.all(Radius.circular(5)),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(8),
-              child: Row(
-                children: [
-                  createCommandControl(),
-                  const Spacer(),
-                  if (!widget.sorting)
-                    createStatusControls(),
-                ],
-              ),
+        child: Container(
+          decoration: BoxDecoration(
+            color: (widget.command.validated && !widget.command.valid) ? Colors.red.withAlpha(20) : Colors.grey.shade100,
+            border: Border.all(color: widget.selected ? selectedColor : Colors.grey, width: widget.selected ? 2 : 1),
+            borderRadius: const BorderRadius.all(Radius.circular(5)),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(8),
+            child: Row(
+              children: [
+                createCommandControl(),
+                const Spacer(),
+                if (!widget.sorting)
+                  createStatusControls(),
+              ],
             ),
           ),
         ),

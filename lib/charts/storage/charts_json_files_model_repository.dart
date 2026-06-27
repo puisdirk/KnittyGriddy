@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
+import 'package:knitty_griddy/charts/model/chart_operation_exception.dart';
 
 import 'package:knitty_griddy/charts/stitchrepo/stitch_set.dart';
 import 'package:knitty_griddy/charts/model/knitting_chart.dart';
@@ -95,14 +96,14 @@ class ChartsJsonFilesModelRepository implements ChartsModelRepository {
 
     File chartFile = File(p.join(appDirectoryPath!, '$chartId.json'));
     if (!chartFile.existsSync()) {
-      throw Exception('Error in loadChart: chart file ${chartFile.path} does not exist');
+      throw ChartOperationException(message: 'Error in loadChart: chart file ${chartFile.path} does not exist');
     }
     try {
       String jsonString = chartFile.readAsStringSync();
       Map<String, dynamic> jsonObject = jsonDecode(jsonString);
       return KnittingChart.fromJson(jsonObject);
     } catch(e) {
-      throw Exception('Error in loadChart: $e');
+      throw ChartOperationException(message: 'Error in loadChart: $e');
     }
   }
   
@@ -190,7 +191,7 @@ class ChartsJsonFilesModelRepository implements ChartsModelRepository {
         bytes: utf8.encode(jsonString),
       );
     } catch(e) {
-      debugPrint('Error while exporting StitchesSet: $e');
+      throw ChartOperationException(message: 'Error while exporting StitchesSet: $e');
     }
   }
 
@@ -204,13 +205,17 @@ class ChartsJsonFilesModelRepository implements ChartsModelRepository {
     );
 
     if (result != null && result.files.isNotEmpty) {
+      if (result.files.first.extension != 'sts') {
+        throw ChartOperationException(message: '${result.files.first.name} is not a stitch set (.sts)');
+      }
+
       try {
         String jsonString = utf8.decode(result.files.first.bytes!);
         Map<String, dynamic> jsonObject = jsonDecode(jsonString);
         StitchSet stitchSet = StitchSet.fromJson(jsonObject);
         return stitchSet;
       } catch (e) {
-        debugPrint('Error while importing stitches set: $e');
+        throw ChartOperationException(message: 'Error while importing stitches set: $e');
       }
     }
 
@@ -227,13 +232,17 @@ class ChartsJsonFilesModelRepository implements ChartsModelRepository {
     );
 
     if (result != null && result.files.isNotEmpty) {
+      if (result.files.first.extension != 'kgc') {
+        throw ChartOperationException(message: '${result.files.first.name} is not a chart (.kgc)');
+      }
+
       try {
         String jsonString = utf8.decode(result.files.first.bytes!);
         Map<String, dynamic> jsonObject = jsonDecode(jsonString);
         KnittingChart chart = KnittingChart.fromJson(jsonObject);
         return chart;
       } catch (e) {
-        debugPrint('Error while importing chart: $e');
+        throw ChartOperationException(message: 'Error while importing chart: $e');
       }
     }
 
@@ -253,7 +262,7 @@ class ChartsJsonFilesModelRepository implements ChartsModelRepository {
         bytes: utf8.encode(jsonString),
       );
     } catch(e) {
-      debugPrint('Error while exporting chart: $e');
+      throw ChartOperationException(message: 'Error while exporting chart: $e');
     }
 
   }

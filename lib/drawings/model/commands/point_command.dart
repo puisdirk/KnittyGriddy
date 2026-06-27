@@ -185,10 +185,10 @@ class PointCommand extends DrawingCommand {
   @override
   PointCommand dependentLabelChanged(String oldLabel, String newLabel) {
     return copyWith(
-      directionAngleFormula: directionAngleFormula.replaceAll(oldLabel, newLabel),
-      distanceFormula: distanceFormula.replaceAll(oldLabel, newLabel),
-      onCurveFractionFormula: onCurveFractionFormula.replaceAll(oldLabel, newLabel),
-      onLineFractionFormula: onLineFractionFormula.replaceAll(oldLabel, newLabel),
+      directionAngleFormula: FormulaExpression.replaceDependentLabel(formula: directionAngleFormula, oldLabel: oldLabel, newLabel: newLabel),
+      distanceFormula: FormulaExpression.replaceDependentLabel(formula: distanceFormula, oldLabel: oldLabel, newLabel: newLabel),
+      onCurveFractionFormula: FormulaExpression.replaceDependentLabel(formula: onCurveFractionFormula, oldLabel: oldLabel, newLabel: newLabel),
+      onLineFractionFormula: FormulaExpression.replaceDependentLabel(formula: onLineFractionFormula, oldLabel: oldLabel, newLabel: newLabel),
     );
   }
 

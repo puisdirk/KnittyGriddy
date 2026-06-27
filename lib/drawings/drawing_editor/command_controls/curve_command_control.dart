@@ -85,7 +85,7 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
   }
 
   Widget createViewContent() {
-    String content = ' Curve ';
+    String content = '';
 
     String startPointLabel = '???';
     PointCommand? startPoint = widget.drawing.pointById(widget.command.startPointId);
@@ -164,7 +164,7 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
             text: TextSpan(
               children: [
                 TextSpan(text: widget.command.label, style: smallStyleBold,),
-                TextSpan(text: content, style: smallStyle,)
+                TextSpan(text: ' $content', style: smallStyle,)
               ]
             )
           ),
@@ -183,7 +183,7 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text('Curve', style: smallStyle,),
+            const Icon(Symbols.line_curve),
             hspacing,
             DropdownButton<CurveDefinitionType>(
               key: GlobalObjectKey('${widget.command.id}-cdt'),
