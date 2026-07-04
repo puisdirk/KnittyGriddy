@@ -1,5 +1,3 @@
-
-import 'package:directed_graph/directed_graph.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
@@ -39,7 +37,7 @@ class PartDrawing extends AbstractDrawing {
   }
 
   @override
-  AbstractDrawing abstractCopyWith({
+  PartDrawing abstractCopyWith({
     String? name, 
     String? description, 
     List<DrawingCommand>? commands,
@@ -85,9 +83,11 @@ class PartDrawing extends AbstractDrawing {
   );
 
   bool sameContentAs(PartDrawing other) {
+    bool commandsEqual = listEquals(commands, other.commands);
     return this == other ||
       name == other.name &&
-      listEquals(commands, other.commands) &&
+      commandsEqual &&
+//      listEquals(commands, other.commands) &&
       category == other.category;
   }
 
@@ -102,62 +102,5 @@ class PartDrawing extends AbstractDrawing {
   }
 
   @override
-  PartDrawing validate() {
-    int lastTick = 0;
-    Stopwatch stopwatch = Stopwatch()..start();
-    printTiming('----------- validating ----------');
-    PartDrawing cleared = copyWith(commands: commands.map((c) => c.clearValidation()).toList());
-
-    printTiming('cleared (${stopwatch.elapsedMilliseconds - lastTick})');
-    lastTick = stopwatch.elapsedMilliseconds;
-    while (true) {
-      Map<String, Set<String>> dependencies = {};
-      for (DrawingCommand command in cleared.commands.where((c) => !c.validated)) {
-        dependencies[command.id] = command.dependencies(this);
-      }
-      DirectedGraph<String> graph = DirectedGraph(dependencies);
-      List<String> cycles = graph.cycle;
-
-      if (cycles.isEmpty) break;
-        String cycleDescription = cycles.map((cycle) => commands.firstWhere((c) => c.id == cycle).label).join(' -> ');
-        cleared = cleared.copyWith(
-          commands: cleared.commands.map((c) => cycles.contains(c.id) ? c.markAsCyclic(cycleDescription) : c).toList()
-        );
-    }
-    printTiming('dependencies checked (${stopwatch.elapsedMilliseconds - lastTick})');
-    lastTick = stopwatch.elapsedMilliseconds;
-    int valstartTick = lastTick;
-
-    int passes = 0;
-    int maxPasses = 1000;
-    while (true) {
-      if (cleared.commands.any((c) => !c.validated) && passes <= maxPasses) {
-        printTiming('pass $passes');
-        // We pass through the whole list on each loop as dependencies may not be solved yet
-        List<DrawingCommand> passedCommands = cleared.commands.map((c) {
-          if (!c.validated) {
-            DrawingCommand r = c.validate(cleared);
-            printTiming('validation of ${r.label}: ${stopwatch.elapsedMilliseconds - lastTick}msec. Validated: ${r.validated}');
-            lastTick = stopwatch.elapsedMilliseconds;
-            return r;
-          }
-          return c;
-        }).toList();
-        cleared = cleared.copyWith(
-          commands: passedCommands
-        );
-        passes++;
-      } else {
-        break;
-      }
-    }
-
-    if (passes >= maxPasses) printTiming('validation overflow!!!!');
-    printTiming('validated in $passes passes (${stopwatch.elapsedMilliseconds - valstartTick})');
-
-    printTiming('----------- end validation (${stopwatch.elapsedMilliseconds}) ----------');
-    stopwatch.stop();
-    
-    return cleared;
-  }
+  PartDrawing validate() => super.validate() as PartDrawing;
 }

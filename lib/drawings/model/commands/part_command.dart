@@ -1,8 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
+import 'package:knitty_griddy/drawings/model/commands/curve_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
+import 'package:knitty_griddy/drawings/model/commands/line_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
+import 'package:knitty_griddy/drawings/model/part_drawing.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 
 class PartCommand extends DrawingCommand {
@@ -42,6 +45,18 @@ class PartCommand extends DrawingCommand {
       errors: errors?? this.errors,
       initiallyOpen: initiallyOpen?? this.initiallyOpen,
     );
+  }
+
+  List<LineCommand> lines(PartDrawing partDrawing) {
+    return partDrawing.lines.where((l) => commandIds.contains(l.id)).toList();
+  }
+
+  List<PointCommand> points(PartDrawing partDrawing) {
+    return partDrawing.points.where((p) => commandIds.contains(p.id)).toList();
+  }
+
+  List<CurveCommand> curves(PartDrawing partDrawing) {
+    return partDrawing.curves.where((p) => commandIds.contains(p.id)).toList();
   }
 
   @override
@@ -106,6 +121,9 @@ class PartCommand extends DrawingCommand {
   }
 
   @override
+  PartCommand changePartDrawingReference({required String oldId, required String newId}) => this;
+
+  @override
   PartCommand deleteReference({required String commandId}) {
     if (commandIds.contains(commandId) || anchorPointId == commandId) {
       return copyWith(
@@ -123,10 +141,10 @@ class PartCommand extends DrawingCommand {
   }
 
   @override
-  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false}) {
+  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = ''}) {
     for (String commandId in commandIds) {
       DrawingCommand command = drawing.commandById(commandId);
-      command.paint(canvas, size, drawing, selected, asPart: true);
+      command.paint(canvas, size, drawing, selected, asPart: true, prefixLabel: prefixLabel);
     }
 
     // Draw anchor on the anchor point
@@ -179,7 +197,7 @@ class PartCommand extends DrawingCommand {
       other is PartCommand &&
       runtimeType == other.runtimeType &&
       id == other.id &&
-      version == other.version &&
+//      version == other.version &&
       label == other.label &&
       setEquals(commandIds, other.commandIds) &&
       anchorPointId == other.anchorPointId &&

@@ -1,25 +1,39 @@
 
+import 'dart:ui';
+
+import 'package:knitty_griddy/drawings/model/part_drawing.dart';
+
 class PartInfo {
   final String partDrawingId;
   final String category;
   final String partId;
   final String partLabel;
 
+  // Stored drawing when used in includedPartCommand
+  final PartDrawing? storedOffsetPartDrawing;
+  final Offset? storedOffset;
+
   const PartInfo({
     required this.partDrawingId,
     required this.category,
     required this.partId,
     required this.partLabel,
+    this.storedOffsetPartDrawing,
+    this.storedOffset,
   });
 
   PartInfo copyWith({
     String? partDrawingId,
+    PartDrawing? storedOffsetPartDrawing,
+    Offset? storedOffset,
   }) {
     return PartInfo(
       partDrawingId: partDrawingId?? this.partDrawingId, 
       category: category, 
       partId: partId, 
-      partLabel: partLabel
+      partLabel: partLabel,
+      storedOffsetPartDrawing: storedOffsetPartDrawing?? this.storedOffsetPartDrawing,
+      storedOffset: storedOffset?? this.storedOffset,
     );
   }
 

@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/drawings/formulas/formula_expression.dart';
 import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
+import 'package:knitty_griddy/drawings/model/commands/included_part_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
 import 'package:knitty_griddy/utils/constants.dart';
@@ -63,6 +64,7 @@ class CurveCommand extends DrawingCommand {
   }) : curveDefinitionType = curveDefinitionType?? CurveDefinitionType.quadratic;
 
   CurveCommand copyWith({
+    String? id,
     String? label,
     CurveDefinitionType? curveDefinitionType,
     String? startPointId,
@@ -82,7 +84,7 @@ class CurveCommand extends DrawingCommand {
     bool? initiallyOpen,
   }) {
     return CurveCommand(
-      id: id,
+      id: id?? this.id,
       version: version + 1,
       label: label?? this.label, 
       curveDefinitionType: curveDefinitionType?? this.curveDefinitionType,
@@ -139,8 +141,21 @@ class CurveCommand extends DrawingCommand {
   Set<String> dependencies(AbstractDrawing drawing) {
     Set<String> deps = {};
     
-    if (startPointId.isNotEmpty) deps.add(startPointId);
-    if (endPointId.isNotEmpty) deps.add(endPointId);
+    if (startPointId.isNotEmpty) {
+      if (startPointId.contains('.')) {
+        deps.add(drawing.includedParts.firstWhere((c) => c.partInfo?.partDrawingId == startPointId.split('.').first).id);
+      }
+
+      deps.add(startPointId);
+    }
+
+    if (endPointId.isNotEmpty) {
+      if (endPointId.contains('.')) {
+        deps.add(drawing.includedParts.firstWhere((c) => c.partInfo?.partDrawingId == endPointId.split('.').first).id);
+      }
+  
+      deps.add(endPointId);
+    }
 
     switch (curveDefinitionType) {
       case CurveDefinitionType.quadratic:
@@ -148,7 +163,13 @@ class CurveCommand extends DrawingCommand {
         deps.addAll(FormulaExpression.dependencies(formula: quadSlantFormula, drawing: drawing));
         break;
       case CurveDefinitionType.quadraticFromPoints:
-        if (quadCtrlPointId.isNotEmpty) deps.add(quadCtrlPointId);
+        if (quadCtrlPointId.isNotEmpty) {
+          if (quadCtrlPointId.contains('.')) {
+            deps.add(drawing.includedParts.firstWhere((c) => c.partInfo?.partDrawingId == quadCtrlPointId.split('.').first).id);
+          }
+          
+          deps.add(quadCtrlPointId);
+        }
         break;
       case CurveDefinitionType.cubic:
         deps.addAll(FormulaExpression.dependencies(formula: cubicAmplitudeFormula1, drawing: drawing));
@@ -157,12 +178,34 @@ class CurveCommand extends DrawingCommand {
         deps.addAll(FormulaExpression.dependencies(formula: cubicSlantFormula2, drawing: drawing));
         break;
       case CurveDefinitionType.cubicFromPoints:
-        if (cubicCtrlPointId1.isNotEmpty) deps.add(cubicCtrlPointId1);
-        if (cubicCtrlPointId2.isNotEmpty) deps.add(cubicCtrlPointId2);
+        if (cubicCtrlPointId1.isNotEmpty) {
+          if (cubicCtrlPointId1.contains('.')) {
+            deps.add(drawing.includedParts.firstWhere((c) => c.partInfo?.partDrawingId == cubicCtrlPointId1.split('.').first).id);
+          }
+          
+          deps.add(cubicCtrlPointId1);
+        }
+        if (cubicCtrlPointId2.isNotEmpty) {
+          if (cubicCtrlPointId2.contains('.')) {
+            deps.add(drawing.includedParts.firstWhere((c) => c.partInfo?.partDrawingId == cubicCtrlPointId2.split('.').first).id);
+          }
+          
+          deps.add(cubicCtrlPointId2);
+        }
         break;
     }
 
     return deps;
+  }
+
+  @override
+  CurveCommand changePartDrawingReference({required String oldId, required String newId}) {
+    return copyWith(
+      startPointId: startPointId.replaceAll(oldId, newId),
+      endPointId: endPointId.replaceAll(oldId, newId),
+      quadCtrlPointId: quadCtrlPointId.replaceAll(oldId, newId),
+      cubicCtrlPointId1: cubicCtrlPointId1.replaceAll(oldId, newId)
+    );   
   }
 
   @override
@@ -235,7 +278,7 @@ class CurveCommand extends DrawingCommand {
     other is CurveCommand &&
     runtimeType == other.runtimeType &&
     id == other.id &&
-    version == other.version &&
+//    version == other.version &&
     label == other.label &&
     startPointId == other.startPointId &&
     endPointId == other.endPointId &&
@@ -425,7 +468,7 @@ class CurveCommand extends DrawingCommand {
   }
 
   @override
-  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false}) {
+  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = ''}) {
     if (!valid) return;
 
     Offset middle = Offset(size.width / 2, size.height / 2);
@@ -462,7 +505,7 @@ class CurveCommand extends DrawingCommand {
       ),
     )
     ..pushStyle(style.getTextStyle())
-    ..addText(label);
+    ..addText(prefixLabel.isEmpty ? label : '$prefixLabel.$label');
 
     final Paragraph paragraph = paragraphBuilder.build()
     ..layout(ParagraphConstraints(width: size.width));
@@ -605,6 +648,12 @@ class CurveCommand extends DrawingCommand {
         isvalid = false;
         retryValidation = false;
         validationErrors.add('Source point does not exist');
+      } else if (startPointId.contains('.')) {
+        // need to wait on validation of the included part command
+        IncludedPartCommand ipc = drawing.includedParts.firstWhere((c) => c.partInfo?.partDrawingId == startPointId.split('.').first);
+        if (!ipc.validated) {
+          isvalid = false;
+        }
       } else {
         if (!fromPoint.validated) {
           // We are not valid, but we should retry
@@ -627,6 +676,12 @@ class CurveCommand extends DrawingCommand {
         isvalid = false;
         retryValidation = false;
         validationErrors.add('Target point does not exist');
+      } else if (endPointId.contains('.')) {
+        // need to wait on validation of the included part command
+        IncludedPartCommand ipc = drawing.includedParts.firstWhere((c) => c.partInfo?.partDrawingId == endPointId.split('.').first);
+        if (!ipc.validated) {
+          isvalid = false;
+        }
       } else {
         if (!toPoint.validated) {
           // We are not valid, but we should retry
@@ -666,6 +721,12 @@ class CurveCommand extends DrawingCommand {
             isvalid = false;
             retryValidation = false;
             validationErrors.add('Control point does not exist');
+          } else if (quadCtrlPointId.contains('.')) {
+            // need to wait on validation of the included part command
+            IncludedPartCommand ipc = drawing.includedParts.firstWhere((c) => c.partInfo?.partDrawingId == quadCtrlPointId.split('.').first);
+            if (!ipc.validated) {
+              isvalid = false;
+            }
           } else {
             if (!ctrlPoint.validated) {
               // We are not valid, but we should retry
@@ -718,6 +779,12 @@ class CurveCommand extends DrawingCommand {
             isvalid = false;
             retryValidation = false;
             validationErrors.add('First control point does not exist');
+          } else if (cubicCtrlPointId1.contains('.')) {
+            // need to wait on validation of the included part command
+            IncludedPartCommand ipc = drawing.includedParts.firstWhere((c) => c.partInfo?.partDrawingId == cubicCtrlPointId1.split('.').first);
+            if (!ipc.validated) {
+              isvalid = false;
+            }
           } else {
             if (!ctrlPoint1.validated) {
               // We are not valid, but we should retry
@@ -739,6 +806,12 @@ class CurveCommand extends DrawingCommand {
             isvalid = false;
             retryValidation = false;
             validationErrors.add('Second control point does not exist');
+          } else if (cubicCtrlPointId2.contains('.')) {
+            // need to wait on validation of the included part command
+            IncludedPartCommand ipc = drawing.includedParts.firstWhere((c) => c.partInfo?.partDrawingId == cubicCtrlPointId2.split('.').first);
+            if (!ipc.validated) {
+              isvalid = false;
+            }
           } else {
             if (!ctrlPoint2.validated) {
               // We are not valid, but we should retry

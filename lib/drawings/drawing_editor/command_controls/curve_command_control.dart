@@ -87,17 +87,8 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
   Widget createViewContent() {
     String content = '';
 
-    String startPointLabel = '???';
-    PointCommand? startPoint = widget.drawing.pointById(widget.command.startPointId);
-    if (startPoint != null) {
-      startPointLabel = startPoint.label;
-    }
-
-    String endPointLabel = '???';
-    PointCommand? endPoint = widget.drawing.pointById(widget.command.endPointId);
-    if (endPoint != null) {
-      endPointLabel = endPoint.label;
-    }
+    String startPointLabel = widget.drawing.commandLabelIncluded(widget.command.startPointId);
+    String endPointLabel = widget.drawing.commandLabelIncluded(widget.command.endPointId);
 
     content += 'between $startPointLabel and $endPointLabel ';
 
@@ -129,25 +120,13 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
         content += 'cubic with amplitude $ampLabel and slant $slantLabel';
         break;
       case CurveDefinitionType.quadraticFromPoints:
-        String ctrlPointLabel = '???';
-        PointCommand? ctrlPoint = widget.drawing.pointById(widget.command.quadCtrlPointId);
-        if (ctrlPoint != null) {
-          ctrlPointLabel = ctrlPoint.label;
-        }
+        String ctrlPointLabel = widget.drawing.commandLabelIncluded(widget.command.quadCtrlPointId);
 
         content += 'quadratic with control point $ctrlPointLabel';
         break;
       case CurveDefinitionType.cubicFromPoints:
-        String ctrlPoint1Label = '???';
-        String ctrlPoint2Label = '???';
-        PointCommand? ctrlPoint1 = widget.drawing.pointById(widget.command.cubicCtrlPointId1);
-        if (ctrlPoint1 != null) {
-          ctrlPoint1Label = ctrlPoint1.label;
-        }
-        PointCommand? ctrlPoint2 = widget.drawing.pointById(widget.command.cubicCtrlPointId2);
-        if (ctrlPoint2 != null) {
-          ctrlPoint2Label = ctrlPoint2.label;
-        }
+        String ctrlPoint1Label = widget.drawing.commandLabelIncluded(widget.command.cubicCtrlPointId1);
+        String ctrlPoint2Label = widget.drawing.commandLabelIncluded(widget.command.cubicCtrlPointId2);
 
         content += 'cubic with control points $ctrlPoint1Label and $ctrlPoint2Label';
         break;
@@ -236,7 +215,7 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
                 const DropdownMenuItem(value: '', child: Text('')),
                 if (widget.command.endPointId != origin.id)
                   DropdownMenuItem(value: origin.id, child: Text(origin.label)),
-                for (PointCommand point in widget.drawing.points.where((p) => p.id != widget.command.endPointId))
+                for (PointCommand point in widget.drawing.pointsIncluded.where((p) => p.id != widget.command.endPointId))
                   DropdownMenuItem(value: point.id, child: Text(point.label)),
               ],
               onChanged: (value) {
@@ -265,7 +244,7 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
                 const DropdownMenuItem(value: '', child: Text('')),
                 if (widget.command.startPointId != origin.id)
                   DropdownMenuItem(value: origin.id, child: Text(origin.label)),
-                for (PointCommand point in widget.drawing.points.where((p) => p.id != widget.command.startPointId))
+                for (PointCommand point in widget.drawing.pointsIncluded.where((p) => p.id != widget.command.startPointId))
                   DropdownMenuItem(value: point.id, child: Text(point.label)),
               ],
               onChanged: (value) {
@@ -387,7 +366,7 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
                   const DropdownMenuItem(value: '', child: Text('')),
                   if (widget.command.quadCtrlPointId != origin.id)
                     DropdownMenuItem(value: origin.id, child: Text(origin.label)),
-                  for (PointCommand point in widget.drawing.points)
+                  for (PointCommand point in widget.drawing.pointsIncluded)
                     DropdownMenuItem(value: point.id, child: Text(point.label)),
                 ],
                 onChanged: (value) {
@@ -417,7 +396,7 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
                     items: [
                       const DropdownMenuItem(value: '', child: Text('')),
                       DropdownMenuItem(value: origin.id, child: Text(origin.label)),
-                      for (PointCommand point in widget.drawing.points)
+                      for (PointCommand point in widget.drawing.pointsIncluded)
                         DropdownMenuItem(value: point.id, child: Text(point.label)),
                     ],
                     onChanged: (value) {
@@ -445,7 +424,7 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
                     items: [
                       const DropdownMenuItem(value: '', child: Text('')),
                       DropdownMenuItem(value: origin.id, child: Text(origin.label)),
-                      for (PointCommand point in widget.drawing.points)
+                      for (PointCommand point in widget.drawing.pointsIncluded)
                         DropdownMenuItem(value: point.id, child: Text(point.label)),
                     ],
                     onChanged: (value) {

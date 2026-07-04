@@ -158,7 +158,7 @@ class _EditDrawingPageState extends State<EditDrawingPage> {
             padding: const EdgeInsets.all(5.0),
               child: DrawingEditorControl(
                 drawing: drawing,
-                onDrawingChanged: (newDrawing) => _storeAndSetDrawing(newDrawing.validate()),
+                onDrawingChanged: (newDrawing) => _storeAndSetDrawing(newDrawing),
               ),
           ),
         )

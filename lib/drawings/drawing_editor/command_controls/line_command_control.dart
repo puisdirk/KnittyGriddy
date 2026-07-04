@@ -50,17 +50,8 @@ class _LineCommandControlState extends State<LineCommandControl> {
   Widget createViewContent() {
     String content = '';
 
-    String point1label = '???';
-    PointCommand? p1 = widget.drawing.pointById(widget.command.fromPointId);
-    if (p1 != null) {
-      point1label = p1.label;
-    }
-
-    String point2label = '???';
-    PointCommand? p2 = widget.drawing.pointById(widget.command.toPointId);
-    if (p2 != null) {
-      point2label = p2.label;
-    }
+    String point1label = widget.drawing.commandLabelIncluded(widget.command.fromPointId);
+    String point2label = widget.drawing.commandLabelIncluded(widget.command.toPointId);
 
     content += 'from $point1label to $point2label';
 
@@ -126,7 +117,7 @@ class _LineCommandControlState extends State<LineCommandControl> {
                 const DropdownMenuItem(value: '', child: Text('')),
                 if (widget.command.toPointId != origin.id)
                   DropdownMenuItem(value: origin.id, child: Text(origin.label)),
-                for (PointCommand point in widget.drawing.points.where((p) => p.id != widget.command.toPointId))
+                for (PointCommand point in widget.drawing.pointsIncluded.where((p) => p.id != widget.command.toPointId))
                   DropdownMenuItem(value: point.id, child: Text(point.label)),
               ],
               onChanged: (value) {
@@ -155,7 +146,7 @@ class _LineCommandControlState extends State<LineCommandControl> {
                 const DropdownMenuItem(value: '', child: Text('')),
                 if (widget.command.fromPointId != origin.id)
                   DropdownMenuItem(value: origin.id, child: Text(origin.label)),
-                for (PointCommand point in widget.drawing.points.where((p) => p.id != widget.command.fromPointId))
+                for (PointCommand point in widget.drawing.pointsIncluded.where((p) => p.id != widget.command.fromPointId))
                   DropdownMenuItem(value: point.id, child: Text(point.label)),
               ],
               onChanged: (value) {

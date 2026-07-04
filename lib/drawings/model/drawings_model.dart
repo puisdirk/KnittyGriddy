@@ -125,7 +125,6 @@ class DrawingsModel extends ChangeNotifier {
   }) {
     if (oldDrawing is PartDrawing && newDrawing is PartDrawing) {
       PartRepository.updatePartDrawing(oldDrawing, newDrawing);
-      notifyListeners();
     } else {
       _drawingsModelObject = _drawingsModelObject.copyWith(drawing: newDrawing as Drawing);
     }
@@ -259,13 +258,11 @@ class DrawingsModel extends ChangeNotifier {
           );
         } else {
           String newId = const UuidV4Gen().get();
-          PartRepository.addPartDrawingToImportedSet(
-            partDrawing.copyWith(
-              id: newId,
-            )
-          );
+          PartDrawing copy = partDrawing.copyWith(id: newId,);
+          PartRepository.addPartDrawingToImportedSet(copy);
           drawing = drawing.copyWith(
-            commands: drawing.commands.map((c) => c is! IncludedPartCommand ? c : c.copyWith(
+            usedPartDrawings: drawing.usedPartDrawings.map((upd) => upd.id == partDrawing.id ? copy : upd).toList(),
+            commands: drawing.commands.map((c) => c is! IncludedPartCommand ? c.changePartDrawingReference(oldId: partDrawing.id, newId: newId) : c.copyWith(
               partInfo: c.partInfo?.copyWith(partDrawingId: newId)
             )).toList()
           );

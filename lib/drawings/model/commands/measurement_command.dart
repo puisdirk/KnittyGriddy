@@ -110,7 +110,7 @@ class MeasurementCommand extends DrawingCommand {
       other is MeasurementCommand &&
       runtimeType == other.runtimeType &&
       id == other.id &&
-      version == other.version &&
+//      version == other.version &&
       label == other.label &&
       minValue == other.minValue &&
       maxValue == other.maxValue &&
@@ -136,6 +136,9 @@ class MeasurementCommand extends DrawingCommand {
   }
 
   @override
+  MeasurementCommand changePartDrawingReference({required String oldId, required String newId}) => this;
+
+  @override
   MeasurementCommand deleteReference({required String commandId}) {
     return this;
   }
@@ -146,7 +149,7 @@ class MeasurementCommand extends DrawingCommand {
   }
 
   @override
-  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false}) {
+  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = ''}) {
   }
 
   @override

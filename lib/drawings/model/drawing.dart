@@ -1,5 +1,3 @@
-
-import 'package:directed_graph/directed_graph.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
@@ -9,7 +7,6 @@ import 'package:knitty_griddy/drawings/model/commands/measurement_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/meaurement_override.dart';
 import 'package:knitty_griddy/drawings/model/commands/part_command.dart';
 import 'package:knitty_griddy/drawings/model/part_drawing.dart';
-import 'package:knitty_griddy/drawings/model/part_info.dart';
 import 'package:knitty_griddy/drawings/partrepo/part_repository.dart';
 
 const String placeholderDrawingId = '_placeholder_drawing_id_';
@@ -31,38 +28,6 @@ class Drawing extends AbstractDrawing {
     this.usedPartDrawings = const[],
   });
 
-  @override
-  AbstractDrawing abstractCopyWith({
-    String? name, 
-    String? description, 
-    List<DrawingCommand>? commands,
-    Offset? offset,
-  }) {
-    return Drawing(
-      id: id, 
-      name: name?? this.name,
-      description: description?? this.description,
-      commands: commands?? this.commands,
-      offset: offset?? this.offset,
-      usedPartDrawings: usedPartDrawings
-    );
-  }
-
-  // We store the drawings of included parts inside the drawing. If the part gets
-  // deleted, we will restore the drawing of the included part into the imported partset
-  Drawing updateIncludedDrawings() {
-    Set<PartDrawing> includedDrawings = {};
-    for (IncludedPartCommand cmd in commands.whereType()) {
-      if (cmd.validated && cmd.valid) {
-        PartDrawing? partDrawing = PartRepository.getPartDrawingById(cmd.partInfo!.partDrawingId);
-        if (partDrawing != null) {
-          includedDrawings.add(partDrawing);
-        }
-      }
-    }
-    return copyWith(usedPartDrawings: includedDrawings.toList());
-  }
-
   Drawing copyWith({
     String? id,
     String? name,
@@ -79,6 +44,38 @@ class Drawing extends AbstractDrawing {
       offset: offset?? this.offset,
       usedPartDrawings: usedPartDrawings?? this.usedPartDrawings,
     );
+  }
+
+  @override
+  Drawing abstractCopyWith({
+    String? name, 
+    String? description, 
+    List<DrawingCommand>? commands,
+    Offset? offset,
+  }) {
+    return Drawing(
+      id: id, 
+      name: name?? this.name,
+      description: description?? this.description,
+      commands: commands?? this.commands,
+      offset: offset?? this.offset,
+      usedPartDrawings: usedPartDrawings,
+    );
+  }
+
+  // We store the drawings of included parts inside the drawing. If the part gets
+  // deleted, we will restore the drawing of the included part into the imported partset
+  Drawing updateIncludedDrawings() {
+    Set<PartDrawing> includedDrawings = {};
+    for (IncludedPartCommand cmd in commands.whereType()) {
+      if (cmd.validated && cmd.valid) {
+        PartDrawing? partDrawing = PartRepository.getPartDrawingById(cmd.partInfo!.partDrawingId);
+        if (partDrawing != null) {
+          includedDrawings.add(partDrawing);
+        }
+      }
+    }
+    return copyWith(usedPartDrawings: includedDrawings.toList());
   }
 
   Drawing fixMeasurementOverrides() {
@@ -126,64 +123,7 @@ class Drawing extends AbstractDrawing {
   }
 
   @override
-  Drawing validate() {
-    int lastTick = 0;
-    Stopwatch stopwatch = Stopwatch()..start();
-    printTiming('----------- validating ----------');
-    Drawing cleared = copyWith(commands: commands.map((c) => c.clearValidation()).toList());
-
-    printTiming('cleared (${stopwatch.elapsedMilliseconds - lastTick})');
-    lastTick = stopwatch.elapsedMilliseconds;
-    while (true) {
-      Map<String, Set<String>> dependencies = {};
-      for (DrawingCommand command in cleared.commands.where((c) => !c.validated)) {
-        dependencies[command.id] = command.dependencies(this);
-      }
-      DirectedGraph<String> graph = DirectedGraph(dependencies);
-      List<String> cycles = graph.cycle;
-
-      if (cycles.isEmpty) break;
-        String cycleDescription = cycles.map((cycle) => commands.firstWhere((c) => c.id == cycle).label).join(' -> ');
-        cleared = cleared.copyWith(
-          commands: cleared.commands.map((c) => cycles.contains(c.id) ? c.markAsCyclic(cycleDescription) : c).toList()
-        );
-    }
-    printTiming('dependencies checked (${stopwatch.elapsedMilliseconds - lastTick})');
-    lastTick = stopwatch.elapsedMilliseconds;
-    int valstartTick = lastTick;
-
-    int passes = 0;
-    int maxPasses = 1000;
-    while (true) {
-      if (cleared.commands.any((c) => !c.validated) && passes <= maxPasses) {
-        printTiming('pass $passes');
-        // We pass through the whole list on each loop as dependencies may not be solved yet
-        List<DrawingCommand> passedCommands = cleared.commands.map((c) {
-          if (!c.validated) {
-            DrawingCommand r = c.validate(cleared);
-            printTiming('validation of ${r.label}: ${stopwatch.elapsedMilliseconds - lastTick}msec. Validated: ${r.validated}');
-            lastTick = stopwatch.elapsedMilliseconds;
-            return r;
-          }
-          return c;
-        }).toList();
-        cleared = cleared.copyWith(
-          commands: passedCommands
-        );
-        passes++;
-      } else {
-        break;
-      }
-    }
-
-    if (passes >= maxPasses) printTiming('validation overflow!!!!');
-    printTiming('validated in $passes passes (${stopwatch.elapsedMilliseconds - valstartTick})');
-
-    printTiming('----------- end validation (${stopwatch.elapsedMilliseconds}) ----------');
-    stopwatch.stop();
-    
-    return cleared;
-  }
+  Drawing validate() => super.validate() as Drawing;
 
   Map<String, Object> toJson() {
     return {

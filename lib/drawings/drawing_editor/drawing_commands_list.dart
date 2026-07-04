@@ -88,7 +88,7 @@ class _DrawingCommandsListState extends State<DrawingCommandsList> {
                             initiallyOpen: true,
                           )
                         ]
-                      ));
+                      ).validate());
                       // We deselect on measurements 
                       widget.onSelect(null);
                     },
@@ -109,7 +109,7 @@ class _DrawingCommandsListState extends State<DrawingCommandsList> {
                             initiallyOpen: true,
                           )
                         ]
-                      ));
+                      ).validate());
                       // We deselect on variables
                       widget.onSelect(null);
                     },
@@ -135,7 +135,7 @@ class _DrawingCommandsListState extends State<DrawingCommandsList> {
                             initiallyOpen: true,
                           )
                         ]
-                      ));
+                      ).validate());
                       widget.onSelect(newId);
                     },
                     icon: const Icon(Symbols.line_start_circle),
@@ -156,7 +156,7 @@ class _DrawingCommandsListState extends State<DrawingCommandsList> {
                             initiallyOpen: true,
                           )
                         ]
-                      ));
+                      ).validate());
                       widget.onSelect(newId);
                     },
                     icon: const Icon(Symbols.pen_size_2),
@@ -177,7 +177,7 @@ class _DrawingCommandsListState extends State<DrawingCommandsList> {
                             initiallyOpen: true,
                           )
                         ]
-                      ));
+                      ).validate());
                       widget.onSelect(newId);
                     },
                     icon: const Icon(Symbols.line_curve),
@@ -203,7 +203,7 @@ class _DrawingCommandsListState extends State<DrawingCommandsList> {
                               initiallyOpen: true,
                             )
                           ]
-                        ));
+                        ).validate());
                         widget.onSelect(newId);
                       },
                       icon: const Icon(Icons.extension_outlined),
@@ -225,7 +225,7 @@ class _DrawingCommandsListState extends State<DrawingCommandsList> {
                               initiallyOpen: true,
                             )
                           ]
-                        ));
+                        ).validate());
                         widget.onSelect(newId);
                       }, 
                       icon: const Icon(Symbols.apparel)),
@@ -283,8 +283,10 @@ class _DrawingCommandsListState extends State<DrawingCommandsList> {
                           commands: widget.drawing.commands.map((c) {
                             if (c.id != command.id) {
                                return isDoubleLabelCorrection ? c : c.dependentLabelChanged(oldLabel.replaceAll(' ', '_'), newCommand.label.replaceAll(' ', '_'));
-                            } else {
+                            } else if (c.initiallyOpen) {
                               return newCommand.setInitiallyClosed();
+                            } else {
+                              return newCommand;
                             }
                           }).toList()
                         ).validate());

@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
+import 'package:knitty_griddy/drawings/model/commands/included_part_command.dart';
 
 import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
@@ -35,6 +36,7 @@ class LineCommand extends DrawingCommand {
   });
 
   LineCommand copyWith({
+    String? id,
     String? label,
     String? fromPointId,
     String? toPointId,
@@ -46,7 +48,7 @@ class LineCommand extends DrawingCommand {
     Offset? storedEndCoordinate,
   }) {
     return LineCommand(
-      id: id,
+      id: id?? this.id,
       version: version + 1,
       label: label?? this.label,
       fromPointId: fromPointId?? this.fromPointId,
@@ -94,8 +96,21 @@ class LineCommand extends DrawingCommand {
   Set<String> dependencies(AbstractDrawing drawing) {
     Set<String> deps = {};
 
-    if (fromPointId.isNotEmpty) deps.add(fromPointId);
-    if (toPointId.isNotEmpty) deps.add(toPointId);
+    if (fromPointId.isNotEmpty) {
+      if (fromPointId.contains('.')) {
+        deps.add(drawing.includedParts.firstWhere((c) => c.partInfo?.partDrawingId == fromPointId.split('.').first).id);
+      }
+      
+      deps.add(fromPointId);
+    }
+
+    if (toPointId.isNotEmpty) {
+      if (toPointId.contains('.')) {
+        deps.add(drawing.includedParts.firstWhere((c) => c.partInfo?.partDrawingId == toPointId.split('.').first).id);
+      }
+      
+      deps.add(toPointId);
+    }
 
     return deps;
   }
@@ -104,6 +119,15 @@ class LineCommand extends DrawingCommand {
   LineCommand dependentLabelChanged(String oldLabel, String newLabel) {
     return this;
   }
+
+  @override
+  LineCommand changePartDrawingReference({required String oldId, required String newId}) {
+    return copyWith(
+      fromPointId: fromPointId.replaceAll(oldId, newId),
+      toPointId: toPointId.replaceAll(oldId, newId),
+    );
+  }
+
 
   @override
   LineCommand deleteReference({required String commandId}) {
@@ -140,7 +164,7 @@ class LineCommand extends DrawingCommand {
     other is LineCommand &&
     runtimeType == other.runtimeType &&
     id == other.id &&
-    version == other.version &&
+//    version == other.version &&
     label == other.label &&
     fromPointId == other.fromPointId &&
     toPointId == other.toPointId &&
@@ -276,7 +300,7 @@ class LineCommand extends DrawingCommand {
   }
 
   @override
-  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false}) {
+  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = ''}) {
     if (!valid) {
       return;
     }
@@ -322,7 +346,7 @@ class LineCommand extends DrawingCommand {
       ),
     )
     ..pushStyle(style.getTextStyle())
-    ..addText(label);
+    ..addText(prefixLabel.isEmpty ? label : '$prefixLabel.$label');
 
     final Paragraph paragraph = paragraphBuilder.build()
     ..layout(ParagraphConstraints(width: size.width));
@@ -358,6 +382,12 @@ class LineCommand extends DrawingCommand {
         isvalid = false;
         retryValidation = false;
         validationErrors.add('Source point does not exist');
+      } else if (fromPointId.contains('.')) {
+        // need to wait on validation of the included part command
+        IncludedPartCommand ipc = drawing.includedParts.firstWhere((c) => c.partInfo?.partDrawingId == fromPointId.split('.').first);
+        if (!ipc.validated) {
+          isvalid = false;
+        }
       } else {
         if (!fromPoint.validated) {
           // We are not valid, but we should retry
@@ -383,6 +413,12 @@ class LineCommand extends DrawingCommand {
         isvalid = false;
         retryValidation = false;
         validationErrors.add('Target point does not exist');
+      } else if (toPointId.contains('.')) {
+        // need to wait on validation of the included part command
+        IncludedPartCommand ipc = drawing.includedParts.firstWhere((c) => c.partInfo?.partDrawingId == toPointId.split('.').first);
+        if (!ipc.validated) {
+          isvalid = false;
+        }
       } else {
         if (!toPoint.validated) {
           // We are not valid, but we should retry

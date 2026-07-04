@@ -153,9 +153,9 @@ class FormulaGrammar extends GrammarDefinition {
       string('#distance'),
       seq5(
         char('(').trim(),
-        (word().star()).flatten().trim(),
+        ((word() | char('.')).star()).flatten().trim(),
         char(',').trim(),
-        (word().star()).flatten().trim(),
+        ((word() | char('.')).star()).flatten().trim(),
         char(')').trim()  
       ).map5((_, p1label, __, p2label, ___) {
 
@@ -178,7 +178,7 @@ class FormulaGrammar extends GrammarDefinition {
       string('#linelength'),
       seq3(
         char('(').trim(),
-        (word().star()).flatten().trim(),
+        ((word() | char('.')).star()).flatten().trim(),
         char(')').trim()).map3((_, label, __) => label)
     ).map2((_, lineLabel) {
       LineCommand? line = drawing.lineByName(lineLabel);

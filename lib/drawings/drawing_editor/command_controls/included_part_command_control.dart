@@ -39,8 +39,7 @@ class _IncludedPartCommandControlState extends State<IncludedPartCommandControl>
 
   void labelChanged(String newText) {
     if (widget.command.label != newText) {
-      // Included part labels are never used in formula's, so we don't need to call changeDrawingCommandLabel
-      widget.onChanged(widget.command.copyWith(label: newText));
+      widget.onChangeLabel(widget.command.copyWith(label: newText), widget.command.label);
     }
   }
 
@@ -147,7 +146,12 @@ class _IncludedPartCommandControlState extends State<IncludedPartCommandControl>
               ],
               onChanged: (value) {
                 if (value != widget.command.anchorPointId) {
-                  widget.onChanged(widget.command.copyWith(anchorPointId: value?? ''));
+                  widget.onChanged(
+                    widget.command.copyWith(
+                      anchorPointId: value?? '',
+                      partInfo: widget.command.partInfo?? widget.command.partInfo!.copyWith(storedOffsetPartDrawing: null)
+                    ).clearValidation().validate(widget.drawing) as IncludedPartCommand
+                  );
                 }
               },
               value: widget.command.anchorPointId,

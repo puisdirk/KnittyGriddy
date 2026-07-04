@@ -39,11 +39,12 @@ abstract class DrawingCommand {
   double get editHeight;
   
   Map<String, Object> toJson();  
-  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false});
+  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = ''});
   
   Rect getBoundingBox(AbstractDrawing drawing);
 
   DrawingCommand deleteReference({required String commandId});
+  DrawingCommand changePartDrawingReference({required String oldId, required String newId});
   DrawingCommand dependentLabelChanged(String oldLabel, String newLabel);
   DrawingCommand setInitiallyClosed();
 
