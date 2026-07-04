@@ -61,39 +61,14 @@ class IncludedPartCommand extends DrawingCommand {
 
   @override
   Rect getBoundingBox(AbstractDrawing drawing) {
-    if (valid) {
-      PartDrawing? partDrawing = PartRepository.getPartDrawingById(partInfo!.partDrawingId);
-      if (partDrawing == null) return Rect.zero;
+    if (!valid) return Rect.zero;
 
-      // Copy the measurement override values into the partDrawing
-      partDrawing = partDrawing.copyWith(
-        commands: partDrawing.commands.map((c) {
-          if (c is! MeasurementCommand) {
-            return c;
-          } else {
-            MeasurementOverride mo = measurementOverrides.firstWhere((mo) => mo.measurementId == c.id);
-            FormulaParseResult res = FormulaExpression.validate(formula: mo.formula, drawing: drawing);
-            return c.copyWith(value: res.result!);
-          }
-        }).toList()
-      );
+    PartDrawing? partDrawing = _getOffsetPartDrawing(drawing);
+    if (partDrawing == null) return Rect.zero;
 
-      PartCommand partCommand = partDrawing.parts.firstWhere((p) => p.id == partInfo!.partId);
+    PartCommand partCommand = partDrawing.parts.firstWhere((p) => p.id == partInfo!.partId);
 
-      // Calculate the offset needed
-      PointCommand? ownAnchorPoint = drawing.pointById(anchorPointId);
-      if (ownAnchorPoint == null) return Rect.zero;
-      PointCommand? partAnchorPoint = partDrawing.pointById(partCommand.anchorPointId);
-      if (partAnchorPoint == null) return Rect.zero;
-      Offset? ownOffset = ownAnchorPoint.getCoordinate(drawing);
-      if (ownOffset == null) return Rect.zero;
-      Offset? partOffset = partAnchorPoint.getCoordinate(partDrawing);
-      if (partOffset == null) return Rect.zero;
-
-      return partCommand.calculateBoundingBox(partDrawing).translate(ownOffset.dx + partOffset.dx, ownOffset.dy + partOffset.dy);
-    }
-
-    return Rect.zero;
+    return partCommand.calculateBoundingBox(partDrawing);
   }
 
   @override
@@ -112,8 +87,16 @@ class IncludedPartCommand extends DrawingCommand {
 
   @override
   Set<String> dependencies(AbstractDrawing drawing) {
-    return {anchorPointId};
+    Set<String> deps = {anchorPointId};
+    for (MeasurementOverride override in measurementOverrides) {
+      deps.addAll(FormulaExpression.dependencies(formula: override.formula, drawing: drawing));
+    }
+    return deps;
   }
+
+  @override
+  IncludedPartCommand changePartDrawingReference({required String oldId, required String newId}) => this;
+
 
   @override
   IncludedPartCommand deleteReference({required String commandId}) {
@@ -170,7 +153,7 @@ class IncludedPartCommand extends DrawingCommand {
       runtimeType == other.runtimeType &&
       id == other.id &&
       label == other.label &&
-      version == other.version &&
+//      version == other.version &&
       partInfo == other.partInfo &&
       anchorPointId == other.anchorPointId &&
       listEquals(measurementOverrides, other.measurementOverrides) &&
@@ -186,15 +169,18 @@ class IncludedPartCommand extends DrawingCommand {
     return copyWith(validated: false, valid: false, errors: const[]);
   }
 
-  @override
-  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false}) {
-    if (!valid) return;
+  PartDrawing? _getOffsetPartDrawing(AbstractDrawing drawing) {
+    if (partInfo?.storedOffsetPartDrawing != null) return partInfo!.storedOffsetPartDrawing;
 
+    return _calculateNewStoredPartDrawing(drawing);
+  }
+
+  PartDrawing? _calculateNewStoredPartDrawing(AbstractDrawing drawing) {
     PartDrawing? partDrawing = PartRepository.getPartDrawingById(partInfo!.partDrawingId);
-    if (partDrawing == null) return;
+    if (partDrawing == null) return null;
 
     // Copy the measurement override values into the partDrawing
-    partDrawing = partDrawing.copyWith(
+    PartDrawing partDrawingWithOverrides = partDrawing.copyWith(
       commands: partDrawing.commands.map((c) {
         if (c is! MeasurementCommand) {
           return c;
@@ -204,23 +190,40 @@ class IncludedPartCommand extends DrawingCommand {
           return c.copyWith(value: res.result!);
         }
       }).toList()
-    ).validate();
+    );
+    if (!partDrawingWithOverrides.sameContentAs(partDrawing)) {
+      partDrawingWithOverrides = partDrawingWithOverrides.validate();
+    }
 
-    PartCommand partCommand = partDrawing.parts.firstWhere((p) => p.id == partInfo!.partId);
+    PartCommand partCommand = partDrawingWithOverrides.parts.firstWhere((p) => p.id == partInfo!.partId);
 
     // Calculate the offset needed
     PointCommand? ownAnchorPoint = drawing.pointById(anchorPointId);
-    if (ownAnchorPoint == null) return;
-    PointCommand? partAnchorPoint = partDrawing.pointById(partCommand.anchorPointId);
-    if (partAnchorPoint == null) return;
+    if (ownAnchorPoint == null) return null;
+    PointCommand? partAnchorPoint = partDrawingWithOverrides.pointById(partCommand.anchorPointId);
+    if (partAnchorPoint == null) return null;
     Offset? ownOffset = ownAnchorPoint.getCoordinate(drawing);
-    if (ownOffset == null) return;
-    Offset? partOffset = partAnchorPoint.getCoordinate(partDrawing);
-    if (partOffset == null) return;
+    if (ownOffset == null) return null;
+    Offset? partOffset = partAnchorPoint.getCoordinate(partDrawingWithOverrides);
+    if (partOffset == null) return null;
 
-    partDrawing = (partDrawing.abstractCopyWith(offset: ownOffset - partOffset) as PartDrawing).validate();
+    if (partInfo?.storedOffsetPartDrawing?.offset != (ownOffset - partOffset)) {
+      return partDrawingWithOverrides.abstractCopyWith(offset: ownOffset - partOffset).validate();
+    } else {
+      return partInfo?.storedOffsetPartDrawing;
+    }
+  }
 
-    partCommand.paint(canvas, size, partDrawing, selected);
+  @override
+  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = ''}) {
+    if (!valid) return;
+
+    PartDrawing? partDrawing = _getOffsetPartDrawing(drawing);
+    if (partDrawing == null) return;
+    
+    PartCommand partCommand = partDrawing.parts.firstWhere((p) => p.id == partInfo!.partId);
+
+    partCommand.paint(canvas, size, partDrawing, selected, prefixLabel: label);
   }
 
   @override
@@ -237,7 +240,7 @@ class IncludedPartCommand extends DrawingCommand {
       retryValidation = false;
       validationErrors.add('Requires a part');
     } else {
-      // TODO: should check if the part exists and is validated && valid, but not sure if it can ever occur
+      // Remark: could check if the part exists and is validated && valid, but I'm pretty sure this can never occur
     }
 
     // Check if the measurement overrides have valid formula's
@@ -271,10 +274,16 @@ class IncludedPartCommand extends DrawingCommand {
       }
     }
 
+    PartDrawing? newStoredPartDrawing;
+    if (isvalid) {
+      newStoredPartDrawing = _calculateNewStoredPartDrawing(drawing);
+    }
+
     return copyWith(
       valid: isvalid,
       validated: (isvalid || !retryValidation),
       errors: validationErrors,
+      partInfo: isvalid ? partInfo!.copyWith(storedOffsetPartDrawing: newStoredPartDrawing) : partInfo,
     );
   }
 

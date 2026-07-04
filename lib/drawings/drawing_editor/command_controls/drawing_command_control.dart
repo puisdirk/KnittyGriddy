@@ -154,7 +154,7 @@ class _DrawingCommandControlState extends State<DrawingCommandControl> {
           IconButton(
             onPressed: () {
               // Make sure the control stays closed
-              if (editing) {
+              if (editing && widget.command.initiallyOpen) {
                 Future.delayed(const Duration(milliseconds: 250), () => widget.onChanged(widget.command.setInitiallyClosed()));
               }
               setState(() => editing = !editing);
@@ -187,7 +187,7 @@ class _DrawingCommandControlState extends State<DrawingCommandControl> {
         IconButton(
           onPressed: () {
             // Make sure the control stays closed
-            if (editing) {
+            if (editing && widget.command.initiallyOpen) {
               Future.delayed(const Duration(milliseconds: 250), () => widget.onChanged(widget.command.setInitiallyClosed()));
             }
             setState(() => editing = !editing);

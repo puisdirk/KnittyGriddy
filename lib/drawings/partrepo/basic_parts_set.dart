@@ -30,7 +30,8 @@ class BasicPartsSet extends PartSet {
     List<PartDrawing> parts = [];
     for (String resourceName in _basicPartSetResources) {
       String json = await rootBundle.loadString('drawings/$resourceName');
-      parts.add(PartDrawing.fromJson(jsonDecode(json)).validate());
+      PartDrawing pd = PartDrawing.fromJson(jsonDecode(json)).validate();
+      parts.add(pd);
     }
 
     return BasicPartsSet.fromList(parts);

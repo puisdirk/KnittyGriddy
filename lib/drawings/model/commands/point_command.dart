@@ -7,7 +7,9 @@ import 'package:knitty_griddy/drawings/formulas/formula_expression.dart';
 import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
 import 'package:knitty_griddy/drawings/model/commands/curve_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
+import 'package:knitty_griddy/drawings/model/commands/included_part_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/line_command.dart';
+import 'package:knitty_griddy/drawings/model/part_drawing.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 import 'package:knitty_griddy/utils/math_utitilies.dart';
 
@@ -87,6 +89,7 @@ class PointCommand extends DrawingCommand {
     direction = direction?? RelativePointDirection.north;
 
   PointCommand copyWith({
+    String? id,
     String? label,
     PointDefinitionType? pointDefinitionType,
     String? fromPointId,
@@ -106,7 +109,7 @@ class PointCommand extends DrawingCommand {
     Offset? storedCoordinate,
   }) {
     return PointCommand(
-      id: id,
+      id: id?? this.id,
       version: version + 1,
       label: label?? this.label,
       pointDefinitionType: pointDefinitionType?? this.pointDefinitionType,
@@ -170,6 +173,18 @@ class PointCommand extends DrawingCommand {
       errors: ['Cycle detected: $cycleDescription'],
     );
   }
+
+  @override
+  PointCommand changePartDrawingReference({required String oldId, required String newId}) {
+    return copyWith(
+      fromPointId: fromPointId.replaceAll(oldId, newId),
+      onLineId: onLineId.replaceAll(oldId, newId),
+      onCurveId: onCurveId.replaceAll(oldId, newId),
+      intersectionLine1Id: intersectionLine1Id.replaceAll(oldId, newId),
+      intersectionLine2Id: intersectionLine2Id.replaceAll(oldId, newId),
+    );
+  }
+
 
   @override
   PointCommand deleteReference({required String commandId}) {
@@ -237,7 +252,7 @@ class PointCommand extends DrawingCommand {
     other is PointCommand &&
     runtimeType == other.runtimeType &&
     id == other.id &&
-    version == other.version &&
+//    version == other.version &&
     label == other.label &&
     pointDefinitionType == other.pointDefinitionType &&
     fromPointId == other.fromPointId &&
@@ -272,7 +287,7 @@ class PointCommand extends DrawingCommand {
   }
 
   @override
-  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false}) {
+  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = ''}) {
     if (!valid) {
       return;
     }
@@ -306,7 +321,7 @@ class PointCommand extends DrawingCommand {
       ),
     )
     ..pushStyle(style.getTextStyle())
-    ..addText(label);
+    ..addText(prefixLabel.isEmpty ? label : '$prefixLabel.$label');
 
     final Paragraph paragraph = paragraphBuilder.build()
     ..layout(ParagraphConstraints(width: size.width));
@@ -325,21 +340,51 @@ class PointCommand extends DrawingCommand {
 
     switch (pointDefinitionType) {
       case PointDefinitionType.relativeToPoint:
-        if (fromPointId.isNotEmpty) deps.add(fromPointId);
+        if (fromPointId.isNotEmpty) {
+          if (fromPointId.contains('.')) {
+            deps.add(drawing.includedParts.firstWhere((c) => c.partInfo?.partDrawingId == fromPointId.split('.').first).id);
+          }
+          
+          deps.add(fromPointId);
+        }
         deps.addAll(FormulaExpression.dependencies(formula: distanceFormula, drawing: drawing));
         if (direction == RelativePointDirection.angle) deps.addAll(FormulaExpression.dependencies(formula: directionAngleFormula, drawing: drawing));
         break;
       case PointDefinitionType.onLine:
-        if (onLineId.isNotEmpty) deps.add(onLineId);
+        if (onLineId.isNotEmpty) {
+          if (onLineId.contains('.')) {
+            deps.add(drawing.includedParts.firstWhere((c) => c.partInfo?.partDrawingId == onLineId.split('.').first).id);
+          }
+          
+          deps.add(onLineId);
+        }
         deps.addAll(FormulaExpression.dependencies(formula: onLineFractionFormula, drawing: drawing));
         break;
       case PointDefinitionType.onCurve:
-        if (onCurveId.isNotEmpty) deps.add(onCurveId);
+        if (onCurveId.isNotEmpty) {
+          if (onCurveId.contains('.')) {
+            deps.add(drawing.includedParts.firstWhere((c) => c.partInfo?.partDrawingId == onCurveId.split('.').first).id);
+          }
+          
+          deps.add(onCurveId);
+        }
         deps.addAll(FormulaExpression.dependencies(formula: onCurveFractionFormula, drawing: drawing));
         break;
       case PointDefinitionType.onIntersection:
-        if (intersectionLine1Id.isNotEmpty) deps.add(intersectionLine1Id);
-        if (intersectionLine2Id.isNotEmpty) deps.add(intersectionLine2Id);
+        if (intersectionLine1Id.isNotEmpty) {
+          if (intersectionLine1Id.contains('.')) {
+            deps.add(drawing.includedParts.firstWhere((c) => c.partInfo?.partDrawingId == intersectionLine1Id.split('.').first).id);
+          }
+          
+          deps.add(intersectionLine1Id);
+        }
+        if (intersectionLine2Id.isNotEmpty) {
+          if (intersectionLine2Id.contains('.')) {
+            deps.add(drawing.includedParts.firstWhere((c) => c.partInfo?.partDrawingId == intersectionLine2Id.split('.').first).id);
+          }
+          
+          deps.add(intersectionLine2Id);
+        }
         break;
     }
 
@@ -396,6 +441,12 @@ class PointCommand extends DrawingCommand {
             isvalid = false;
             retryValidation = false;
             validationErrors.add('Reference point does not exist');
+          } else if (fromPointId.contains('.')) {
+            // need to wait on validation of the included part command
+            IncludedPartCommand ipc = drawing.includedParts.firstWhere((c) => c.partInfo?.partDrawingId == fromPointId.split('.').first);
+            if (!ipc.validated) {
+              isvalid = false;
+            }
           } else {
             if (!fromPoint.validated) {
               // We are not valid, but we should retry
@@ -427,6 +478,12 @@ class PointCommand extends DrawingCommand {
             isvalid = false;
             retryValidation = false;
             validationErrors.add('Reference line does not exist');
+          } else if (onLineId.contains('.')) {
+            // need to wait on validation of the included part command
+            IncludedPartCommand ipc = drawing.includedParts.firstWhere((c) => c.partInfo?.partDrawingId == onLineId.split('.').first);
+            if (!ipc.validated) {
+              isvalid = false;
+            }
           } else if (!line.validated) {
             // We are not valid, but we should retry
             isvalid = false;
@@ -464,6 +521,12 @@ class PointCommand extends DrawingCommand {
             isvalid = false;
             retryValidation = false;
             validationErrors.add('Referece curve does not exist');
+          } else if (onCurveId.contains('.')) {
+            // need to wait on validation of the included part command
+            IncludedPartCommand ipc = drawing.includedParts.firstWhere((c) => c.partInfo?.partDrawingId == onCurveId.split('.').first);
+            if (!ipc.validated) {
+              isvalid = false;
+            }
           } else if (!curve.validated) {
             // We are not valid, but we should retry
             isvalid = false;
@@ -485,8 +548,18 @@ class PointCommand extends DrawingCommand {
         }
 
         if (isvalid) {
-          Path p = curve!.getPath(drawing, Offset.zero)!;
-          newStoredCoordinate = curve.pointOnPath(p, fraction);
+          if (onCurveId.contains('.')) {
+            String partDrawingId = onCurveId.split('.').first;
+            IncludedPartCommand c = drawing.commands.firstWhere((c) => c is IncludedPartCommand && c.partInfo?.partDrawingId == partDrawingId) as IncludedPartCommand;
+            PartDrawing? pd = c.partInfo?.storedOffsetPartDrawing;
+            if (pd != null) {
+              Path p = curve!.getPath(pd, Offset.zero)!;
+              newStoredCoordinate = curve.pointOnPath(p, fraction).scale(1, -1);
+            }
+          } else {
+            Path p = curve!.getPath(drawing, Offset.zero)!;
+            newStoredCoordinate = curve.pointOnPath(p, fraction).scale(1, -1);
+          }
         }
 
       case PointDefinitionType.onIntersection:
@@ -503,6 +576,12 @@ class PointCommand extends DrawingCommand {
             isvalid = false;
             retryValidation = false;
             validationErrors.add('Line 1 does not exist');
+          } else if (intersectionLine1Id.contains('.')) {
+            // need to wait on validation of the included part command
+            IncludedPartCommand ipc = drawing.includedParts.firstWhere((c) => c.partInfo?.partDrawingId == intersectionLine1Id.split('.').first);
+            if (!ipc.validated) {
+              isvalid = false;
+            }
           } else if (!line1.validated) {
             // We are not valid, but we should retry
             isvalid = false;
@@ -522,6 +601,12 @@ class PointCommand extends DrawingCommand {
             isvalid = false;
             retryValidation = false;
             validationErrors.add('Line 2 does not exist');
+          } else if (intersectionLine2Id.contains('.')) {
+            // need to wait on validation of the included part command
+            IncludedPartCommand ipc = drawing.includedParts.firstWhere((c) => c.partInfo?.partDrawingId == intersectionLine2Id.split('.').first);
+            if (!ipc.validated) {
+              isvalid = false;
+            }
           } else if (!line2.validated) {
             // We are not valid, but we should retry
             isvalid = false;

@@ -78,6 +78,9 @@ class VariableCommand extends DrawingCommand {
   }
 
   @override
+  VariableCommand changePartDrawingReference({required String oldId, required String newId}) => this;
+
+  @override
   VariableCommand deleteReference({required String commandId}) {
     return this;
   }
@@ -94,7 +97,7 @@ class VariableCommand extends DrawingCommand {
   }
 
   @override
-  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false}) {
+  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = ''}) {
   }
 
   @override
@@ -122,7 +125,7 @@ class VariableCommand extends DrawingCommand {
       other is VariableCommand &&
       runtimeType == other.runtimeType &&
       id == other.id &&
-      version == other.version &&
+//      version == other.version &&
       label == other.label &&
       formula == other.formula &&
       valid == other.valid &&

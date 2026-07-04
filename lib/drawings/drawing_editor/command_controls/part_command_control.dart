@@ -145,7 +145,7 @@ class _PartCommandControlState extends State<PartCommandControl> {
                         focusColor: Colors.transparent,
                         underline: Container(),
                         items: [
-                          for (DrawingCommand cmd in widget.drawing.linesAndCurves.where((c) => !widget.command.commandIds.contains(c.id)))
+                          for (DrawingCommand cmd in widget.drawing.pointsLinesAndCurves.where((c) => !widget.command.commandIds.contains(c.id)))
                             DropdownMenuItem(value: cmd, child: Text(cmd.label)),
                         ], 
                         onChanged: (value) {

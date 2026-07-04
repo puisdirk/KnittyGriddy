@@ -206,7 +206,7 @@ class _MeasurementCommandControlState extends State<MeasurementCommandControl> {
                 key: GlobalObjectKey('${widget.command.id}-def'),
                 textStyle: smallStyle,
                 onChanged: (value) {
-                  if (value != widget.command.decimals) {
+                  if (value != widget.command.value) {
                     widget.onChanged(widget.command.copyWith(value: value));
                   }
                 },

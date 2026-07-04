@@ -68,13 +68,16 @@ class CommentCommand extends DrawingCommand {
   }
 
   @override
+  CommentCommand changePartDrawingReference({required String oldId, required String newId}) => this;
+
+  @override
   CommentCommand deleteReference({required String commandId}) => this;
 
   @override
   CommentCommand dependentLabelChanged(String oldLabel, String newLabel) => this;
 
   @override
-  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false}) {
+  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = ''}) {
   }
 
   @override
@@ -102,7 +105,7 @@ class CommentCommand extends DrawingCommand {
       other is CommentCommand &&
       runtimeType == other.runtimeType &&
       id == other.id &&
-      version == other.version &&
+//      version == other.version &&
       label == other.label &&
       comment == other.comment &&
       valid == other.valid &&

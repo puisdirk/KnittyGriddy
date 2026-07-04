@@ -93,20 +93,12 @@ class _PointCommandControlState extends State<PointCommandControl> {
         directionLabel = widget.command.direction.label;
       }
 
-      String fromPointLabel = '???';
-      PointCommand? fromPoint = widget.drawing.pointById(widget.command.fromPointId);
-      if (fromPoint != null) {
-        fromPointLabel = fromPoint.label;
-      }
+      String fromPointLabel = widget.drawing.commandLabelIncluded(widget.command.fromPointId);
 
       content += '$distanceLabel $directionLabel of $fromPointLabel';
 
     } else if (widget.command.pointDefinitionType == PointDefinitionType.onLine) {
-      String onlineLabel = '???';
-      LineCommand? line = widget.drawing.lineById(widget.command.onLineId);
-      if (line != null) {
-        onlineLabel = line.label;
-      }
+      String onlineLabel = widget.drawing.commandLabelIncluded(widget.command.onLineId);
 
       String fractionLabel = '???';
       if (widget.command.onLineFractionFormula.isNotEmpty) {
@@ -115,11 +107,7 @@ class _PointCommandControlState extends State<PointCommandControl> {
 
       content += 'on line $onlineLabel at $fractionLabel';
     } else if (widget.command.pointDefinitionType == PointDefinitionType.onCurve) {
-      String oncurveLabel = '???';
-      CurveCommand? curve = widget.drawing.curveById(widget.command.onCurveId);
-      if (curve != null) {
-        oncurveLabel = curve.label;
-      }
+      String oncurveLabel = widget.drawing.commandLabelIncluded(widget.command.onCurveId);
 
       String fractionLabel = '???';
       if (widget.command.onCurveFractionFormula.isNotEmpty) {
@@ -128,17 +116,9 @@ class _PointCommandControlState extends State<PointCommandControl> {
 
       content += 'on curve $oncurveLabel at $fractionLabel';
     } else if (widget.command.pointDefinitionType == PointDefinitionType.onIntersection) {
-      String l1label = '???';
-      LineCommand? l1 = widget.drawing.lineById(widget.command.intersectionLine1Id);
-      if (l1 != null) {
-        l1label = l1.label;
-      }
-      
-      String l2label = '???';
-      LineCommand? l2 = widget.drawing.lineById(widget.command.intersectionLine2Id);
-      if (l2 != null) {
-        l2label = l2.label;
-      }
+      String l1label = widget.drawing.commandLabelIncluded(widget.command.intersectionLine1Id);      
+      String l2label = widget.drawing.commandLabelIncluded(widget.command.intersectionLine2Id);
+
       content += 'on intersection of $l1label and $l2label';
     }
 
@@ -277,7 +257,7 @@ class _PointCommandControlState extends State<PointCommandControl> {
                     items: [
                       const DropdownMenuItem(value: '', child: Text('')),
                       DropdownMenuItem(value: origin.id, child: Text(origin.label)),
-                      for (PointCommand point in widget.drawing.points.where((p) => p.id != widget.command.id))
+                      for (PointCommand point in widget.drawing.pointsIncluded.where((p) => p.id != widget.command.id))
                         DropdownMenuItem(value: point.id, child: Text(point.label)),
                     ],
                     onChanged: (value) {
@@ -310,7 +290,7 @@ class _PointCommandControlState extends State<PointCommandControl> {
                     underline: Container(),
                     items: [
                       const DropdownMenuItem(value: '', child: Text('')),
-                      for (LineCommand line in widget.drawing.lines)
+                      for (LineCommand line in widget.drawing.linesIncluded)
                         DropdownMenuItem(value: line.id, child: Text(line.label))
                     ], 
                     onChanged: (value) {
@@ -340,6 +320,8 @@ class _PointCommandControlState extends State<PointCommandControl> {
           ),
         if (widget.command.pointDefinitionType == PointDefinitionType.onCurve)
           Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
@@ -355,7 +337,7 @@ class _PointCommandControlState extends State<PointCommandControl> {
                     underline: Container(),
                     items: [
                       const DropdownMenuItem(value: '', child: Text('')),
-                      for (CurveCommand curve in widget.drawing.curves)
+                      for (CurveCommand curve in widget.drawing.curvesIncluded)
                         DropdownMenuItem(value: curve.id, child: Text(curve.label))
                     ], 
                     onChanged: (value) {
@@ -400,7 +382,7 @@ class _PointCommandControlState extends State<PointCommandControl> {
                     underline: Container(),
                     items: [
                       const DropdownMenuItem(value: '', child: Text('')),
-                      for (LineCommand line in widget.drawing.lines.where((l) => l.id != widget.command.intersectionLine2Id))
+                      for (LineCommand line in widget.drawing.linesIncluded.where((l) => l.id != widget.command.intersectionLine2Id))
                         DropdownMenuItem(value: line.id, child: Text(line.label))
                     ], 
                     onChanged: (value) {
@@ -427,7 +409,7 @@ class _PointCommandControlState extends State<PointCommandControl> {
                     underline: Container(),
                     items: [
                       const DropdownMenuItem(value: '', child: Text('')),
-                      for (LineCommand line in widget.drawing.lines.where((l) => l.id != widget.command.intersectionLine1Id))
+                      for (LineCommand line in widget.drawing.linesIncluded.where((l) => l.id != widget.command.intersectionLine1Id))
                         DropdownMenuItem(value: line.id, child: Text(line.label))
                     ], 
                     onChanged: (value) {
