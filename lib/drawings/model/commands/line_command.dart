@@ -3,10 +3,14 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
+import 'package:knitty_griddy/drawings/model/commands/arrow_painter.dart';
 import 'package:knitty_griddy/drawings/model/commands/included_part_command.dart';
 
 import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
+import 'package:knitty_griddy/drawings/model/commands/styling_command.dart';
+import 'package:knitty_griddy/drawings/model/part_drawing.dart';
+import 'package:knitty_griddy/utils/dashed_painter.dart';
 import 'package:knitty_griddy/utils/infinite_line.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 import 'package:knitty_griddy/utils/math_utitilies.dart';
@@ -300,7 +304,7 @@ class LineCommand extends DrawingCommand {
   }
 
   @override
-  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = ''}) {
+  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const[]}) {
     if (!valid) {
       return;
     }
@@ -321,13 +325,34 @@ class LineCommand extends DrawingCommand {
     start += middle;
     end += middle;
 
-    canvas.drawLine(
-      start, 
-      end, 
-      Paint()
-        ..color = selected ? selectedColor : asPart ? partColor : Colors.grey.shade700
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = asPart || selected ? 2 : 1);
+    Paint paint = Paint()..style = PaintingStyle.stroke;
+    StylingCommand? styling = drawing.styleFor(id);
+    if (styling == null) {
+      // Look for id in format drawingid.id
+      if (stylings.any((s) => s.commandIds.any((sid) => sid == '${drawing.id}.$id'))) {
+        styling = stylings.firstWhere((s) => s.commandIds.any((sid) => sid == '${drawing.id}.$id'));
+      }
+    }
+
+    if (styling == null) {
+      paint.color = selected ? selectedColor : (asPart && drawing is PartDrawing) ? partColor : Colors.grey.shade700;
+      paint.strokeWidth = asPart || selected ? 2 : 1;
+    } else {
+      paint.color = selected ? selectedColor : styling.color;
+      paint.strokeWidth = styling.thickness;
+    }
+
+    Path path = Path()..moveTo(start.dx, start.dy)..lineTo(end.dx, end.dy);
+
+    if (styling == null || styling.dashStyle == DashStyle.full) {
+      canvas.drawPath(path, paint);
+    } else {
+      DashedPainter.pattern(enableCaching: false, dashPattern: styling.dashStyle.dashPattern).paint(canvas, path, paint);
+    }
+
+    if (styling != null) {
+      ArrowPainter.paint(canvas, styling, start, end, paint);
+    }
 
     // draw line label
     Offset? midline = pointOnLine(0.3, drawing);

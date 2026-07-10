@@ -74,7 +74,7 @@ class _DrawingChooserViewState extends State<DrawingChooserView> {
                   if (context.mounted) {
                     showDialog(context: context, builder: (context) => 
                       AlertDialog(
-                        content: SizedBox(width: 400, height: 50, child: Text(e.message)),
+                        content: SizedBox(width: 400, height: 100, child: Text(e.message)),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.pop(context), 

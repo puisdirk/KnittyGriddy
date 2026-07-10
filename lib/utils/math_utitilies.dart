@@ -1,5 +1,6 @@
 
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:flutter/painting.dart';
 import 'package:knitty_griddy/drawings/model/commands/measurement_command.dart';
@@ -46,6 +47,7 @@ class MathUtitilies {
     if (adjacent == 0) {
       return p0.dx >= p1.dx ? pi / 2.0 : (pi * 3.0) / 2.0; // 90 or 270
     }
+
     return atan(opposite / adjacent);
   }
 
@@ -87,5 +89,11 @@ class MathUtitilies {
       case Unit.angle:
         return valueInMM;
     }
+  }
+
+  static Offset pointOnPath(Path p, double fraction) {
+    final PathMetrics m = p.computeMetrics();
+    final PathMetric pm = m.first;
+    return pm.getTangentForOffset(pm.length * fraction)!.position;
   }
 }

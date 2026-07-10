@@ -10,11 +10,15 @@ import 'package:knitty_griddy/drawings/model/commands/measurement_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/meaurement_override.dart';
 import 'package:knitty_griddy/drawings/model/commands/part_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
+import 'package:knitty_griddy/drawings/model/commands/styling_command.dart';
+import 'package:knitty_griddy/drawings/model/commands/tape_command.dart';
+import 'package:knitty_griddy/drawings/model/commands/text_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/variable_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
 import 'package:knitty_griddy/drawings/model/drawing.dart';
 import 'package:knitty_griddy/drawings/model/part_drawing.dart';
 import 'package:knitty_griddy/drawings/partrepo/part_repository.dart';
+import 'package:knitty_griddy/utils/constants.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 class DrawingCommandsList extends StatefulWidget {
@@ -254,7 +258,75 @@ class _DrawingCommandsListState extends State<DrawingCommandsList> {
                   const SizedBox(width: 40,),
               ],
             ),
-            const SizedBox(height: 10,),
+            if (widget.drawing is Drawing)
+              vspacing,
+            if (widget.drawing is Drawing)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Tooltip(
+                    message: 'Add Style',
+                    child: IconButton(
+                    onPressed: () {
+                      String newId = const UuidV4Gen().get();
+                      widget.onDrawingChanged(widget.drawing.abstractCopyWith(
+                        commands: [
+                          ...widget.drawing.commands,
+                          StylingCommand(
+                            id: newId, 
+                            version: 0,
+                            label: widget.drawing.nextLabel('style'),
+                            initiallyOpen: true,
+                          )
+                        ]
+                      ).validate());
+                      widget.onSelect(newId);
+                    }, 
+                    icon: const Icon(Symbols.palette)),
+                  ),
+                  Tooltip(
+                    message: 'Add Text',
+                    child: IconButton(
+                    onPressed: () {
+                      String newId = const UuidV4Gen().get();
+                      widget.onDrawingChanged(widget.drawing.abstractCopyWith(
+                        commands: [
+                          ...widget.drawing.commands,
+                          TextCommand(
+                            id: newId, 
+                            version: 0,
+                            label: widget.drawing.nextLabel('text'),
+                            initiallyOpen: true,
+                          )
+                        ]
+                      ).validate());
+                      widget.onSelect(newId);
+                    }, 
+                    icon: const Icon(Icons.title)),
+                  ),
+                  Tooltip(
+                    message: 'Add Tape Measurement',
+                    child: IconButton(
+                    onPressed: () {
+                      String newId = const UuidV4Gen().get();
+                      widget.onDrawingChanged(widget.drawing.abstractCopyWith(
+                        commands: [
+                          ...widget.drawing.commands,
+                          TapeCommand(
+                            id: newId, 
+                            version: 0,
+                            label: widget.drawing.nextLabel('tape'),
+                            initiallyOpen: true,
+                          )
+                        ]
+                      ).validate());
+                      widget.onSelect(newId);
+                    }, 
+                    icon: const Icon(Icons.straighten)),
+                  ),
+                ],
+              ),
+            vspacing,
             Expanded(
               child: ReorderableListView(
                 buildDefaultDragHandles: sorting,
@@ -303,6 +375,25 @@ class _DrawingCommandsListState extends State<DrawingCommandsList> {
                                 String formula = mcmd.value.toString();
                                 if (widget.drawing.measurements.any((m) => m.label == mcmd.label)) {
                                   formula = '@${mcmd.label.replaceAll(' ', '_')}';
+                                  // A measurement formula will always return in mm, so we add a funtion to convert
+                                  switch (mcmd.unit) {
+                                    case Unit.angle:
+                                      break;
+                                    case Unit.cm:
+                                      formula = '#toCM($formula)';
+                                      break;
+                                    case Unit.feet:
+                                      formula = '#toFeet($formula)';
+                                      break;
+                                    case Unit.inches:
+                                      formula = '#toInches($formula)';
+                                      break;
+                                    case Unit.meter:
+                                      formula = '#toMeter($formula)';
+                                      break;
+                                    case Unit.mm:
+                                      break;
+                                  }
                                 }
                                 moverrides.add(
                                   MeasurementOverride(

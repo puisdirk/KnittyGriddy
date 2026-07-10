@@ -11,6 +11,9 @@ import 'package:knitty_griddy/drawings/model/commands/line_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/measurement_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/part_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
+import 'package:knitty_griddy/drawings/model/commands/styling_command.dart';
+import 'package:knitty_griddy/drawings/model/commands/tape_command.dart';
+import 'package:knitty_griddy/drawings/model/commands/text_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/variable_command.dart';
 import 'package:knitty_griddy/drawings/model/part_drawing.dart';
 import 'package:knitty_griddy/drawings/partrepo/part_repository.dart';
@@ -172,6 +175,16 @@ abstract class AbstractDrawing {
           break;
         case DrawingCommandTypes.includedPartCommand:
           commands.add(IncludedPartCommand.fromJson(commandObject));
+          break;
+        case DrawingCommandTypes.stylingCommand:
+          commands.add(StylingCommand.fromJson(commandObject));
+          break;
+        case DrawingCommandTypes.textCommand:
+          commands.add(TextCommand.fromJson(commandObject));
+          break;
+        case DrawingCommandTypes.tapeCommand:
+          commands.add(TapeCommand.fromJson(commandObject));
+          break;
       }
     }
     return commands;
@@ -186,15 +199,27 @@ abstract class AbstractDrawing {
   List<PartCommand> get parts => commands.whereType<PartCommand>().toList();
   List<IncludedPartCommand> get includedParts => commands.whereType<IncludedPartCommand>().toList();
   List<DrawingCommand> get pointsLinesAndCurves => [...points, ...lines, ...curves];
+  List<DrawingCommand> get linesAndCurvesIncluded => [...linesIncluded, ...curvesIncluded];
   List<DrawingCommand> get pointLinesAndCurvesIncluded => [...pointsIncluded, ...linesIncluded, ...curvesIncluded];
+  List<DrawingCommand> get pointLinesCurvesAndTapesIncluded => [...pointsIncluded, ...linesIncluded, ...curvesIncluded, ...tapes];
+  List<DrawingCommand> get linesCurvesAndTapesIncluded => [...linesIncluded, ...curvesIncluded, ...tapes];
+
+  StylingCommand? styleFor(String id) {
+    if (commands.whereType<StylingCommand>().any((s) => s.commandIds.contains(id))) {
+      return commands.whereType<StylingCommand>().firstWhere((s) => s.commandIds.contains(id));
+    }
+    return null;
+  }
 
   String commandLabelIncluded(String id) {
     if (id == originId) return origin.label;
-    if (pointLinesAndCurvesIncluded.any((c) => c.id == id)) {
-      return pointLinesAndCurvesIncluded.firstWhere((c) => c.id == id).label;
+    if (pointLinesCurvesAndTapesIncluded.any((c) => c.id == id)) {
+      return pointLinesCurvesAndTapesIncluded.firstWhere((c) => c.id == id).label;
     }
     return '???';
   }
+
+  List<TapeCommand> get tapes => commands.whereType<TapeCommand>().toList();
 
   List<LineCommand> get linesIncluded {
     List<LineCommand> lines = commands.whereType<LineCommand>().toList();
@@ -244,7 +269,7 @@ abstract class AbstractDrawing {
     return curves;
   }
 
-  DrawingCommand commandById(String id) {
+  DrawingCommand? commandById(String id) {
     if (id.contains('.')) {
       String partDrawingId = id.split('.').first;
       IncludedPartCommand c = commands.firstWhere((c) => c is IncludedPartCommand && c.partInfo?.partDrawingId == partDrawingId) as IncludedPartCommand;
@@ -254,11 +279,16 @@ abstract class AbstractDrawing {
       }
     }
 
-    return commands.firstWhere((c) => c.id == id);
+    try {
+      return commands.firstWhere((c) => c.id == id);
+    } catch (_) {
+      return null;
+    }
   }
 
   String commandLabel(String id) {
-    return commandById(id).label;
+    DrawingCommand? c = commandById(id);
+    return c == null ? '' : c.label;
   }
 
   LineCommand? lineById(String id) {
