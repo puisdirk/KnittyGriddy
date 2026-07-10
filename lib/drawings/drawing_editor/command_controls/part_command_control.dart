@@ -43,7 +43,7 @@ class _PartCommandControlState extends State<PartCommandControl> {
 
     if (widget.command.commandIds.isNotEmpty) {
       for (String id in widget.command.commandIds) {
-        partLabels += widget.drawing.commandById(id).label;
+        partLabels += widget.drawing.commandById(id)!.label;
         partLabels += ', ';
       }
     }

@@ -8,9 +8,11 @@ import 'package:knitty_griddy/drawings/model/commands/measurement_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/meaurement_override.dart';
 import 'package:knitty_griddy/drawings/model/commands/part_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
+import 'package:knitty_griddy/drawings/model/commands/styling_command.dart';
 import 'package:knitty_griddy/drawings/model/part_drawing.dart';
 import 'package:knitty_griddy/drawings/model/part_info.dart';
 import 'package:knitty_griddy/drawings/partrepo/part_repository.dart';
+import 'package:knitty_griddy/utils/math_utitilies.dart';
 
 @immutable
 class IncludedPartCommand extends DrawingCommand {
@@ -210,12 +212,12 @@ class IncludedPartCommand extends DrawingCommand {
     if (partInfo?.storedOffsetPartDrawing?.offset != (ownOffset - partOffset)) {
       return partDrawingWithOverrides.abstractCopyWith(offset: ownOffset - partOffset).validate();
     } else {
-      return partInfo?.storedOffsetPartDrawing;
+      return partDrawingWithOverrides; //partInfo?.storedOffsetPartDrawing;
     }
   }
 
   @override
-  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = ''}) {
+  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const[]}) {
     if (!valid) return;
 
     PartDrawing? partDrawing = _getOffsetPartDrawing(drawing);
@@ -223,7 +225,7 @@ class IncludedPartCommand extends DrawingCommand {
     
     PartCommand partCommand = partDrawing.parts.firstWhere((p) => p.id == partInfo!.partId);
 
-    partCommand.paint(canvas, size, partDrawing, selected, prefixLabel: label);
+    partCommand.paint(canvas, size, partDrawing, selected, prefixLabel: label, stylings: drawing.commands.whereType<StylingCommand>().toList());
   }
 
   @override

@@ -6,10 +6,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/drawings/formulas/formula_expression.dart';
 import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
+import 'package:knitty_griddy/drawings/model/commands/arrow_painter.dart';
 import 'package:knitty_griddy/drawings/model/commands/included_part_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
+import 'package:knitty_griddy/drawings/model/commands/styling_command.dart';
+import 'package:knitty_griddy/drawings/model/part_drawing.dart';
 import 'package:knitty_griddy/utils/constants.dart';
+import 'package:knitty_griddy/utils/dashed_painter.dart';
 import 'package:knitty_griddy/utils/math_utitilies.dart';
 
 enum CurveDefinitionType {
@@ -28,6 +32,9 @@ class CurveCommand extends DrawingCommand {
 
   final String startPointId;
   final String endPointId;
+
+  final Offset? storedStartCoordinate;
+  final Offset? storedEndCoordinate;
 
   final CurveDefinitionType curveDefinitionType;
 
@@ -61,6 +68,8 @@ class CurveCommand extends DrawingCommand {
     super.valid,
     super.errors,
     super.initiallyOpen,
+    this.storedStartCoordinate,
+    this.storedEndCoordinate,
   }) : curveDefinitionType = curveDefinitionType?? CurveDefinitionType.quadratic;
 
   CurveCommand copyWith({
@@ -82,6 +91,8 @@ class CurveCommand extends DrawingCommand {
     bool? valid,
     List<String>? errors,
     bool? initiallyOpen,
+    Offset? storedStartCoordinate,
+    Offset? storedEndCoordinate,
   }) {
     return CurveCommand(
       id: id?? this.id,
@@ -103,6 +114,8 @@ class CurveCommand extends DrawingCommand {
       valid: valid?? this.valid,
       errors: errors?? this.errors,
       initiallyOpen: initiallyOpen?? this.initiallyOpen,
+      storedStartCoordinate: storedStartCoordinate?? this.storedStartCoordinate,
+      storedEndCoordinate: storedEndCoordinate?? this.storedEndCoordinate,
     );
   }
 
@@ -294,10 +307,13 @@ class CurveCommand extends DrawingCommand {
     cubicCtrlPointId2 == other.cubicCtrlPointId2 &&
     validated == other.validated &&
     valid == other.valid &&
-    listEquals(errors, other.errors);
+    listEquals(errors, other.errors) &&
+    storedStartCoordinate == other.storedStartCoordinate &&
+    storedEndCoordinate == other.storedEndCoordinate;
   
   @override
   int get hashCode => super.hashCode ^ startPointId.hashCode ^ endPointId.hashCode ^ 
+    storedStartCoordinate.hashCode ^ storedEndCoordinate.hashCode ^
     curveDefinitionType.hashCode ^
     quadAmplitudeFormula.hashCode ^ quadSlantFormula.hashCode ^ quadCtrlPointId.hashCode ^
     cubicAmplitudeFormula1.hashCode ^ cubicSlantFormula1.hashCode ^ cubicAmplitudeFormula2.hashCode ^ cubicSlantFormula2.hashCode ^ 
@@ -392,12 +408,6 @@ class CurveCommand extends DrawingCommand {
     }
   }
 
-  Offset pointOnPath(Path p, double fraction) {
-    final PathMetrics m = p.computeMetrics();
-    final PathMetric pm = m.first;
-    return pm.getTangentForOffset(pm.length * fraction)!.position;
-  }
-
   @override
   String previewPath(AbstractDrawing drawing) {
     if (!valid) return '';
@@ -468,7 +478,7 @@ class CurveCommand extends DrawingCommand {
   }
 
   @override
-  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = ''}) {
+  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const[]}) {
     if (!valid) return;
 
     Offset middle = Offset(size.width / 2, size.height / 2);
@@ -483,15 +493,35 @@ class CurveCommand extends DrawingCommand {
     endCoordinate = endCoordinate.scale(1, -1);
     endCoordinate += middle;
 
-    Path? p = getPath(drawing, middle);
-    if (p == null) return;
+    Path? path = getPath(drawing, middle);
+    if (path == null) return;
 
-    canvas.drawPath(
-      p, 
-      Paint()
-        ..color = selected ? selectedColor : asPart ? partColor : Colors.grey.shade700
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = asPart || selected ? 2 : 1);
+    Paint paint = Paint()..style = PaintingStyle.stroke;
+    StylingCommand? styling = drawing.styleFor(id);
+    if (styling == null) {
+      // Look for id in format drawingid.id
+      if (stylings.any((s) => s.commandIds.any((sid) => sid == '${drawing.id}.$id'))) {
+        styling = stylings.firstWhere((s) => s.commandIds.any((sid) => sid == '${drawing.id}.$id'));
+      }
+    }
+
+    if (styling == null) {
+      paint.color = selected ? selectedColor : (asPart && drawing is PartDrawing) ? partColor : Colors.grey.shade700;
+      paint.strokeWidth = asPart || selected ? 2 : 1;
+    } else {
+      paint.color = selected ? selectedColor : styling.color;
+      paint.strokeWidth = styling.thickness;
+    }
+
+    if (styling == null || styling.dashStyle == DashStyle.full) {
+      canvas.drawPath(path, paint);
+    } else {
+      DashedPainter.pattern(enableCaching: false, dashPattern: styling.dashStyle.dashPattern).paint(canvas, path, paint);
+    }
+
+    if (styling != null) {
+      ArrowPainter.paint(canvas, styling, startCoordinate, endCoordinate, paint, curvePath: path);
+    }
 
     // draw curve label
     TextStyle style = TextStyle(color: selected ? selectedColor : Colors.grey[400]);
@@ -510,7 +540,7 @@ class CurveCommand extends DrawingCommand {
     final Paragraph paragraph = paragraphBuilder.build()
     ..layout(ParagraphConstraints(width: size.width));
 
-    Offset labelPosition = pointOnPath(p, 0.3);
+    Offset labelPosition = MathUtitilies.pointOnPath(path, 0.3);
     canvas.drawParagraph(paragraph, labelPosition);
 
     // Draw control points and lines
@@ -596,15 +626,11 @@ class CurveCommand extends DrawingCommand {
   }
 
   Offset? getStartCoordinate(AbstractDrawing drawing) {
-    PointCommand? startPoint = drawing.pointById(startPointId);
-    if (startPoint == null) return null;
-    return startPoint.getCoordinate(drawing);
+    return storedStartCoordinate;
   }
 
   Offset? getEndCoordinate(AbstractDrawing drawing) {
-    PointCommand? endPoint = drawing.pointById(endPointId);
-    if (endPoint == null) return null;
-    return endPoint.getCoordinate(drawing);
+    return storedEndCoordinate;
   }
 
   Offset getControlPointCoordinate(Offset startCoordinate, Offset endCoordinate, double amplitude, double slant) {
@@ -626,7 +652,8 @@ class CurveCommand extends DrawingCommand {
 
   @override
   CurveCommand clearValidation() {
-    return copyWith(validated: false, valid: false, errors: const[]);
+    return copyWith(validated: false, valid: false, errors: const[],
+      storedStartCoordinate: null, storedEndCoordinate: null);
   }
   
   @override
@@ -638,12 +665,15 @@ class CurveCommand extends DrawingCommand {
     if (label.isEmpty) { isvalid = false; retryValidation = false; validationErrors.add('Requires a label'); }
     if (drawing.commands.any((c) => c.id != id && c.label == label)) { isvalid = false; retryValidation = false; validationErrors.add('Label should be unique'); }
 
+    PointCommand? fromPoint;
     if (startPointId.isEmpty) {
       isvalid = false; 
       retryValidation = false;
       validationErrors.add('Requires a source point');
-    } else if (startPointId != originId) {
-      PointCommand? fromPoint = drawing.pointById(startPointId);
+    } else if (startPointId == originId) {
+      fromPoint = origin;
+    } else {
+      fromPoint = drawing.pointById(startPointId);
       if (fromPoint == null) {
         isvalid = false;
         retryValidation = false;
@@ -666,12 +696,15 @@ class CurveCommand extends DrawingCommand {
       }
     }
 
+    PointCommand? toPoint;
     if (endPointId.isEmpty) {
       isvalid = false; 
       retryValidation = false;
       validationErrors.add('Requires a target point');
-    } else if (endPointId != originId) {
-      PointCommand? toPoint = drawing.pointById(endPointId);
+    } else if (endPointId == originId) {
+      toPoint = origin;
+    } else {
+      toPoint = drawing.pointById(endPointId);
       if (toPoint == null) {
         isvalid = false;
         retryValidation = false;
@@ -830,6 +863,8 @@ class CurveCommand extends DrawingCommand {
       valid: isvalid,
       validated: (isvalid || !retryValidation),
       errors: validationErrors,
+      storedStartCoordinate: isvalid ? fromPoint!.getCoordinate(drawing) : null,
+      storedEndCoordinate: isvalid ? toPoint!.getCoordinate(drawing) : null,
     );
   }
 }

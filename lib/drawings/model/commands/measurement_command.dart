@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
 
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
+import 'package:knitty_griddy/drawings/model/commands/styling_command.dart';
 import 'package:knitty_griddy/utils/math_utitilies.dart';
 
 enum Unit {
@@ -58,12 +59,6 @@ class MeasurementCommand extends DrawingCommand {
     double val = value?? this.value;
     if (val < min) val = min;
     if (val > max) val = max;
-//    if (decimals != null) {
-      // Force refresh of the stepper controls
-//      min += 0.0000000001;
-//      max += 0.0000000001;
-//      val += 0.0000000001;
-//    }
     return MeasurementCommand(
       id: id, 
       version: version + 1,
@@ -149,7 +144,7 @@ class MeasurementCommand extends DrawingCommand {
   }
 
   @override
-  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = ''}) {
+  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const[]}) {
   }
 
   @override

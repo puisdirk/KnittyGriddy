@@ -1,6 +1,11 @@
 enum FormulaFunction {
   linelength(insert: 'linelength(', signature: 'linelength(line)'),
   distance(insert: 'distance(', signature: 'distance(point, point)'),
+  toCM(insert: 'toCM(', signature: 'toCM(double)'),
+  toMM(insert: 'toMM(', signature: 'toMM(double)'),
+  toMeter(insert: 'toMeter(', signature: 'toMeter(double)'),
+  toInches(insert: 'toInches(', signature: 'toInches(double)'),
+  toFeet(insert: 'toFeet(', signature: 'toFeet(double)'),
   cos(insert: 'cos(', signature: 'cos(angle)'),
   acos(insert: 'acos(', signature: 'acos(angle)'),
   sin(insert: 'sin(', signature: 'sin(angle)'),

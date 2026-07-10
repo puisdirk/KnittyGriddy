@@ -4,6 +4,7 @@ import 'package:flutter/painting.dart';
 import 'package:knitty_griddy/drawings/formulas/formula_expression.dart';
 import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
+import 'package:knitty_griddy/drawings/model/commands/styling_command.dart';
 
 class VariableCommand extends DrawingCommand {
   final String formula;
@@ -97,7 +98,7 @@ class VariableCommand extends DrawingCommand {
   }
 
   @override
-  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = ''}) {
+  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const[]}) {
   }
 
   @override

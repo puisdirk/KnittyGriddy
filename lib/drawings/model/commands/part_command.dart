@@ -5,6 +5,7 @@ import 'package:knitty_griddy/drawings/model/commands/curve_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/line_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
+import 'package:knitty_griddy/drawings/model/commands/styling_command.dart';
 import 'package:knitty_griddy/drawings/model/part_drawing.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 
@@ -64,7 +65,7 @@ class PartCommand extends DrawingCommand {
     if (validated && valid) {
       String p = '';
       for (String cmdId in commandIds) {
-        DrawingCommand cmd = drawing.commandById(cmdId);
+        DrawingCommand cmd = drawing.commandById(cmdId)!;
         p += cmd.previewPath(drawing);
       }
       return p;
@@ -80,7 +81,7 @@ class PartCommand extends DrawingCommand {
     if (valid) {
       Rect r = Rect.zero;
       for (String commandId in commandIds) {
-        DrawingCommand command = drawing.commandById(commandId);
+        DrawingCommand command = drawing.commandById(commandId)!;
         r = r.expandToInclude(command.getBoundingBox(drawing));
       }
       return r;
@@ -141,10 +142,10 @@ class PartCommand extends DrawingCommand {
   }
 
   @override
-  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = ''}) {
+  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const[]}) {
     for (String commandId in commandIds) {
-      DrawingCommand command = drawing.commandById(commandId);
-      command.paint(canvas, size, drawing, selected, asPart: true, prefixLabel: prefixLabel);
+      DrawingCommand command = drawing.commandById(commandId)!;
+      command.paint(canvas, size, drawing, selected, asPart: true, prefixLabel: prefixLabel, stylings: stylings);
     }
 
     // Draw anchor on the anchor point
@@ -218,7 +219,7 @@ class PartCommand extends DrawingCommand {
     if (drawing.commands.any((c) => c.id != id && c.label == label)) { isvalid = false; retryValidation = false; validationErrors.add('Label should be unique'); }
 
     for (String commandId in commandIds) {
-      DrawingCommand command = drawing.commandById(commandId);
+      DrawingCommand command = drawing.commandById(commandId)!;
       if (!command.validated) {
         isvalid = false;
       } else if (!command.valid) {

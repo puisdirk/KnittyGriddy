@@ -2,6 +2,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
+import 'package:knitty_griddy/drawings/model/commands/styling_command.dart';
 
 enum DrawingCommandTypes {
   commentCommand,
@@ -12,6 +13,9 @@ enum DrawingCommandTypes {
   curveCommand,
   partCommand,
   includedPartCommand,
+  stylingCommand,
+  textCommand,
+  tapeCommand,
 }
 
 @immutable
@@ -39,7 +43,7 @@ abstract class DrawingCommand {
   double get editHeight;
   
   Map<String, Object> toJson();  
-  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = ''});
+  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const[]});
   
   Rect getBoundingBox(AbstractDrawing drawing);
 

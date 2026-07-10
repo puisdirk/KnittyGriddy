@@ -9,6 +9,7 @@ import 'package:knitty_griddy/drawings/model/commands/curve_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/included_part_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/line_command.dart';
+import 'package:knitty_griddy/drawings/model/commands/styling_command.dart';
 import 'package:knitty_griddy/drawings/model/part_drawing.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 import 'package:knitty_griddy/utils/math_utitilies.dart';
@@ -287,7 +288,7 @@ class PointCommand extends DrawingCommand {
   }
 
   @override
-  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = ''}) {
+  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const[]}) {
     if (!valid) {
       return;
     }
@@ -520,7 +521,7 @@ class PointCommand extends DrawingCommand {
           if (curve == null) {
             isvalid = false;
             retryValidation = false;
-            validationErrors.add('Referece curve does not exist');
+            validationErrors.add('Reference curve does not exist');
           } else if (onCurveId.contains('.')) {
             // need to wait on validation of the included part command
             IncludedPartCommand ipc = drawing.includedParts.firstWhere((c) => c.partInfo?.partDrawingId == onCurveId.split('.').first);
@@ -554,11 +555,11 @@ class PointCommand extends DrawingCommand {
             PartDrawing? pd = c.partInfo?.storedOffsetPartDrawing;
             if (pd != null) {
               Path p = curve!.getPath(pd, Offset.zero)!;
-              newStoredCoordinate = curve.pointOnPath(p, fraction).scale(1, -1);
+              newStoredCoordinate = MathUtitilies.pointOnPath(p, fraction).scale(1, -1);
             }
           } else {
             Path p = curve!.getPath(drawing, Offset.zero)!;
-            newStoredCoordinate = curve.pointOnPath(p, fraction).scale(1, -1);
+            newStoredCoordinate = MathUtitilies.pointOnPath(p, fraction).scale(1, -1);
           }
         }
 

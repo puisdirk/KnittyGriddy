@@ -136,7 +136,27 @@ class FormulaGrammar extends GrammarDefinition {
   });
 
   Parser unitDouble() => (pDouble() & (string('mm') | string('cm') | string('m') | string('"') | string('ft') | string('deg')).trim()).map((p) {
-    Unit unit = Unit.values.byName(p[1]);
+    Unit unit = Unit.mm;
+    switch (p[1]) {
+      case 'mm':
+        unit = Unit.mm;
+        break;
+      case 'cm':
+        unit = Unit.cm;
+        break;
+      case 'm':
+        unit = Unit.meter;
+        break;
+      case '"':
+        unit = Unit.inches;
+        break;
+      case 'ft':
+        unit = Unit.feet;
+        break;
+      case 'deg':
+        unit = Unit.angle;
+        break;
+    }
     return MathUtitilies.valueInMM(p[0], unit);
   });
 
@@ -230,6 +250,13 @@ class FormulaGrammar extends GrammarDefinition {
           case '#round': return (args[0] as double).round();
           case '#toRadians': return (MathUtitilies.toRadians(args[0] as double));
           case '#toDegrees': return (MathUtitilies.toDegrees(args[0] as double));
+
+          case '#toMM': return (MathUtitilies.valueInUnit(args[0] as double, Unit.mm));
+          case '#toCM': return (MathUtitilies.valueInUnit(args[0] as double, Unit.cm));
+          case '#toMeter': return (MathUtitilies.valueInUnit(args[0] as double, Unit.meter));
+          case '#toInches': return (MathUtitilies.valueInUnit(args[0] as double, Unit.inches));
+          case '#toFeet': return (MathUtitilies.valueInUnit(args[0] as double, Unit.feet));
+
           default:
             throw FormulaException(errorMessage: 'Unknown function $name', shouldRetry: false);
         }
