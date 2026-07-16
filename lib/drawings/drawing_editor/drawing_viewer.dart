@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
+import 'package:knitty_griddy/drawings/model/commands/tape_command.dart';
 import 'package:knitty_griddy/utils/constants.dart';
   
 class DrawingViewer extends StatelessWidget {
@@ -127,20 +128,29 @@ class DrawingPainter extends CustomPainter {
     _printTiming('drew origin (${stopwatch.elapsedMilliseconds - lastTick})');
     lastTick = stopwatch.elapsedMilliseconds;
 
+    DrawingCommand? selectedCommand;
+    bool drawDirectionArrows = false;
+    if (selectedCommandId != null) {
+        selectedCommand = drawing.commandById(selectedCommandId!);
+        if (selectedCommand != null) {
+          drawDirectionArrows = selectedCommand is TapeCommand && selectedCommand.tapeType == TapeType.linesAndcurves;
+        }
+    }
+
     // We draw each command, but we draw the selected one last
     for (DrawingCommand command in drawing.commands) {
       if (command.id != selectedCommandId) {
         _printTiming('start drawing ${command.label} (${stopwatch.elapsedMilliseconds - lastTick})');
         lastTick = stopwatch.elapsedMilliseconds;
-        command.paint(canvas, size, drawing, false);
+        command.paint(canvas, size, drawing, false, drawDirectionArrow: drawDirectionArrows);
         _printTiming('done drawing ${command.label} (${stopwatch.elapsedMilliseconds - lastTick})');
         lastTick = stopwatch.elapsedMilliseconds;
       }
     }
-    if (selectedCommandId != null && drawing.commands.any((c) => c.id == selectedCommandId)) {
+    if (selectedCommand != null) {
       _printTiming('start drawing selected command (${stopwatch.elapsedMilliseconds - lastTick})');
       lastTick = stopwatch.elapsedMilliseconds;
-      drawing.commands.firstWhere((c) => c.id == selectedCommandId).paint(canvas, size, drawing, true);
+      selectedCommand.paint(canvas, size, drawing, true);
       _printTiming('done drawing selected command (${stopwatch.elapsedMilliseconds - lastTick})');
       lastTick = stopwatch.elapsedMilliseconds;
     }

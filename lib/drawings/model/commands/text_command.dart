@@ -163,14 +163,14 @@ class TextCommand extends DrawingCommand {
 
   @override
   TextCommand deleteReference({required String commandId}) {
-    return copyWith(anchorPointId: anchorPointId == commandId ? '' : anchorPointId);
+    return copyWith(anchorPointId: (anchorPointId == commandId || anchorPointId.startsWith('$commandId.')) ? '' : anchorPointId);
   }
 
   @override
   DrawingCommand dependentLabelChanged(String oldLabel, String newLabel) => this;
 
   @override
-  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const []}) {
+  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const [], bool drawDirectionArrow = false}) {
     if (!valid) return;
 
     PointCommand? anchorPoint = drawing.pointById(anchorPointId);
@@ -232,7 +232,7 @@ class TextCommand extends DrawingCommand {
         validationErrors.add('Anchor point does not exist');
       } else if (anchorPointId.contains('.')) {
         // need to wait on validation of the included part command
-        IncludedPartCommand ipc = drawing.includedParts.firstWhere((c) => c.partInfo?.partDrawingId == anchorPointId.split('.').first);
+        IncludedPartCommand ipc = drawing.includedParts.firstWhere((c) => c.id == anchorPointId.split('.')[2]);
         if (!ipc.validated) {
           isvalid = false;
         }

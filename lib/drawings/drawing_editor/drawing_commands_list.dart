@@ -343,8 +343,8 @@ class _DrawingCommandsListState extends State<DrawingCommandsList> {
                         widget.onSelect(null);
                         widget.onDrawingChanged(widget.drawing.abstractCopyWith(
                           commands: widget.drawing.commands
-                            .where((c) => c.id != command.id)
-                            .map((c) => c.deleteReference(commandId: command.id)).toList()
+                            .map((c) => c.deleteReference(commandId: (command is IncludedPartCommand && command.partInfo != null) ? command.partInfo!.partDrawingId : command.id))
+                            .where((c) => c.id != command.id).toList()
                         ).validate());
                       },
                       onChangeLabel: (DrawingCommand newCommand, String oldLabel) {

@@ -112,7 +112,7 @@ class _IncludedPartCommandControlState extends State<IncludedPartCommandControl>
             OutlinedButton.icon(
               iconAlignment: IconAlignment.end,
               onPressed: () async {
-                PartInfo? partInfo = await showDialog(context: context, builder: (context) => 
+                PartInfo? partInfo = await showDialog(barrierDismissible: false, context: context, builder: (context) => 
                   PartChooser(selectedPartInfo: widget.command.partInfo),
                 );
                 if (partInfo != widget.command.partInfo) {
@@ -149,8 +149,8 @@ class _IncludedPartCommandControlState extends State<IncludedPartCommandControl>
                   widget.onChanged(
                     widget.command.copyWith(
                       anchorPointId: value?? '',
-                      partInfo: widget.command.partInfo?? widget.command.partInfo!.copyWith(storedOffsetPartDrawing: null)
-                    ).clearValidation().validate(widget.drawing) as IncludedPartCommand
+//                      partInfo: widget.command.partInfo?? widget.command.partInfo!.copyWith(storedOffsetPartDrawing: null)
+                    )//.clearValidation().validate(widget.drawing) as IncludedPartCommand
                   );
                 }
               },

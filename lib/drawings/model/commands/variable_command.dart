@@ -82,9 +82,7 @@ class VariableCommand extends DrawingCommand {
   VariableCommand changePartDrawingReference({required String oldId, required String newId}) => this;
 
   @override
-  VariableCommand deleteReference({required String commandId}) {
-    return this;
-  }
+  VariableCommand deleteReference({required String commandId}) => this;
 
   @override
   DrawingCommand dependentLabelChanged(String oldLabel, String newLabel) {
@@ -98,7 +96,7 @@ class VariableCommand extends DrawingCommand {
   }
 
   @override
-  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const[]}) {
+  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const[], bool drawDirectionArrow = false}) {
   }
 
   @override

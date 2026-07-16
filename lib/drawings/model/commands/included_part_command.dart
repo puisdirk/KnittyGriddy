@@ -12,7 +12,6 @@ import 'package:knitty_griddy/drawings/model/commands/styling_command.dart';
 import 'package:knitty_griddy/drawings/model/part_drawing.dart';
 import 'package:knitty_griddy/drawings/model/part_info.dart';
 import 'package:knitty_griddy/drawings/partrepo/part_repository.dart';
-import 'package:knitty_griddy/utils/math_utitilies.dart';
 
 @immutable
 class IncludedPartCommand extends DrawingCommand {
@@ -102,7 +101,7 @@ class IncludedPartCommand extends DrawingCommand {
 
   @override
   IncludedPartCommand deleteReference({required String commandId}) {
-    if (anchorPointId == commandId) {
+    if (anchorPointId == commandId || anchorPointId.startsWith('$commandId.')) {
       return copyWith(anchorPointId: '');
     }
 
@@ -174,10 +173,10 @@ class IncludedPartCommand extends DrawingCommand {
   PartDrawing? _getOffsetPartDrawing(AbstractDrawing drawing) {
     if (partInfo?.storedOffsetPartDrawing != null) return partInfo!.storedOffsetPartDrawing;
 
-    return _calculateNewStoredPartDrawing(drawing);
+    return _calculateNewStoredPartDrawing(drawing)!.storedOffsetPartDrawing;
   }
 
-  PartDrawing? _calculateNewStoredPartDrawing(AbstractDrawing drawing) {
+  PartInfo? _calculateNewStoredPartDrawing(AbstractDrawing drawing) {
     PartDrawing? partDrawing = PartRepository.getPartDrawingById(partInfo!.partDrawingId);
     if (partDrawing == null) return null;
 
@@ -209,15 +208,19 @@ class IncludedPartCommand extends DrawingCommand {
     Offset? partOffset = partAnchorPoint.getCoordinate(partDrawingWithOverrides);
     if (partOffset == null) return null;
 
-    if (partInfo?.storedOffsetPartDrawing?.offset != (ownOffset - partOffset)) {
-      return partDrawingWithOverrides.abstractCopyWith(offset: ownOffset - partOffset).validate();
-    } else {
-      return partDrawingWithOverrides; //partInfo?.storedOffsetPartDrawing;
-    }
+//    if (partInfo?.storedOffsetPartDrawing?.offset != (ownOffset - partOffset)) {
+      return partInfo!.copyWith(
+        storedOffsetPartDrawing: 
+          partDrawingWithOverrides.abstractCopyWith(offset: ownOffset - partOffset).validate(),
+        storedOffset: ownOffset - partOffset,
+      );
+//    } else {
+//      return partInfo!.copyWith(storedOffsetPartDrawing: partDrawingWithOverrides);
+//    }
   }
 
   @override
-  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const[]}) {
+  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const[], bool drawDirectionArrow = false}) {
     if (!valid) return;
 
     PartDrawing? partDrawing = _getOffsetPartDrawing(drawing);
@@ -225,7 +228,7 @@ class IncludedPartCommand extends DrawingCommand {
     
     PartCommand partCommand = partDrawing.parts.firstWhere((p) => p.id == partInfo!.partId);
 
-    partCommand.paint(canvas, size, partDrawing, selected, prefixLabel: label, stylings: drawing.commands.whereType<StylingCommand>().toList());
+    partCommand.paint(canvas, size, partDrawing, selected, prefixLabel: label, stylings: drawing.commands.whereType<StylingCommand>().toList(), drawDirectionArrow: drawDirectionArrow);
   }
 
   @override
@@ -276,16 +279,11 @@ class IncludedPartCommand extends DrawingCommand {
       }
     }
 
-    PartDrawing? newStoredPartDrawing;
-    if (isvalid) {
-      newStoredPartDrawing = _calculateNewStoredPartDrawing(drawing);
-    }
-
     return copyWith(
       valid: isvalid,
       validated: (isvalid || !retryValidation),
       errors: validationErrors,
-      partInfo: isvalid ? partInfo!.copyWith(storedOffsetPartDrawing: newStoredPartDrawing) : partInfo,
+      partInfo: isvalid ? _calculateNewStoredPartDrawing(drawing) : partInfo,
     );
   }
 

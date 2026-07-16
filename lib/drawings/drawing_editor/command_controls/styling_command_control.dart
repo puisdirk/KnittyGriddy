@@ -1,3 +1,4 @@
+import 'package:fitted_scale/fitted_scale.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinbox/material.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/command_controls/edit_style_colour_dialog.dart';
@@ -153,104 +154,147 @@ class _StylingCommandControlState extends State<StylingCommandControl> {
           ],
         ),
         vspacing,
+
         Row(
           children: [
-            const SmallLabel(label: 'Style', width: 60,),
-            hspacing,
-            DropdownButton<DashStyle>(
-              key: GlobalObjectKey('${widget.command.id}-dashstyle'),
-              icon: SizedBox(width: 60, height: 20, child: CustomPaint(painter: DashStylePainter(dashStyle: widget.command.dashStyle, command: widget.command),),),
-              isDense: true,
-              autofocus: false,
-              style: smallStyle,
-              itemHeight: kMinInteractiveDimension,
-              focusColor: Colors.transparent,
-              underline: Container(),
-              items: [
-                for (DashStyle ds in DashStyle.values)
-                  DropdownMenuItem(
-                    value: ds, 
-                    child: SizedBox(
-                      width: 60,
-                      height: 20,
-                      child: CustomPaint(painter: DashStylePainter(dashStyle: ds, command: widget.command),),
+            Column(
+              children: [
+                Row(
+                  children: [
+                    const SmallLabel(label: 'Style', width: 60,),
+                    hspacing,
+                    DropdownButton<DashStyle>(
+                      key: GlobalObjectKey('${widget.command.id}-dashstyle'),
+                      icon: SizedBox(width: 60, height: 20, child: CustomPaint(painter: DashStylePainter(dashStyle: widget.command.dashStyle, command: widget.command),),),
+                      isDense: true,
+                      autofocus: false,
+                      style: smallStyle,
+                      itemHeight: kMinInteractiveDimension,
+                      focusColor: Colors.transparent,
+                      underline: Container(),
+                      items: [
+                        for (DashStyle ds in DashStyle.values)
+                          DropdownMenuItem(
+                            value: ds, 
+                            child: SizedBox(
+                              width: 60,
+                              height: 20,
+                              child: CustomPaint(painter: DashStylePainter(dashStyle: ds, command: widget.command),),
+                            ),
+                          ),
+                      ], 
+                      onChanged: (value) {
+                        if (value != null && value != widget.command.dashStyle) {
+                          widget.onChanged(widget.command.copyWith(dashStyle: value));
+                        }
+                      }
                     ),
-                  ),
-              ], 
-              onChanged: (value) {
-                if (value != null && value != widget.command.dashStyle) {
-                  widget.onChanged(widget.command.copyWith(dashStyle: value));
-                }
-              }
+                  ],
+                ),
+                vspacing,
+                Row(
+                  children: [
+                    const SmallLabel(label: 'Start arrow', width: 60,),
+                    hspacing,
+                    DropdownButton<ArrowType>(
+                      key: GlobalObjectKey('${widget.command.id}-startArrow'),
+                      icon: SizedBox(width: 60, height: 20, child: CustomPaint(painter: ArrowChooserPainter(atStart: true, arrowType: widget.command.startArrow, command: widget.command),),),
+                      isDense: true,
+                      autofocus: false,
+                      style: smallStyle,
+                      itemHeight: kMinInteractiveDimension,
+                      focusColor: Colors.transparent,
+                      underline: Container(),
+                      items: [
+                        for (ArrowType arrow in ArrowType.values)
+                          DropdownMenuItem(
+                            value: arrow, 
+                            child: SizedBox(
+                              width: 60,
+                              height: 20,
+                              child: CustomPaint(painter: ArrowChooserPainter(atStart: true, arrowType: arrow, command: widget.command),),
+                            ),
+                          ),
+                      ], 
+                      onChanged: (value) {
+                        if (value != null && value != widget.command.startArrow) {
+                          widget.onChanged(widget.command.copyWith(startArrow: value));
+                        }
+                      }
+                    ),
+                  ]
+                ),
+                vspacing,
+                Row(
+                  children: [
+                    const SmallLabel(label: 'End arrow', width: 60,),
+                    hspacing,
+                    DropdownButton<ArrowType>(
+                      key: GlobalObjectKey('${widget.command.id}-endArrow'),
+                      icon: SizedBox(width: 60, height: 20, child: CustomPaint(painter: ArrowChooserPainter(atStart: false, arrowType: widget.command.endArrow, command: widget.command),),),
+                      isDense: true,
+                      autofocus: false,
+                      style: smallStyle,
+                      itemHeight: kMinInteractiveDimension,
+                      focusColor: Colors.transparent,
+                      underline: Container(),
+                      items: [
+                        for (ArrowType arrow in ArrowType.values)
+                          DropdownMenuItem(
+                            value: arrow, 
+                            child: SizedBox(
+                              width: 60,
+                              height: 20,
+                              child: CustomPaint(painter: ArrowChooserPainter(atStart: false, arrowType: arrow, command: widget.command),),
+                            ),
+                          ),
+                      ], 
+                      onChanged: (value) {
+                        if (value != null && value != widget.command.endArrow) {
+                          widget.onChanged(widget.command.copyWith(endArrow: value));
+                        }
+                      }
+                    ),
+                  ],
+                ),
+              ],
             ),
+            const Column(
+              children: [ SizedBox(height: 100, width: 50, child: VerticalDivider(),)],
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Arrow size:', style: smallStyle,),
+                vspacing,
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    for (ArrowSize arrowSize in ArrowSize.values)
+                      FittedScale(
+                        scale: 0.75,
+                        child: Row(
+                          children: [
+                            Radio(
+                              value: arrowSize, 
+                              groupValue: widget.command.arrowSize, 
+                              onChanged: (value) {
+                                if (value != null && value != widget.command.arrowSize) {
+                                  widget.onChanged(widget.command.copyWith(arrowSize: value));
+                                }
+                              },
+                            ),
+                            Text(arrowSize.label),
+                          ],
+                        ),
+                      )
+                  ],
+                )
+              ],
+            )
           ],
         ),
-        vspacing,
-        Row(
-          children: [
-            const SmallLabel(label: 'Start arrow', width: 60,),
-            hspacing,
-            DropdownButton<ArrowType>(
-              key: GlobalObjectKey('${widget.command.id}-startArrow'),
-              icon: SizedBox(width: 60, height: 20, child: CustomPaint(painter: ArrowChooserPainter(atStart: true, arrowType: widget.command.startArrow, command: widget.command),),),
-              isDense: true,
-              autofocus: false,
-              style: smallStyle,
-              itemHeight: kMinInteractiveDimension,
-              focusColor: Colors.transparent,
-              underline: Container(),
-              items: [
-                for (ArrowType arrow in ArrowType.values)
-                  DropdownMenuItem(
-                    value: arrow, 
-                    child: SizedBox(
-                      width: 60,
-                      height: 20,
-                      child: CustomPaint(painter: ArrowChooserPainter(atStart: true, arrowType: arrow, command: widget.command),),
-                    ),
-                  ),
-              ], 
-              onChanged: (value) {
-                if (value != null && value != widget.command.startArrow) {
-                  widget.onChanged(widget.command.copyWith(startArrow: value));
-                }
-              }
-            ),
-          ]
-        ),
-        vspacing,
-        Row(
-          children: [
-            const SmallLabel(label: 'End arrow', width: 60,),
-            hspacing,
-            DropdownButton<ArrowType>(
-              key: GlobalObjectKey('${widget.command.id}-endArrow'),
-              icon: SizedBox(width: 60, height: 20, child: CustomPaint(painter: ArrowChooserPainter(atStart: false, arrowType: widget.command.endArrow, command: widget.command),),),
-              isDense: true,
-              autofocus: false,
-              style: smallStyle,
-              itemHeight: kMinInteractiveDimension,
-              focusColor: Colors.transparent,
-              underline: Container(),
-              items: [
-                for (ArrowType arrow in ArrowType.values)
-                  DropdownMenuItem(
-                    value: arrow, 
-                    child: SizedBox(
-                      width: 60,
-                      height: 20,
-                      child: CustomPaint(painter: ArrowChooserPainter(atStart: false, arrowType: arrow, command: widget.command),),
-                    ),
-                  ),
-              ], 
-              onChanged: (value) {
-                if (value != null && value != widget.command.endArrow) {
-                  widget.onChanged(widget.command.copyWith(endArrow: value));
-                }
-              }
-            ),
-          ],
-        ),
+
         vspacing,
         Column(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -366,9 +410,13 @@ class ArrowChooserPainter extends CustomPainter {
       endArrow: atStart? ArrowType.none : arrowType,
     );
 
-    ArrowPainter.paint(canvas, partialCommand, start, end, paint, 
-      heightFraction: .2, arrowFraction: 0.2, sharpArrowFraction: 0.1);
-
+    ArrowPainter.paint(
+      canvas: canvas, 
+      styleCommand: partialCommand, 
+      start: start, end: end, 
+      paint: paint,
+      arrowSizeOverride: partialCommand.arrowSize.size * 2,
+    );
   }
 
   @override

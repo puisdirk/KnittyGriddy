@@ -268,37 +268,39 @@ class _TapeCommandControlState extends State<TapeCommandControl> {
             ],
           ),
           vspacing,
-          Row(
-            children: [
-              vspacing,
-              Row(
-                children: [
-                  const SmallLabel(label: 'Direction'),
-                  hspacing,
-                  DropdownButton<TapeDirectionType>(
-                    key: GlobalObjectKey('${widget.command.id}-directiontype'),
-                    isDense: true,
-                    autofocus: false,
-                    style: smallStyle,
-                    itemHeight: kMinInteractiveDimension,
-                    focusColor: Colors.transparent,
-                    underline: Container(),
-                    items: [
-                      for (TapeDirectionType tdt in TapeDirectionType.values)
-                        DropdownMenuItem(value: tdt, child: Text(tdt.label))
-                    ],
-                    value: widget.command.directionType,
-                    onChanged: (value) {
-                      if (value != widget.command.directionType) {
-                        widget.onChanged(widget.command.copyWith(directionType: value));
-                      }
-                    },
-                  ),
-                ],
-              ),
-            ],            
-          ),
-        vspacing,
+          if (widget.command.tapeType != TapeType.linesAndcurves)
+            Row(
+              children: [
+                vspacing,
+                Row(
+                  children: [
+                    const SmallLabel(label: 'Direction'),
+                    hspacing,
+                    DropdownButton<TapeDirectionType>(
+                      key: GlobalObjectKey('${widget.command.id}-directiontype'),
+                      isDense: true,
+                      autofocus: false,
+                      style: smallStyle,
+                      itemHeight: kMinInteractiveDimension,
+                      focusColor: Colors.transparent,
+                      underline: Container(),
+                      items: [
+                        for (TapeDirectionType tdt in TapeDirectionType.values)
+                          DropdownMenuItem(value: tdt, child: Text(tdt.label))
+                      ],
+                      value: widget.command.directionType,
+                      onChanged: (value) {
+                        if (value != widget.command.directionType) {
+                          widget.onChanged(widget.command.copyWith(directionType: value));
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ],            
+            ),
+          if (widget.command.tapeType != TapeType.linesAndcurves)
+            vspacing,
         Row(
           children: [
             const SmallLabel(label: 'Unit'),

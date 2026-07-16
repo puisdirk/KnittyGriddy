@@ -70,6 +70,7 @@ class _PartChooserState extends State<PartChooser> {
             borderRadius: const BorderRadius.all(Radius.circular(10)),
             splashColor: Colors.blue.withAlpha(30),
             onTap: () => setState(() => selectedPartInfo = info),
+            onDoubleTap: () => Navigator.of(context).pop(info),
             child: Row(
               children: [
                 const SizedBox(width: _spacerwidth,),

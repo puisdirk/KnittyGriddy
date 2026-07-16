@@ -190,11 +190,11 @@ class PointCommand extends DrawingCommand {
   @override
   PointCommand deleteReference({required String commandId}) {
     return copyWith(
-      fromPointId: fromPointId == commandId ? '' : fromPointId,
-      onLineId: onLineId == commandId ? '' : onLineId,
-      onCurveId: onCurveId == commandId ? '' : onCurveId,
-      intersectionLine1Id: intersectionLine1Id == commandId ? '' : intersectionLine1Id,
-      intersectionLine2Id: intersectionLine2Id == commandId ? '' : intersectionLine2Id,
+      fromPointId: (fromPointId == commandId || fromPointId.startsWith('$commandId.')) ? '' : fromPointId,
+      onLineId: (onLineId == commandId || onLineId.startsWith('$commandId.')) ? '' : onLineId,
+      onCurveId: (onCurveId == commandId || onCurveId.startsWith('$commandId.')) ? '' : onCurveId,
+      intersectionLine1Id: (intersectionLine1Id == commandId || intersectionLine1Id.startsWith('$commandId.')) ? '' : intersectionLine1Id,
+      intersectionLine2Id: (intersectionLine2Id == commandId || intersectionLine2Id.startsWith('$commandId.')) ? '' : intersectionLine2Id,
     );
   }
 
@@ -288,7 +288,7 @@ class PointCommand extends DrawingCommand {
   }
 
   @override
-  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const[]}) {
+  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const[], bool drawDirectionArrow = false}) {
     if (!valid) {
       return;
     }
@@ -343,7 +343,7 @@ class PointCommand extends DrawingCommand {
       case PointDefinitionType.relativeToPoint:
         if (fromPointId.isNotEmpty) {
           if (fromPointId.contains('.')) {
-            deps.add(drawing.includedParts.firstWhere((c) => c.partInfo?.partDrawingId == fromPointId.split('.').first).id);
+            deps.add(drawing.includedParts.firstWhere((c) => c.id == fromPointId.split('.')[2]).id);
           }
           
           deps.add(fromPointId);
@@ -354,7 +354,7 @@ class PointCommand extends DrawingCommand {
       case PointDefinitionType.onLine:
         if (onLineId.isNotEmpty) {
           if (onLineId.contains('.')) {
-            deps.add(drawing.includedParts.firstWhere((c) => c.partInfo?.partDrawingId == onLineId.split('.').first).id);
+            deps.add(drawing.includedParts.firstWhere((c) => c.id == onLineId.split('.')[2]).id);
           }
           
           deps.add(onLineId);
@@ -364,7 +364,7 @@ class PointCommand extends DrawingCommand {
       case PointDefinitionType.onCurve:
         if (onCurveId.isNotEmpty) {
           if (onCurveId.contains('.')) {
-            deps.add(drawing.includedParts.firstWhere((c) => c.partInfo?.partDrawingId == onCurveId.split('.').first).id);
+            deps.add(drawing.includedParts.firstWhere((c) => c.id == onCurveId.split('.')[2]).id);
           }
           
           deps.add(onCurveId);
@@ -374,14 +374,14 @@ class PointCommand extends DrawingCommand {
       case PointDefinitionType.onIntersection:
         if (intersectionLine1Id.isNotEmpty) {
           if (intersectionLine1Id.contains('.')) {
-            deps.add(drawing.includedParts.firstWhere((c) => c.partInfo?.partDrawingId == intersectionLine1Id.split('.').first).id);
+            deps.add(drawing.includedParts.firstWhere((c) => c.id == intersectionLine1Id.split('.')[2]).id);
           }
           
           deps.add(intersectionLine1Id);
         }
         if (intersectionLine2Id.isNotEmpty) {
           if (intersectionLine2Id.contains('.')) {
-            deps.add(drawing.includedParts.firstWhere((c) => c.partInfo?.partDrawingId == intersectionLine2Id.split('.').first).id);
+            deps.add(drawing.includedParts.firstWhere((c) => c.id == intersectionLine2Id.split('.')[2]).id);
           }
           
           deps.add(intersectionLine2Id);
@@ -444,7 +444,7 @@ class PointCommand extends DrawingCommand {
             validationErrors.add('Reference point does not exist');
           } else if (fromPointId.contains('.')) {
             // need to wait on validation of the included part command
-            IncludedPartCommand ipc = drawing.includedParts.firstWhere((c) => c.partInfo?.partDrawingId == fromPointId.split('.').first);
+            IncludedPartCommand ipc = drawing.includedParts.firstWhere((c) => c.id == fromPointId.split('.')[2]);
             if (!ipc.validated) {
               isvalid = false;
             }
@@ -481,7 +481,7 @@ class PointCommand extends DrawingCommand {
             validationErrors.add('Reference line does not exist');
           } else if (onLineId.contains('.')) {
             // need to wait on validation of the included part command
-            IncludedPartCommand ipc = drawing.includedParts.firstWhere((c) => c.partInfo?.partDrawingId == onLineId.split('.').first);
+            IncludedPartCommand ipc = drawing.includedParts.firstWhere((c) => c.id == onLineId.split('.')[2]);
             if (!ipc.validated) {
               isvalid = false;
             }
@@ -524,7 +524,7 @@ class PointCommand extends DrawingCommand {
             validationErrors.add('Reference curve does not exist');
           } else if (onCurveId.contains('.')) {
             // need to wait on validation of the included part command
-            IncludedPartCommand ipc = drawing.includedParts.firstWhere((c) => c.partInfo?.partDrawingId == onCurveId.split('.').first);
+            IncludedPartCommand ipc = drawing.includedParts.firstWhere((c) => c.id == onCurveId.split('.')[2]);
             if (!ipc.validated) {
               isvalid = false;
             }
@@ -550,16 +550,16 @@ class PointCommand extends DrawingCommand {
 
         if (isvalid) {
           if (onCurveId.contains('.')) {
-            String partDrawingId = onCurveId.split('.').first;
-            IncludedPartCommand c = drawing.commands.firstWhere((c) => c is IncludedPartCommand && c.partInfo?.partDrawingId == partDrawingId) as IncludedPartCommand;
+            String includedPartCommandId = onCurveId.split('.')[2];
+            IncludedPartCommand c = drawing.commands.firstWhere((c) => c is IncludedPartCommand && c.id == includedPartCommandId) as IncludedPartCommand;
             PartDrawing? pd = c.partInfo?.storedOffsetPartDrawing;
             if (pd != null) {
               Path p = curve!.getPath(pd, Offset.zero)!;
-              newStoredCoordinate = MathUtitilies.pointOnPath(p, fraction).scale(1, -1);
+              newStoredCoordinate = MathUtitilies.pointOnPathAtFraction(p, fraction).scale(1, -1);
             }
           } else {
             Path p = curve!.getPath(drawing, Offset.zero)!;
-            newStoredCoordinate = MathUtitilies.pointOnPath(p, fraction).scale(1, -1);
+            newStoredCoordinate = MathUtitilies.pointOnPathAtFraction(p, fraction).scale(1, -1);
           }
         }
 
@@ -579,7 +579,7 @@ class PointCommand extends DrawingCommand {
             validationErrors.add('Line 1 does not exist');
           } else if (intersectionLine1Id.contains('.')) {
             // need to wait on validation of the included part command
-            IncludedPartCommand ipc = drawing.includedParts.firstWhere((c) => c.partInfo?.partDrawingId == intersectionLine1Id.split('.').first);
+            IncludedPartCommand ipc = drawing.includedParts.firstWhere((c) => c.id == intersectionLine1Id.split('.')[2]);
             if (!ipc.validated) {
               isvalid = false;
             }
@@ -604,7 +604,7 @@ class PointCommand extends DrawingCommand {
             validationErrors.add('Line 2 does not exist');
           } else if (intersectionLine2Id.contains('.')) {
             // need to wait on validation of the included part command
-            IncludedPartCommand ipc = drawing.includedParts.firstWhere((c) => c.partInfo?.partDrawingId == intersectionLine2Id.split('.').first);
+            IncludedPartCommand ipc = drawing.includedParts.firstWhere((c) => c.id == intersectionLine2Id.split('.')[2]);
             if (!ipc.validated) {
               isvalid = false;
             }

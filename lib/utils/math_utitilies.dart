@@ -34,11 +34,14 @@ class MathUtitilies {
     Offset((p0.dx + p1.dx) / 2.0, (p0.dy + p1.dy) / 2.0);
 
   // Given two coordinates, get a coordinate at a fraction of the line between these coordinates
-  static Offset fractionOfLine(Offset p0, Offset p1, double fraction) =>
+  static Offset pointOnLineAtFraction(Offset p0, Offset p1, double fraction) =>
     Offset(
       p0.dx + ((p1.dx - p0.dx) * fraction), 
       p0.dy + (p1.dy - p0.dy) * fraction
     );
+
+  static Offset pointOnLineAtDistance(Offset p0, Offset p1, double distance) =>
+    pointOnPathAtDistance(Path()..moveTo(p0.dx, p0.dy)..lineTo(p1.dx, p1.dy), distance);
 
   // Get the angle between two coordinates. (see https://www.mathsisfun.com/algebra/trig-finding-angle-right-triangle.html)
   static double angleOfLine(Offset p0, Offset p1) {
@@ -48,6 +51,10 @@ class MathUtitilies {
       return p0.dx >= p1.dx ? pi / 2.0 : (pi * 3.0) / 2.0; // 90 or 270
     }
 
+    // Take quadrant into account
+    if (p0.dx > p1.dx) {
+      return atan(opposite / adjacent) + pi;
+    }
     return atan(opposite / adjacent);
   }
 
@@ -91,9 +98,20 @@ class MathUtitilies {
     }
   }
 
-  static Offset pointOnPath(Path p, double fraction) {
+  static Offset pointOnPathAtFraction(Path p, double fraction) {
     final PathMetrics m = p.computeMetrics();
     final PathMetric pm = m.first;
     return pm.getTangentForOffset(pm.length * fraction)!.position;
+  }
+
+  static Offset pointOnPathAtDistance(Path p, double distance) {
+    final PathMetrics m = p.computeMetrics();
+    final PathMetric pm = m.first;
+    return pm.getTangentForOffset(distance)!.position;
+  }
+
+  static double lengthOfPath(Path p) {
+    final PathMetrics m = p.computeMetrics();
+    return m.first.length;
   }
 }

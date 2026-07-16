@@ -57,6 +57,7 @@ class TapeCommand extends DrawingCommand {
   final String toPointId;
   final String lineId;
   final Set<String> lineAndCurveIds;
+  final bool isCircular;
   final TapeDirectionType directionType;
   final TapeType tapeType;
   final TapeUnit unit;
@@ -71,6 +72,7 @@ class TapeCommand extends DrawingCommand {
     this.toPointId = '',
     this.lineId = '',
     this.lineAndCurveIds = const{},
+    this.isCircular = false,
     this.directionType = TapeDirectionType.free,
     this.tapeType = TapeType.betweenPoints,
     this.unit = TapeUnit.mm,
@@ -88,6 +90,7 @@ class TapeCommand extends DrawingCommand {
     String? toPointId,
     String? lineId,
     Set<String>? lineAndCurveIds,
+    bool? isCircular,
     TapeDirectionType? directionType,
     TapeType? tapeType,
     TapeUnit? unit,
@@ -106,6 +109,7 @@ class TapeCommand extends DrawingCommand {
       toPointId: toPointId?? this.toPointId,
       lineId: lineId?? this.lineId,
       lineAndCurveIds: lineAndCurveIds?? this.lineAndCurveIds,
+      isCircular: isCircular?? this.isCircular,
       directionType: directionType?? this.directionType,
       tapeType: tapeType?? this.tapeType,
       unit: unit?? this.unit,
@@ -128,6 +132,7 @@ class TapeCommand extends DrawingCommand {
       fromPointId == other.fromPointId &&
       lineId == other.lineId &&
       setEquals(lineAndCurveIds, other.lineAndCurveIds) &&
+      isCircular == other.isCircular &&
       directionType == other.directionType &&
       tapeType == other.tapeType &&
       toPointId == other.toPointId &&
@@ -140,7 +145,7 @@ class TapeCommand extends DrawingCommand {
 
   @override
   int get hashCode => super.hashCode ^ fromPointId.hashCode ^ toPointId.hashCode ^ lineId.hashCode ^ lineAndCurveIds.hashCode ^
-    directionType.hashCode ^ tapeType.hashCode ^ unit.hashCode ^ rowsGauge.hashCode ^ stitchesGauge.hashCode;
+    isCircular.hashCode ^ directionType.hashCode ^ tapeType.hashCode ^ unit.hashCode ^ rowsGauge.hashCode ^ stitchesGauge.hashCode;
 
   @override
   Map<String, Object> toJson() {
@@ -235,7 +240,7 @@ class TapeCommand extends DrawingCommand {
 
     if (fromPointId.isNotEmpty) {
       if (fromPointId.contains('.')) {
-        deps.add(drawing.includedParts.firstWhere((c) => c.partInfo?.partDrawingId == fromPointId.split('.').first).id);
+        deps.add(fromPointId.split('.')[2]);
       }
       
       deps.add(fromPointId);
@@ -243,7 +248,7 @@ class TapeCommand extends DrawingCommand {
 
     if (toPointId.isNotEmpty) {
       if (toPointId.contains('.')) {
-        deps.add(drawing.includedParts.firstWhere((c) => c.partInfo?.partDrawingId == toPointId.split('.').first).id);
+        deps.add(toPointId.split('.')[2]);
       }
       
       deps.add(toPointId);
@@ -251,7 +256,7 @@ class TapeCommand extends DrawingCommand {
 
     if (lineId.isNotEmpty) {
       if (lineId.contains('.')) {
-        deps.add(drawing.includedParts.firstWhere((c) => c.partInfo?.partDrawingId == lineId.split('.').first).id);
+        deps.add(lineId.split('.')[2]);
       }
       
       deps.add(toPointId);
@@ -259,7 +264,7 @@ class TapeCommand extends DrawingCommand {
 
     for (String lineOrCurveId in lineAndCurveIds) {
       if (lineOrCurveId.contains('.')) {
-        deps.add(drawing.includedParts.firstWhere((c) => c.partInfo?.partDrawingId == lineOrCurveId.split('.').first).id);
+        deps.add(lineOrCurveId.split('.')[2]);
       }
 
       deps.add(lineOrCurveId);
@@ -286,20 +291,20 @@ class TapeCommand extends DrawingCommand {
   @override
   TapeCommand deleteReference({required String commandId}) {
     return copyWith(
-      fromPointId: fromPointId == commandId ? '' : fromPointId,
-      toPointId: toPointId == commandId ? '' : toPointId,
-      lineId: lineId == commandId ? '' : lineId,
-      lineAndCurveIds: lineAndCurveIds.where((c) => c != commandId).toSet(),
+      fromPointId: (fromPointId == commandId || fromPointId.startsWith('$commandId.')) ? '' : fromPointId,
+      toPointId: (toPointId == commandId || toPointId.startsWith('$commandId.')) ? '' : toPointId,
+      lineId: (lineId == commandId || lineId.startsWith('$commandId.')) ? '' : lineId,
+      lineAndCurveIds: lineAndCurveIds.where((c) => c != commandId && !c.startsWith('$commandId.')).toSet(),
     );
   }
 
   @override
   TapeCommand clearValidation() {
-    return copyWith(validated: false, valid: false, errors: const[],);
+    return copyWith(validated: false, valid: false, errors: const[], isCircular: false);
   }
 
   @override
-  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const []}) {
+  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const [], bool drawDirectionArrow = false}) {
     if (!valid) {
       return;
     }
@@ -345,14 +350,20 @@ class TapeCommand extends DrawingCommand {
             }
 
             if (styling != null) {
-              ArrowPainter.paint(canvas, styling, start, end, paint);
+              ArrowPainter.paint(
+                canvas: canvas,
+                styleCommand: styling,
+                start: start,
+                end: end,
+                paint: paint
+              );
             }
 
             // Draw value in correct units
             double distanceInMM = MathUtitilies.distance(start, end);
             String distanceInUnit = _distanceInUnit(distanceInMM, unit);
 
-            Offset midline = MathUtitilies.fractionOfLine(start, end, 0.5);
+            Offset midline = MathUtitilies.pointOnLineAtFraction(start, end, 0.5);
 
             TextStyle style = TextStyle(color: selected ? selectedColor : Colors.black);
             final ParagraphBuilder paragraphBuilder = ParagraphBuilder(
@@ -380,7 +391,7 @@ class TapeCommand extends DrawingCommand {
             // Helper line from endpoint
             if ((tapeEndPoint.dy - end.dy).abs() > 5) {
               Path helperLine = Path()..moveTo(end.dx, end.dy)..lineTo(tapeEndPoint.dx, tapeEndPoint.dy);
-              DashedPainter.pattern(enableCaching: false, dashPattern: DashStyle.stripes.dashPattern).paint(canvas, helperLine, helperPaint);
+              DashedPainter.pattern(enableCaching: false, dashPattern: DashStyle.shortStripes.dashPattern).paint(canvas, helperLine, helperPaint);
             }
 
             Path path = Path()..moveTo(start.dx, start.dy)..lineTo(tapeEndPoint.dx, tapeEndPoint.dy);
@@ -392,14 +403,20 @@ class TapeCommand extends DrawingCommand {
             }
 
             if (styling != null) {
-              ArrowPainter.paint(canvas, styling, start, tapeEndPoint, paint);
+              ArrowPainter.paint(
+                canvas: canvas,
+                styleCommand: styling,
+                start: start,
+                end: tapeEndPoint,
+                paint: paint
+              );
             }
 
             // Draw value in correct units
             double distanceInMM = MathUtitilies.distance(start, tapeEndPoint);
             String distanceInUnit = _distanceInUnit(distanceInMM, unit);
 
-            Offset midline = MathUtitilies.fractionOfLine(start, tapeEndPoint, 0.5);
+            Offset midline = MathUtitilies.pointOnLineAtFraction(start, tapeEndPoint, 0.5);
 
             TextStyle style = TextStyle(color: selected ? selectedColor : Colors.black);
             final ParagraphBuilder paragraphBuilder = ParagraphBuilder(
@@ -425,7 +442,7 @@ class TapeCommand extends DrawingCommand {
             // Helper line from endpoint
             if ((tapeEndPoint.dx - end.dx).abs() > 5) {
               Path helperLine = Path()..moveTo(end.dx, end.dy)..lineTo(tapeEndPoint.dx, tapeEndPoint.dy);
-              DashedPainter.pattern(enableCaching: false, dashPattern: DashStyle.stripes.dashPattern).paint(canvas, helperLine, helperLinePaint);
+              DashedPainter.pattern(enableCaching: false, dashPattern: DashStyle.shortStripes.dashPattern).paint(canvas, helperLine, helperLinePaint);
             }
 
             Path path = Path()..moveTo(start.dx, start.dy)..lineTo(tapeEndPoint.dx, tapeEndPoint.dy);
@@ -437,14 +454,20 @@ class TapeCommand extends DrawingCommand {
             }
 
             if (styling != null) {
-              ArrowPainter.paint(canvas, styling, start, tapeEndPoint, paint);
+              ArrowPainter.paint(
+                canvas: canvas,
+                styleCommand: styling,
+                start: start,
+                end: tapeEndPoint,
+                paint: paint
+              );
             }
 
             // Draw value in correct units
             double distanceInMM = MathUtitilies.distance(start, tapeEndPoint);
             String distanceInUnit = _distanceInUnit(distanceInMM, unit);
 
-            Offset midline = MathUtitilies.fractionOfLine(start, tapeEndPoint, 0.5);
+            Offset midline = MathUtitilies.pointOnLineAtFraction(start, tapeEndPoint, 0.5);
 
             TextStyle style = TextStyle(color: selected ? selectedColor : Colors.black);
             final ParagraphBuilder paragraphBuilder = ParagraphBuilder(
@@ -487,21 +510,16 @@ class TapeCommand extends DrawingCommand {
         switch (directionType) {
           case TapeDirectionType.free: {
             // Calculate perpendicular points to start and end
-            final double angleOfLine = MathUtitilies.angleOfLine(start, end);
-            double perpendicularAngle = angleOfLine + (pi / 2.0);
-            // Take quadrant into account
-            if (start.dx > end.dx) {
-              perpendicularAngle = angleOfLine + pi;
-            }
+            double perpendicularAngle = MathUtitilies.angleOfLine(start, end) + (pi / 2.0);
 
             double helperLineHeight = 20;
             Offset tapeStartPoint = MathUtitilies.relativepointatangle(start, -helperLineHeight, perpendicularAngle);
             Offset tapeEndPoint= MathUtitilies.relativepointatangle(end, -helperLineHeight, perpendicularAngle);
 
             Path startHelperPath = Path()..moveTo(start.dx, start.dy)..lineTo(tapeStartPoint.dx, tapeStartPoint.dy);
-            DashedPainter.pattern(enableCaching: false, dashPattern: DashStyle.stripes.dashPattern).paint(canvas, startHelperPath, helperLinePaint);
+            DashedPainter.pattern(enableCaching: false, dashPattern: DashStyle.shortStripes.dashPattern).paint(canvas, startHelperPath, helperLinePaint);
             Path endHelperPath = Path()..moveTo(end.dx, end.dy)..lineTo(tapeEndPoint.dx, tapeEndPoint.dy);
-            DashedPainter.pattern(enableCaching: false, dashPattern: DashStyle.stripes.dashPattern).paint(canvas, endHelperPath, helperLinePaint);
+            DashedPainter.pattern(enableCaching: false, dashPattern: DashStyle.shortStripes.dashPattern).paint(canvas, endHelperPath, helperLinePaint);
 
             Path path = Path()..moveTo(tapeStartPoint.dx, tapeStartPoint.dy)..lineTo(tapeEndPoint.dx, tapeEndPoint.dy);
 
@@ -512,14 +530,20 @@ class TapeCommand extends DrawingCommand {
             }
 
             if (styling != null) {
-              ArrowPainter.paint(canvas, styling, tapeStartPoint, tapeEndPoint, paint);
+              ArrowPainter.paint(
+                canvas: canvas,
+                styleCommand: styling,
+                start: tapeStartPoint,
+                end: tapeEndPoint,
+                paint: paint
+              );
             }
 
             // Draw value in correct units
             double distanceInMM = MathUtitilies.distance(start, end);
             String distanceInUnit = _distanceInUnit(distanceInMM, unit);
 
-            Offset midline = MathUtitilies.fractionOfLine(tapeStartPoint, tapeEndPoint, 0.5);
+            Offset midline = MathUtitilies.pointOnLineAtFraction(tapeStartPoint, tapeEndPoint, 0.5);
 
             TextStyle style = TextStyle(color: selected ? selectedColor : Colors.black);
             final ParagraphBuilder paragraphBuilder = ParagraphBuilder(
@@ -545,7 +569,7 @@ class TapeCommand extends DrawingCommand {
             // Helper line from endpoint
             if ((tapeEndPoint.dy - end.dy).abs() > 5) {
               Path helperLine = Path()..moveTo(end.dx, end.dy)..lineTo(tapeEndPoint.dx, tapeEndPoint.dy);
-              DashedPainter.pattern(enableCaching: false, dashPattern: DashStyle.stripes.dashPattern).paint(canvas, helperLine, helperLinePaint);
+              DashedPainter.pattern(enableCaching: false, dashPattern: DashStyle.shortStripes.dashPattern).paint(canvas, helperLine, helperLinePaint);
             }
 
             Path path = Path()..moveTo(start.dx, start.dy)..lineTo(tapeEndPoint.dx, tapeEndPoint.dy);
@@ -557,14 +581,20 @@ class TapeCommand extends DrawingCommand {
             }
 
             if (styling != null) {
-              ArrowPainter.paint(canvas, styling, start, tapeEndPoint, paint);
+              ArrowPainter.paint(
+                canvas: canvas,
+                styleCommand: styling,
+                start: start,
+                end: tapeEndPoint,
+                paint: paint
+              );
             }
 
             // Draw value in correct units
             double distanceInMM = MathUtitilies.distance(start, tapeEndPoint);
             String distanceInUnit = _distanceInUnit(distanceInMM, unit);
 
-            Offset midline = MathUtitilies.fractionOfLine(start, tapeEndPoint, 0.5);
+            Offset midline = MathUtitilies.pointOnLineAtFraction(start, tapeEndPoint, 0.5);
 
             TextStyle style = TextStyle(color: selected ? selectedColor : Colors.black);
             final ParagraphBuilder paragraphBuilder = ParagraphBuilder(
@@ -590,7 +620,7 @@ class TapeCommand extends DrawingCommand {
             // Helper line from endpoint
             if ((tapeEndPoint.dx - end.dx).abs() > 5) {
               Path helperLine = Path()..moveTo(end.dx, end.dy)..lineTo(tapeEndPoint.dx, tapeEndPoint.dy);
-              DashedPainter.pattern(enableCaching: false, dashPattern: DashStyle.stripes.dashPattern).paint(canvas, helperLine, helperLinePaint);
+              DashedPainter.pattern(enableCaching: false, dashPattern: DashStyle.shortStripes.dashPattern).paint(canvas, helperLine, helperLinePaint);
             }
 
             Path path = Path()..moveTo(start.dx, start.dy)..lineTo(tapeEndPoint.dx, tapeEndPoint.dy);
@@ -602,14 +632,20 @@ class TapeCommand extends DrawingCommand {
             }
 
             if (styling != null) {
-              ArrowPainter.paint(canvas, styling, start, tapeEndPoint, paint);
+              ArrowPainter.paint(
+                canvas: canvas,
+                styleCommand: styling,
+                start: start,
+                end: tapeEndPoint,
+                paint: paint
+              );
             }
 
             // Draw value in correct units
             double distanceInMM = MathUtitilies.distance(start, tapeEndPoint);
             String distanceInUnit = _distanceInUnit(distanceInMM, unit);
 
-            Offset midline = MathUtitilies.fractionOfLine(start, tapeEndPoint, 0.5);
+            Offset midline = MathUtitilies.pointOnLineAtFraction(start, tapeEndPoint, 0.5);
 
             TextStyle style = TextStyle(color: selected ? selectedColor : Colors.black);
             final ParagraphBuilder paragraphBuilder = ParagraphBuilder(
@@ -642,196 +678,198 @@ class TapeCommand extends DrawingCommand {
           linesAndCurves.add(lineOrcurve);
         }
 
-        // Get the start and end curve
-        DrawingCommand startLineOrCurve = linesAndCurves.firstWhere((lineOrCurve) {
-          return !linesAndCurves.any((other) {
-            if (lineOrCurve == other) return false;
-            Offset startOffset;
-            if (lineOrCurve is LineCommand) {
-              startOffset = lineOrCurve.getStartCoordinate(drawing)!;
-            } else {
-              startOffset = (lineOrCurve as CurveCommand).getStartCoordinate(drawing)!;
-            }
-            Offset endOffset;
-            if (other is LineCommand) {
-              endOffset = other.getEndCoordinate(drawing)!;
-            } else {
-              endOffset = (other as CurveCommand).getEndCoordinate(drawing)!;
-            }
-            return startOffset == endOffset;
-          });
-        });
-        DrawingCommand endLineOrCurve = linesAndCurves.firstWhere((lineOrCurve) {
-          return !linesAndCurves.any((other) {
-            if (lineOrCurve == other) return false;
-            
-            Offset endOffset;
-            if (lineOrCurve is LineCommand) {
-              endOffset = lineOrCurve.getEndCoordinate(drawing)!;
-            } else {
-              endOffset = (lineOrCurve as CurveCommand).getEndCoordinate(drawing)!;
-            }
+        DrawingCommand startLineOrCurve;
+        DrawingCommand endLineOrCurve;
 
-            Offset startOffset;
-            if (other is LineCommand) {
-              startOffset = other.getStartCoordinate(drawing)!;
-            } else {
-              startOffset = (other as CurveCommand).getStartCoordinate(drawing)!;
-            }
+        if (isCircular) {
+          // Use the first one as start
+          startLineOrCurve = linesAndCurves.first;
 
-            return endOffset == startOffset;
-          });
-        });
+          // Find the command that ends on the first's head
+          endLineOrCurve = linesAndCurves.firstWhere((lineOrCurve) =>
+            _getLineOrCurveEndPointId(lineOrCurve) == _getLineOrCurveStartPointId(startLineOrCurve)
+          );
+        } else {
+          // Find the command that doesn't have a command at the head
+          startLineOrCurve = linesAndCurves.firstWhere((lineOrCurve) =>
+            !linesAndCurves.any((other) => lineOrCurve != other &&
+            _getLineOrCurveStartCoordinate(lineOrCurve, drawing) == _getLineOrCurveEndCoordinate(other, drawing))
+          );
 
-        Offset? start = (startLineOrCurve is LineCommand) ? startLineOrCurve.getStartCoordinate(drawing) : (startLineOrCurve as CurveCommand).getStartCoordinate(drawing);
-        if (start == null) return;
+          // Find the command that doesn't have a command at the tail
+          endLineOrCurve = linesAndCurves.firstWhere((lineOrCurve) =>
+            !linesAndCurves.any((other) => lineOrCurve != other &&
+            _getLineOrCurveEndCoordinate(lineOrCurve, drawing) == _getLineOrCurveStartCoordinate(other, drawing))
+          );
+        }
+
+        Offset? start = _getLineOrCurveStartCoordinate(startLineOrCurve, drawing);
         start = start.scale(1, -1);
 
-        Offset? end = (endLineOrCurve is LineCommand) ? endLineOrCurve.getEndCoordinate(drawing) : (endLineOrCurve as CurveCommand).getEndCoordinate(drawing);
-        if (end == null) return;
+        Offset? end = _getLineOrCurveEndCoordinate(endLineOrCurve, drawing);
         end = end.scale(1, -1);
 
         start += middle;
         end += middle;
 
-        switch (directionType) {
-          case TapeDirectionType.free: {
+        double fractionIncrease = 0.02;
 
-            double fractionIncrease = 0.01;
-  
-            Path tapeCurvePath = Path();
-            Offset tapeCurveStartLocation = Offset.zero;
-            Offset tapeCurveEndLocation = Offset.zero;
+        // We build the tape path to draw it at the end
+        Path tapeCurvePath = Path();
+        // We'll remember the start and end of the tape to draw arrows on them at the end
+        Offset tapeCurveStartLocation = Offset.zero;
+        Offset tapeCurveEndLocation = Offset.zero;
+        // We add the length of each segment
+        double distanceInMM = 0;
 
-            for (DrawingCommand lineOrCurve in linesAndCurves) {
-              if (lineOrCurve is CurveCommand) {
-                Path curvePath = lineOrCurve.getPath(drawing, middle)!;
-    
-                // Calculate perpendicular points, every fractionIncrease step of the curve
-                for (double perplocation = 0; perplocation <= 1 + fractionIncrease; perplocation += fractionIncrease) {
-                  bool atEndOfCurve = perplocation >= 1;
+        DrawingCommand lineOrCurve = startLineOrCurve;
+        while (true) {
+          if (lineOrCurve is CurveCommand) {
+            Path curvePath = lineOrCurve.getPath(drawing, middle)!;
+            distanceInMM += MathUtitilies.lengthOfPath(curvePath);
 
-                  // Find that next point on the curve
-                  Offset perpOffset = MathUtitilies.pointOnPath(curvePath, perplocation);
-                  
-                  // Find a point that is a bit further or back on the curve to get the angle between those two points
-                  Offset perpoffsetincreased = MathUtitilies.pointOnPath(curvePath, atEndOfCurve ? perplocation - 0.05 : perplocation + 0.05);
-                  
-                  // Get the angle of that piece of the curve
-                  final double angleOfCurveAtPerplocation = MathUtitilies.angleOfLine(perpOffset, perpoffsetincreased);
+            // Calculate perpendicular points, every fractionIncrease step of the curve
+            for (double perplocation = 0; perplocation <= 1 + fractionIncrease; perplocation += fractionIncrease) {
+              bool atEndOfCurve = perplocation >= 1;
 
-                  // Add 90 degrees
-                  double perpendicularAngle = angleOfCurveAtPerplocation + (pi / 2.0);
+              // Find that next point on the curve
+              Offset perpOffset = MathUtitilies.pointOnPathAtFraction(curvePath, perplocation);
+              
+              // Find a point that is a bit further or back on the curve to get the angle between those two points
+              Offset perpoffsetincreased = MathUtitilies.pointOnPathAtFraction(curvePath, atEndOfCurve ? perplocation - 0.05 : perplocation + 0.05);
+              
+              // Get the perpendicular angle of that piece of the curve
+              double perpendicularAngle = atEndOfCurve ?
+                MathUtitilies.angleOfLine(perpoffsetincreased, perpOffset) + (pi / 2.0)
+              : MathUtitilies.angleOfLine(perpOffset, perpoffsetincreased) + (pi / 2.0);
 
-                  // Take quadrant into account
-                  // TODO: the dx compare is not a good criterium, but not sure what would be
-                  if (perpoffsetincreased.dx > perpOffset.dx) {
-                    perpendicularAngle += pi;
-                  } else {
-                    perpendicularAngle -= pi;
-                  }
+              // Get a point at that angle, somewhat removed from the curve
+              Offset shadowPointOffset = MathUtitilies.relativepointatangle(perpOffset, -helperLineHeight, perpendicularAngle);
 
-                  // Get a point at that angle, somewhat removed from the curve
-                  Offset shadowPointOffset = MathUtitilies.relativepointatangle(perpOffset, helperLineHeight, perpendicularAngle);
+              // If we are at the first point of the start curve, we draw a helper line
+              if (lineOrCurve == startLineOrCurve && perplocation == 0) {
+                canvas.drawLine(start, shadowPointOffset, helperLinePaint);
+                tapeCurveStartLocation = shadowPointOffset;
+              }
+              // and same on the last point of the last curve
+              if (lineOrCurve == endLineOrCurve && atEndOfCurve) {
+                canvas.drawLine(end, shadowPointOffset, helperLinePaint);
+                tapeCurveEndLocation = shadowPointOffset;
+              }
 
-                  // If we are at the first point of the start curve, we draw a helper line
-                  if (lineOrCurve == startLineOrCurve && perplocation == 0) {
-                    canvas.drawLine(start, shadowPointOffset, helperLinePaint);
-                    tapeCurveStartLocation = shadowPointOffset;
-                  }
-                  // and same on the last point of the last curve
-                  if (lineOrCurve == endLineOrCurve && atEndOfCurve) {
-                    canvas.drawLine(end, shadowPointOffset, helperLinePaint);
-                    tapeCurveEndLocation = shadowPointOffset;
-                  }
-
-                  // Construct on the tapeCurvePath
-                  if (lineOrCurve == startLineOrCurve && perplocation == 0) {
-                    tapeCurvePath.moveTo(shadowPointOffset.dx, shadowPointOffset.dy);
-                  } else {
-                    tapeCurvePath.lineTo(shadowPointOffset.dx, shadowPointOffset.dy);
-                  }
-                }
+              // Construct on the tapeCurvePath
+              if (lineOrCurve == startLineOrCurve && perplocation == 0) {
+                tapeCurvePath.moveTo(shadowPointOffset.dx, shadowPointOffset.dy);
               } else {
-                LineCommand line = lineOrCurve as LineCommand;
-
-                Offset lineStart = line.getStartCoordinate(drawing)!;
-                lineStart = lineStart.scale(1, -1); lineStart += middle;
-                Offset lineEnd = line.getEndCoordinate(drawing)!;
-                lineEnd = lineEnd.scale(1, -1); lineEnd += middle;
-
-                final double angleOfLine = MathUtitilies.angleOfLine(lineStart, lineEnd);
-                double perpendicularAngle = angleOfLine + (pi / 2.0);
-                if (lineEnd.dx > lineStart.dx) perpendicularAngle += pi;
-
-                Offset startShadowPointOffset = MathUtitilies.relativepointatangle(lineStart, helperLineHeight, perpendicularAngle);
-
-                if (line == startLineOrCurve) {
-                  tapeCurveStartLocation = startShadowPointOffset;
-                  tapeCurvePath.moveTo(startShadowPointOffset.dx, startShadowPointOffset.dy);
-                  canvas.drawLine(lineStart, startShadowPointOffset, helperLinePaint);
-                } else {
-                  tapeCurvePath.lineTo(startShadowPointOffset.dx, startShadowPointOffset.dy);
-                }
-
-                Offset endShadowPointOffset = MathUtitilies.relativepointatangle(lineEnd, helperLineHeight, perpendicularAngle);
-                tapeCurvePath.lineTo(endShadowPointOffset.dx, endShadowPointOffset.dy);
-
-                if (line == endLineOrCurve) {
-                  tapeCurveEndLocation = endShadowPointOffset;
-                  canvas.drawLine(lineEnd, endShadowPointOffset, helperLinePaint);
-                }
+                tapeCurvePath.lineTo(shadowPointOffset.dx, shadowPointOffset.dy);
               }
             }
+          } else {
+            LineCommand line = lineOrCurve as LineCommand;
 
-            if (styling == null || styling.dashStyle == DashStyle.full) {
-              canvas.drawPath(tapeCurvePath, paint);
+            Offset lineStart = line.getStartCoordinate(drawing)!;
+            lineStart = lineStart.scale(1, -1); lineStart += middle;
+            Offset lineEnd = line.getEndCoordinate(drawing)!;
+            lineEnd = lineEnd.scale(1, -1); lineEnd += middle;
+
+            double perpendicularAngle = MathUtitilies.angleOfLine(lineStart, lineEnd) + (pi / 2.0);
+
+            Offset startShadowPointOffset = MathUtitilies.relativepointatangle(lineStart, -helperLineHeight, perpendicularAngle);
+
+            if (line == startLineOrCurve) {
+              tapeCurveStartLocation = startShadowPointOffset;
+              tapeCurvePath.moveTo(startShadowPointOffset.dx, startShadowPointOffset.dy);
+              canvas.drawLine(lineStart, startShadowPointOffset, helperLinePaint);
             } else {
-              DashedPainter.pattern(enableCaching: false, dashPattern: styling.dashStyle.dashPattern).paint(canvas, tapeCurvePath, paint);
+              tapeCurvePath.lineTo(startShadowPointOffset.dx, startShadowPointOffset.dy);
             }
 
-            // Draw arrows
-            if (styling != null) {
-              ArrowPainter.paint(canvas, styling, tapeCurveStartLocation, tapeCurveEndLocation, paint, curvePath: tapeCurvePath);
+            Offset endShadowPointOffset = MathUtitilies.relativepointatangle(lineEnd, -helperLineHeight, perpendicularAngle);
+            tapeCurvePath.lineTo(endShadowPointOffset.dx, endShadowPointOffset.dy);
+
+            if (line == endLineOrCurve) {
+              tapeCurveEndLocation = endShadowPointOffset;
+              canvas.drawLine(lineEnd, endShadowPointOffset, helperLinePaint);
             }
+          }
 
-            // Draw value in correct units
-            double distanceInMM = MathUtitilies.distance(start, end);
-            String distanceInUnit = _distanceInUnit(distanceInMM, unit);
+          // Find the next line or curve or stop the forever loop
+          if (lineOrCurve == endLineOrCurve) {
+            break;
+          }
+          lineOrCurve = linesAndCurves.firstWhere((c) => _getLineOrCurveStartPointId(c) == _getLineOrCurveEndPointId(lineOrCurve));
+        } // end of while(true)
 
-            // We put the label in the middle of the tape curve
-            Offset midline = MathUtitilies.pointOnPath(tapeCurvePath, 0.5);
+        if (styling == null || styling.dashStyle == DashStyle.full) {
+          canvas.drawPath(tapeCurvePath, paint);
+        } else {
+          DashedPainter.pattern(enableCaching: false, dashPattern: styling.dashStyle.dashPattern).paint(canvas, tapeCurvePath, paint);
+        }
 
-            TextStyle style = TextStyle(color: selected ? selectedColor : Colors.black);
-            final ParagraphBuilder paragraphBuilder = ParagraphBuilder(
-              ParagraphStyle(
-                fontSize: 10,
-                fontFamily: style.fontFamily,
-                fontStyle: style.fontStyle,
-                fontWeight: style.fontWeight,
-                textAlign: TextAlign.justify,
-              ),
-            )
-            ..pushStyle(style.getTextStyle())
-            ..addText(distanceInUnit);
+        // Draw arrows
+        if (styling != null) {
+          ArrowPainter.paint(
+            canvas: canvas,
+            styleCommand: styling,
+            start: tapeCurveStartLocation,
+            end: tapeCurveEndLocation,
+            paint: paint,
+            curvePath: tapeCurvePath,
+          );
+        }
 
-            final Paragraph paragraph = paragraphBuilder.build()
-            ..layout(ParagraphConstraints(width: size.width));
+        // Draw value in correct units
+        String distanceInUnit = _distanceInUnit(distanceInMM, unit);
 
-            canvas.drawParagraph(paragraph,  midline.translate(2, 0));
+        // We put the label in the middle of the tape curve
+        Offset midline = MathUtitilies.pointOnPathAtFraction(tapeCurvePath, 0.5);
 
-        } break;
-          case TapeDirectionType.horizontal: {
+        TextStyle style = TextStyle(color: selected ? selectedColor : Colors.black);
+        final ParagraphBuilder paragraphBuilder = ParagraphBuilder(
+          ParagraphStyle(
+            fontSize: 10,
+            fontFamily: style.fontFamily,
+            fontStyle: style.fontStyle,
+            fontWeight: style.fontWeight,
+            textAlign: TextAlign.justify,
+          ),
+        )
+        ..pushStyle(style.getTextStyle())
+        ..addText(distanceInUnit);
 
-          } break;
-          case TapeDirectionType.vertical: {
+        final Paragraph paragraph = paragraphBuilder.build()
+        ..layout(ParagraphConstraints(width: size.width));
 
-          } break;
-//======================================
-        } break; // end of TapeType.curve
+        canvas.drawParagraph(paragraph,  midline.translate(2, 0));
 
-      }
+      } // end of case linesAndCurves
     }
+  }
+
+  Offset _getLineOrCurveStartCoordinate(DrawingCommand lineOrCurve, AbstractDrawing drawing) {
+    if (lineOrCurve is LineCommand) {
+      return lineOrCurve.getStartCoordinate(drawing)!;
+    } else {
+      return (lineOrCurve as CurveCommand).getStartCoordinate(drawing)!;
+    }
+  }
+
+  Offset _getLineOrCurveEndCoordinate(DrawingCommand lineOrCurve, AbstractDrawing drawing) {
+    if (lineOrCurve is LineCommand) {
+      return lineOrCurve.getEndCoordinate(drawing)!;
+    } else {
+      return (lineOrCurve as CurveCommand).getEndCoordinate(drawing)!;
+    }
+  }
+
+  String _getLineOrCurveStartPointId(DrawingCommand lineOrCurve) {
+    if (lineOrCurve is LineCommand) return lineOrCurve.fromPointId;
+    return (lineOrCurve as CurveCommand).startPointId;
+  }
+
+  String _getLineOrCurveEndPointId(DrawingCommand lineOrCurve) {
+    if (lineOrCurve is LineCommand) return lineOrCurve.toPointId;
+    return (lineOrCurve as CurveCommand).endPointId;
   }
 
   String _distanceInUnit(double distanceInMM, TapeUnit toUnit) {
@@ -859,6 +897,7 @@ class TapeCommand extends DrawingCommand {
     bool isvalid = true;
     bool retryValidation = true;
     List<String> validationErrors = [];
+    bool circular = false;
 
     if (label.isEmpty) { isvalid = false; retryValidation = false; validationErrors.add('Requires a label'); }
     if (drawing.commands.any((c) => c.id != id && c.label == label)) { isvalid = false; retryValidation = false; validationErrors.add('Label should be unique'); }
@@ -880,7 +919,7 @@ class TapeCommand extends DrawingCommand {
             validationErrors.add('Source point does not exist');
           } else if (fromPointId.contains('.')) {
             // need to wait on validation of the included part command
-            IncludedPartCommand ipc = drawing.includedParts.firstWhere((c) => c.partInfo?.partDrawingId == fromPointId.split('.').first);
+            IncludedPartCommand ipc = drawing.includedParts.firstWhere((c) => c.id == fromPointId.split('.')[2]);
             if (!ipc.validated) {
               isvalid = false;
             }
@@ -911,7 +950,7 @@ class TapeCommand extends DrawingCommand {
             validationErrors.add('Target point does not exist');
           } else if (toPointId.contains('.')) {
             // need to wait on validation of the included part command
-            IncludedPartCommand ipc = drawing.includedParts.firstWhere((c) => c.partInfo?.partDrawingId == toPointId.split('.').first);
+            IncludedPartCommand ipc = drawing.includedParts.firstWhere((c) => c.id == toPointId.split('.')[2]);
             if (!ipc.validated) {
               isvalid = false;
             }
@@ -942,7 +981,7 @@ class TapeCommand extends DrawingCommand {
             validationErrors.add('Line does not exist');
           } else if (lineId.contains('.')) {
             // need to wait on validation of the included part command
-            IncludedPartCommand ipc = drawing.includedParts.firstWhere((c) => c.partInfo?.partDrawingId == lineId.split('.').first);
+            IncludedPartCommand ipc = drawing.includedParts.firstWhere((c) => c.id == lineId.split('.')[2]);
             if (!ipc.validated) {
               isvalid = false;
             }
@@ -975,7 +1014,7 @@ class TapeCommand extends DrawingCommand {
               validationErrors.add('Line or curve $lineOrCurveId does not exist');
             } else if (lineOrCurveId.contains('.')) {
               // need to wait on validation of the included part command
-              IncludedPartCommand ipc = drawing.includedParts.firstWhere((c) => c.partInfo?.partDrawingId == lineOrCurveId.split('.').first);
+              IncludedPartCommand ipc = drawing.includedParts.firstWhere((c) => c.id == lineOrCurveId.split('.')[2]);
               if (!ipc.validated) {
                 isvalid = false;
               }
@@ -997,26 +1036,22 @@ class TapeCommand extends DrawingCommand {
             bool foundEnd = false;
             // Border case: 2 curves, but they are separate
             if (linesAndCurves.length == 2) {
-              DrawingCommand first = linesAndCurves.first;
-              DrawingCommand last = linesAndCurves.last;
-              String firstStartPointId = (first is LineCommand) ? first.fromPointId : (first as CurveCommand).startPointId;
-              String firstEndPointId = (first is LineCommand) ? first.toPointId : (first as CurveCommand).endPointId;
-              String lastStartPointId = (last is LineCommand) ? last.fromPointId : (last as CurveCommand).startPointId;
-              String lastEndPointId = (last is LineCommand) ? last.toPointId : (last as CurveCommand).endPointId;
+              String firstStartPointId = _getLineOrCurveStartPointId(linesAndCurves.first);
+              String firstEndPointId = _getLineOrCurveEndPointId(linesAndCurves.first);
+              String lastStartPointId = _getLineOrCurveStartPointId(linesAndCurves.last);
+              String lastEndPointId = _getLineOrCurveEndPointId(linesAndCurves.last);
               if (!((firstStartPointId == lastEndPointId) || (firstEndPointId == lastStartPointId))) {
                 isvalid = false;
                 retryValidation = false;
                 validationErrors.add('The lines and curves to measure must be consecutive');
+              } else if ((firstStartPointId == lastEndPointId) && (firstEndPointId == lastStartPointId)) {
+                circular = true;
               }
+
             } else {
               for (DrawingCommand lineOrCurve in linesAndCurves) {
-                // No previous curve?
-                if (!linesAndCurves.any((c) {
-                  if (c == lineOrCurve) return false;
-                  String cEndPointId = (c is LineCommand) ? c.toPointId : (c as CurveCommand).endPointId;
-                  String lineOrCurveStartPointId = (lineOrCurve is LineCommand) ? lineOrCurve.fromPointId : (lineOrCurve as CurveCommand).startPointId;
-                  return cEndPointId == lineOrCurveStartPointId;
-                })) {
+                // No previous line or curve?
+                if (!linesAndCurves.any((c) => lineOrCurve != c && _getLineOrCurveEndPointId(c) == _getLineOrCurveStartPointId(lineOrCurve))) {
                   if (foundStart) {
                     // we already had a startcurve
                     isvalid = false;
@@ -1027,13 +1062,8 @@ class TapeCommand extends DrawingCommand {
                     foundStart = true;
                   }
                 }
-                // No next curve?
-                if (!linesAndCurves.any((c) {
-                  if (c == lineOrCurve) return false;
-                  String cstartPointId = (c is LineCommand) ? c.fromPointId : (c as CurveCommand).startPointId;
-                  String lineOrCurveEndPointId = (lineOrCurve is LineCommand) ? lineOrCurve.toPointId : (lineOrCurve as CurveCommand).endPointId;
-                  return cstartPointId == lineOrCurveEndPointId;
-                })) {
+                // No next line or curve?
+                if (!linesAndCurves.any((c) => lineOrCurve != c && _getLineOrCurveStartPointId(c) == _getLineOrCurveEndPointId(lineOrCurve))) {
                   if (foundEnd) {
                     // We already had an endcurve
                     isvalid = false;
@@ -1045,6 +1075,7 @@ class TapeCommand extends DrawingCommand {
                   }
                 }
               }
+              if (!foundStart && !foundEnd) circular = true;
             }
           }
         }
@@ -1056,6 +1087,7 @@ class TapeCommand extends DrawingCommand {
       valid: isvalid,
       validated: (isvalid || !retryValidation),
       errors: validationErrors,
+      isCircular: circular,
     );
   }
 

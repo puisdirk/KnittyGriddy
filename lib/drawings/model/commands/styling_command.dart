@@ -10,12 +10,29 @@ enum DashStyle {
   mediumStripes(dashPattern: [7,3]),
   shortStripes(dashPattern: [3, 1]),
   dots(dashPattern: [1, 1]),
-  stripesAndDots(dashPattern: [10, 2, 1, 2]);
+  separatedDots(dashPattern: [1, 3]),
+  stripesAndDots(dashPattern: [10, 2, 1, 2]),
+  stripesAndDotDots(dashPattern: [10, 2, 1, 2, 1, 2]);
 
   final List<double> dashPattern;
 
   const DashStyle({
     required this.dashPattern
+  });
+}
+
+enum ArrowSize {
+  small(label: 'S', size: 5),
+  medium(label: 'M', size: 10),
+  large(label: 'L', size: 16),
+  ;
+
+  final String label;
+  final double size;
+
+  const ArrowSize({
+    required this.label,
+    required this.size,
   });
 }
 
@@ -26,6 +43,7 @@ class StylingCommand extends DrawingCommand {
   final DashStyle dashStyle;
   final ArrowType startArrow;
   final ArrowType endArrow;
+  final ArrowSize arrowSize;
 
   const StylingCommand({
     required super.id,
@@ -37,6 +55,7 @@ class StylingCommand extends DrawingCommand {
     this.dashStyle = DashStyle.full,
     this.startArrow = ArrowType.none,
     this.endArrow = ArrowType.none,
+    this.arrowSize = ArrowSize.medium,
     super.validated,
     super.valid,
     super.errors,
@@ -51,6 +70,7 @@ class StylingCommand extends DrawingCommand {
     DashStyle? dashStyle,
     ArrowType? startArrow,
     ArrowType? endArrow,
+    ArrowSize? arrowSize,
     bool? validated,
     bool? valid,
     List<String>? errors,
@@ -66,6 +86,7 @@ class StylingCommand extends DrawingCommand {
       dashStyle: dashStyle?? this.dashStyle,
       startArrow: startArrow?? this.startArrow,
       endArrow: endArrow?? this.endArrow,
+      arrowSize: arrowSize?? this.arrowSize,
       validated: validated?? this.validated,
       valid: valid?? this.valid,
       errors: errors?? this.errors,
@@ -74,7 +95,7 @@ class StylingCommand extends DrawingCommand {
   }
 
   @override
-  double get editHeight => 510;
+  double get editHeight => 520;
 
   @override
   Rect getBoundingBox(AbstractDrawing drawing) => Rect.zero;
@@ -104,7 +125,7 @@ class StylingCommand extends DrawingCommand {
 
   @override
   StylingCommand deleteReference({required String commandId}) {
-    return copyWith(commandIds: commandIds.where((c) => c != commandId).toSet());
+    return copyWith(commandIds: commandIds.where((c) => c != commandId && !c.startsWith('$commandId.')).toSet());
   }
 
   @override
@@ -113,7 +134,7 @@ class StylingCommand extends DrawingCommand {
   }
 
   @override
-  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const[]}) {
+  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const[], bool drawDirectionArrow = false}) {
   }
 
   @override
@@ -128,6 +149,7 @@ class StylingCommand extends DrawingCommand {
       'ids': commandIds.toList(),
       'startarrow': startArrow.name,
       'endarrow': endArrow.name,
+      'arrowsize': arrowSize.name,
     };
   }
 
@@ -142,6 +164,7 @@ class StylingCommand extends DrawingCommand {
       commandIds: (json['ids'] as List).map((o) => o as String).toSet(),
       startArrow: ArrowType.values.byName(json['startarrow'] as String),
       endArrow: ArrowType.values.byName(json['endarrow'] as String),
+      arrowSize: ArrowSize.values.byName(json['arrowsize']),
     );
   }
 
@@ -157,11 +180,12 @@ class StylingCommand extends DrawingCommand {
     thickness == other.thickness &&
     dashStyle == other.dashStyle &&
     startArrow == other.startArrow &&
-    endArrow == other.endArrow;
+    endArrow == other.endArrow &&
+    arrowSize == other.arrowSize;
   
   @override
   int get hashCode => super.hashCode ^ commandIds.hashCode ^ color.hashCode ^ thickness.hashCode ^ 
-    dashStyle.hashCode ^ startArrow.hashCode ^ endArrow.hashCode;
+    dashStyle.hashCode ^ startArrow.hashCode ^ endArrow.hashCode ^ arrowSize.hashCode;
 
   @override
   DrawingCommand validate(AbstractDrawing drawing) {

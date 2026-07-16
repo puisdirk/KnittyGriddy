@@ -43,7 +43,7 @@ abstract class DrawingCommand {
   double get editHeight;
   
   Map<String, Object> toJson();  
-  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const[]});
+  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const[], bool drawDirectionArrow = false});
   
   Rect getBoundingBox(AbstractDrawing drawing);
 

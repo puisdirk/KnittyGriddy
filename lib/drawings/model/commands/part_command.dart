@@ -142,10 +142,10 @@ class PartCommand extends DrawingCommand {
   }
 
   @override
-  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const[]}) {
+  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const[], bool drawDirectionArrow = false}) {
     for (String commandId in commandIds) {
       DrawingCommand command = drawing.commandById(commandId)!;
-      command.paint(canvas, size, drawing, selected, asPart: true, prefixLabel: prefixLabel, stylings: stylings);
+      command.paint(canvas, size, drawing, selected, asPart: true, prefixLabel: prefixLabel, stylings: stylings, drawDirectionArrow: drawDirectionArrow);
     }
 
     // Draw anchor on the anchor point
