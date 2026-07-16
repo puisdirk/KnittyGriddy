@@ -102,7 +102,7 @@ class LineCommand extends DrawingCommand {
 
     if (fromPointId.isNotEmpty) {
       if (fromPointId.contains('.')) {
-        deps.add(drawing.includedParts.firstWhere((c) => c.partInfo?.partDrawingId == fromPointId.split('.').first).id);
+        deps.add(drawing.includedParts.firstWhere((c) => c.id == fromPointId.split('.')[2]).id);
       }
       
       deps.add(fromPointId);
@@ -110,7 +110,7 @@ class LineCommand extends DrawingCommand {
 
     if (toPointId.isNotEmpty) {
       if (toPointId.contains('.')) {
-        deps.add(drawing.includedParts.firstWhere((c) => c.partInfo?.partDrawingId == toPointId.split('.').first).id);
+        deps.add(drawing.includedParts.firstWhere((c) => c.id == toPointId.split('.')[2]).id);
       }
       
       deps.add(toPointId);
@@ -136,8 +136,8 @@ class LineCommand extends DrawingCommand {
   @override
   LineCommand deleteReference({required String commandId}) {
     return copyWith(
-      fromPointId: fromPointId == commandId ? '' : fromPointId,
-      toPointId: toPointId == commandId ? '' : toPointId,
+      fromPointId: (fromPointId == commandId || fromPointId.startsWith('$commandId.')) ? '' : fromPointId,
+      toPointId: (toPointId == commandId || toPointId.startsWith('$commandId.')) ? '' : toPointId,
     );
   }
 
@@ -304,7 +304,7 @@ class LineCommand extends DrawingCommand {
   }
 
   @override
-  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const[]}) {
+  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const[], bool drawDirectionArrow = false}) {
     if (!valid) {
       return;
     }
@@ -351,7 +351,17 @@ class LineCommand extends DrawingCommand {
     }
 
     if (styling != null) {
-      ArrowPainter.paint(canvas, styling, start, end, paint);
+      ArrowPainter.paint(
+        canvas: canvas,
+        styleCommand: styling,
+        start: start,
+        end: end,
+        paint: paint
+      );
+    }
+
+    if (selected || drawDirectionArrow) {
+      ArrowPainter.paintDirectionArrow(canvas: canvas, path: path, paint: paint, thickness: styling == null ? 1 : styling.thickness);
     }
 
     // draw line label
@@ -409,7 +419,7 @@ class LineCommand extends DrawingCommand {
         validationErrors.add('Source point does not exist');
       } else if (fromPointId.contains('.')) {
         // need to wait on validation of the included part command
-        IncludedPartCommand ipc = drawing.includedParts.firstWhere((c) => c.partInfo?.partDrawingId == fromPointId.split('.').first);
+        IncludedPartCommand ipc = drawing.includedParts.firstWhere((c) => c.id == fromPointId.split('.')[2]);
         if (!ipc.validated) {
           isvalid = false;
         }
@@ -440,7 +450,7 @@ class LineCommand extends DrawingCommand {
         validationErrors.add('Target point does not exist');
       } else if (toPointId.contains('.')) {
         // need to wait on validation of the included part command
-        IncludedPartCommand ipc = drawing.includedParts.firstWhere((c) => c.partInfo?.partDrawingId == toPointId.split('.').first);
+        IncludedPartCommand ipc = drawing.includedParts.firstWhere((c) => c.id == toPointId.split('.')[2]);
         if (!ipc.validated) {
           isvalid = false;
         }

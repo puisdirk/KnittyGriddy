@@ -127,6 +127,34 @@ class CurveCommand extends DrawingCommand {
     return 270;
   }
 
+  Rect getBoundingBoxWithoutControlPoints(AbstractDrawing drawing) {
+    if (valid) {
+      Path? p = getPath(drawing, Offset.zero);
+
+      if (p != null) {
+        Rect r = Rect.zero;
+        for (double fraction = 0; fraction <= 1; fraction += 0.01) {
+          Offset point = MathUtitilies.pointOnPathAtFraction(p, fraction);
+          if (point.dx < r.left) {
+            r = Rect.fromLTRB(point.dx, r.top, r.right, r.bottom);
+          }
+          if (point.dx > r.right) {
+            r = Rect.fromLTRB(r.left, r.top, point.dx, r.bottom);
+          }
+          if (point.dy < r.top) {
+            r = Rect.fromLTRB(r.left, point.dy, r.right, r.bottom);
+          }
+          if (point.dy > r.bottom) {
+            r = Rect.fromLTRB(r.left, r.top, r.right, point.dy);
+          }
+        }
+        return r;
+      }
+    }
+
+    return Rect.zero;
+  }
+
   @override
   Rect getBoundingBox(AbstractDrawing drawing) {
     if (valid) {
@@ -156,7 +184,7 @@ class CurveCommand extends DrawingCommand {
     
     if (startPointId.isNotEmpty) {
       if (startPointId.contains('.')) {
-        deps.add(drawing.includedParts.firstWhere((c) => c.partInfo?.partDrawingId == startPointId.split('.').first).id);
+        deps.add(startPointId.split('.')[2]);
       }
 
       deps.add(startPointId);
@@ -164,7 +192,7 @@ class CurveCommand extends DrawingCommand {
 
     if (endPointId.isNotEmpty) {
       if (endPointId.contains('.')) {
-        deps.add(drawing.includedParts.firstWhere((c) => c.partInfo?.partDrawingId == endPointId.split('.').first).id);
+        deps.add(endPointId.split('.')[2]);
       }
   
       deps.add(endPointId);
@@ -178,7 +206,7 @@ class CurveCommand extends DrawingCommand {
       case CurveDefinitionType.quadraticFromPoints:
         if (quadCtrlPointId.isNotEmpty) {
           if (quadCtrlPointId.contains('.')) {
-            deps.add(drawing.includedParts.firstWhere((c) => c.partInfo?.partDrawingId == quadCtrlPointId.split('.').first).id);
+            deps.add(quadCtrlPointId.split('.')[2]);
           }
           
           deps.add(quadCtrlPointId);
@@ -193,14 +221,14 @@ class CurveCommand extends DrawingCommand {
       case CurveDefinitionType.cubicFromPoints:
         if (cubicCtrlPointId1.isNotEmpty) {
           if (cubicCtrlPointId1.contains('.')) {
-            deps.add(drawing.includedParts.firstWhere((c) => c.partInfo?.partDrawingId == cubicCtrlPointId1.split('.').first).id);
+            deps.add(cubicCtrlPointId1.split('.')[2]);
           }
           
           deps.add(cubicCtrlPointId1);
         }
         if (cubicCtrlPointId2.isNotEmpty) {
           if (cubicCtrlPointId2.contains('.')) {
-            deps.add(drawing.includedParts.firstWhere((c) => c.partInfo?.partDrawingId == cubicCtrlPointId2.split('.').first).id);
+            deps.add(cubicCtrlPointId2.split('.')[2]);
           }
           
           deps.add(cubicCtrlPointId2);
@@ -224,11 +252,11 @@ class CurveCommand extends DrawingCommand {
   @override
   CurveCommand deleteReference({required String commandId}) {
     return copyWith(
-      startPointId: startPointId == commandId ? '' : startPointId,
-      endPointId: endPointId == commandId ? '' : endPointId,
-      quadCtrlPointId: quadCtrlPointId == commandId ? '' : quadCtrlPointId,
-      cubicCtrlPointId1: cubicCtrlPointId1 == commandId ? '' : cubicCtrlPointId1,
-      cubicCtrlPointId2: cubicCtrlPointId2 == commandId ? '' : cubicCtrlPointId2,
+      startPointId: (startPointId == commandId || startPointId.startsWith('$commandId.')) ? '' : startPointId,
+      endPointId: (endPointId == commandId || endPointId.startsWith('$commandId.')) ? '' : endPointId,
+      quadCtrlPointId: (quadCtrlPointId == commandId || quadCtrlPointId.startsWith('$commandId.')) ? '' : quadCtrlPointId,
+      cubicCtrlPointId1: (cubicCtrlPointId1 == commandId || cubicCtrlPointId1.startsWith('$commandId.')) ? '' : cubicCtrlPointId1,
+      cubicCtrlPointId2: (cubicCtrlPointId2 == commandId || cubicCtrlPointId2.startsWith('$commandId.')) ? '' : cubicCtrlPointId2,
     );
   }
 
@@ -478,7 +506,7 @@ class CurveCommand extends DrawingCommand {
   }
 
   @override
-  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const[]}) {
+  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const[], bool drawDirectionArrow = false}) {
     if (!valid) return;
 
     Offset middle = Offset(size.width / 2, size.height / 2);
@@ -520,7 +548,18 @@ class CurveCommand extends DrawingCommand {
     }
 
     if (styling != null) {
-      ArrowPainter.paint(canvas, styling, startCoordinate, endCoordinate, paint, curvePath: path);
+      ArrowPainter.paint(
+        canvas: canvas,
+        styleCommand: styling,
+        start: startCoordinate,
+        end: endCoordinate,
+        paint: paint, 
+        curvePath: path
+      );
+    }
+
+    if (selected || drawDirectionArrow) {
+      ArrowPainter.paintDirectionArrow(canvas: canvas, path: path, paint: paint, thickness: styling == null ? 1 : styling.thickness);
     }
 
     // draw curve label
@@ -540,7 +579,7 @@ class CurveCommand extends DrawingCommand {
     final Paragraph paragraph = paragraphBuilder.build()
     ..layout(ParagraphConstraints(width: size.width));
 
-    Offset labelPosition = MathUtitilies.pointOnPath(path, 0.3);
+    Offset labelPosition = MathUtitilies.pointOnPathAtFraction(path, 0.3);
     canvas.drawParagraph(paragraph, labelPosition);
 
     // Draw control points and lines
@@ -637,17 +676,19 @@ class CurveCommand extends DrawingCommand {
     double lineLength = MathUtitilies.distance(startCoordinate, endCoordinate);
     double ampLength = lineLength * amplitude;
 
-    Offset ampStartPoint = MathUtitilies.fractionOfLine(startCoordinate, endCoordinate, 0.5 + (slant / 2));
+    Offset ampStartPoint = MathUtitilies.pointOnLineAtFraction(startCoordinate, endCoordinate, 0.5 + (slant / 2));
 
-    // control point is perpendicular to the line with the given ampLenght
-    final double angleOfLine = MathUtitilies.angleOfLine(startCoordinate, endCoordinate);
-    double perpendicularAngle = angleOfLine + (pi / 2.0);
-    // Take quadrant into account
-    if (endCoordinate.dx > startCoordinate.dx) {
-      perpendicularAngle = angleOfLine - (pi / 2.0);
+    // control point is perpendicular to the line with the given ampLength
+    double perpendicularAngle = MathUtitilies.angleOfLine(startCoordinate, endCoordinate);
+
+    // Special case: at due north, we need to switch the other way
+    if (perpendicularAngle == (pi / 2.0)) {
+      perpendicularAngle -= (pi / 2.0);
+    } else {
+      perpendicularAngle += (pi / 2.0);
     }
-    
-    return MathUtitilies.relativepointatangle(ampStartPoint, ampLength, perpendicularAngle);
+
+    return MathUtitilies.relativepointatangle(ampStartPoint, -ampLength, perpendicularAngle);
   }
 
   @override
@@ -680,7 +721,7 @@ class CurveCommand extends DrawingCommand {
         validationErrors.add('Source point does not exist');
       } else if (startPointId.contains('.')) {
         // need to wait on validation of the included part command
-        IncludedPartCommand ipc = drawing.includedParts.firstWhere((c) => c.partInfo?.partDrawingId == startPointId.split('.').first);
+        IncludedPartCommand ipc = drawing.includedParts.firstWhere((c) => c.id == startPointId.split('.')[2]);
         if (!ipc.validated) {
           isvalid = false;
         }
@@ -711,7 +752,7 @@ class CurveCommand extends DrawingCommand {
         validationErrors.add('Target point does not exist');
       } else if (endPointId.contains('.')) {
         // need to wait on validation of the included part command
-        IncludedPartCommand ipc = drawing.includedParts.firstWhere((c) => c.partInfo?.partDrawingId == endPointId.split('.').first);
+        IncludedPartCommand ipc = drawing.includedParts.firstWhere((c) => c.id == endPointId.split('.')[2]);
         if (!ipc.validated) {
           isvalid = false;
         }
@@ -756,7 +797,7 @@ class CurveCommand extends DrawingCommand {
             validationErrors.add('Control point does not exist');
           } else if (quadCtrlPointId.contains('.')) {
             // need to wait on validation of the included part command
-            IncludedPartCommand ipc = drawing.includedParts.firstWhere((c) => c.partInfo?.partDrawingId == quadCtrlPointId.split('.').first);
+            IncludedPartCommand ipc = drawing.includedParts.firstWhere((c) => c.id == quadCtrlPointId.split('.')[2]);
             if (!ipc.validated) {
               isvalid = false;
             }
@@ -814,7 +855,7 @@ class CurveCommand extends DrawingCommand {
             validationErrors.add('First control point does not exist');
           } else if (cubicCtrlPointId1.contains('.')) {
             // need to wait on validation of the included part command
-            IncludedPartCommand ipc = drawing.includedParts.firstWhere((c) => c.partInfo?.partDrawingId == cubicCtrlPointId1.split('.').first);
+            IncludedPartCommand ipc = drawing.includedParts.firstWhere((c) => c.id == cubicCtrlPointId1.split('.')[2]);
             if (!ipc.validated) {
               isvalid = false;
             }
@@ -841,7 +882,7 @@ class CurveCommand extends DrawingCommand {
             validationErrors.add('Second control point does not exist');
           } else if (cubicCtrlPointId2.contains('.')) {
             // need to wait on validation of the included part command
-            IncludedPartCommand ipc = drawing.includedParts.firstWhere((c) => c.partInfo?.partDrawingId == cubicCtrlPointId2.split('.').first);
+            IncludedPartCommand ipc = drawing.includedParts.firstWhere((c) => c.id == cubicCtrlPointId2.split('.')[2]);
             if (!ipc.validated) {
               isvalid = false;
             }

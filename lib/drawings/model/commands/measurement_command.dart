@@ -134,17 +134,13 @@ class MeasurementCommand extends DrawingCommand {
   MeasurementCommand changePartDrawingReference({required String oldId, required String newId}) => this;
 
   @override
-  MeasurementCommand deleteReference({required String commandId}) {
-    return this;
-  }
+  MeasurementCommand deleteReference({required String commandId}) => this;
 
   @override
-  MeasurementCommand dependentLabelChanged(String oldLabel, String newLabel) {
-    return this;
-  }
+  MeasurementCommand dependentLabelChanged(String oldLabel, String newLabel) => this;
 
   @override
-  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const[]}) {
+  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const[], bool drawDirectionArrow = false}) {
   }
 
   @override

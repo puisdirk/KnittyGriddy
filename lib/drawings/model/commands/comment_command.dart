@@ -78,7 +78,7 @@ class CommentCommand extends DrawingCommand {
   CommentCommand dependentLabelChanged(String oldLabel, String newLabel) => this;
 
   @override
-  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const[]}) {
+  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const[], bool drawDirectionArrow = false}) {
   }
 
   @override
