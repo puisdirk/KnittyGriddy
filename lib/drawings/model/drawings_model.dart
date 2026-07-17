@@ -219,7 +219,14 @@ class DrawingsModel extends ChangeNotifier {
 
   Future<void> importDrawing() async {
     Drawing? drawing = await _repository.importDrawing();
-    if (drawing != null && !drawingInfos.any((di) => di.id == drawing.id)) {
+    if (drawing != null) {
+      // We already seem to have this drawing
+      if (drawingInfos.any((di) => di.id == drawing!.id)) {
+        // import anyway, but under different id
+        drawing = drawing.copyWith(id: const UuidV4Gen().get());
+      }
+      
+      // copy over to our own repo location
       await _repository.saveDrawing(drawing);
       _drawingsModelObject = _drawingsModelObject.copyWith(
         drawingInfos: [...drawingInfos, DrawingInfo(
@@ -262,8 +269,9 @@ class DrawingsModel extends ChangeNotifier {
           PartRepository.addPartDrawingToImportedSet(copy);
           drawing = drawing.copyWith(
             usedPartDrawings: drawing.usedPartDrawings.map((upd) => upd.id == partDrawing.id ? copy : upd).toList(),
-            commands: drawing.commands.map((c) => c is! IncludedPartCommand ? c.changePartDrawingReference(oldId: partDrawing.id, newId: newId) : c.copyWith(
-              partInfo: c.partInfo?.copyWith(partDrawingId: newId)
+            commands: drawing.commands.map((c) => c is! IncludedPartCommand ? 
+              c.changePartDrawingReference(oldId: partDrawing.id, newId: newId) : 
+              c.copyWith(partDrawingId: newId,
             )).toList()
           );
         }

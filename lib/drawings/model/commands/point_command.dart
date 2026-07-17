@@ -552,7 +552,7 @@ class PointCommand extends DrawingCommand {
           if (onCurveId.contains('.')) {
             String includedPartCommandId = onCurveId.split('.')[2];
             IncludedPartCommand c = drawing.commands.firstWhere((c) => c is IncludedPartCommand && c.id == includedPartCommandId) as IncludedPartCommand;
-            PartDrawing? pd = c.partInfo?.storedOffsetPartDrawing;
+            PartDrawing? pd = c.storedOffsetPartDrawing;
             if (pd != null) {
               Path p = curve!.getPath(pd, Offset.zero)!;
               newStoredCoordinate = MathUtitilies.pointOnPathAtFraction(p, fraction).scale(1, -1);

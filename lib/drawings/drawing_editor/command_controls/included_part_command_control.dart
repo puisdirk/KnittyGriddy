@@ -46,8 +46,8 @@ class _IncludedPartCommandControlState extends State<IncludedPartCommandControl>
   Widget createViewContent() {
     String content = '';
 
-    if (widget.command.partInfo != null) {
-      content += widget.command.partInfo!.partLabel;
+    if (widget.command.partLabel.isNotEmpty) {
+      content += widget.command.partLabel;
     }
 
     return Row(
@@ -107,20 +107,45 @@ class _IncludedPartCommandControlState extends State<IncludedPartCommandControl>
           children: [
             const SmallLabel(label: 'Part'),
             hspacing,
-            if (widget.command.partInfo != null)
-              DrawingPartIcon(partInfo: widget.command.partInfo!, size: 32,),
+            if (widget.command.partDrawingId.isNotEmpty && widget.command.partId.isNotEmpty)
+              DrawingPartIcon(
+                partInfo: PartInfo(
+                  partDrawingId: widget.command.partDrawingId, 
+                  category: '', 
+                  partId: widget.command.partId, 
+                  partLabel: ''
+                ), 
+                size: 32,
+              ),
             OutlinedButton.icon(
               iconAlignment: IconAlignment.end,
               onPressed: () async {
-                PartInfo? partInfo = await showDialog(barrierDismissible: false, context: context, builder: (context) => 
-                  PartChooser(selectedPartInfo: widget.command.partInfo),
+                PartInfo? partInfo = await showDialog(
+                  barrierDismissible: false, 
+                  context: context, 
+                  builder: (context) => 
+                  PartChooser(
+                    selectedPartInfo: 
+                    PartInfo(
+                      partDrawingId: widget.command.partDrawingId, 
+                      category: '', 
+                      partId: widget.command.partId, 
+                      partLabel: ''
+                    )
+                  ),
                 );
-                if (partInfo != widget.command.partInfo) {
-                  widget.onChanged(widget.command.copyWith(partInfo: partInfo));
+                if (partInfo != null && 
+                  (partInfo.partDrawingId != widget.command.partDrawingId || partInfo.partId != widget.command.partId)) {
+                    widget.onChanged(widget.command.copyWith(
+                      partDrawingId: partInfo.partDrawingId, 
+                      partId: partInfo.partId,
+                      partLabel: partInfo.partLabel,
+                    )
+                  );
                 } 
               },
               icon: const Icon(Icons.edit, size: 16,),
-              label: Text(widget.command.partInfo == null ? 'No part selected' : widget.command.partInfo!.partLabel, style: smallStyle,)
+              label: Text(widget.command.partDrawingId.isEmpty ? 'No part selected' : widget.command.partLabel, style: smallStyle,)
             ),
           ]
         ),

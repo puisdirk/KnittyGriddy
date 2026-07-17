@@ -10,23 +10,40 @@ import 'package:knitty_griddy/drawings/model/commands/part_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/styling_command.dart';
 import 'package:knitty_griddy/drawings/model/part_drawing.dart';
-import 'package:knitty_griddy/drawings/model/part_info.dart';
 import 'package:knitty_griddy/drawings/partrepo/part_repository.dart';
 
 @immutable
 class IncludedPartCommand extends DrawingCommand {
 
-  final PartInfo? partInfo;
+  // Info about the part and its drawing
+  final String partDrawingId;
+  final String partId;
+  final String partLabel;
+
+  // Stored offet drawing and offset info
+  final PartDrawing? storedOffsetPartDrawing;
+  final Offset? storedOffset;
+  final Offset? storedAnchorOffset;
+
   final String anchorPointId;
   final List<MeasurementOverride> measurementOverrides;
+
+  // Whether we need to recalculate the offset-drawing
+  final bool isDirty;
 
   const IncludedPartCommand({
     required super.id,
     required super.label,
     required super.version,
-    this.partInfo,
+    this.partDrawingId = '',
+    this.partId = '',
+    this.partLabel = '',
+    this.storedOffsetPartDrawing,
+    this.storedOffset,
+    this.storedAnchorOffset,
     this.anchorPointId = originId,
     this.measurementOverrides = const[],
+    this.isDirty = false,
     super.validated,
     super.valid,
     super.errors,
@@ -35,20 +52,37 @@ class IncludedPartCommand extends DrawingCommand {
 
   IncludedPartCommand copyWith({
     String? label,
-    PartInfo? partInfo,
     String? anchorPointId,
+    String? partDrawingId,
+    String? partId,
+    String? partLabel,
+    PartDrawing? storedOffsetPartDrawing,
+    Offset? storedOffset,
+    Offset? storedAnchorOffset,
     bool? validated,
     bool? valid,
     List<String>? errors,
     bool? initiallyOpen,
     List<MeasurementOverride>? measurementOverrides,
   }) {
+    bool makeDirty = 
+      (anchorPointId != null && anchorPointId != this.anchorPointId) || 
+      (partDrawingId != null && partDrawingId != this.partDrawingId) || 
+      (partId != null && partId != this.partId) || 
+      (measurementOverrides != null && !listEquals(measurementOverrides, this.measurementOverrides));
+
     return IncludedPartCommand(
       id: id,
       version: version + 1,
       label: label?? this.label, 
-      partInfo: partInfo?? this.partInfo,
       anchorPointId: anchorPointId?? this.anchorPointId,
+      partDrawingId: partDrawingId?? this.partDrawingId,
+      partId: partId?? this.partId,
+      partLabel: partLabel?? this.partLabel,
+      storedOffsetPartDrawing: storedOffsetPartDrawing?? this.storedOffsetPartDrawing,
+      storedOffset: storedOffset?? this.storedOffset,
+      storedAnchorOffset: storedAnchorOffset?? this.storedAnchorOffset,
+      isDirty: makeDirty,
       measurementOverrides: measurementOverrides?? this.measurementOverrides,
       validated: validated?? this.validated,
       valid: valid?? this.valid,
@@ -64,12 +98,11 @@ class IncludedPartCommand extends DrawingCommand {
   Rect getBoundingBox(AbstractDrawing drawing) {
     if (!valid) return Rect.zero;
 
-    PartDrawing? partDrawing = _getOffsetPartDrawing(drawing);
-    if (partDrawing == null) return Rect.zero;
+    if (storedOffsetPartDrawing == null) return Rect.zero;
 
-    PartCommand partCommand = partDrawing.parts.firstWhere((p) => p.id == partInfo!.partId);
+    PartCommand partCommand = storedOffsetPartDrawing!.parts.firstWhere((p) => p.id == partId);
 
-    return partCommand.calculateBoundingBox(partDrawing);
+    return partCommand.calculateBoundingBox(storedOffsetPartDrawing!);
   }
 
   @override
@@ -96,7 +129,9 @@ class IncludedPartCommand extends DrawingCommand {
   }
 
   @override
-  IncludedPartCommand changePartDrawingReference({required String oldId, required String newId}) => this;
+  IncludedPartCommand changePartDrawingReference({required String oldId, required String newId}) {
+    return copyWith(anchorPointId: anchorPointId.replaceAll(oldId, newId));
+  }
 
 
   @override
@@ -124,7 +159,9 @@ class IncludedPartCommand extends DrawingCommand {
       'type': DrawingCommandTypes.includedPartCommand.name,
       'id': id,
       'label': label,
-      'partinfo': partInfo == null ? {} : partInfo!.toJson(),
+      'partdrawingid': partDrawingId,
+      'partid': partId,
+      'partlabel': partLabel,
       'anchor': anchorPointId,
       'moverrides': measurementOverrides.map((m) => m.toJson()).toList(),
     };
@@ -141,7 +178,10 @@ class IncludedPartCommand extends DrawingCommand {
       id: json['id'] as String, 
       label: json['label'] as String, 
       version: 0,
-      partInfo: (json['partinfo'] as Map<String, dynamic>).isEmpty ? null : PartInfo.fromJson(json['partinfo'] as Map<String, dynamic>),
+      partDrawingId: json['partdrawingid'] as String,
+      partId: json['partid'] as String,
+      partLabel: json['partlabel'] as String,
+      isDirty: true,
       anchorPointId: json['anchor'] as String,
       measurementOverrides: moverrides,
     );
@@ -154,31 +194,33 @@ class IncludedPartCommand extends DrawingCommand {
       runtimeType == other.runtimeType &&
       id == other.id &&
       label == other.label &&
-//      version == other.version &&
-      partInfo == other.partInfo &&
+      partDrawingId == other.partDrawingId &&
+      partId == other.partId &&
+      partLabel == other.partLabel &&
+      storedOffsetPartDrawing == other.storedOffsetPartDrawing &&
+      storedAnchorOffset == other.storedAnchorOffset &&
+      storedOffset == other.storedOffset &&
       anchorPointId == other.anchorPointId &&
       listEquals(measurementOverrides, other.measurementOverrides) &&
+      isDirty == other.isDirty &&
       validated == other.validated &&
       valid == other.valid &&
       listEquals(errors, other.errors);
 
   @override
-  int get hashCode => super.hashCode ^ partInfo.hashCode ^ anchorPointId.hashCode ^ measurementOverrides.hashCode;
+  int get hashCode => super.hashCode ^ partDrawingId.hashCode ^ partId.hashCode ^ partLabel.hashCode ^
+    storedOffsetPartDrawing.hashCode ^ storedAnchorOffset.hashCode ^ storedOffset.hashCode ^ 
+    anchorPointId.hashCode ^ measurementOverrides.hashCode ^ isDirty.hashCode;
 
   @override
   IncludedPartCommand clearValidation() {
     return copyWith(validated: false, valid: false, errors: const[]);
   }
 
-  PartDrawing? _getOffsetPartDrawing(AbstractDrawing drawing) {
-    if (partInfo?.storedOffsetPartDrawing != null) return partInfo!.storedOffsetPartDrawing;
-
-    return _calculateNewStoredPartDrawing(drawing)!.storedOffsetPartDrawing;
-  }
-
-  PartInfo? _calculateNewStoredPartDrawing(AbstractDrawing drawing) {
-    PartDrawing? partDrawing = PartRepository.getPartDrawingById(partInfo!.partDrawingId);
-    if (partDrawing == null) return null;
+  IncludedPartCommand _calculateNewStoredPartDrawing(AbstractDrawing drawing) {
+    if (partDrawingId.isEmpty || partId.isEmpty) return this;
+    PartDrawing? partDrawing = PartRepository.getPartDrawingById(partDrawingId);
+    if (partDrawing == null) return this;
 
     // Copy the measurement override values into the partDrawing
     PartDrawing partDrawingWithOverrides = partDrawing.copyWith(
@@ -192,43 +234,40 @@ class IncludedPartCommand extends DrawingCommand {
         }
       }).toList()
     );
+    // If the measurement overrides change the drawing, we need to validate to get the new point offsets
     if (!partDrawingWithOverrides.sameContentAs(partDrawing)) {
       partDrawingWithOverrides = partDrawingWithOverrides.validate();
     }
 
-    PartCommand partCommand = partDrawingWithOverrides.parts.firstWhere((p) => p.id == partInfo!.partId);
+    PartCommand partCommand = partDrawingWithOverrides.parts.firstWhere((p) => p.id == partId);
 
     // Calculate the offset needed
     PointCommand? ownAnchorPoint = drawing.pointById(anchorPointId);
-    if (ownAnchorPoint == null) return null;
-    PointCommand? partAnchorPoint = partDrawingWithOverrides.pointById(partCommand.anchorPointId);
-    if (partAnchorPoint == null) return null;
+    if (ownAnchorPoint == null) return this;
     Offset? ownOffset = ownAnchorPoint.getCoordinate(drawing);
-    if (ownOffset == null) return null;
+    if (ownOffset == null) return this;
+    PointCommand? partAnchorPoint = partDrawingWithOverrides.pointById(partCommand.anchorPointId);
+    if (partAnchorPoint == null) return this;
     Offset? partOffset = partAnchorPoint.getCoordinate(partDrawingWithOverrides);
-    if (partOffset == null) return null;
+    if (partOffset == null) return this;
 
-//    if (partInfo?.storedOffsetPartDrawing?.offset != (ownOffset - partOffset)) {
-      return partInfo!.copyWith(
-        storedOffsetPartDrawing: 
-          partDrawingWithOverrides.abstractCopyWith(offset: ownOffset - partOffset).validate(),
-        storedOffset: ownOffset - partOffset,
-      );
-//    } else {
-//      return partInfo!.copyWith(storedOffsetPartDrawing: partDrawingWithOverrides);
-//    }
+    return copyWith(
+      storedOffsetPartDrawing: 
+        partDrawingWithOverrides.abstractCopyWith(offset: ownOffset - partOffset).validate(),
+      storedOffset: ownOffset - partOffset,
+      storedAnchorOffset: ownOffset,
+    );
   }
 
   @override
   void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const[], bool drawDirectionArrow = false}) {
     if (!valid) return;
 
-    PartDrawing? partDrawing = _getOffsetPartDrawing(drawing);
-    if (partDrawing == null) return;
+    if (storedOffsetPartDrawing == null) return;
     
-    PartCommand partCommand = partDrawing.parts.firstWhere((p) => p.id == partInfo!.partId);
+    PartCommand partCommand = storedOffsetPartDrawing!.parts.firstWhere((p) => p.id == partId);
 
-    partCommand.paint(canvas, size, partDrawing, selected, prefixLabel: label, stylings: drawing.commands.whereType<StylingCommand>().toList(), drawDirectionArrow: drawDirectionArrow);
+    partCommand.paint(canvas, size, storedOffsetPartDrawing!, selected, prefixLabel: label, stylings: drawing.commands.whereType<StylingCommand>().toList(), drawDirectionArrow: drawDirectionArrow);
   }
 
   @override
@@ -240,7 +279,7 @@ class IncludedPartCommand extends DrawingCommand {
     if (label.isEmpty) { isvalid = false; retryValidation = false; validationErrors.add('Requires a label'); }
     if (drawing.commands.any((c) => c.id != id && c.label == label)) { isvalid = false; retryValidation = false; validationErrors.add('Label should be unique'); }
 
-    if (partInfo == null) {
+    if (partDrawingId.isEmpty || partId.isEmpty) {
       isvalid = false;
       retryValidation = false;
       validationErrors.add('Requires a part');
@@ -258,11 +297,15 @@ class IncludedPartCommand extends DrawingCommand {
         }
     }
 
+    Offset? newAnchorPointLocation;
+
     if (anchorPointId.isEmpty) {
       isvalid = false;
       retryValidation = false;
       validationErrors.add('Requires an anchor point');
-    } else if (anchorPointId != originId) {
+    } else if (anchorPointId == originId) {
+      newAnchorPointLocation = origin.getCoordinate(drawing);
+    } else {
       PointCommand? anchor = drawing.pointById(anchorPointId);
       if (anchor == null) {
         isvalid = false;
@@ -275,16 +318,27 @@ class IncludedPartCommand extends DrawingCommand {
           isvalid = false;
           retryValidation = false;
           validationErrors.add('Anchor point ${anchor.label} has errors');
+        } else {
+          newAnchorPointLocation = anchor.getCoordinate(drawing);
         }
       }
     }
 
-    return copyWith(
-      valid: isvalid,
-      validated: (isvalid || !retryValidation),
-      errors: validationErrors,
-      partInfo: isvalid ? _calculateNewStoredPartDrawing(drawing) : partInfo,
-    );
+    if (isvalid && (isDirty || newAnchorPointLocation != storedAnchorOffset) ||
+      (partDrawingId.isNotEmpty && storedOffsetPartDrawing == null)) {
+      IncludedPartCommand copy = _calculateNewStoredPartDrawing(drawing);
+      return copy.copyWith(
+        valid: isvalid,
+        validated: (isvalid || !retryValidation),
+        errors: validationErrors,
+      );
+    } else {
+      return copyWith(
+        valid: isvalid,
+        validated: (isvalid || !retryValidation),
+        errors: validationErrors,
+      );
+    }
   }
 
 }

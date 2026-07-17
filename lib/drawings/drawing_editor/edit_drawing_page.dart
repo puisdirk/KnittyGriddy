@@ -88,7 +88,7 @@ class _EditDrawingPageState extends State<EditDrawingPage> {
         title: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('${(widget.drawing is PartDrawing) ? 'Part Drawing' : 'Drawing'} - ${drawing.name}'),
+            Text('${(widget.drawing is PartDrawing) ? 'Part Drawing' : 'Drawing'} - ${drawing.name}',),
             hspacing,
             if (!showToolbarContents)
               IconButton(

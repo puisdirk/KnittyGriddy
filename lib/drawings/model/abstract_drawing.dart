@@ -224,10 +224,10 @@ abstract class AbstractDrawing {
   List<LineCommand> get linesIncluded {
     List<LineCommand> lines = commands.whereType<LineCommand>().toList();
     for (IncludedPartCommand cmd in includedParts) {
-      if (cmd.partInfo != null) {
-        PartDrawing? pd = PartRepository.getPartDrawingById(cmd.partInfo!.partDrawingId);
+      if (cmd.partDrawingId.isNotEmpty) {
+        PartDrawing? pd = PartRepository.getPartDrawingById(cmd.partDrawingId);
         if (pd != null) {
-          PartCommand? part = pd.partById(cmd.partInfo!.partId);
+          PartCommand? part = pd.partById(cmd.partId);
           if (part != null) {
             lines.addAll(part.lines(pd).map((l) => l.copyWith(id: '${pd.id}.${l.id}.${cmd.id}', label: '${cmd.label}.${l.label}')));
           }
@@ -240,10 +240,10 @@ abstract class AbstractDrawing {
   List<PointCommand> get pointsIncluded {
     List<PointCommand> points = commands.whereType<PointCommand>().toList();
     for (IncludedPartCommand cmd in includedParts) {
-      if (cmd.partInfo != null) {
-        PartDrawing? pd = PartRepository.getPartDrawingById(cmd.partInfo!.partDrawingId);
+      if (cmd.partDrawingId.isNotEmpty) {
+        PartDrawing? pd = PartRepository.getPartDrawingById(cmd.partDrawingId);
         if (pd != null) {
-          PartCommand? part = pd.partById(cmd.partInfo!.partId);
+          PartCommand? part = pd.partById(cmd.partId);
           if (part != null) {
             points.addAll(part.points(pd).map((p) => p.copyWith(id: '${pd.id}.${p.id}.${cmd.id}', label: '${cmd.label}.${p.label}')));
           }
@@ -256,10 +256,10 @@ abstract class AbstractDrawing {
   List<CurveCommand> get curvesIncluded {
     List<CurveCommand> curves = commands.whereType<CurveCommand>().toList();
     for (IncludedPartCommand cmd in includedParts) {
-      if (cmd.partInfo != null) {
-        PartDrawing? pd = PartRepository.getPartDrawingById(cmd.partInfo!.partDrawingId);
+      if (cmd.partDrawingId.isNotEmpty) {
+        PartDrawing? pd = PartRepository.getPartDrawingById(cmd.partDrawingId);
         if (pd != null) {
-          PartCommand? part = pd.partById(cmd.partInfo!.partId);
+          PartCommand? part = pd.partById(cmd.partId);
           if (part != null) {
             curves.addAll(part.curves(pd).map((c) => c.copyWith(id: '${pd.id}.${c.id}.${cmd.id}', label: '${cmd.label}.${c.label}')));
           }
@@ -273,9 +273,8 @@ abstract class AbstractDrawing {
     if (id.contains('.')) {
       String includedPartCommandId = id.split('.')[2];
       IncludedPartCommand c = commands.firstWhere((c) => c is IncludedPartCommand && c.id == includedPartCommandId) as IncludedPartCommand;
-      PartDrawing? pd = c.partInfo?.storedOffsetPartDrawing;
-      if (pd != null) {
-        return pd.commands.firstWhere((c) => c.id == id.split('.')[1]);
+      if (c.storedOffsetPartDrawing != null) {
+        return c.storedOffsetPartDrawing!.commands.firstWhere((c) => c.id == id.split('.')[1]);
       }
     }
 
@@ -295,9 +294,8 @@ abstract class AbstractDrawing {
     if (id.contains('.')) {
       String includedPartCommandId = id.split('.')[2];
       IncludedPartCommand c = commands.firstWhere((c) => c is IncludedPartCommand && c.id == includedPartCommandId) as IncludedPartCommand;
-      PartDrawing? pd = c.partInfo?.storedOffsetPartDrawing;
-      if (pd != null) {
-        return pd.lineById(id.split('.')[1]);
+      if (c.storedOffsetPartDrawing != null) {
+        return c.storedOffsetPartDrawing!.lineById(id.split('.')[1]);
       }
     }
     
@@ -316,9 +314,8 @@ abstract class AbstractDrawing {
     if (id.contains('.')) {
       String includedPartCommandId = id.split('.')[2];
       IncludedPartCommand c = commands.firstWhere((c) => c is IncludedPartCommand && c.id == includedPartCommandId) as IncludedPartCommand;
-      PartDrawing? pd = c.partInfo?.storedOffsetPartDrawing;
-      if (pd != null) {
-        return pd.pointById(id.split('.')[1]);
+      if (c.storedOffsetPartDrawing != null) {
+        return c.storedOffsetPartDrawing!.pointById(id.split('.')[1]);
       }
     }
     
@@ -335,9 +332,8 @@ abstract class AbstractDrawing {
     if (name.contains('.')) {
       String includedPartCommandName = name.split('.').first;
       IncludedPartCommand c = commands.firstWhere((c) => c is IncludedPartCommand && c.label == includedPartCommandName.replaceAll('_', ' ')) as IncludedPartCommand;
-      PartDrawing? pd = c.partInfo?.storedOffsetPartDrawing;
-      if (pd != null) {
-        return pd.pointByName(name.split('.')[1]);
+      if (c.storedOffsetPartDrawing != null) {
+        return c.storedOffsetPartDrawing!.pointByName(name.split('.')[1]);
       }
     }
     
@@ -352,9 +348,8 @@ abstract class AbstractDrawing {
     if (id.contains('.')) {
       String includedPartCommandId = id.split('.')[2];
       IncludedPartCommand c = commands.firstWhere((c) => c is IncludedPartCommand && c.id == includedPartCommandId) as IncludedPartCommand;
-      PartDrawing? pd = c.partInfo?.storedOffsetPartDrawing;
-      if (pd != null) {
-        return pd.curveById(id.split('.')[1]);
+      if (c.storedOffsetPartDrawing != null) {
+        return c.storedOffsetPartDrawing!.curveById(id.split('.')[1]);
       }
     }
     
@@ -393,9 +388,8 @@ abstract class AbstractDrawing {
     if (name.contains('.')) {
       String partDrawingName = name.split('.').first;
       IncludedPartCommand c = commands.firstWhere((c) => c is IncludedPartCommand && c.label == partDrawingName.replaceAll('_', ' ')) as IncludedPartCommand;
-      PartDrawing? pd = c.partInfo?.storedOffsetPartDrawing;
-      if (pd != null) {
-        return pd.lineByName(name.split('.')[1]);
+      if (c.storedOffsetPartDrawing != null) {
+        return c.storedOffsetPartDrawing!.lineByName(name.split('.')[1]);
       }
     }
     
