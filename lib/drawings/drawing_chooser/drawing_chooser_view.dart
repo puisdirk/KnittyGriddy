@@ -19,7 +19,7 @@ class DrawingChooserView extends StatefulWidget {
 
 class _DrawingChooserViewState extends State<DrawingChooserView> {
 
-    List<Widget> _createDrawingCards(List<DrawingInfo> drawingInfos) {
+  List<Widget> _createDrawingCards(List<DrawingInfo> drawingInfos) {
     List<Widget> cards = [];
     for (DrawingInfo drawingInfo in drawingInfos) {
       cards.add(SizedBox(

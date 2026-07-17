@@ -87,7 +87,7 @@ class DrawingCard extends StatelessWidget {
                   onPressed: () => _confirmToDelete(context), 
                   icon: const Icon(Icons.delete)
                 ),
-                title: Text(drawingInfo.name),
+                title: Text(drawingInfo.name, overflow: TextOverflow.ellipsis,),
                 subtitle: Text(
                   drawingInfo.description,
                   maxLines: 2,

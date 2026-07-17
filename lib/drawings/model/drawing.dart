@@ -69,7 +69,7 @@ class Drawing extends AbstractDrawing {
     Set<PartDrawing> includedDrawings = {};
     for (IncludedPartCommand cmd in commands.whereType()) {
       if (cmd.validated && cmd.valid) {
-        PartDrawing? partDrawing = PartRepository.getPartDrawingById(cmd.partInfo!.partDrawingId);
+        PartDrawing? partDrawing = PartRepository.getPartDrawingById(cmd.partDrawingId);
         if (partDrawing != null) {
           includedDrawings.add(partDrawing);
         }
@@ -82,10 +82,10 @@ class Drawing extends AbstractDrawing {
     return copyWith(
       commands: commands.map((cmd) {
         if (cmd is! IncludedPartCommand) return cmd;
-        if (cmd.partInfo == null) return cmd;
-        PartDrawing? partDrawing = PartRepository.getPartDrawingById(cmd.partInfo!.partDrawingId);
+        if (cmd.partDrawingId.isEmpty) return cmd;
+        PartDrawing? partDrawing = PartRepository.getPartDrawingById(cmd.partDrawingId);
         if (partDrawing == null) return cmd;
-        PartCommand? partCommand = partDrawing.partById(cmd.partInfo!.partId);
+        PartCommand? partCommand = partDrawing.partById(cmd.partId);
         if (partCommand == null) return cmd;
 
         // delete measurements that are no longer in the part

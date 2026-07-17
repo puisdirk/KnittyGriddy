@@ -343,7 +343,7 @@ class _DrawingCommandsListState extends State<DrawingCommandsList> {
                         widget.onSelect(null);
                         widget.onDrawingChanged(widget.drawing.abstractCopyWith(
                           commands: widget.drawing.commands
-                            .map((c) => c.deleteReference(commandId: (command is IncludedPartCommand && command.partInfo != null) ? command.partInfo!.partDrawingId : command.id))
+                            .map((c) => c.deleteReference(commandId: (command is IncludedPartCommand && command.partDrawingId.isNotEmpty) ? command.partDrawingId : command.id))
                             .where((c) => c.id != command.id).toList()
                         ).validate());
                       },
@@ -367,9 +367,9 @@ class _DrawingCommandsListState extends State<DrawingCommandsList> {
                         // If it is an includedPartCommand, we also update the includedDrawings and create the MeasurementOverrides
                         if (newCommand is IncludedPartCommand) {
                           List<MeasurementOverride> moverrides = [];
-                          if (newCommand.partInfo != null && 
-                              (newCommand.measurementOverrides.isEmpty || newCommand.partInfo!.partId != (command as IncludedPartCommand).partInfo?.partId)) {
-                            PartDrawing? partDrawing = PartRepository.getPartDrawingById(newCommand.partInfo!.partDrawingId);
+                          if (newCommand.partDrawingId.isNotEmpty && 
+                              (newCommand.measurementOverrides.isEmpty || newCommand.partId != (command as IncludedPartCommand).partId)) {
+                            PartDrawing? partDrawing = PartRepository.getPartDrawingById(newCommand.partDrawingId);
                             if (partDrawing != null) {
                               for (MeasurementCommand mcmd in partDrawing.measurements) {
                                 String formula = mcmd.value.toString();
