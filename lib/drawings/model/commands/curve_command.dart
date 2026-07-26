@@ -12,6 +12,7 @@ import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/styling_command.dart';
 import 'package:knitty_griddy/drawings/model/part_drawing.dart';
+import 'package:knitty_griddy/utils/color_utilities.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 import 'package:knitty_griddy/utils/dashed_painter.dart';
 import 'package:knitty_griddy/utils/math_utitilies.dart';
@@ -157,6 +158,7 @@ class CurveCommand extends DrawingCommand {
 
   @override
   Rect getBoundingBox(AbstractDrawing drawing) {
+    // Remark: I cannot get this correct unless I know the offset
     if (valid) {
       Path? p = getPath(drawing, Offset.zero);
       if (p != null) return p.getBounds();
@@ -319,7 +321,6 @@ class CurveCommand extends DrawingCommand {
     other is CurveCommand &&
     runtimeType == other.runtimeType &&
     id == other.id &&
-//    version == other.version &&
     label == other.label &&
     startPointId == other.startPointId &&
     endPointId == other.endPointId &&
@@ -338,7 +339,28 @@ class CurveCommand extends DrawingCommand {
     listEquals(errors, other.errors) &&
     storedStartCoordinate == other.storedStartCoordinate &&
     storedEndCoordinate == other.storedEndCoordinate;
-  
+
+  @override
+  @override
+  bool isSameAs(Object other) =>
+    identical(this, other) ||
+    other is CurveCommand &&
+    runtimeType == other.runtimeType &&
+    id == other.id &&
+    label == other.label &&
+    startPointId == other.startPointId &&
+    endPointId == other.endPointId &&
+    curveDefinitionType == other.curveDefinitionType &&
+    quadAmplitudeFormula == other.quadAmplitudeFormula &&
+    quadSlantFormula == other.quadSlantFormula &&
+    quadCtrlPointId == other.quadCtrlPointId &&
+    cubicAmplitudeFormula1 == other.cubicAmplitudeFormula1 &&
+    cubicSlantFormula1 == other.cubicSlantFormula1 &&
+    cubicAmplitudeFormula2 == other.cubicAmplitudeFormula2 &&
+    cubicSlantFormula2 == other.cubicSlantFormula2 &&
+    cubicCtrlPointId1 == other.cubicCtrlPointId1 &&
+    cubicCtrlPointId2 == other.cubicCtrlPointId2;
+
   @override
   int get hashCode => super.hashCode ^ startPointId.hashCode ^ endPointId.hashCode ^ 
     storedStartCoordinate.hashCode ^ storedEndCoordinate.hashCode ^
@@ -346,6 +368,78 @@ class CurveCommand extends DrawingCommand {
     quadAmplitudeFormula.hashCode ^ quadSlantFormula.hashCode ^ quadCtrlPointId.hashCode ^
     cubicAmplitudeFormula1.hashCode ^ cubicSlantFormula1.hashCode ^ cubicAmplitudeFormula2.hashCode ^ cubicSlantFormula2.hashCode ^ 
     cubicCtrlPointId1.hashCode ^ cubicCtrlPointId2.hashCode;
+
+  String _getPathSvg(AbstractDrawing drawing, Offset offset) {
+    if (!valid) return '';
+
+    Offset? startCoordinate = getStartCoordinate(drawing);
+    if (startCoordinate == null) return '';
+    startCoordinate = startCoordinate.scale(1, -1);
+    startCoordinate += offset;
+
+    Offset? endCoordinate = getEndCoordinate(drawing);
+    if (endCoordinate == null) return '';
+    endCoordinate = endCoordinate.scale(1, -1);
+    endCoordinate += offset;
+
+    switch (curveDefinitionType) {
+      case CurveDefinitionType.quadratic:
+        double? amplitude = getQuadAmplitude(drawing);
+        if (amplitude == null) return '';
+
+        double? slant = getQuadSlant(drawing);
+        if (slant == null) return '';
+
+        Offset controlCoordinate = getControlPointCoordinate(startCoordinate, endCoordinate, amplitude, slant);
+
+        return 'M${startCoordinate.dx},${startCoordinate.dy} Q${controlCoordinate.dx},${controlCoordinate.dy},${endCoordinate.dx},${endCoordinate.dy}';
+      case CurveDefinitionType.quadraticFromPoints:
+        if (quadCtrlPointId.isEmpty) return '';
+        PointCommand? ctrlPointCmd = drawing.pointById(quadCtrlPointId);
+        if (ctrlPointCmd == null) return '';
+        Offset? ctrlPoint = ctrlPointCmd.getCoordinate(drawing);
+        if (ctrlPoint == null) return '';
+        ctrlPoint = ctrlPoint.scale(1, -1);
+        ctrlPoint += offset;
+
+        return 'M${startCoordinate.dx},${startCoordinate.dy} Q${ctrlPoint.dx},${ctrlPoint.dy},${endCoordinate.dx},${endCoordinate.dy}';
+      case CurveDefinitionType.cubic:
+        double? amplitude1 = getCubicAmplitude1(drawing);
+        if (amplitude1 == null) return '';
+
+        double? slant1 = getCubicSlant1(drawing);
+        if (slant1 == null) return '';
+
+        double? amplitude2 = getCubicAmplitude2(drawing);
+        if (amplitude2 == null) return '';
+
+        double? slant2 = getCubicSlant2(drawing);
+        if (slant2 == null) return '';
+
+        Offset controlCoordinate1 = getControlPointCoordinate(startCoordinate, endCoordinate, amplitude1, slant1);
+        Offset controlCoordinate2 = getControlPointCoordinate(startCoordinate, endCoordinate, amplitude2, slant2);
+
+        return 'M${startCoordinate.dx},${startCoordinate.dy} C${controlCoordinate1.dx},${controlCoordinate1.dy},${controlCoordinate2.dx},${controlCoordinate2.dy},${endCoordinate.dx},${endCoordinate.dy}';
+      case CurveDefinitionType.cubicFromPoints:
+        if (cubicCtrlPointId1.isEmpty) return '';
+        PointCommand? ctrlPoint1Cmd = drawing.pointById(cubicCtrlPointId1);
+        if (ctrlPoint1Cmd == null) return '';
+        Offset? ctrlPoint1 = ctrlPoint1Cmd.getCoordinate(drawing);
+        if (ctrlPoint1 == null) return '';
+        ctrlPoint1 = ctrlPoint1.scale(1, -1);
+        ctrlPoint1 += offset;
+
+        if (cubicCtrlPointId2.isEmpty) return '';
+        PointCommand? ctrlPoint2Cmd = drawing.pointById(cubicCtrlPointId2);
+        if (ctrlPoint2Cmd == null) return '';
+        Offset? ctrlPoint2 = ctrlPoint2Cmd.getCoordinate(drawing);
+        if (ctrlPoint2 == null) return '';
+        ctrlPoint2 = ctrlPoint2.scale(1, -1);
+        ctrlPoint2 += offset;
+
+        return 'M${startCoordinate.dx},${startCoordinate.dy} C${ctrlPoint1.dx},${ctrlPoint1.dy},${ctrlPoint2.dx},${ctrlPoint2.dy},${endCoordinate.dx},${endCoordinate.dy}';
+    }
+  }
 
   Path? getPath(AbstractDrawing drawing, Offset offset) {
     if (!valid) return null;
@@ -506,7 +600,55 @@ class CurveCommand extends DrawingCommand {
   }
 
   @override
-  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const[], bool drawDirectionArrow = false}) {
+  String toSvg(Size drawingSize, AbstractDrawing drawing, {List<StylingCommand> stylings = const []}) {
+    if (!valid) return '';
+
+    Offset middle = Offset(drawingSize.width / 2, drawingSize.height / 2);
+
+    StylingCommand? styling = drawing.styleFor(id);
+    if (styling == null) {
+      // Look for id in format drawingid.id
+      if (stylings.any((s) => s.commandIds.any((sid) => sid.startsWith('${drawing.id}.$id')))) {
+        styling = stylings.firstWhere((s) => s.commandIds.any((sid) => sid.startsWith('${drawing.id}.$id')));
+      }
+    }
+
+    String curvePathSvg = '<g id="$label"><path d="${_getPathSvg(drawing, middle)}" fill="none" ';
+
+    if (styling == null) {
+      curvePathSvg += ' stroke="${ColorUtilities.colorToSvhHex(Colors.grey.shade700)}"/>';
+    } else {
+      curvePathSvg += ' stroke="${ColorUtilities.colorToSvhHex(styling.color)}" ${ColorUtilities.strokeOpacity(styling.color)} stroke-width="${styling.thickness}" ';
+      if (styling.dashStyle == DashStyle.full) {
+        curvePathSvg += '/>';
+      } else {
+        curvePathSvg += 'stroke-dasharray="${styling.dashStyle.svgString}"/>';
+      }
+
+      Path? path = getPath(drawing, middle);
+      if (path != null) {
+        Offset? start = getStartCoordinate(drawing);
+        if (start == null) return '';
+        start = start.scale(1, -1);
+        start += middle;
+
+        Offset? end = getEndCoordinate(drawing);
+        if (end == null) return '';
+        end = end.scale(1, -1);
+        end += middle;
+
+        curvePathSvg += ArrowPainter.startArrowSvg(styleCommand: styling, start: start, end: end, curvePath: path);
+        curvePathSvg += ArrowPainter.endArrowSvg(styleCommand: styling, start: start, end: end, curvePath: path);
+      }
+    }
+
+    curvePathSvg += '</g>';
+
+    return curvePathSvg;
+  }
+
+  @override
+  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const[], bool drawDirectionArrow = false, bool forPreview = false}) {
     if (!valid) return;
 
     Offset middle = Offset(size.width / 2, size.height / 2);
@@ -528,16 +670,16 @@ class CurveCommand extends DrawingCommand {
     StylingCommand? styling = drawing.styleFor(id);
     if (styling == null) {
       // Look for id in format drawingid.id
-      if (stylings.any((s) => s.commandIds.any((sid) => sid == '${drawing.id}.$id'))) {
-        styling = stylings.firstWhere((s) => s.commandIds.any((sid) => sid == '${drawing.id}.$id'));
+      if (stylings.any((s) => s.commandIds.any((sid) => sid.startsWith('${drawing.id}.$id')))) {
+        styling = stylings.firstWhere((s) => s.commandIds.any((sid) => sid.startsWith('${drawing.id}.$id')));
       }
     }
 
     if (styling == null) {
-      paint.color = selected ? selectedColor : (asPart && drawing is PartDrawing) ? partColor : Colors.grey.shade700;
-      paint.strokeWidth = asPart || selected ? 2 : 1;
+      paint.color = (!forPreview && selected) ? selectedColor : (!forPreview && asPart && drawing is PartDrawing) ? partColor : Colors.grey.shade700;
+      paint.strokeWidth = selected ? 2 : 1;
     } else {
-      paint.color = selected ? selectedColor : styling.color;
+      paint.color = (!forPreview && selected) ? selectedColor : styling.color;
       paint.strokeWidth = styling.thickness;
     }
 
@@ -558,85 +700,87 @@ class CurveCommand extends DrawingCommand {
       );
     }
 
-    if (selected || drawDirectionArrow) {
+    if (!forPreview && (selected || drawDirectionArrow)) {
       ArrowPainter.paintDirectionArrow(canvas: canvas, path: path, paint: paint, thickness: styling == null ? 1 : styling.thickness);
     }
 
-    // draw curve label
-    TextStyle style = TextStyle(color: selected ? selectedColor : Colors.grey[400]);
-    final ParagraphBuilder paragraphBuilder = ParagraphBuilder(
-      ParagraphStyle(
-        fontSize: 10,
-        fontFamily: style.fontFamily,
-        fontStyle: style.fontStyle,
-        fontWeight: style.fontWeight,
-        textAlign: TextAlign.justify,
-      ),
-    )
-    ..pushStyle(style.getTextStyle())
-    ..addText(prefixLabel.isEmpty ? label : '$prefixLabel.$label');
+    if (!forPreview) {
+      // draw curve label
+      TextStyle style = TextStyle(color: selected ? selectedColor : Colors.grey[400]);
+      final ParagraphBuilder paragraphBuilder = ParagraphBuilder(
+        ParagraphStyle(
+          fontSize: 10,
+          fontFamily: style.fontFamily,
+          fontStyle: style.fontStyle,
+          fontWeight: style.fontWeight,
+          textAlign: TextAlign.justify,
+        ),
+      )
+      ..pushStyle(style.getTextStyle())
+      ..addText(prefixLabel.isEmpty ? label : '$prefixLabel.$label');
 
-    final Paragraph paragraph = paragraphBuilder.build()
-    ..layout(ParagraphConstraints(width: size.width));
+      final Paragraph paragraph = paragraphBuilder.build()
+      ..layout(ParagraphConstraints(width: size.width));
 
-    Offset labelPosition = MathUtitilies.pointOnPathAtFraction(path, 0.3);
-    canvas.drawParagraph(paragraph, labelPosition);
+      Offset labelPosition = MathUtitilies.pointOnPathAtFraction(path, 0.3);
+      canvas.drawParagraph(paragraph, labelPosition);
 
-    // Draw control points and lines
-    Paint controlsPaint = Paint()
-      ..color = selected ? selectedColorLight : Colors.grey.withAlpha(60)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = selected ? 1 : .5;
+      // Draw control points and lines
+      Paint controlsPaint = Paint()
+        ..color = selected ? selectedColorLight : Colors.grey.withAlpha(60)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = selected ? 1 : .5;
+        
+      if (curveDefinitionType == CurveDefinitionType.quadratic) {
+        Offset controlCoordinate = getControlPointCoordinate(startCoordinate, endCoordinate, getQuadAmplitude(drawing)!, getQuadSlant(drawing)!);
+        canvas.drawRect(Rect.fromCenter(center: controlCoordinate, width: 3, height: 3), controlsPaint);
+        canvas.drawLine(controlCoordinate, startCoordinate, controlsPaint);
+        canvas.drawLine(controlCoordinate, endCoordinate, controlsPaint);
+      }
+      if (curveDefinitionType == CurveDefinitionType.quadraticFromPoints) {
+        if (quadCtrlPointId.isEmpty) return;
+        PointCommand? ctrlPointCmd = drawing.pointById(quadCtrlPointId);
+        if (ctrlPointCmd == null) return;
+        Offset? ctrlPoint = ctrlPointCmd.getCoordinate(drawing);
+        if (ctrlPoint == null) return;
+        ctrlPoint = ctrlPoint.scale(1, -1);
+        ctrlPoint += middle;
+        
+        canvas.drawRect(Rect.fromCenter(center: ctrlPoint, width: 3, height: 3), controlsPaint);
+        canvas.drawLine(ctrlPoint, startCoordinate, controlsPaint);
+        canvas.drawLine(ctrlPoint, endCoordinate, controlsPaint);
+      }
+      if (curveDefinitionType == CurveDefinitionType.cubic) {
+        Offset controlCoordinate1 = getControlPointCoordinate(startCoordinate, endCoordinate, getCubicAmplitude1(drawing)!, getCubicSlant1(drawing)!);
+        Offset controlCoordinate2 = getControlPointCoordinate(startCoordinate, endCoordinate, getCubicAmplitude2(drawing)!, getCubicSlant2(drawing)!);
       
-    if (curveDefinitionType == CurveDefinitionType.quadratic) {
-      Offset controlCoordinate = getControlPointCoordinate(startCoordinate, endCoordinate, getQuadAmplitude(drawing)!, getQuadSlant(drawing)!);
-      canvas.drawRect(Rect.fromCenter(center: controlCoordinate, width: 3, height: 3), controlsPaint);
-      canvas.drawLine(controlCoordinate, startCoordinate, controlsPaint);
-      canvas.drawLine(controlCoordinate, endCoordinate, controlsPaint);
-    }
-    if (curveDefinitionType == CurveDefinitionType.quadraticFromPoints) {
-      if (quadCtrlPointId.isEmpty) return;
-      PointCommand? ctrlPointCmd = drawing.pointById(quadCtrlPointId);
-      if (ctrlPointCmd == null) return;
-      Offset? ctrlPoint = ctrlPointCmd.getCoordinate(drawing);
-      if (ctrlPoint == null) return;
-      ctrlPoint = ctrlPoint.scale(1, -1);
-      ctrlPoint += middle;
-      
-      canvas.drawRect(Rect.fromCenter(center: ctrlPoint, width: 3, height: 3), controlsPaint);
-      canvas.drawLine(ctrlPoint, startCoordinate, controlsPaint);
-      canvas.drawLine(ctrlPoint, endCoordinate, controlsPaint);
-    }
-    if (curveDefinitionType == CurveDefinitionType.cubic) {
-      Offset controlCoordinate1 = getControlPointCoordinate(startCoordinate, endCoordinate, getCubicAmplitude1(drawing)!, getCubicSlant1(drawing)!);
-      Offset controlCoordinate2 = getControlPointCoordinate(startCoordinate, endCoordinate, getCubicAmplitude2(drawing)!, getCubicSlant2(drawing)!);
-    
-      canvas.drawRect(Rect.fromCenter(center: controlCoordinate1, width: 3, height: 3), controlsPaint);
-      canvas.drawRect(Rect.fromCenter(center: controlCoordinate2, width: 3, height: 3), controlsPaint);
-      canvas.drawLine(controlCoordinate1, startCoordinate, controlsPaint);
-      canvas.drawLine(controlCoordinate2, endCoordinate, controlsPaint);
-    }
-    if (curveDefinitionType == CurveDefinitionType.cubicFromPoints) {
-      if (cubicCtrlPointId1.isEmpty) return;
-      PointCommand? ctrlPointCmd1 = drawing.pointById(cubicCtrlPointId1);
-      if (ctrlPointCmd1 == null) return;
-      Offset? ctrlPoint1 = ctrlPointCmd1.getCoordinate(drawing);
-      if (ctrlPoint1 == null) return;
-      ctrlPoint1 = ctrlPoint1.scale(1, -1);
-      ctrlPoint1 += middle;
-      
-      if (cubicCtrlPointId2.isEmpty) return;
-      PointCommand? ctrlPointCmd2 = drawing.pointById(cubicCtrlPointId2);
-      if (ctrlPointCmd2 == null) return;
-      Offset? ctrlPoint2 = ctrlPointCmd2.getCoordinate(drawing);
-      if (ctrlPoint2 == null) return;
-      ctrlPoint2 = ctrlPoint2.scale(1, -1);
-      ctrlPoint2 += middle;
-      
-      canvas.drawRect(Rect.fromCenter(center: ctrlPoint1, width: 3, height: 3), controlsPaint);
-      canvas.drawRect(Rect.fromCenter(center: ctrlPoint2, width: 3, height: 3), controlsPaint);
-      canvas.drawLine(ctrlPoint1, startCoordinate, controlsPaint);
-      canvas.drawLine(ctrlPoint2, endCoordinate, controlsPaint);
+        canvas.drawRect(Rect.fromCenter(center: controlCoordinate1, width: 3, height: 3), controlsPaint);
+        canvas.drawRect(Rect.fromCenter(center: controlCoordinate2, width: 3, height: 3), controlsPaint);
+        canvas.drawLine(controlCoordinate1, startCoordinate, controlsPaint);
+        canvas.drawLine(controlCoordinate2, endCoordinate, controlsPaint);
+      }
+      if (curveDefinitionType == CurveDefinitionType.cubicFromPoints) {
+        if (cubicCtrlPointId1.isEmpty) return;
+        PointCommand? ctrlPointCmd1 = drawing.pointById(cubicCtrlPointId1);
+        if (ctrlPointCmd1 == null) return;
+        Offset? ctrlPoint1 = ctrlPointCmd1.getCoordinate(drawing);
+        if (ctrlPoint1 == null) return;
+        ctrlPoint1 = ctrlPoint1.scale(1, -1);
+        ctrlPoint1 += middle;
+        
+        if (cubicCtrlPointId2.isEmpty) return;
+        PointCommand? ctrlPointCmd2 = drawing.pointById(cubicCtrlPointId2);
+        if (ctrlPointCmd2 == null) return;
+        Offset? ctrlPoint2 = ctrlPointCmd2.getCoordinate(drawing);
+        if (ctrlPoint2 == null) return;
+        ctrlPoint2 = ctrlPoint2.scale(1, -1);
+        ctrlPoint2 += middle;
+        
+        canvas.drawRect(Rect.fromCenter(center: ctrlPoint1, width: 3, height: 3), controlsPaint);
+        canvas.drawRect(Rect.fromCenter(center: ctrlPoint2, width: 3, height: 3), controlsPaint);
+        canvas.drawLine(ctrlPoint1, startCoordinate, controlsPaint);
+        canvas.drawLine(ctrlPoint2, endCoordinate, controlsPaint);
+      }
     }
   }
 

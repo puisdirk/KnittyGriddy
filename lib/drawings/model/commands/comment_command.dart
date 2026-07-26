@@ -78,8 +78,11 @@ class CommentCommand extends DrawingCommand {
   CommentCommand dependentLabelChanged(String oldLabel, String newLabel) => this;
 
   @override
-  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const[], bool drawDirectionArrow = false}) {
+  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const[], bool drawDirectionArrow = false, bool forPreview = false}) {
   }
+
+  @override
+  String toSvg(Size drawingSize, AbstractDrawing drawing, {List<StylingCommand> stylings = const[]}) => '';
 
   @override
   Map<String, Object> toJson() {
@@ -106,7 +109,6 @@ class CommentCommand extends DrawingCommand {
       other is CommentCommand &&
       runtimeType == other.runtimeType &&
       id == other.id &&
-//      version == other.version &&
       label == other.label &&
       comment == other.comment &&
       valid == other.valid &&
@@ -119,4 +121,14 @@ class CommentCommand extends DrawingCommand {
 
   @override
   DrawingCommand validate(AbstractDrawing drawing) => this;
+  
+  @override
+  bool isSameAs(Object other) =>
+    identical(this, other) ||
+      other is CommentCommand &&
+      runtimeType == other.runtimeType &&
+      id == other.id &&
+      label == other.label &&
+      comment == other.comment;
+
 }

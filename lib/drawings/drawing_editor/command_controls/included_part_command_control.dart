@@ -194,6 +194,7 @@ class _IncludedPartCommandControlState extends State<IncludedPartCommandControl>
                       SmallLabel(label: moverride.measurementLabel, width: 100,),
                       hspacing,
                       FormulaFieldControl(
+                        drawing: widget.drawing,
                         formula: moverride.formula, 
                         width: 200, 
                         excludeCommand: widget.command, 

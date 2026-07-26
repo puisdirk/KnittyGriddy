@@ -64,6 +64,8 @@ class DrawingPainter extends CustomPainter {
     Stopwatch stopwatch = Stopwatch()..start();
     _printTiming('------------------------- repainting ${paintcycle++} --------------------------------------------');
 
+    Offset middle = Offset(size.width / 2, size.height / 2);
+
     // Scale to show the complete drawing
     Rect bbox = drawing.getBoundingBox();
 
@@ -104,7 +106,6 @@ class DrawingPainter extends CustomPainter {
     if (drawing.parts.any((p) => p.anchorPointId == originId && p.id == selectedCommandId)) {
       originColor = selectedColor;
     }
-    Offset middle = Offset(size.width / 2, size.height / 2);
     canvas.drawCircle(middle, 2, Paint()..color = originColor..style = PaintingStyle.stroke);
 
     // draw origin label

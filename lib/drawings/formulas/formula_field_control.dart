@@ -4,6 +4,7 @@ import 'package:knitty_griddy/drawings/formulas/formula_function.dart';
 import 'package:knitty_griddy/drawings/formulas/function_chooser.dart';
 import 'package:knitty_griddy/drawings/formulas/measurement_command_chooser.dart';
 import 'package:knitty_griddy/drawings/formulas/variable_command_chooser.dart';
+import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/measurement_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/variable_command.dart';
@@ -11,6 +12,7 @@ import 'package:knitty_griddy/utils/constants.dart';
 import 'package:multi_trigger_autocomplete/multi_trigger_autocomplete.dart';
 
 class FormulaFieldControl extends StatefulWidget {
+  final AbstractDrawing drawing;
   final String formula;
   final double width;
   final String? unitLabel;
@@ -18,6 +20,7 @@ class FormulaFieldControl extends StatefulWidget {
   final void Function(String newFormula) onFormulaChanged;
 
   const FormulaFieldControl({
+    required this.drawing,
     required this.formula,
     required this.width,
     this.unitLabel,
@@ -70,6 +73,7 @@ class _FormulaFieldControlState extends State<FormulaFieldControl> {
           trigger: '@', 
           optionsViewBuilder: (context, autocompleteQuery, textEditingController) {
             return MeasurementCommandChooser(
+              drawing: widget.drawing,
               query: autocompleteQuery.query.toLowerCase(),
               onChooseMeasurement: (MeasurementCommand command) {
                 final MultiTriggerAutocompleteState autocompleteState = MultiTriggerAutocomplete.of(context);
@@ -82,6 +86,7 @@ class _FormulaFieldControlState extends State<FormulaFieldControl> {
           trigger: '!', 
           optionsViewBuilder: (context, autocompleteQuery, textEditingController) {
             return VariableCommandChooser(
+              drawing: widget.drawing,
               excludeCommand: widget.excludeCommand,
               query: autocompleteQuery.query.toLowerCase(),
               onChooseVariable: (VariableCommand command) {

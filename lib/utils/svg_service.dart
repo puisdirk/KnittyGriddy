@@ -10,11 +10,37 @@ import 'package:knitty_griddy/charts/model/cell_address.dart';
 import 'package:knitty_griddy/charts/model/knitting_chart.dart';
 import 'package:knitty_griddy/charts/model/named_colour.dart';
 import 'package:knitty_griddy/charts/model/stitch_cell.dart';
+import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
+import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
+import 'package:knitty_griddy/drawings/model/commands/part_command.dart';
+import 'package:knitty_griddy/drawings/model/part_drawing.dart';
 import 'package:knitty_griddy/utils/color_utilities.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 
 class SvgService {
-  static Future<void> exportToSVG(KnittingChart chart, ExportSettings exportSetting, Size drawingSize, Size legendSize) async {
+  static Future<void> exportDrawingToSVG(AbstractDrawing drawing, Size drawingSize) async {
+    String drawingGroup = '<g>';
+    for (DrawingCommand command in drawing.commands) {
+      // For PartDrawings, we only draw the parts
+      if (drawing is PartDrawing && command is! PartCommand) continue;
+      drawingGroup += command.toSvg(drawingSize, drawing);
+    }
+    drawingGroup += '</g>';
+    
+    String completeDrawing = '<svg width="${drawingSize.width + 20}" height="${drawingSize.height + 20}" viewBox="0 0 ${drawingSize.width + 20} ${drawingSize.height + 20}" xmlns="http://www.w3.org/2000/svg">';
+    completeDrawing += '<g class="inset" transform="translate(20, 20)">';
+    completeDrawing += drawingGroup;
+    completeDrawing += '</g>';
+    completeDrawing += '</svg>';
+    
+    await FilePicker.platform.saveFile(
+      dialogTitle: 'Where do you want to store the output?',
+      fileName: '${drawing.name}.svg',
+      bytes: utf8.encode(completeDrawing),
+    );
+  }
+
+  static Future<void> exportKnittingChartToSVG(KnittingChart chart, ExportSettings exportSetting, Size drawingSize, Size legendSize) async {
     
     // Draw the grid itself by asking each stitchcell for its svg
     // Position those

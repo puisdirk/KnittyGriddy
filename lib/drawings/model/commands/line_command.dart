@@ -10,6 +10,7 @@ import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/styling_command.dart';
 import 'package:knitty_griddy/drawings/model/part_drawing.dart';
+import 'package:knitty_griddy/utils/color_utilities.dart';
 import 'package:knitty_griddy/utils/dashed_painter.dart';
 import 'package:knitty_griddy/utils/infinite_line.dart';
 import 'package:knitty_griddy/utils/constants.dart';
@@ -168,7 +169,6 @@ class LineCommand extends DrawingCommand {
     other is LineCommand &&
     runtimeType == other.runtimeType &&
     id == other.id &&
-//    version == other.version &&
     label == other.label &&
     fromPointId == other.fromPointId &&
     toPointId == other.toPointId &&
@@ -178,6 +178,16 @@ class LineCommand extends DrawingCommand {
     storedStartCoordinate == other.storedStartCoordinate &&
     storedEndCoordinate == other.storedEndCoordinate;
 
+  @override
+  bool isSameAs(Object other) =>
+    identical(this, other) ||
+    other is LineCommand &&
+    runtimeType == other.runtimeType &&
+    id == other.id &&
+    label == other.label &&
+    fromPointId == other.fromPointId &&
+    toPointId == other.toPointId;
+    
   @override
   int get hashCode => super.hashCode ^ fromPointId.hashCode ^ toPointId.hashCode ^
     storedStartCoordinate.hashCode ^ storedEndCoordinate.hashCode;
@@ -304,10 +314,54 @@ class LineCommand extends DrawingCommand {
   }
 
   @override
-  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const[], bool drawDirectionArrow = false}) {
-    if (!valid) {
-      return;
+  String toSvg(Size drawingSize, AbstractDrawing drawing, {List<StylingCommand> stylings = const[]}) {
+    if (!valid) return '';    
+
+    Offset? start = getStartCoordinate(drawing);
+    if (start == null) {
+      return '';
     }
+    start = start.scale(1, -1);
+
+    Offset? end = getEndCoordinate(drawing);
+    if (end == null) {
+      return '';
+    }
+    end = end.scale(1, -1);
+
+    Offset middle = Offset(drawingSize.width / 2, drawingSize.height / 2);
+    start += middle;
+    end += middle;
+
+    StylingCommand? styling = drawing.styleFor(id);
+    if (styling == null) {
+      // Look for id in format drawingid.id
+      if (stylings.any((s) => s.commandIds.any((sid) => sid.startsWith('${drawing.id}.$id')))) {
+        styling = stylings.firstWhere((s) => s.commandIds.any((sid) => sid.startsWith('${drawing.id}.$id')));
+      }
+    }
+
+    if (styling == null) {
+      return '<g id="$label"><line x1="${start.dx}" y1="${start.dy}" x2="${end.dx}" y2="${end.dy}" fill="none" stroke="${ColorUtilities.colorToSvhHex(Colors.grey.shade700)}"/></g>';
+    } else {
+      String svg = '<g id="$label"><line x1="${start.dx}" y1="${start.dy}" x2="${end.dx}" y2="${end.dy}" fill="none" stroke="${ColorUtilities.colorToSvhHex(styling.color)}" ${ColorUtilities.strokeOpacity(styling.color)} stroke-width="${styling.thickness}" ';
+      if (styling.dashStyle == DashStyle.full) {
+        svg += '/>';
+      } else {
+        svg += 'stroke-dasharray="${styling.dashStyle.svgString}" />';
+      }
+
+      svg += ArrowPainter.startArrowSvg(styleCommand: styling, start: start, end: end);
+      svg += ArrowPainter.endArrowSvg(styleCommand: styling, start: start, end: end);
+
+      svg += '</g>';
+      return svg;
+    }
+  }
+
+  @override
+  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const[], bool drawDirectionArrow = false, bool forPreview = false}) {
+    if (!valid) return;
 
     Offset? start = getStartCoordinate(drawing);
     if (start == null) {
@@ -329,16 +383,16 @@ class LineCommand extends DrawingCommand {
     StylingCommand? styling = drawing.styleFor(id);
     if (styling == null) {
       // Look for id in format drawingid.id
-      if (stylings.any((s) => s.commandIds.any((sid) => sid == '${drawing.id}.$id'))) {
-        styling = stylings.firstWhere((s) => s.commandIds.any((sid) => sid == '${drawing.id}.$id'));
+      if (stylings.any((s) => s.commandIds.any((sid) => sid.startsWith('${drawing.id}.$id')))) {
+        styling = stylings.firstWhere((s) => s.commandIds.any((sid) => sid.startsWith('${drawing.id}.$id')));
       }
     }
 
     if (styling == null) {
-      paint.color = selected ? selectedColor : (asPart && drawing is PartDrawing) ? partColor : Colors.grey.shade700;
-      paint.strokeWidth = asPart || selected ? 2 : 1;
+      paint.color = (!forPreview && selected) ? selectedColor : (!forPreview && asPart && drawing is PartDrawing) ? partColor : const Color(0xFF616161);
+      paint.strokeWidth = selected ? 2 : 1;
     } else {
-      paint.color = selected ? selectedColor : styling.color;
+      paint.color = (!forPreview && selected) ? selectedColor : styling.color;
       paint.strokeWidth = styling.thickness;
     }
 
@@ -360,33 +414,35 @@ class LineCommand extends DrawingCommand {
       );
     }
 
-    if (selected || drawDirectionArrow) {
+    if (!forPreview && (selected || drawDirectionArrow)) {
       ArrowPainter.paintDirectionArrow(canvas: canvas, path: path, paint: paint, thickness: styling == null ? 1 : styling.thickness);
     }
 
     // draw line label
-    Offset? midline = pointOnLine(0.3, drawing);
-    if (midline == null) return;
-    midline = midline.scale(1, -1);
-    midline += middle;
+    if (!forPreview) {
+      Offset? midline = pointOnLine(0.3, drawing);
+      if (midline == null) return;
+      midline = midline.scale(1, -1);
+      midline += middle;
 
-    TextStyle style = TextStyle(color: selected ? selectedColor : Colors.grey[400]);
-    final ParagraphBuilder paragraphBuilder = ParagraphBuilder(
-      ParagraphStyle(
-        fontSize: 10,
-        fontFamily: style.fontFamily,
-        fontStyle: style.fontStyle,
-        fontWeight: style.fontWeight,
-        textAlign: TextAlign.justify,
-      ),
-    )
-    ..pushStyle(style.getTextStyle())
-    ..addText(prefixLabel.isEmpty ? label : '$prefixLabel.$label');
+      TextStyle style = TextStyle(color: selected ? selectedColor : Colors.grey[400]);
+      final ParagraphBuilder paragraphBuilder = ParagraphBuilder(
+        ParagraphStyle(
+          fontSize: 10,
+          fontFamily: style.fontFamily,
+          fontStyle: style.fontStyle,
+          fontWeight: style.fontWeight,
+          textAlign: TextAlign.justify,
+        ),
+      )
+      ..pushStyle(style.getTextStyle())
+      ..addText(prefixLabel.isEmpty ? label : '$prefixLabel.$label');
 
-    final Paragraph paragraph = paragraphBuilder.build()
-    ..layout(ParagraphConstraints(width: size.width));
+      final Paragraph paragraph = paragraphBuilder.build()
+      ..layout(ParagraphConstraints(width: size.width));
 
-    canvas.drawParagraph(paragraph,  midline.translate(2, 0));
+      canvas.drawParagraph(paragraph,  midline.translate(2, 0));
+    }
   }
 
   @override

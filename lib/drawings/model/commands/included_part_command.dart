@@ -11,6 +11,7 @@ import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/styling_command.dart';
 import 'package:knitty_griddy/drawings/model/part_drawing.dart';
 import 'package:knitty_griddy/drawings/partrepo/part_repository.dart';
+import 'package:knitty_griddy/utils/collection_utilities.dart';
 
 @immutable
 class IncludedPartCommand extends DrawingCommand {
@@ -208,6 +209,19 @@ class IncludedPartCommand extends DrawingCommand {
       listEquals(errors, other.errors);
 
   @override
+  bool isSameAs(Object other) =>
+    identical(this, other) ||
+      other is IncludedPartCommand &&
+      runtimeType == other.runtimeType &&
+      id == other.id &&
+      label == other.label &&
+      partDrawingId == other.partDrawingId &&
+      partId == other.partId &&
+      partLabel == other.partLabel &&
+      anchorPointId == other.anchorPointId &&
+      listEquals(measurementOverrides, other.measurementOverrides);
+
+  @override
   int get hashCode => super.hashCode ^ partDrawingId.hashCode ^ partId.hashCode ^ partLabel.hashCode ^
     storedOffsetPartDrawing.hashCode ^ storedAnchorOffset.hashCode ^ storedOffset.hashCode ^ 
     anchorPointId.hashCode ^ measurementOverrides.hashCode ^ isDirty.hashCode;
@@ -260,14 +274,23 @@ class IncludedPartCommand extends DrawingCommand {
   }
 
   @override
-  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const[], bool drawDirectionArrow = false}) {
-    if (!valid) return;
+  String toSvg(Size drawingSize, AbstractDrawing drawing, {List<StylingCommand> stylings = const []}) {
+    if (!valid) return '';
+    if (storedOffsetPartDrawing == null) return '';
+    
+    PartCommand partCommand = storedOffsetPartDrawing!.parts.firstWhere((p) => p.id == partId);
 
+    return '<g id="${partCommand.label}">${partCommand.toSvg(drawingSize, storedOffsetPartDrawing!, stylings: drawing.commands.whereType<StylingCommand>().toList())}</g>';    
+  }
+
+  @override
+  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const[], bool drawDirectionArrow = false, bool forPreview = false}) {
+    if (!valid) return;
     if (storedOffsetPartDrawing == null) return;
     
     PartCommand partCommand = storedOffsetPartDrawing!.parts.firstWhere((p) => p.id == partId);
 
-    partCommand.paint(canvas, size, storedOffsetPartDrawing!, selected, prefixLabel: label, stylings: drawing.commands.whereType<StylingCommand>().toList(), drawDirectionArrow: drawDirectionArrow);
+    partCommand.paint(canvas, size, storedOffsetPartDrawing!, selected, prefixLabel: label, stylings: drawing.commands.whereType<StylingCommand>().toList(), drawDirectionArrow: drawDirectionArrow, forPreview: forPreview);
   }
 
   @override

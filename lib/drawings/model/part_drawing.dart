@@ -4,6 +4,7 @@ import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/part_command.dart';
 import 'package:knitty_griddy/drawings/model/part_info.dart';
+import 'package:knitty_griddy/utils/collection_utilities.dart';
 
 @immutable
 class PartDrawing extends AbstractDrawing {
@@ -53,6 +54,31 @@ class PartDrawing extends AbstractDrawing {
     );
   }
 
+  @override
+  bool operator ==(Object other) =>
+    identical(this, other) ||
+      other is PartDrawing &&
+      runtimeType == other.runtimeType &&
+      id == other.id &&
+      name == other.name &&
+      description == other.description &&
+      offset == other.offset &&
+      category == other.category &&
+      listEquals(commands, other.commands);
+
+  @override
+  int get hashCode => super.hashCode ^ category.hashCode;
+
+  bool isSameAs(Object other) =>
+    identical(this, other) ||
+      other is PartDrawing &&
+      runtimeType == other.runtimeType &&
+      id == other.id &&
+      name == other.name &&
+      description == other.description &&
+      offset == other.offset &&
+      category == other.category &&
+      CollectionUtilities.listSameAs(commands, other.commands);
 
   Map<String, Object> toJson() {
     return {

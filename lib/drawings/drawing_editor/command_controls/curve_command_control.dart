@@ -265,6 +265,7 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
                   SmallLabel(label: 'Amplitude', width: labelWidth,),
                   hspacing,
                   FormulaFieldControl(
+                    drawing: widget.drawing,
                     key: GlobalObjectKey('${widget.command.id}-${widget.command.version}-qamp'),
                     formula: widget.command.quadAmplitudeFormula, 
                     width: 240, 
@@ -279,6 +280,7 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
                   SmallLabel(label: 'Slant', width: labelWidth,),
                   hspacing,
                   FormulaFieldControl(
+                    drawing: widget.drawing,
                     key: GlobalObjectKey('${widget.command.id}-${widget.command.version}-qslant'),
                     formula: widget.command.quadSlantFormula, 
                     width: 240, 
@@ -297,6 +299,7 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
                   SmallLabel(label: 'Amplitude 1', width: labelWidth,),
                   hspacing,
                   FormulaFieldControl(
+                    drawing: widget.drawing,
                     key: GlobalObjectKey('${widget.command.id}-${widget.command.version}-camp1'),
                     formula: widget.command.cubicAmplitudeFormula1, 
                     width: 240, 
@@ -311,6 +314,7 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
                   SmallLabel(label: 'Slant 1', width: labelWidth,),
                   hspacing,
                   FormulaFieldControl(
+                    drawing: widget.drawing,
                     key: GlobalObjectKey('${widget.command.id}-${widget.command.version}-cslant1'),
                     formula: widget.command.cubicSlantFormula1, 
                     width: 240, 
@@ -325,6 +329,7 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
                   SmallLabel(label: 'Amplitude 2', width: labelWidth,),
                   hspacing,
                   FormulaFieldControl(
+                    drawing: widget.drawing,
                     key: GlobalObjectKey('${widget.command.id}-${widget.command.version}-camp2'),
                     formula: widget.command.cubicAmplitudeFormula2, 
                     width: 240, 
@@ -339,6 +344,7 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
                   SmallLabel(label: 'Slant 2', width: labelWidth,),
                   hspacing,
                   FormulaFieldControl(
+                    drawing: widget.drawing,
                     key: GlobalObjectKey('${widget.command.id}-${widget.command.version}-cslant2'),
                     formula: widget.command.cubicSlantFormula2, 
                     width: 240, 

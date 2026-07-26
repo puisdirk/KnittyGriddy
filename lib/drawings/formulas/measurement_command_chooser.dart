@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
 import 'package:knitty_griddy/drawings/model/commands/measurement_command.dart';
-import 'package:knitty_griddy/drawings/model/drawings_model.dart';
-import 'package:provider/provider.dart';
 
 import '../../utils/constants.dart';
 
 class MeasurementCommandChooser extends StatelessWidget {
+  final AbstractDrawing drawing;
   final String query;
   final ValueSetter<MeasurementCommand> onChooseMeasurement;
 
   const MeasurementCommandChooser({
+    required this.drawing,
     required this.query,
     required this.onChooseMeasurement,
     super.key
@@ -18,8 +19,7 @@ class MeasurementCommandChooser extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<MeasurementCommand> measurements = 
-      Provider.of<DrawingsModel>(context, listen: false)
-        .drawing.measurements.where((m) => m.label.toLowerCase().contains(query))
+      drawing.measurements.where((m) => m.label.toLowerCase().contains(query))
         .toList();
     if (measurements.isEmpty) {
       return const SizedBox.shrink();

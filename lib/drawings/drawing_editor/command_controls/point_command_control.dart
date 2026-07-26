@@ -197,6 +197,7 @@ class _PointCommandControlState extends State<PointCommandControl> {
                   const SmallLabel(label: 'Distance'),
                   hspacing,
                   FormulaFieldControl(
+                    drawing: widget.drawing,
                     key: GlobalObjectKey('${widget.command.id}-${widget.command.version}-${widget.command.version}-dist'),
                     formula: widget.command.distanceFormula,
                     width: 240, 
@@ -232,6 +233,7 @@ class _PointCommandControlState extends State<PointCommandControl> {
                   hspacing,
                   if (widget.command.direction == RelativePointDirection.angle)
                     FormulaFieldControl(
+                      drawing: widget.drawing,
                       key: GlobalObjectKey('${widget.command.id}-${widget.command.version}-angle'),
                       formula: widget.command.directionAngleFormula,
                       width: 155, 
@@ -308,6 +310,7 @@ class _PointCommandControlState extends State<PointCommandControl> {
                   const SmallLabel(label: 'Fraction'),
                   hspacing,
                   FormulaFieldControl(
+                    drawing: widget.drawing,
                     key: GlobalObjectKey('${widget.command.id}-${widget.command.version}-linefrac'),
                     formula: widget.command.onLineFractionFormula,
                     width: 240, 
@@ -355,6 +358,7 @@ class _PointCommandControlState extends State<PointCommandControl> {
                   const SmallLabel(label: 'Fraction'),
                   hspacing,
                   FormulaFieldControl(
+                    drawing: widget.drawing,
                     key: GlobalObjectKey('${widget.command.id}-${widget.command.version}-curvefrac'),
                     formula: widget.command.onCurveFractionFormula,
                     width: 240, 

@@ -82,6 +82,20 @@ class TextCommand extends DrawingCommand {
       listEquals(errors, other.errors);
   
   @override
+  bool isSameAs(Object other) =>
+    identical(this, other) ||
+      other is TextCommand &&
+      runtimeType == other.runtimeType &&
+      id == other.id &&
+      label == other.label &&
+      text == other.text &&
+      anchorPointId == other.anchorPointId &&
+      italic == other.italic &&
+      bold == other.bold &&
+      textSize == other.textSize &&
+      textColor == other.textColor;
+  
+  @override
   int get hashCode => super.hashCode ^ text.hashCode ^ anchorPointId.hashCode ^ italic.hashCode ^ bold.hashCode ^
     textSize.hashCode ^ textColor.hashCode;
 
@@ -170,7 +184,25 @@ class TextCommand extends DrawingCommand {
   DrawingCommand dependentLabelChanged(String oldLabel, String newLabel) => this;
 
   @override
-  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const [], bool drawDirectionArrow = false}) {
+  String toSvg(Size drawingSize, AbstractDrawing drawing, {List<StylingCommand> stylings = const []}) {
+    if (!valid) return '';
+
+    PointCommand? anchorPoint = drawing.pointById(anchorPointId);
+    if (anchorPoint == null) return '';
+
+    Offset? coord = anchorPoint.getCoordinate(drawing);
+    if (coord == null) return '';
+    coord = coord.scale(1, -1);
+
+    Offset middle = Offset(drawingSize.width / 2, drawingSize.height / 2);
+    coord += middle;
+
+    return '<g id="$label"><text font-size="12" font-family="Roboto" x="${coord.dx}" y="${coord.dy}">$text</text></g>';
+
+  }
+
+  @override
+  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const [], bool drawDirectionArrow = false, bool forPreview = false}) {
     if (!valid) return;
 
     PointCommand? anchorPoint = drawing.pointById(anchorPointId);
@@ -184,7 +216,7 @@ class TextCommand extends DrawingCommand {
     coord += middle;
 
     TextStyle style = TextStyle(
-      color: selected ? selectedColor : textColor,
+      color: (!forPreview && selected) ? selectedColor : textColor,
       fontSize: textSize.toDouble(),
       fontStyle: italic ? FontStyle.italic : FontStyle.normal,
       fontWeight: bold ? FontWeight.w700 : FontWeight.normal,

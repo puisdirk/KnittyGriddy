@@ -256,7 +256,9 @@ class DrawingsModel extends ChangeNotifier {
 
     // Import unknown parts
     for (PartDrawing partDrawing in drawing.usedPartDrawings) {
+      // Check if we have this part (same id and content)
       if (!PartRepository.hasPartDrawing(partDrawing)) {
+        // If not, is there a part with same content and different id?
         PartDrawing? samedrawingcontent = PartRepository.getPartByContent(partDrawing);
         if (samedrawingcontent != null) {
           // We have a partdrawing in the repo that is the same except for the id. So use that instead
@@ -264,8 +266,9 @@ class DrawingsModel extends ChangeNotifier {
             usedPartDrawings: drawing.usedPartDrawings.map((pd) => pd != partDrawing ? pd : samedrawingcontent).toList()
           );
         } else {
+          // We don't have the required part, so we import into the repo under the "imported" set
           String newId = const UuidV4Gen().get();
-          PartDrawing copy = partDrawing.copyWith(id: newId,);
+          PartDrawing copy = partDrawing.copyWith(id: newId,).validate();
           PartRepository.addPartDrawingToImportedSet(copy);
           drawing = drawing.copyWith(
             usedPartDrawings: drawing.usedPartDrawings.map((upd) => upd.id == partDrawing.id ? copy : upd).toList(),
