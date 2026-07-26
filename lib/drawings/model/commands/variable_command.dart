@@ -50,9 +50,7 @@ class VariableCommand extends DrawingCommand {
   double get editHeight => 165;
 
   @override
-  Rect getBoundingBox(AbstractDrawing drawing) {
-    return Rect.zero;
-  }
+  Rect getBoundingBox(AbstractDrawing drawing) => Rect.zero;
 
   @override
   VariableCommand setInitiallyClosed() {
@@ -96,8 +94,11 @@ class VariableCommand extends DrawingCommand {
   }
 
   @override
-  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const[], bool drawDirectionArrow = false}) {
+  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const[], bool drawDirectionArrow = false, bool forPreview = false}) {
   }
+
+  @override
+  String toSvg(Size drawingSize, AbstractDrawing drawing, {List<StylingCommand> stylings = const[]}) => '';
 
   @override
   Map<String, Object> toJson() {
@@ -124,13 +125,21 @@ class VariableCommand extends DrawingCommand {
       other is VariableCommand &&
       runtimeType == other.runtimeType &&
       id == other.id &&
-//      version == other.version &&
       label == other.label &&
       formula == other.formula &&
       valid == other.valid &&
       validated == other.validated &&
       listEquals(errors, other.errors) &&
       storedValue == other.storedValue;
+  
+  @override
+  bool isSameAs(Object other) =>
+    identical(this, other) ||
+      other is VariableCommand &&
+      runtimeType == other.runtimeType &&
+      id == other.id &&
+      label == other.label &&
+      formula == other.formula;
   
   @override
   int get hashCode => super.hashCode ^ formula.hashCode ^ storedValue.hashCode;

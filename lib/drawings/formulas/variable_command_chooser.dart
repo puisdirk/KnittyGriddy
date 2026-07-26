@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/variable_command.dart';
-import 'package:knitty_griddy/drawings/model/drawings_model.dart';
-import 'package:provider/provider.dart';
 
 import '../../utils/constants.dart';
 
 class VariableCommandChooser extends StatelessWidget {
+  final AbstractDrawing drawing;
   final DrawingCommand? excludeCommand;
   final String query;
   final ValueSetter<VariableCommand> onChooseVariable;
 
   const VariableCommandChooser({
+    required this.drawing,
     this.excludeCommand,
     required this.query,
     required this.onChooseVariable,
@@ -21,7 +22,7 @@ class VariableCommandChooser extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<VariableCommand> variables = 
-      Provider.of<DrawingsModel>(context, listen: false).drawing.variables.where(
+      drawing.variables.where(
         (m) => m.id != excludeCommand?.id && m.label.toLowerCase().contains(query)).toList();
     if (variables.isEmpty) {
       return const SizedBox.shrink();

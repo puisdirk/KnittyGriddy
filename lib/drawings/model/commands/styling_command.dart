@@ -3,21 +3,24 @@ import 'package:flutter/material.dart';
 import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
 import 'package:knitty_griddy/drawings/model/commands/arrow_painter.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
+import 'package:knitty_griddy/drawings/model/commands/included_part_command.dart';
 
 enum DashStyle {
-  full(dashPattern: []),
-  stripes(dashPattern: [10,3]),
-  mediumStripes(dashPattern: [7,3]),
-  shortStripes(dashPattern: [3, 1]),
-  dots(dashPattern: [1, 1]),
-  separatedDots(dashPattern: [1, 3]),
-  stripesAndDots(dashPattern: [10, 2, 1, 2]),
-  stripesAndDotDots(dashPattern: [10, 2, 1, 2, 1, 2]);
+  full(dashPattern: [], svgString: ''),
+  stripes(dashPattern: [10,3], svgString: '10 3'),
+  mediumStripes(dashPattern: [7,3], svgString: '7 3'),
+  shortStripes(dashPattern: [3, 1], svgString: '3 1'),
+  dots(dashPattern: [1, 1], svgString: '1 1'),
+  separatedDots(dashPattern: [1, 3], svgString: '1 3'),
+  stripesAndDots(dashPattern: [10, 2, 1, 2], svgString: '10 2 1 2'),
+  stripesAndDotDots(dashPattern: [10, 2, 1, 2, 1, 2], svgString: '10 2 1 2 1 2');
 
   final List<double> dashPattern;
+  final String svgString;
 
   const DashStyle({
-    required this.dashPattern
+    required this.dashPattern,
+    required this.svgString,
   });
 }
 
@@ -120,7 +123,9 @@ class StylingCommand extends DrawingCommand {
 
   @override
   StylingCommand changePartDrawingReference({required String oldId, required String newId}) {
-    return this;
+    return copyWith(
+      commandIds: commandIds.map((cid) => cid.replaceAll(oldId, newId)).toSet()
+    );
   }
 
   @override
@@ -134,8 +139,11 @@ class StylingCommand extends DrawingCommand {
   }
 
   @override
-  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const[], bool drawDirectionArrow = false}) {
+  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const[], bool drawDirectionArrow = false, bool forPreview = false}) {
   }
+
+  @override
+  String toSvg(Size drawingSize, AbstractDrawing drawing, {List<StylingCommand> stylings = const[]}) => '';
 
   @override
   Map<String, Object> toJson() {
@@ -181,6 +189,24 @@ class StylingCommand extends DrawingCommand {
     dashStyle == other.dashStyle &&
     startArrow == other.startArrow &&
     endArrow == other.endArrow &&
+    arrowSize == other.arrowSize &&
+    validated == other.validated &&
+    valid == other.valid &&
+    listEquals(errors, other.errors);
+  
+  @override
+  bool isSameAs(Object other) =>
+  identical(this, other) ||
+    other is StylingCommand &&
+    runtimeType == other.runtimeType &&
+    id == other.id &&
+    setEquals(commandIds, other.commandIds) &&
+    label == other.label &&
+    color == other.color &&
+    thickness == other.thickness &&
+    dashStyle == other.dashStyle &&
+    startArrow == other.startArrow &&
+    endArrow == other.endArrow &&
     arrowSize == other.arrowSize;
   
   @override
@@ -189,10 +215,47 @@ class StylingCommand extends DrawingCommand {
 
   @override
   DrawingCommand validate(AbstractDrawing drawing) {
+    bool isvalid = true;
+    bool retryValidation = true;
+    List<String> validationErrors = [];
+
+    if (label.isEmpty) { isvalid = false; retryValidation = false; validationErrors.add('Requires a label'); }
+    if (drawing.commands.any((c) => c.id != id && c.label == label)) { isvalid = false; retryValidation = false; validationErrors.add('Label should be unique'); }
+
+    if (commandIds.isEmpty) {
+      isvalid = false;
+      retryValidation = false;
+      validationErrors.add('Requires elements to apply the style');
+    } else {
+      for (String commandId in commandIds) {
+        if (commandId.contains('.')) {
+          // Need to wait on validation of the included part command
+          IncludedPartCommand ipc = drawing.includedParts.firstWhere((c) => c.id == commandId.split('.')[2]);
+          if (!ipc.validated) {
+            isvalid = false;
+          }
+        } else {
+          DrawingCommand? command = drawing.commandById(commandId);
+          if (command == null) {
+            isvalid = false;
+            retryValidation = false;
+            validationErrors.add('Element $commandId does not exist');
+          } else if (!command.validated) {
+            // We are not valid, but we should retry
+            isvalid = false;
+          } else if (!command.valid) {
+            isvalid = false;
+            retryValidation = false;
+            validationErrors.add('Element ${command.label} has errors');
+          }
+        }
+      }
+    }
+
     return copyWith(
-      valid: true,
-      validated: true,
-      errors: [],
+      valid: isvalid,
+      validated: (isvalid || !retryValidation),
+      errors: validationErrors,
     );
   }
 

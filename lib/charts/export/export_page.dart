@@ -83,7 +83,7 @@ class _ExportPageState extends State<ExportPage> {
               RenderRepaintBoundary drawingBoundary = drawingBoundaryKey.currentContext!.findRenderObject()! as RenderRepaintBoundary;
               Size drawingSize = drawingBoundary.size;
 
-              await SvgService.exportToSVG(
+              await SvgService.exportKnittingChartToSVG(
                 Provider.of<ChartsModel>(context, listen: false).knittingChart.pruneUnusedStitchesAndColours(), 
                 exportSettings, 
                 drawingSize, legendSize

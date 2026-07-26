@@ -1,8 +1,9 @@
 
 import 'dart:math';
-import 'dart:ui';
 
+import 'package:flutter/material.dart';
 import 'package:knitty_griddy/drawings/model/commands/styling_command.dart';
+import 'package:knitty_griddy/utils/color_utilities.dart';
 import 'package:knitty_griddy/utils/math_utitilies.dart';
 
 enum ArrowType {
@@ -17,6 +18,108 @@ enum ArrowType {
 }
 
 class ArrowPainter {
+
+  static String startArrowSvg({
+    required StylingCommand styleCommand,
+    required Offset start,
+    required Offset end,
+    Path? curvePath,
+  }) {
+    double arrowHeight = styleCommand.arrowSize.size + styleCommand.thickness;
+
+    if (styleCommand.startArrow == ArrowType.circle) {
+      Offset center = curvePath == null ? start : MathUtitilies.pointOnPathAtFraction(curvePath, 0);
+      return '<circle cx="${center.dx}" cy="${center.dy}" r="${arrowHeight / 2}" fill="${ColorUtilities.colorToSvhHex(styleCommand.color)}" ${ColorUtilities.fillOpacity(styleCommand.color)} ';
+    } else if (styleCommand.startArrow == ArrowType.hollowCircle) {
+      Offset center = curvePath == null ? start : MathUtitilies.pointOnPathAtFraction(curvePath, 0);
+      return '<circle cx="${center.dx}" cy="${center.dy}" r="${arrowHeight / 2}" fill="none" stroke="${ColorUtilities.colorToSvhHex(styleCommand.color)}" ${ColorUtilities.strokeOpacity(styleCommand.color)}';
+    } else if (styleCommand.startArrow != ArrowType.none) {
+      Offset arrowPoint = curvePath == null ? start : 
+        MathUtitilies.pointOnPathAtFraction(curvePath, 0);
+      Offset arrowBase = curvePath == null ? 
+        MathUtitilies.pointOnLineAtDistance(start, end, arrowHeight) : 
+        MathUtitilies.pointOnPathAtDistance(curvePath, arrowHeight);
+      Offset sharpArrowPoint = curvePath == null ?
+        MathUtitilies.pointOnLineAtDistance(start, end, arrowHeight / 2.0) :
+        MathUtitilies.pointOnPathAtDistance(curvePath, arrowHeight / 2.0);
+
+      double arrowAngle = MathUtitilies.angleOfLine(arrowBase, arrowPoint);
+      Offset arrowHeadEnd1 = MathUtitilies.relativepointatangle(arrowBase, arrowHeight / 2, arrowAngle + (pi / 2.0));
+      Offset arrowHeadEnd2 = MathUtitilies.relativepointatangle(arrowBase, arrowHeight / 2, arrowAngle - (pi / 2.0));
+
+      String svg = '<path d="';
+      svg += 'M${arrowHeadEnd1.dx},${arrowHeadEnd1.dy}L${arrowPoint.dx},${arrowPoint.dy}L${arrowHeadEnd2.dx},${arrowHeadEnd2.dy}';
+      if (styleCommand.startArrow == ArrowType.sharpFull || styleCommand.startArrow == ArrowType.sharpHollow) {
+        svg += 'L${sharpArrowPoint.dx},${sharpArrowPoint.dy}';
+      }
+      if (styleCommand.startArrow != ArrowType.open) {
+        svg += 'L${arrowHeadEnd1.dx},${arrowHeadEnd1.dy}z';
+      }
+
+      svg += '" ';
+
+      if (styleCommand.startArrow == ArrowType.full || styleCommand.startArrow == ArrowType.sharpFull) {
+        svg += ' fill="${ColorUtilities.colorToSvhHex(styleCommand.color)}" ${ColorUtilities.fillOpacity(styleCommand.color)} />';
+      } else {
+        svg += ' fill="none" stroke="${ColorUtilities.colorToSvhHex(styleCommand.color)}" ${ColorUtilities.strokeOpacity(styleCommand.color)} />';
+      }
+            
+      return svg;
+    }
+
+    return '';
+  }
+
+  static String endArrowSvg({
+    required StylingCommand styleCommand,
+    required Offset start,
+    required Offset end,
+    Path? curvePath,
+  }) {
+    double arrowHeight = styleCommand.arrowSize.size + styleCommand.thickness;
+
+    if (styleCommand.endArrow == ArrowType.circle) {
+      Offset center = curvePath == null ? end : MathUtitilies.pointOnPathAtFraction(curvePath, 1);
+      return '<circle cx="${center.dx}" cy="${center.dy}" r="${arrowHeight / 2}" fill="${ColorUtilities.colorToSvhHex(styleCommand.color)}" ${ColorUtilities.fillOpacity(styleCommand.color)} ';
+    } else if (styleCommand.endArrow == ArrowType.hollowCircle) {
+      Offset center = curvePath == null ? end : MathUtitilies.pointOnPathAtFraction(curvePath, 1);
+      return '<circle cx="${center.dx}" cy="${center.dy}" r="${arrowHeight / 2}" stroke="${ColorUtilities.colorToSvhHex(styleCommand.color)}" ${ColorUtilities.strokeOpacity(styleCommand.color)} ';
+    } else if (styleCommand.endArrow != ArrowType.none) {
+      Offset arrowPoint = curvePath == null ? end : 
+        MathUtitilies.pointOnPathAtFraction(curvePath, 1);
+      Offset arrowBase = curvePath == null ? 
+        MathUtitilies.pointOnLineAtDistance(start, end, MathUtitilies.distance(start, end) - arrowHeight) : 
+        MathUtitilies.pointOnPathAtDistance(curvePath, MathUtitilies.lengthOfPath(curvePath) - arrowHeight);
+      Offset sharpArrowPoint = curvePath == null ?
+        MathUtitilies.pointOnLineAtDistance(start, end, MathUtitilies.distance(start, end) -(arrowHeight / 2.0)) :
+        MathUtitilies.pointOnPathAtDistance(curvePath, MathUtitilies.lengthOfPath(curvePath) -(arrowHeight / 2.0));
+      
+      double arrowAngle = MathUtitilies.angleOfLine(arrowBase, arrowPoint);
+      Offset arrowHeadEnd1 = MathUtitilies.relativepointatangle(arrowBase, arrowHeight / 2, arrowAngle + (pi / 2.0));
+      Offset arrowHeadEnd2 = MathUtitilies.relativepointatangle(arrowBase, arrowHeight / 2, arrowAngle - (pi / 2.0));
+
+      String svg = '<path d="';
+      svg += 'M${arrowHeadEnd1.dx},${arrowHeadEnd1.dy}L${arrowPoint.dx},${arrowPoint.dy}L${arrowHeadEnd2.dx},${arrowHeadEnd2.dy}';
+      if (styleCommand.endArrow == ArrowType.sharpFull || styleCommand.endArrow == ArrowType.sharpHollow) {
+        svg += 'L${sharpArrowPoint.dx},${sharpArrowPoint.dy}';
+      }
+      if (styleCommand.endArrow != ArrowType.open) {
+        svg += 'L${arrowHeadEnd1.dx},${arrowHeadEnd1.dy}z';
+      }
+
+      svg += '" ';
+
+      if (styleCommand.endArrow == ArrowType.full || styleCommand.endArrow == ArrowType.sharpFull) {
+        svg += ' fill="${ColorUtilities.colorToSvhHex(styleCommand.color)}" ${ColorUtilities.strokeOpacity(styleCommand.color)}/>';
+      } else {
+        svg += ' fill="none" stroke="${ColorUtilities.colorToSvhHex(styleCommand.color)}" ${ColorUtilities.strokeOpacity(styleCommand.color)} />';
+      }
+            
+      return svg;
+    }
+
+    return '';
+  }
 
   static void paint({
     required Canvas canvas, 

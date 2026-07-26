@@ -79,9 +79,7 @@ class MeasurementCommand extends DrawingCommand {
   double get editHeight => 330;
 
   @override
-  Rect getBoundingBox(AbstractDrawing drawing) {
-    return Rect.zero;
-  }
+  Rect getBoundingBox(AbstractDrawing drawing) => Rect.zero;
 
   @override
   MeasurementCommand markAsCyclic(String cycleDescription) {
@@ -105,7 +103,6 @@ class MeasurementCommand extends DrawingCommand {
       other is MeasurementCommand &&
       runtimeType == other.runtimeType &&
       id == other.id &&
-//      version == other.version &&
       label == other.label &&
       minValue == other.minValue &&
       maxValue == other.maxValue &&
@@ -116,6 +113,19 @@ class MeasurementCommand extends DrawingCommand {
       validated == other.validated &&
       listEquals(errors, other.errors);
   
+  @override
+  bool isSameAs(Object other) =>
+    identical(this, other) ||
+      other is MeasurementCommand &&
+      runtimeType == other.runtimeType &&
+      id == other.id &&
+      label == other.label &&
+      minValue == other.minValue &&
+      maxValue == other.maxValue &&
+      value == other.value &&
+      decimals == other.decimals &&
+      unit == other.unit;
+
   @override
   int get hashCode => super.hashCode ^ id.hashCode ^ label.hashCode ^
     minValue.hashCode ^ maxValue.hashCode ^ value.hashCode ^ decimals.hashCode ^ unit.hashCode;
@@ -140,8 +150,11 @@ class MeasurementCommand extends DrawingCommand {
   MeasurementCommand dependentLabelChanged(String oldLabel, String newLabel) => this;
 
   @override
-  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const[], bool drawDirectionArrow = false}) {
+  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const[], bool drawDirectionArrow = false, bool forPreview = false}) {
   }
+
+  @override
+  String toSvg(Size drawingSize, AbstractDrawing drawing, {List<StylingCommand> stylings = const[]}) => '';
 
   @override
   Map<String, Object> toJson() {

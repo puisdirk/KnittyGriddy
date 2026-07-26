@@ -7,6 +7,7 @@ import 'package:knitty_griddy/drawings/model/commands/line_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/styling_command.dart';
 import 'package:knitty_griddy/drawings/model/part_drawing.dart';
+import 'package:knitty_griddy/utils/collection_utilities.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 
 class PartCommand extends DrawingCommand {
@@ -93,9 +94,7 @@ class PartCommand extends DrawingCommand {
   // We avoid expensive calculation as we don't require this in a PartDrawing
   // (existing lines and curves are already included)
   @override
-  Rect getBoundingBox(AbstractDrawing drawing) {
-    return Rect.zero;
-  }
+  Rect getBoundingBox(AbstractDrawing drawing) => Rect.zero;
 
   @override
   PartCommand setInitiallyClosed() {
@@ -142,31 +141,44 @@ class PartCommand extends DrawingCommand {
   }
 
   @override
-  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const[], bool drawDirectionArrow = false}) {
+  String toSvg(Size drawingSize, AbstractDrawing drawing, {List<StylingCommand> stylings = const []}) {
+    String svg = '<g id="$label">';
     for (String commandId in commandIds) {
       DrawingCommand command = drawing.commandById(commandId)!;
-      command.paint(canvas, size, drawing, selected, asPart: true, prefixLabel: prefixLabel, stylings: stylings, drawDirectionArrow: drawDirectionArrow);
+      svg += command.toSvg(drawingSize, drawing, stylings: stylings);
+    }
+    svg += '</g>';
+    return svg;
+  }
+
+  @override
+  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const[], bool drawDirectionArrow = false, bool forPreview = false}) {
+    for (String commandId in commandIds) {
+      DrawingCommand command = drawing.commandById(commandId)!;
+      command.paint(canvas, size, drawing, selected, asPart: true, prefixLabel: prefixLabel, stylings: stylings, drawDirectionArrow: drawDirectionArrow, forPreview: forPreview);
     }
 
     // Draw anchor on the anchor point
-    PointCommand? anchorPoint = drawing.pointById(anchorPointId);
-    if (anchorPoint != null && anchorPoint.validated && anchorPoint.valid) {
-      Offset? anchorCoordinate = anchorPoint.getCoordinate(drawing);
-      if (anchorCoordinate != null) {
-        anchorCoordinate = anchorCoordinate.scale(1, -1);
-        anchorCoordinate = anchorCoordinate.translate(-10, 4);
+    if (!forPreview) {
+      PointCommand? anchorPoint = drawing.pointById(anchorPointId);
+      if (anchorPoint != null && anchorPoint.validated && anchorPoint.valid) {
+        Offset? anchorCoordinate = anchorPoint.getCoordinate(drawing);
+        if (anchorCoordinate != null) {
+          anchorCoordinate = anchorCoordinate.scale(1, -1);
+          anchorCoordinate = anchorCoordinate.translate(-10, 4);
 
-        Offset middle = Offset(size.width / 2, size.height / 2);
-        anchorCoordinate += middle;
+          Offset middle = Offset(size.width / 2, size.height / 2);
+          anchorCoordinate += middle;
 
 
-        TextPainter textPainter = TextPainter(textDirection: TextDirection.rtl);
-        textPainter.text = TextSpan(
-          text: String.fromCharCode(Icons.anchor.codePoint),
-          style: TextStyle(fontSize: 10.0,fontFamily: Icons.anchor.fontFamily, color: selected ? selectedColor : partColor)
-        );
-        textPainter.layout();
-        textPainter.paint(canvas, anchorCoordinate);
+          TextPainter textPainter = TextPainter(textDirection: TextDirection.rtl);
+          textPainter.text = TextSpan(
+            text: String.fromCharCode(Icons.anchor.codePoint),
+            style: TextStyle(fontSize: 10.0,fontFamily: Icons.anchor.fontFamily, color: selected ? selectedColor : partColor)
+          );
+          textPainter.layout();
+          textPainter.paint(canvas, anchorCoordinate);
+        }
       }
     }
   }
@@ -198,13 +210,22 @@ class PartCommand extends DrawingCommand {
       other is PartCommand &&
       runtimeType == other.runtimeType &&
       id == other.id &&
-//      version == other.version &&
       label == other.label &&
       setEquals(commandIds, other.commandIds) &&
       anchorPointId == other.anchorPointId &&
       validated == other.validated &&
       valid == other.valid &&
       listEquals(errors, other.errors);
+
+  @override
+  bool isSameAs(Object other) =>
+    identical(this, other) ||
+      other is PartCommand &&
+      runtimeType == other.runtimeType &&
+      id == other.id &&
+      label == other.label &&
+      setEquals(commandIds, other.commandIds) &&
+      anchorPointId == other.anchorPointId;
 
   @override
   int get hashCode => super.hashCode ^ commandIds.hashCode ^ anchorPointId.hashCode;

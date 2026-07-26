@@ -253,7 +253,6 @@ class PointCommand extends DrawingCommand {
     other is PointCommand &&
     runtimeType == other.runtimeType &&
     id == other.id &&
-//    version == other.version &&
     label == other.label &&
     pointDefinitionType == other.pointDefinitionType &&
     fromPointId == other.fromPointId &&
@@ -272,6 +271,25 @@ class PointCommand extends DrawingCommand {
     storedCoordinate == other.storedCoordinate;
 
   @override
+  bool isSameAs(Object other) =>
+    identical(this, other) ||
+    other is PointCommand &&
+    runtimeType == other.runtimeType &&
+    id == other.id &&
+    label == other.label &&
+    pointDefinitionType == other.pointDefinitionType &&
+    fromPointId == other.fromPointId &&
+    distanceFormula == other.distanceFormula &&
+    direction == other.direction &&
+    directionAngleFormula == other.directionAngleFormula &&
+    onLineId == other.onLineId &&
+    onLineFractionFormula == other.onLineFractionFormula &&
+    onCurveId == other.onCurveId &&
+    onCurveFractionFormula == other.onCurveFractionFormula &&
+    intersectionLine1Id == other.intersectionLine1Id &&
+    intersectionLine2Id == other.intersectionLine2Id;
+
+  @override
   int get hashCode => super.hashCode ^ pointDefinitionType.hashCode ^ 
     fromPointId.hashCode ^ distanceFormula.hashCode ^ direction.hashCode ^ directionAngleFormula.hashCode ^
     onLineId.hashCode ^ onLineFractionFormula.hashCode ^
@@ -288,10 +306,29 @@ class PointCommand extends DrawingCommand {
   }
 
   @override
-  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const[], bool drawDirectionArrow = false}) {
-    if (!valid) {
-      return;
+  String toSvg(Size drawingSize, AbstractDrawing drawing, {List<StylingCommand> stylings = const[]}) {
+    if (!valid) return '';
+    String svg = '<g id="$label">';
+
+    Offset? coordinate = getCoordinate(drawing);
+    if (coordinate == null) {
+      return '';
     }
+    coordinate = coordinate.scale(1, -1);
+
+    Offset middle = Offset(drawingSize.width / 2, drawingSize.height / 2);
+    coordinate += middle;
+
+    svg += '<circle cx="${coordinate.dx}" cy="${coordinate.dy}" r="2" />';
+
+    svg += '</g>';
+    return svg;
+  }
+
+  @override
+  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const[], bool drawDirectionArrow = false, bool forPreview = false}) {
+    if (!valid) return;
+    if (forPreview) return;
 
     Offset? coordinate = getCoordinate(drawing);
     if (coordinate == null) {

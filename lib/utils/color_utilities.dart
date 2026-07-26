@@ -36,4 +36,17 @@ class ColorUtilities {
     double lighter = Contrast.lighter(tone: original.tone, ratio: 4.5);
     return ui.Color(Hct.from(original.hue, original.chroma, lighter).toInt());
   }
+
+  static String colorToSvhHex(ui.Color color) {
+    return '#${color.red.toRadixString(16).padLeft(2, '0')}${color.green.toRadixString(16).padLeft(2, '0')}${color.blue.toRadixString(16).padLeft(2, '0')}';
+  }
+
+  static String fillOpacity(ui.Color color) {
+    return color.alpha == 255 ? '' : 'fill-opacity="${color.alpha}"';
+  }
+
+  static String strokeOpacity(ui.Color color) {
+    return color.alpha == 255 ? '' : 'stroke-opacity="${color.alpha / 255}"';
+  }
+
 }

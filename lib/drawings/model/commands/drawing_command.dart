@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
 import 'package:knitty_griddy/drawings/model/commands/styling_command.dart';
+import 'package:knitty_griddy/utils/collection_utilities.dart';
 
 enum DrawingCommandTypes {
   commentCommand,
@@ -19,7 +20,7 @@ enum DrawingCommandTypes {
 }
 
 @immutable
-abstract class DrawingCommand {
+abstract class DrawingCommand implements SameAs {
   final String id;
   final int version;
   final String label;
@@ -43,8 +44,11 @@ abstract class DrawingCommand {
   double get editHeight;
   
   Map<String, Object> toJson();  
-  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const[], bool drawDirectionArrow = false});
-  
+  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, 
+    {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const[], 
+     bool drawDirectionArrow = false, bool forPreview = false});
+  String toSvg(Size drawingSize, AbstractDrawing drawing, {List<StylingCommand> stylings = const[]});
+
   Rect getBoundingBox(AbstractDrawing drawing);
 
   DrawingCommand deleteReference({required String commandId});

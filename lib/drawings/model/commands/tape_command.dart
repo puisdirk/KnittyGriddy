@@ -12,9 +12,11 @@ import 'package:knitty_griddy/drawings/model/commands/line_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/styling_command.dart';
 import 'package:knitty_griddy/drawings/model/part_drawing.dart';
+import 'package:knitty_griddy/utils/color_utilities.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 import 'package:knitty_griddy/utils/dashed_painter.dart';
 import 'package:knitty_griddy/utils/math_utitilies.dart';
+import 'package:path_drawing/path_drawing.dart';
 
 enum TapeUnit {
   mm(label: 'Millimeter', abbr: 'mm', shortLabel: 'mm'),
@@ -142,6 +144,24 @@ class TapeCommand extends DrawingCommand {
       validated == other.validated &&
       valid == other.valid &&
       listEquals(errors, other.errors);
+
+  @override
+  bool isSameAs(Object other) =>
+    identical(this, other) ||
+      other is TapeCommand &&
+      runtimeType == other.runtimeType &&
+      id == other.id &&
+      label == other.label &&
+      fromPointId == other.fromPointId &&
+      lineId == other.lineId &&
+      setEquals(lineAndCurveIds, other.lineAndCurveIds) &&
+      isCircular == other.isCircular &&
+      directionType == other.directionType &&
+      tapeType == other.tapeType &&
+      toPointId == other.toPointId &&
+      unit == other.unit &&
+      rowsGauge == other.rowsGauge &&
+      stitchesGauge == other.stitchesGauge;
 
   @override
   int get hashCode => super.hashCode ^ fromPointId.hashCode ^ toPointId.hashCode ^ lineId.hashCode ^ lineAndCurveIds.hashCode ^
@@ -304,19 +324,444 @@ class TapeCommand extends DrawingCommand {
   }
 
   @override
-  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const [], bool drawDirectionArrow = false}) {
-    if (!valid) {
-      return;
+  String toSvg(Size drawingSize, AbstractDrawing drawing, {List<StylingCommand> stylings = const []}) {
+    if (!valid) return '';
+
+    Offset middle = Offset(drawingSize.width / 2, drawingSize.height / 2);
+    StylingCommand? styling = drawing.styleFor(id);
+
+    String svg = '<g id="$label">';
+
+    switch (tapeType) {
+      case TapeType.betweenPoints: {
+
+        Offset? start = drawing.pointById(fromPointId)!.getCoordinate(drawing);
+        if (start == null) {
+          return '';
+        }
+        start = start.scale(1, -1);
+
+        Offset? end = drawing.pointById(toPointId)!.getCoordinate(drawing);
+        if (end == null) {
+          return '';
+        }
+        end = end.scale(1, -1);
+        start += middle;
+        end += middle;
+
+        switch (directionType) {
+          case TapeDirectionType.free: {
+            svg += '<line x1="${start.dx}" y1="${start.dy}" x2="${end.dx}" y2="${end.dy}" fill="none" ';
+
+            if (styling == null) {
+              svg += 'stroke="${ColorUtilities.colorToSvhHex(Colors.grey.shade700)}"/>';
+            } else {
+              svg += 'stroke="${ColorUtilities.colorToSvhHex(styling.color)}" ${ColorUtilities.strokeOpacity(styling.color)} stroke-width="${styling.thickness}" ';
+              if (styling.dashStyle == DashStyle.full) {
+                svg += '/>';
+              } else {
+                svg += 'stroke-dasharray="${styling.dashStyle.svgString}"/>';
+              }
+            }
+
+            if (styling != null) {
+              svg += ArrowPainter.startArrowSvg(styleCommand: styling, start: start, end: end);
+              svg += ArrowPainter.endArrowSvg(styleCommand: styling, start: start, end: end);
+            }
+
+            // Draw value in correct units
+            double distanceInMM = MathUtitilies.distance(start, end);
+            String distanceInUnit = _distanceInUnit(distanceInMM, unit);
+
+            Offset midline = MathUtitilies.pointOnLineAtFraction(start, end, 0.5);
+
+            svg += '<text font-family="Roboto" font-size="12" x="${midline.dx}" y="${midline.dy}">$distanceInUnit</text>';
+
+          } break;
+          case TapeDirectionType.horizontal: {
+            Offset tapeEndPoint = Offset(end.dx, start.dy);
+
+            // Helper line from endpoint
+            if ((tapeEndPoint.dy - end.dy).abs() > 5) {
+              svg += '<line x1="${end.dx}" y1="#{end.dy}" x2="${tapeEndPoint.dx}" y2="${tapeEndPoint.dy}" fill="none" stroke="${ColorUtilities.colorToSvhHex(Colors.grey.shade700)}" stroke-width="0.7" stroke-dasharray="${DashStyle.shortStripes.svgString}"/>';
+            }
+
+            svg += '<line x1="${start.dx}" y1="${start.dy}" x2="${tapeEndPoint.dx}" y2="${tapeEndPoint.dy}" fill="none" ';
+
+            if (styling == null) {
+              svg += 'stroke="${ColorUtilities.colorToSvhHex(Colors.grey.shade700)}"/>';
+            } else {
+              svg += 'stroke="${ColorUtilities.colorToSvhHex(styling.color)}" ${ColorUtilities.strokeOpacity(styling.color)} stroke-width="${styling.thickness}" ';
+              if (styling.dashStyle == DashStyle.full) {
+                svg += '/>';
+              } else {
+                svg += 'stroke-dasharray="${styling.dashStyle.svgString}"/>';
+              }
+            }
+
+            if (styling != null) {
+              svg += ArrowPainter.startArrowSvg(styleCommand: styling, start: start, end: tapeEndPoint);
+              svg += ArrowPainter.endArrowSvg(styleCommand: styling, start: start, end: tapeEndPoint);
+            }
+
+            // Draw value in correct units
+            double distanceInMM = MathUtitilies.distance(start, tapeEndPoint);
+            String distanceInUnit = _distanceInUnit(distanceInMM, unit);
+
+            Offset midline = MathUtitilies.pointOnLineAtFraction(start, end, 0.5);
+
+            svg += '<text font-family="Roboto" font-size="12" x="${midline.dx}" y="${midline.dy}">$distanceInUnit</text>';
+
+          } break;
+          case TapeDirectionType.vertical: {
+            Offset tapeEndPoint = Offset(start.dx, end.dy);
+
+            // Helper line from endpoint
+            if ((tapeEndPoint.dx - end.dx).abs() > 5) {
+              svg += '<line x1="${end.dx}" y1="${end.dy}" x2="${tapeEndPoint.dx}" y2="${tapeEndPoint.dy}" fill="none" stroke="${ColorUtilities.colorToSvhHex(Colors.grey.shade700)}" stroke-width="0.7" stroke-dasharray="${DashStyle.shortStripes.svgString}"/>';
+            }
+
+            svg += '<line x1="${start.dx}" y1="${start.dy}" x2="${tapeEndPoint.dx}" y2="${tapeEndPoint.dy}" fill="none" ';
+
+            if (styling == null) {
+              svg += 'stroke="${ColorUtilities.colorToSvhHex(Colors.grey.shade700)}"/>';
+            } else {
+              svg += 'stroke="${ColorUtilities.colorToSvhHex(styling.color)}" ${ColorUtilities.strokeOpacity(styling.color)} stroke-width="${styling.thickness}" ';
+              if (styling.dashStyle == DashStyle.full) {
+                svg += '/>';
+              } else {
+                svg += 'stroke-dasharray="${styling.dashStyle.svgString}"/>';
+              }
+            }
+
+            if (styling != null) {
+              svg += ArrowPainter.startArrowSvg(styleCommand: styling, start: start, end: tapeEndPoint);
+              svg += ArrowPainter.endArrowSvg(styleCommand: styling, start: start, end: tapeEndPoint);
+            }
+
+            // Draw value in correct units
+            double distanceInMM = MathUtitilies.distance(start, tapeEndPoint);
+            String distanceInUnit = _distanceInUnit(distanceInMM, unit);
+
+            Offset midline = MathUtitilies.pointOnLineAtFraction(start, end, 0.5);
+
+            svg += '<text font-family="Roboto" font-size="12" x="${midline.dx}" y="${midline.dy}">$distanceInUnit</text>';
+
+          } break;
+        }
+      } break; // end of TapeType.betweenPoints
+
+      case TapeType.line: {
+
+        LineCommand? line = drawing.lineById(lineId);
+        if (line == null) return '';
+
+        Offset? start = line.getStartCoordinate(drawing);
+        if (start == null) return '';
+        start = start.scale(1, -1);
+
+        Offset? end = line.getEndCoordinate(drawing);
+        if (end == null) return '';
+        end = end.scale(1, -1);
+
+        start += middle;
+        end += middle;
+
+        switch (directionType) {
+          case TapeDirectionType.free: {
+            // Calculate perpendicular points to start and end
+            double perpendicularAngle = MathUtitilies.angleOfLine(start, end) + (pi / 2.0);
+
+            double helperLineHeight = 20;
+            Offset tapeStartPoint = MathUtitilies.relativepointatangle(start, -helperLineHeight, perpendicularAngle);
+            Offset tapeEndPoint= MathUtitilies.relativepointatangle(end, -helperLineHeight, perpendicularAngle);
+
+            svg += '<line x1="${start.dx}" y1="${start.dy}" x2="${tapeStartPoint.dx}" y2="${tapeStartPoint.dy}" fill="none" stroke="${ColorUtilities.colorToSvhHex(Colors.grey.shade700)}" stroke-width="0.7" stroke-dasharray="${DashStyle.shortStripes.svgString}"/>';
+            svg += '<line x1="${end.dx}" y1="${end.dy}" x2="${tapeEndPoint.dx}" y2="${tapeEndPoint.dy}" fill="none" stroke="${ColorUtilities.colorToSvhHex(Colors.grey.shade700)}" stroke-width="0.7" stroke-dasharray="${DashStyle.shortStripes.svgString}"/>';
+
+            svg += '<line x1="${tapeStartPoint.dx}" y1="${tapeStartPoint.dy}" x2="${tapeEndPoint.dx}" y2="${tapeEndPoint.dy}" fill="none" ';
+
+            if (styling == null) {
+              svg += 'stroke="${ColorUtilities.colorToSvhHex(Colors.grey.shade700)}"/>';
+            } else {
+              svg += 'stroke="${ColorUtilities.colorToSvhHex(styling.color)}" ${ColorUtilities.strokeOpacity(styling.color)} stroke-width="${styling.thickness}" ';
+              if (styling.dashStyle == DashStyle.full) {
+                svg += '/>';
+              } else {
+                svg += 'stroke-dasharray="${styling.dashStyle.svgString}"/>';
+              }
+            }
+
+            if (styling != null) {
+              svg += ArrowPainter.startArrowSvg(styleCommand: styling, start: tapeStartPoint, end: tapeEndPoint);
+              svg += ArrowPainter.endArrowSvg(styleCommand: styling, start: tapeStartPoint, end: tapeEndPoint);
+            }
+
+            // Draw value in correct units
+            double distanceInMM = MathUtitilies.distance(start, end);
+            String distanceInUnit = _distanceInUnit(distanceInMM, unit);
+
+            Offset midline = MathUtitilies.pointOnLineAtFraction(tapeStartPoint, tapeEndPoint, 0.5);
+
+            svg += '<text font-family="Roboto" font-size="12" x="${midline.dx}" y="${midline.dy}">$distanceInUnit</text>';
+
+          } break;
+          case TapeDirectionType.horizontal: {
+            Offset tapeEndPoint = Offset(end.dx, start.dy);
+
+            // Helper line from endpoint
+            if ((tapeEndPoint.dy - end.dy).abs() > 5) {
+              svg += '<line x1="${end.dx}" y1="${end.dy}" x2="${tapeEndPoint.dx}" y2="${tapeEndPoint.dy}" fill="none" stroke="${ColorUtilities.colorToSvhHex(Colors.grey.shade700)}" stroke-width="0.7" stroke-dasharray="${DashStyle.shortStripes.svgString}"/>';
+            }
+
+            svg += '<line x1="${start.dx}" y1="${start.dy}" x2="${tapeEndPoint.dx}" y2="${tapeEndPoint.dy}" fill="none" ';
+
+            if (styling == null) {
+              svg += 'stroke="${ColorUtilities.colorToSvhHex(Colors.grey.shade700)}"/>';
+            } else {
+              svg += 'stroke="${ColorUtilities.colorToSvhHex(styling.color)}" ${ColorUtilities.strokeOpacity(styling.color)} stroke-width="${styling.thickness}" ';
+              if (styling.dashStyle == DashStyle.full) {
+                svg += '/>';
+              } else {
+                svg += 'stroke-dasharray="${styling.dashStyle.svgString}"/>';
+              }
+            }
+
+            if (styling != null) {
+              svg += ArrowPainter.startArrowSvg(styleCommand: styling, start: start, end: tapeEndPoint);
+              svg += ArrowPainter.endArrowSvg(styleCommand: styling, start: start, end: tapeEndPoint);
+            }
+
+            // Draw value in correct units
+            double distanceInMM = MathUtitilies.distance(start, tapeEndPoint);
+            String distanceInUnit = _distanceInUnit(distanceInMM, unit);
+
+            Offset midline = MathUtitilies.pointOnLineAtFraction(start, tapeEndPoint, 0.5);
+
+            svg += '<text font-family="Roboto" font-size="12" x="${midline.dx}" y="${midline.dy}">$distanceInUnit</text>';
+
+          } break;
+          case TapeDirectionType.vertical: {
+            Offset tapeEndPoint = Offset(start.dx, end.dy);
+
+            // Helper line from endpoint
+            if ((tapeEndPoint.dx - end.dx).abs() > 5) {
+              svg += '<line x1="${end.dx}" y1="${end.dy}" x2="${tapeEndPoint.dx}" y2="${tapeEndPoint.dy}" fill="none" stroke="${ColorUtilities.colorToSvhHex(Colors.grey.shade700)}" stroke-width="0.7" stroke-dasharray="${DashStyle.shortStripes.svgString}"/>';
+            }
+
+            svg += '<line x1="${start.dx}" y1="${start.dy}" x2="${tapeEndPoint.dx}" y2="${tapeEndPoint.dy}" fill="none" ';
+
+            if (styling == null) {
+              svg += 'stroke="${ColorUtilities.colorToSvhHex(Colors.grey.shade700)}"/>';
+            } else {
+              svg += 'stroke="${ColorUtilities.colorToSvhHex(styling.color)}" ${ColorUtilities.strokeOpacity(styling.color)} stroke-width="${styling.thickness}" ';
+              if (styling.dashStyle == DashStyle.full) {
+                svg += '/>';
+              } else {
+                svg += 'stroke-dasharray="${styling.dashStyle.svgString}"/>';
+              }
+            }
+
+            if (styling != null) {
+              svg += ArrowPainter.startArrowSvg(styleCommand: styling, start: start, end: tapeEndPoint);
+              svg += ArrowPainter.endArrowSvg(styleCommand: styling, start: start, end: tapeEndPoint);
+            }
+
+            // Draw value in correct units
+            double distanceInMM = MathUtitilies.distance(start, tapeEndPoint);
+            String distanceInUnit = _distanceInUnit(distanceInMM, unit);
+
+            Offset midline = MathUtitilies.pointOnLineAtFraction(start, tapeEndPoint, 0.5);
+
+            svg += '<text font-family="Roboto" font-size="12" x="${midline.dx}" y="${midline.dy}">$distanceInUnit</text>';
+
+          } break;
+        }
+      } break; // end of TapeType.line
+
+      case TapeType.linesAndcurves: {
+        double helperLineHeight = 20;
+
+        List<DrawingCommand> linesAndCurves = [];
+        for (String lineOrCurveId in lineAndCurveIds) {
+          DrawingCommand? lineOrcurve = drawing.commandById(lineOrCurveId);
+          if (lineOrcurve == null) return '';
+          linesAndCurves.add(lineOrcurve);
+        }
+
+        DrawingCommand startLineOrCurve;
+        DrawingCommand endLineOrCurve;
+
+        if (isCircular) {
+          // Use the first one as start
+          startLineOrCurve = linesAndCurves.first;
+
+          // Find the command that ends on the first's head
+          endLineOrCurve = linesAndCurves.firstWhere((lineOrCurve) =>
+            _getLineOrCurveEndPointId(lineOrCurve) == _getLineOrCurveStartPointId(startLineOrCurve)
+          );
+        } else {
+          // Find the command that doesn't have a command at the head
+          startLineOrCurve = linesAndCurves.firstWhere((lineOrCurve) =>
+            !linesAndCurves.any((other) => lineOrCurve != other &&
+            _getLineOrCurveStartCoordinate(lineOrCurve, drawing) == _getLineOrCurveEndCoordinate(other, drawing))
+          );
+
+          // Find the command that doesn't have a command at the tail
+          endLineOrCurve = linesAndCurves.firstWhere((lineOrCurve) =>
+            !linesAndCurves.any((other) => lineOrCurve != other &&
+            _getLineOrCurveEndCoordinate(lineOrCurve, drawing) == _getLineOrCurveStartCoordinate(other, drawing))
+          );
+        }
+
+        Offset? start = _getLineOrCurveStartCoordinate(startLineOrCurve, drawing);
+        start = start.scale(1, -1);
+
+        Offset? end = _getLineOrCurveEndCoordinate(endLineOrCurve, drawing);
+        end = end.scale(1, -1);
+
+        start += middle;
+        end += middle;
+
+        double fractionIncrease = 0.02;
+
+        // We build the tape path to draw it at the end
+        String tapeCurvePath = '';
+        // We'll remember the start and end of the tape to draw arrows on them at the end
+        Offset tapeCurveStartLocation = Offset.zero;
+        Offset tapeCurveEndLocation = Offset.zero;
+        // We add the length of each segment
+        double distanceInMM = 0;
+
+        DrawingCommand lineOrCurve = startLineOrCurve;
+        while (true) {
+          if (lineOrCurve is CurveCommand) {
+            Path curvePath = lineOrCurve.getPath(drawing, middle)!;
+            distanceInMM += MathUtitilies.lengthOfPath(curvePath);
+
+            // Calculate perpendicular points, every fractionIncrease step of the curve
+            for (double perplocation = 0; perplocation <= 1 + fractionIncrease; perplocation += fractionIncrease) {
+              bool atEndOfCurve = perplocation >= 1;
+
+              // Find that next point on the curve
+              Offset perpOffset = MathUtitilies.pointOnPathAtFraction(curvePath, perplocation);
+              
+              // Find a point that is a bit further or back on the curve to get the angle between those two points
+              Offset perpoffsetincreased = MathUtitilies.pointOnPathAtFraction(curvePath, atEndOfCurve ? perplocation - 0.05 : perplocation + 0.05);
+              
+              // Get the perpendicular angle of that piece of the curve
+              double perpendicularAngle = atEndOfCurve ?
+                MathUtitilies.angleOfLine(perpoffsetincreased, perpOffset) + (pi / 2.0)
+              : MathUtitilies.angleOfLine(perpOffset, perpoffsetincreased) + (pi / 2.0);
+
+              // Get a point at that angle, somewhat removed from the curve
+              Offset shadowPointOffset = MathUtitilies.relativepointatangle(perpOffset, -helperLineHeight, perpendicularAngle);
+
+              // If we are at the first point of the start curve, we draw a helper line
+              if (lineOrCurve == startLineOrCurve && perplocation == 0) {
+                svg += '<line x1="${start.dx}" y1="${start.dy}" x2="${shadowPointOffset.dx}" y2="${shadowPointOffset.dy}" fill="none" stroke="${ColorUtilities.colorToSvhHex(Colors.grey.shade700)}" stroke-width="0.7" stroke-dasharray="${DashStyle.shortStripes.svgString}"/>';
+                tapeCurveStartLocation = shadowPointOffset;
+              }
+              // and same on the last point of the last curve
+              if (lineOrCurve == endLineOrCurve && atEndOfCurve) {
+                svg += '<line x1="${end.dx}" y1="${end.dy}" x2="${shadowPointOffset.dx}" y2="${shadowPointOffset.dy}" fill="none" stroke="${ColorUtilities.colorToSvhHex(Colors.grey.shade700)}" stroke-width="0.7" stroke-dasharray="${DashStyle.shortStripes.svgString}"/>';
+                tapeCurveEndLocation = shadowPointOffset;
+              }
+
+              // Construct on the tapeCurvePath
+              if (lineOrCurve == startLineOrCurve && perplocation == 0) {
+                tapeCurvePath += 'M${shadowPointOffset.dx},${shadowPointOffset.dy} ';
+              } else {
+                tapeCurvePath += 'L${shadowPointOffset.dx},${shadowPointOffset.dy} ';
+              }
+            }
+          } else {
+            LineCommand line = lineOrCurve as LineCommand;
+
+            Offset lineStart = line.getStartCoordinate(drawing)!;
+            lineStart = lineStart.scale(1, -1); lineStart += middle;
+            Offset lineEnd = line.getEndCoordinate(drawing)!;
+            lineEnd = lineEnd.scale(1, -1); lineEnd += middle;
+
+            distanceInMM += MathUtitilies.distance(lineStart, lineEnd);
+
+            double perpendicularAngle = MathUtitilies.angleOfLine(lineStart, lineEnd) + (pi / 2.0);
+
+            Offset startShadowPointOffset = MathUtitilies.relativepointatangle(lineStart, -helperLineHeight, perpendicularAngle);
+
+            if (line == startLineOrCurve) {
+              tapeCurveStartLocation = startShadowPointOffset;
+              tapeCurvePath += 'M${startShadowPointOffset.dx},${startShadowPointOffset.dy} ';
+              svg += '<line x1="${lineStart.dx}" y1="${lineStart.dy}" x2="${startShadowPointOffset.dx}" y2="${startShadowPointOffset.dy}" fill="none" stroke="${ColorUtilities.colorToSvhHex(Colors.grey.shade700)}" stroke-width="0.7" stroke-dasharray="${DashStyle.shortStripes.svgString}"/>';
+            } else {
+              tapeCurvePath += 'L${startShadowPointOffset.dx},${startShadowPointOffset.dy} ';
+            }
+
+            Offset endShadowPointOffset = MathUtitilies.relativepointatangle(lineEnd, -helperLineHeight, perpendicularAngle);
+            tapeCurvePath += 'L${endShadowPointOffset.dx},${endShadowPointOffset.dy} ';
+
+            if (line == endLineOrCurve) {
+              tapeCurveEndLocation = endShadowPointOffset;
+              svg += '<line x1="${lineEnd.dx}" y1="${lineEnd.dy}" x2="${endShadowPointOffset.dx}" y2="${endShadowPointOffset.dy}" fill="none" stroke="${ColorUtilities.colorToSvhHex(Colors.grey.shade700)}" stroke-width="0.7" stroke-dasharray="${DashStyle.shortStripes.svgString}"/>';
+            }
+          }
+
+          // Find the next line or curve or stop the forever loop
+          if (lineOrCurve == endLineOrCurve) {
+            break;
+          }
+          lineOrCurve = linesAndCurves.firstWhere((c) => _getLineOrCurveStartPointId(c) == _getLineOrCurveEndPointId(lineOrCurve));
+        } // end of while(true)
+
+        // Draw the tape path
+        svg += '<path d="$tapeCurvePath" fill="none" ';
+
+        if (styling == null) {
+          svg += 'stroke="${ColorUtilities.colorToSvhHex(Colors.grey.shade700)}"/>';
+        } else {
+          svg += 'stroke="${ColorUtilities.colorToSvhHex(styling.color)}" ${ColorUtilities.strokeOpacity(styling.color)} stroke-width="${styling.thickness}" ';
+          if (styling.dashStyle == DashStyle.full) {
+            svg += '/>';
+          } else {
+            svg += 'stroke-dasharray="${styling.dashStyle.svgString}"/>';
+          }
+        }
+
+        Path curvePath = parseSvgPathData(tapeCurvePath);
+
+        if (styling != null) {
+          svg += ArrowPainter.startArrowSvg(styleCommand: styling, start: tapeCurveStartLocation, end: tapeCurveEndLocation, curvePath: curvePath);
+          svg += ArrowPainter.endArrowSvg(styleCommand: styling, start: tapeCurveStartLocation, end: tapeCurveEndLocation, curvePath: curvePath);
+        }
+
+        // Draw value in correct units
+        String distanceInUnit = _distanceInUnit(distanceInMM, unit);
+
+        // We put the label in the middle of the tape curve
+        Offset midline = MathUtitilies.pointOnPathAtFraction(curvePath, 0.5);
+
+        svg += '<text font-family="Roboto" font-size="12" x="${midline.dx}" y="${midline.dy}">$distanceInUnit</text>';
+
+      } // end of case linesAndCurves
     }
+
+    svg += '</g>';
+
+    return svg;
+  }
+
+  @override
+  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const [], bool drawDirectionArrow = false, bool forPreview = false}) {
+    if (!valid) return;
 
     Offset middle = Offset(size.width / 2, size.height / 2);
     Paint paint = Paint()..style = PaintingStyle.stroke;
     StylingCommand? styling = drawing.styleFor(id);
     if (styling == null) {
-      paint.color = selected ? selectedColor : (asPart && drawing is PartDrawing) ? partColor : Colors.grey.shade700;
-      paint.strokeWidth = asPart || selected ? 2 : 1;
+      paint.color = (!forPreview && selected) ? selectedColor : (!forPreview && asPart && drawing is PartDrawing) ? partColor : Colors.grey.shade700;
+      paint.strokeWidth = selected ? 2 : 1;
     } else {
-      paint.color = selected ? selectedColor : styling.color;
+      paint.color = (!forPreview && selected) ? selectedColor : styling.color;
       paint.strokeWidth = styling.thickness;
     }
 
@@ -365,7 +810,7 @@ class TapeCommand extends DrawingCommand {
 
             Offset midline = MathUtitilies.pointOnLineAtFraction(start, end, 0.5);
 
-            TextStyle style = TextStyle(color: selected ? selectedColor : Colors.black);
+            TextStyle style = TextStyle(color: (!forPreview && selected) ? selectedColor : Colors.black);
             final ParagraphBuilder paragraphBuilder = ParagraphBuilder(
               ParagraphStyle(
                 fontSize: 10,
@@ -418,7 +863,7 @@ class TapeCommand extends DrawingCommand {
 
             Offset midline = MathUtitilies.pointOnLineAtFraction(start, tapeEndPoint, 0.5);
 
-            TextStyle style = TextStyle(color: selected ? selectedColor : Colors.black);
+            TextStyle style = TextStyle(color: (!forPreview && selected) ? selectedColor : Colors.black);
             final ParagraphBuilder paragraphBuilder = ParagraphBuilder(
               ParagraphStyle(
                 fontSize: 10,
@@ -469,7 +914,7 @@ class TapeCommand extends DrawingCommand {
 
             Offset midline = MathUtitilies.pointOnLineAtFraction(start, tapeEndPoint, 0.5);
 
-            TextStyle style = TextStyle(color: selected ? selectedColor : Colors.black);
+            TextStyle style = TextStyle(color: (!forPreview && selected) ? selectedColor : Colors.black);
             final ParagraphBuilder paragraphBuilder = ParagraphBuilder(
               ParagraphStyle(
                 fontSize: 10,
@@ -545,7 +990,7 @@ class TapeCommand extends DrawingCommand {
 
             Offset midline = MathUtitilies.pointOnLineAtFraction(tapeStartPoint, tapeEndPoint, 0.5);
 
-            TextStyle style = TextStyle(color: selected ? selectedColor : Colors.black);
+            TextStyle style = TextStyle(color: (!forPreview && selected) ? selectedColor : Colors.black);
             final ParagraphBuilder paragraphBuilder = ParagraphBuilder(
               ParagraphStyle(
                 fontSize: 10,
@@ -596,7 +1041,7 @@ class TapeCommand extends DrawingCommand {
 
             Offset midline = MathUtitilies.pointOnLineAtFraction(start, tapeEndPoint, 0.5);
 
-            TextStyle style = TextStyle(color: selected ? selectedColor : Colors.black);
+            TextStyle style = TextStyle(color: (!forPreview && selected) ? selectedColor : Colors.black);
             final ParagraphBuilder paragraphBuilder = ParagraphBuilder(
               ParagraphStyle(
                 fontSize: 10,
@@ -647,7 +1092,7 @@ class TapeCommand extends DrawingCommand {
 
             Offset midline = MathUtitilies.pointOnLineAtFraction(start, tapeEndPoint, 0.5);
 
-            TextStyle style = TextStyle(color: selected ? selectedColor : Colors.black);
+            TextStyle style = TextStyle(color: (!forPreview && selected) ? selectedColor : Colors.black);
             final ParagraphBuilder paragraphBuilder = ParagraphBuilder(
               ParagraphStyle(
                 fontSize: 10,
@@ -772,6 +1217,8 @@ class TapeCommand extends DrawingCommand {
             Offset lineEnd = line.getEndCoordinate(drawing)!;
             lineEnd = lineEnd.scale(1, -1); lineEnd += middle;
 
+            distanceInMM += MathUtitilies.distance(lineStart, lineEnd);
+
             double perpendicularAngle = MathUtitilies.angleOfLine(lineStart, lineEnd) + (pi / 2.0);
 
             Offset startShadowPointOffset = MathUtitilies.relativepointatangle(lineStart, -helperLineHeight, perpendicularAngle);
@@ -824,7 +1271,7 @@ class TapeCommand extends DrawingCommand {
         // We put the label in the middle of the tape curve
         Offset midline = MathUtitilies.pointOnPathAtFraction(tapeCurvePath, 0.5);
 
-        TextStyle style = TextStyle(color: selected ? selectedColor : Colors.black);
+        TextStyle style = TextStyle(color: (!forPreview && selected) ? selectedColor : Colors.black);
         final ParagraphBuilder paragraphBuilder = ParagraphBuilder(
           ParagraphStyle(
             fontSize: 10,
@@ -1005,26 +1452,28 @@ class TapeCommand extends DrawingCommand {
           validationErrors.add('Requires lines and curves to measure');
         } else {
           for (String lineOrCurveId in lineAndCurveIds) {
-            DrawingCommand? lineOrCurve = drawing.commandById(lineOrCurveId);
-            if (lineOrCurve != null) linesAndCurves.add(lineOrCurve);
-
-            if (lineOrCurve == null) {
-              isvalid = false;
-              retryValidation = false;
-              validationErrors.add('Line or curve $lineOrCurveId does not exist');
-            } else if (lineOrCurveId.contains('.')) {
+            if (lineOrCurveId.contains('.')) {
               // need to wait on validation of the included part command
               IncludedPartCommand ipc = drawing.includedParts.firstWhere((c) => c.id == lineOrCurveId.split('.')[2]);
               if (!ipc.validated) {
                 isvalid = false;
               }
-            } else if (!lineOrCurve.validated) {
-              // We are not valid, but we should retry
-              isvalid = false;
-            } else if (!lineOrCurve.valid) {
-              isvalid = false;
-              retryValidation = false;
-              validationErrors.add('${lineOrCurve is LineCommand ? 'Line' : 'Curve'} ${lineOrCurve.label} has errors');
+            } else {
+              DrawingCommand? lineOrCurve = drawing.commandById(lineOrCurveId);
+              if (lineOrCurve != null) linesAndCurves.add(lineOrCurve);
+
+              if (lineOrCurve == null) {
+                isvalid = false;
+                retryValidation = false;
+                validationErrors.add('Line or curve $lineOrCurveId does not exist');
+              } else if (!lineOrCurve.validated) {
+                // We are not valid, but we should retry
+                isvalid = false;
+              } else if (!lineOrCurve.valid) {
+                isvalid = false;
+                retryValidation = false;
+                validationErrors.add('${lineOrCurve is LineCommand ? 'Line' : 'Curve'} ${lineOrCurve.label} has errors');
+              }
             }
           }
         }

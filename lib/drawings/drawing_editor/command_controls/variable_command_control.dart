@@ -95,6 +95,7 @@ class _VariableCommandControlState extends State<VariableCommandControl> {
             const SmallLabel(label: 'Formula'),
             hspacing,
             FormulaFieldControl(
+              drawing: widget.drawing,
               key: GlobalObjectKey('${widget.command.id}-${widget.command.version}-form'),
               excludeCommand: widget.command,
               width: 240,

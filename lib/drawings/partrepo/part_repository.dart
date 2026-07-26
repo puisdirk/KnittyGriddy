@@ -159,8 +159,8 @@ class PartRepository {
     return null;
   }
 
-  static bool hasPartDrawing(PartDrawing part) {
-    return instance.sets.any((s) => s.partDrawings.any((p) => p == part));
+  static bool hasPartDrawing(PartDrawing partDrawing) {
+    return instance.sets.any((s) => s.partDrawings.any((p) => p.isSameAs(partDrawing)));
   }
 
   static PartDrawing? getPartByContent(PartDrawing part) {
