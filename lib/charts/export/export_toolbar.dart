@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:knitty_griddy/charts/export/export_settings.dart';
+import 'package:knitty_griddy/charts/export/knitting_chart_view_settings.dart';
 
 class ExportToolbar extends StatelessWidget {
   final double height;
-  final ExportSettings exportSetting;
-  final Function(ExportSettings newSettings) settingsChanged;
+  final KnittingChartViewSettings exportSetting;
+  final Function(KnittingChartViewSettings newSettings) settingsChanged;
 
   final Function() exportToChart;
   final Function() exportToPNG;

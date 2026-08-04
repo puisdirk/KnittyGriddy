@@ -10,18 +10,20 @@ class KnittingSymbolControl extends StatelessWidget {
   final KnittingSymbol? knittingSymbol;
   final Color? symbolColor;
   final void Function()? onTap;
+  final MouseCursor cursor;
 
   const KnittingSymbolControl({
     this.knittingSymbol,
     this.symbolColor,
     this.onTap,
+    this.cursor = SystemMouseCursors.click,
     super.key
   });
 
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
-      cursor: SystemMouseCursors.click,
+      cursor: cursor,
       child: GestureDetector(
         onTap: onTap,
         child: SizedBox(
@@ -38,7 +40,7 @@ class KnittingSymbolControl extends StatelessWidget {
                   child: Stack(
                     children: [
                       for (KnittingSymbolPart part in knittingSymbol!.parts)
-                        Positioned(child: KnittingSymbolPartControl(knittingSymbolPart: part, symbolColor: symbolColor?? Colors.black)),
+                        Positioned(child: KnittingSymbolPartControl(knittingSymbolPart: part, symbolColor: symbolColor?? Colors.black, cursor: cursor,)),
                       // need to detect the tap even if there are no parts
                       if (knittingSymbol!.parts.isEmpty)
                         Positioned(child: Container(color: Colors.transparent,)),

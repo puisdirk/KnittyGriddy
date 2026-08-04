@@ -3,7 +3,7 @@ import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:knitty_griddy/charts/export/export_settings.dart';
+import 'package:knitty_griddy/charts/export/knitting_chart_view_settings.dart';
 import 'dart:ui' as ui;
 import 'package:knitty_griddy/charts/export/export_toolbar.dart';
 import 'package:knitty_griddy/charts/export/preview_legend.dart';
@@ -23,7 +23,7 @@ class ExportPage extends StatefulWidget {
 class _ExportPageState extends State<ExportPage> {
   final GlobalKey drawingBoundaryKey = GlobalKey();
   final GlobalKey legendBoundaryKey = GlobalKey();
-  ExportSettings exportSettings = const ExportSettings();
+  KnittingChartViewSettings exportSettings = const KnittingChartViewSettings();
 
   @override
   Widget build(BuildContext context) {

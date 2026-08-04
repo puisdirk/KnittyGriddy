@@ -1,0 +1,47 @@
+import 'package:flutter/material.dart';
+import 'package:knitty_griddy/charts/model/cell_address.dart';
+import 'package:knitty_griddy/utils/constants.dart';
+
+class ChartFieldOutlineControl extends StatelessWidget {
+  final int columns;
+  final int rows;
+  final Set<CellAddress> outline;
+  
+  const ChartFieldOutlineControl({
+    required this.columns,
+    required this.rows,
+    required this.outline,
+    super.key
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: columns * stitchCellWidth,
+      height: rows * stitchCellHeight,
+      child: Stack(
+        children: [
+          for (CellAddress address in outline)
+            Positioned(
+              top: address.row * stitchCellHeight,
+              left: address.column * stitchCellWidth,
+              child: SizedBox(
+                width: stitchCellWidth,
+                height: stitchCellHeight,
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border(
+                      top: outline.contains(CellAddress(column: address.column, row: address.row - 1)) ? BorderSide.none : const BorderSide(width: 2, color: Colors.orange),
+                      bottom: outline.contains(CellAddress(column: address.column, row: address.row + 1)) ? BorderSide.none : const BorderSide(width: 2, color: Colors.orange),
+                      left: outline.contains(CellAddress(column: address.column - 1, row: address.row)) ? BorderSide.none : const BorderSide(width: 2, color: Colors.orange),
+                      right: outline.contains(CellAddress(column: address.column + 1, row: address.row)) ? BorderSide.none : const BorderSide(width: 2, color: Colors.orange),
+                    )
+                  ),
+                ),
+              )
+            ),
+        ],
+      ),
+    );
+  }
+}

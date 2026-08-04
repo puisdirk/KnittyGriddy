@@ -13,6 +13,8 @@ class ChartInfo {
     this.description = '',
   });
 
+  static const ChartInfo emptyChartInfo = ChartInfo(id: '', name: '');
+
   ChartInfo copyWith({
     String? name,
     String? description

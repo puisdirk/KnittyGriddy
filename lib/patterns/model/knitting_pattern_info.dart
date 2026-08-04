@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
 
 @immutable
-class PatternInfo {
+class KnittingPatternInfo {
   final String id;
   final String name;
   final String description;
 
-  const PatternInfo({
+  const KnittingPatternInfo({
     required this.id,
     required this.name,
     this.description = '',
   });
 
-  PatternInfo copyWith({
+  KnittingPatternInfo copyWith({
     String? id,
     String? name,
     String? description,
   }) {
-    return PatternInfo(
+    return KnittingPatternInfo(
       id: id?? this.id, 
       name: name?? this.name,
       description: description?? this.description,
@@ -30,7 +30,7 @@ class PatternInfo {
   @override
   bool operator ==(Object other) =>
     identical(this, other) ||
-      other is PatternInfo &&
+      other is KnittingPatternInfo &&
       runtimeType == other.runtimeType &&
       id == other.id &&
       name == other.name &&
@@ -44,8 +44,8 @@ class PatternInfo {
     };
   }
 
-  static PatternInfo fromJson(Map<String, dynamic> json) {
-    return PatternInfo(
+  static KnittingPatternInfo fromJson(Map<String, dynamic> json) {
+    return KnittingPatternInfo(
       id: json['id'] as String, 
       name: json['name'] as String,
       description: json['description'] as String,

@@ -1,0 +1,57 @@
+import 'dart:typed_data';
+
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:knitty_griddy/patterns/model/fields/pattern_image_field.dart';
+
+class PatternImageFieldToolbar extends StatefulWidget {
+  final PatternImageField field;
+  final void Function(PatternImageField newField) onChanged;
+  
+  const PatternImageFieldToolbar({
+    required this.field,
+    required this.onChanged,
+    super.key
+  });
+
+  @override
+  State<PatternImageFieldToolbar> createState() => _PatternImageFieldToolbarState();
+}
+
+class _PatternImageFieldToolbarState extends State<PatternImageFieldToolbar> {
+  late PatternImageField field;
+
+  @override
+  void initState() {
+    field = widget.field;
+
+    super.initState();
+  }
+
+  void _updateField(PatternImageField newField) {
+    setState(() => field = newField);
+    widget.onChanged(newField);
+  }
+
+  Future<void> _selectImage() async {
+    final imagePicker = ImagePicker();
+    final pickedFile = await imagePicker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      Uint8List imageData = await pickedFile.readAsBytes();
+      _updateField(field.copyWith(imageData: imageData));
+    }
+  }
+ 
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        OutlinedButton.icon(
+          onPressed: () async => await _selectImage(), 
+          label: const Text('Set image'),
+          icon: const Icon(Icons.photo_camera),
+        ),
+      ],
+    );
+  }
+}

@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/charts/stitch_icon.dart';
 import 'package:knitty_griddy/charts/stitchrepo/stitch_definition.dart';
-import 'package:knitty_griddy/charts/export/export_settings.dart';
+import 'package:knitty_griddy/charts/export/knitting_chart_view_settings.dart';
 import 'package:knitty_griddy/charts/model/knitting_chart.dart';
 import 'package:knitty_griddy/charts/model/charts_model.dart';
 import 'package:knitty_griddy/charts/model/named_colour.dart';
 import 'package:provider/provider.dart';
 
 class PreviewLegend extends StatelessWidget {
-  final ExportSettings exportSettings;
+  final KnittingChartViewSettings exportSettings;
 
   const PreviewLegend({
     required this.exportSettings,

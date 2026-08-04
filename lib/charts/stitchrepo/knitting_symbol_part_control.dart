@@ -7,18 +7,20 @@ class KnittingSymbolPartControl extends StatelessWidget {
   final KnittingSymbolPart knittingSymbolPart;
   final Color? symbolColor;
   final void Function()? onTap;
+  final MouseCursor cursor;
 
   const KnittingSymbolPartControl({
     required this.knittingSymbolPart,
     this.symbolColor,
     this.onTap,
+    this.cursor = SystemMouseCursors.click,
     super.key
   });
 
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
-      cursor: SystemMouseCursors.click,
+      cursor: cursor,
       child: GestureDetector(
         onTap: onTap,
         child: SizedBox(
