@@ -11,7 +11,6 @@ import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/styling_command.dart';
 import 'package:knitty_griddy/drawings/model/part_drawing.dart';
 import 'package:knitty_griddy/drawings/partrepo/part_repository.dart';
-import 'package:knitty_griddy/utils/collection_utilities.dart';
 
 @immutable
 class IncludedPartCommand extends DrawingCommand {

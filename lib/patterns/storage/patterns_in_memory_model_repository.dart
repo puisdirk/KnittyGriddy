@@ -2,14 +2,14 @@
 import 'dart:convert';
 
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/material.dart';
-import 'package:knitty_griddy/patterns/model/pattern.dart';
-import 'package:knitty_griddy/patterns/model/pattern_info.dart';
+import 'package:knitty_griddy/patterns/model/knitting_pattern.dart';
+import 'package:knitty_griddy/patterns/model/knitting_pattern_info.dart';
+import 'package:knitty_griddy/patterns/model/pattern_operation_exception.dart';
 import 'package:knitty_griddy/patterns/storage/patterns_model_repository.dart';
 
 class PatternsInMemoryModelRepository implements PatternsModelRepository {
-  List<PatternInfo> patternInfos = [];
-  List<Pattern> patterns = [];
+  List<KnittingPatternInfo> patternInfos = [];
+  List<KnittingPattern> patterns = [];
   
 
   @override
@@ -18,17 +18,17 @@ class PatternsInMemoryModelRepository implements PatternsModelRepository {
   }
 
   @override
-  Future<Pattern> loadPattern(String chartId) async {
+  Future<KnittingPattern> loadPattern(String chartId) async {
     return patterns.firstWhere((p) => p.id == chartId);
   }
 
   @override
-  Future<List<PatternInfo>> loadPatternInfos() async {
+  Future<List<KnittingPatternInfo>> loadPatternInfos() async {
     return patternInfos;
   }
 
   @override
-  Future<void> savePattern(Pattern pattern) async {
+  Future<void> savePattern(KnittingPattern pattern) async {
     if (patterns.any((p) => p.id == pattern.id)) {
       patterns = patterns.map((p) => p.id == pattern.id ? pattern : p).toList();
     } else {
@@ -37,29 +37,29 @@ class PatternsInMemoryModelRepository implements PatternsModelRepository {
   }
 
   @override
-  Future<void> savePatternInfos(List<PatternInfo> patternInfos) async {
+  Future<void> savePatternInfos(List<KnittingPatternInfo> patternInfos) async {
     patternInfos = patternInfos;
   }
 
   @override
-  Future<void> exportPattern(Pattern pattern) async {
+  Future<void> exportPattern(KnittingPattern pattern) async {
     Map<String, Object> jsonObject = pattern.toJson();
     try {
       String jsonString = jsonEncode(jsonObject);
       await FilePicker.platform.saveFile(
         dialogTitle: 'Where do you want to store the output?',
-        fileName: '${pattern.name}.kgd',
+        fileName: '${pattern.name}.kgp',
         bytes: utf8.encode(jsonString),
       );
     } catch (e) {
-      debugPrint('Error while exporting pattern: $e');
+      throw PatternOperationException(message: 'Error while exporting pattern: $e');
     }
   }
 
   @override
-  Future<Pattern?> importPattern() async {
+  Future<KnittingPattern?> importPattern() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
-      dialogTitle: 'Load a pattern (kgd)',
+      dialogTitle: 'Load a pattern (kgp)',
       allowMultiple: false,
       withData: true,
     );
@@ -68,10 +68,10 @@ class PatternsInMemoryModelRepository implements PatternsModelRepository {
       try {
         String jsonString = utf8.decode(result.files.first.bytes!);
         Map<String, dynamic> jsonObject = jsonDecode(jsonString);
-        Pattern pattern = Pattern.fromJson(jsonObject);
+        KnittingPattern pattern = KnittingPattern.fromJson(jsonObject);
         return pattern;
       } catch (e) {
-        debugPrint('Error while importing pattern: $e');
+        throw PatternOperationException(message: 'Error while importing pattern: $e');
       }
     }
 

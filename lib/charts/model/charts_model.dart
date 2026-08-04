@@ -136,6 +136,60 @@ class ChartsModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<KnittingChart> getChart(ChartInfo chartInfo) async {
+    KnittingChart chart = await _repository.loadChart(chartInfo.id);
+    // Import unknown stitches
+    for (StitchDefinition def in chart.usedStitches) {
+      if (!StitchRepository.hasStitch(def)) {
+        StitchDefinition? sameStitchContent = StitchRepository.getStitchDefinitionByContent(def);
+        if (sameStitchContent != null) {
+          // We have a stitchdefinition in the repo that is the same except for the id. So use that
+          chart = chart.copyWith(
+            usedStitches: chart.usedStitches.map((us) => us != def ? def : sameStitchContent).toList(),
+            stitches: chart.stitches.map((sc) => sc.stitchDefinitionId != def.id ? sc : sc.copyWith(stitchDefinitionId: sameStitchContent.id)).toList()
+          );
+        } else {
+          StitchRepository.addStitchToImportedSet(def);
+        }
+      }
+    }
+    return chart;
+  }
+
+  bool hasChart(KnittingChart chart) {
+    return chartInfos.any((ci) => ci.id == chart.id && ci.name == chart.name);
+  }
+
+  Future<KnittingChart> saveChartAndAux(KnittingChart chart) async {
+    
+    // Import unknown stitches
+    for (StitchDefinition def in chart.usedStitches) {
+      if (!StitchRepository.hasStitch(def)) {
+        StitchDefinition? sameStitchContent = StitchRepository.getStitchDefinitionByContent(def);
+        if (sameStitchContent != null) {
+          // We have a stitchdefinition in the repo that is the same except for the id. So use that
+          chart = chart.copyWith(
+            usedStitches: chart.usedStitches.map((us) => us != def ? def : sameStitchContent).toList(),
+            stitches: chart.stitches.map((sc) => sc.stitchDefinitionId != def.id ? sc : sc.copyWith(stitchDefinitionId: sameStitchContent.id)).toList()
+          );
+        } else {
+          StitchRepository.addStitchToImportedSet(def);
+        }
+      }
+    }
+
+    await _repository.saveChart(chart);
+    
+    _chartsModelObject = _chartsModelObject.copyWith(
+      chartInfos: [..._chartsModelObject.chartInfos, ChartInfo(id: chart.id, name: chart.name, description: chart.description)]
+    );
+
+    _saveChartInfos();
+    notifyListeners();
+
+    return chart;
+  }
+
   Future<void> loadChart(String chartId) async {
     KnittingChart chart = await _repository.loadChart(chartId);
     // Import unknown stitches

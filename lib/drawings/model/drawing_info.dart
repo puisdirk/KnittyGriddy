@@ -12,6 +12,8 @@ class DrawingInfo {
     this.description = '',
   });
 
+  static const DrawingInfo emptyDrawingInfo = DrawingInfo(id: '', name: '');
+
   DrawingInfo copyWith({
     String? name,
     String? description,

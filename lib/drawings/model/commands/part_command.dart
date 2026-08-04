@@ -7,7 +7,6 @@ import 'package:knitty_griddy/drawings/model/commands/line_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/styling_command.dart';
 import 'package:knitty_griddy/drawings/model/part_drawing.dart';
-import 'package:knitty_griddy/utils/collection_utilities.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 
 class PartCommand extends DrawingCommand {

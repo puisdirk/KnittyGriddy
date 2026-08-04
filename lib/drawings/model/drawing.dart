@@ -28,6 +28,8 @@ class Drawing extends AbstractDrawing {
     this.usedPartDrawings = const[],
   });
 
+  bool get validated => !commands.any((c) => !c.validated);
+
   Drawing copyWith({
     String? id,
     String? name,

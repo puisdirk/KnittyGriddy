@@ -5,7 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/charts/stitchrepo/stitch_definition.dart';
 import 'package:knitty_griddy/charts/stitchrepo/stitch_repository.dart';
-import 'package:knitty_griddy/charts/export/export_settings.dart';
+import 'package:knitty_griddy/charts/export/knitting_chart_view_settings.dart';
 import 'package:knitty_griddy/charts/model/cell_address.dart';
 import 'package:knitty_griddy/charts/model/knitting_chart.dart';
 import 'package:knitty_griddy/charts/model/named_colour.dart';
@@ -40,7 +40,7 @@ class SvgService {
     );
   }
 
-  static Future<void> exportKnittingChartToSVG(KnittingChart chart, ExportSettings exportSetting, Size drawingSize, Size legendSize) async {
+  static Future<void> exportKnittingChartToSVG(KnittingChart chart, KnittingChartViewSettings exportSetting, Size drawingSize, Size legendSize) async {
     
     // Draw the grid itself by asking each stitchcell for its svg
     // Position those

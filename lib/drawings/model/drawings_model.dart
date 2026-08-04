@@ -251,6 +251,84 @@ class DrawingsModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<Drawing> getDrawing(DrawingInfo drawingInfo) async {
+    Drawing drawing = await _repository.loadDrawing(drawingInfo.id);
+
+    // Import unknown parts
+    for (PartDrawing partDrawing in drawing.usedPartDrawings) {
+      // Check if we have this part (same id and content)
+      if (!PartRepository.hasPartDrawing(partDrawing)) {
+        // If not, is there a part with same content and different id?
+        PartDrawing? samedrawingcontent = PartRepository.getPartByContent(partDrawing);
+        if (samedrawingcontent != null) {
+          // We have a partdrawing in the repo that is the same except for the id. So use that instead
+          drawing = drawing.copyWith(
+            usedPartDrawings: drawing.usedPartDrawings.map((pd) => pd != partDrawing ? pd : samedrawingcontent).toList()
+          );
+        } else {
+          // We don't have the required part, so we import into the repo under the "imported" set
+          String newId = const UuidV4Gen().get();
+          PartDrawing copy = partDrawing.copyWith(id: newId,).validate();
+          PartRepository.addPartDrawingToImportedSet(copy);
+          drawing = drawing.copyWith(
+            usedPartDrawings: drawing.usedPartDrawings.map((upd) => upd.id == partDrawing.id ? copy : upd).toList(),
+            commands: drawing.commands.map((c) => c is! IncludedPartCommand ? 
+              c.changePartDrawingReference(oldId: partDrawing.id, newId: newId) : 
+              c.copyWith(partDrawingId: newId,
+            )).toList()
+          );
+        }
+      }
+    }
+
+    return drawing;
+  }
+
+  bool hasDrawing(Drawing drawing) {
+    return drawingInfos.any((di) => di.id == drawing.id && di.name == drawing.name);
+  }
+
+  Future<Drawing> saveDrawingAndAux(Drawing drawing) async {
+
+    // Import unknown parts
+    for (PartDrawing partDrawing in drawing.usedPartDrawings) {
+      // Check if we have this part (same id and content)
+      if (!PartRepository.hasPartDrawing(partDrawing)) {
+        // If not, is there a part with same content and different id?
+        PartDrawing? samedrawingcontent = PartRepository.getPartByContent(partDrawing);
+        if (samedrawingcontent != null) {
+          // We have a partdrawing in the repo that is the same except for the id. So use that instead
+          drawing = drawing.copyWith(
+            usedPartDrawings: drawing.usedPartDrawings.map((pd) => pd != partDrawing ? pd : samedrawingcontent).toList()
+          );
+        } else {
+          // We don't have the required part, so we import into the repo under the "imported" set
+          String newId = const UuidV4Gen().get();
+          PartDrawing copy = partDrawing.copyWith(id: newId,).validate();
+          PartRepository.addPartDrawingToImportedSet(copy);
+          drawing = drawing.copyWith(
+            usedPartDrawings: drawing.usedPartDrawings.map((upd) => upd.id == partDrawing.id ? copy : upd).toList(),
+            commands: drawing.commands.map((c) => c is! IncludedPartCommand ? 
+              c.changePartDrawingReference(oldId: partDrawing.id, newId: newId) : 
+              c.copyWith(partDrawingId: newId,
+            )).toList()
+          );
+        }
+      }
+    }
+
+    await _repository.saveDrawing(drawing);
+
+    _drawingsModelObject = _drawingsModelObject.copyWith(
+      drawingInfos: [..._drawingsModelObject.drawingInfos, DrawingInfo(id: drawing.id, name: drawing.name, description: drawing.description)]
+    );
+
+    _saveDrawingInfos();
+    notifyListeners();
+
+    return drawing;
+  }
+
   Future<void> loadDrawing(String drawingId) async {
     Drawing drawing = await _repository.loadDrawing(drawingId);
 

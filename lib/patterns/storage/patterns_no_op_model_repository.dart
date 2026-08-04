@@ -1,6 +1,6 @@
 
-import 'package:knitty_griddy/patterns/model/pattern.dart';
-import 'package:knitty_griddy/patterns/model/pattern_info.dart';
+import 'package:knitty_griddy/patterns/model/knitting_pattern.dart';
+import 'package:knitty_griddy/patterns/model/knitting_pattern_info.dart';
 import 'package:knitty_griddy/patterns/storage/patterns_model_repository.dart';
 
 class PatternsNoOpModelRepository implements PatternsModelRepository {
@@ -12,29 +12,29 @@ class PatternsNoOpModelRepository implements PatternsModelRepository {
   }
 
   @override
-  Future<void> exportPattern(Pattern pattern) async {
+  Future<void> exportPattern(KnittingPattern pattern) async {
   }
 
   @override
-  Future<Pattern?> importPattern() async {
+  Future<KnittingPattern?> importPattern() async {
     return null;
   }
 
   @override
-  Future<Pattern> loadPattern(String patternId) async {
-    return const Pattern(id: 'default', name: 'default');
+  Future<KnittingPattern> loadPattern(String patternId) async {
+    return const KnittingPattern(id: 'default', name: 'default');
   }
 
   @override
-  Future<List<PatternInfo>> loadPatternInfos() async {
+  Future<List<KnittingPatternInfo>> loadPatternInfos() async {
     return [];
   }
 
   @override
-  Future<void> savePattern(Pattern pattern) async {
+  Future<void> savePattern(KnittingPattern pattern) async {
   }
 
   @override
-  Future<void> savePatternInfos(List<PatternInfo> patternInfos) async {
+  Future<void> savePatternInfos(List<KnittingPatternInfo> patternInfos) async {
   }
 }

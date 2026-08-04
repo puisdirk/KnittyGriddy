@@ -1,0 +1,104 @@
+import 'package:flutter/material.dart';
+import 'package:knitty_griddy/patterns/model/fields/pattern_field.dart';
+import 'package:knitty_griddy/utils/constants.dart';
+import 'package:material_symbols_icons/symbols.dart';
+
+class PatternToolbar extends StatelessWidget {
+  final PatternField? selectedField;
+  final bool patternHasMultipleFields;
+  final Widget? fieldToolbar;
+  final void Function(PatternFieldType type) onAddField;
+  final void Function(PatternField newField) onChanged;
+  final void Function() onMoveBack;
+  final void Function() onMoveForward;
+
+  const PatternToolbar({
+    required this.selectedField,
+    required this.patternHasMultipleFields,
+    required this.fieldToolbar,
+    required this.onAddField,
+    required this.onChanged,
+    required this.onMoveBack,
+    required this.onMoveForward,
+    super.key
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 50,
+      child: Container(
+        padding: const EdgeInsets.all(5),
+        decoration: const BoxDecoration(
+          border: Border(bottom: BorderSide(color: Colors.grey)),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Tooltip(
+              message: 'Add text field',
+              child: IconButton(
+                onPressed: () => onAddField(PatternFieldType.texteditor),
+                icon: const Icon(Icons.text_fields)
+              ),
+            ),
+            Tooltip(
+              message: 'Add knitting chart',
+              child: IconButton(
+                onPressed: () => onAddField(PatternFieldType.knittingchart),
+                icon: const Icon(Icons.grid_on)
+              ),
+            ),
+            Tooltip(
+              message: 'Add drawing',
+              child: IconButton(
+                onPressed: () => onAddField(PatternFieldType.drawing),
+                icon: const Icon(Symbols.apparel)
+              ),
+            ),
+            Tooltip(
+              message: 'Add image',
+              child: IconButton(
+                onPressed: () => onAddField(PatternFieldType.image),
+                icon: const Icon(Icons.photo_camera)
+              ),
+            ),
+            Tooltip(
+              message: 'Add panel',
+              child: IconButton(
+                onPressed: () => onAddField(PatternFieldType.panel),
+                icon: const Icon(Symbols.rectangle_add)
+              ),
+            ),
+            VerticalDivider(indent: 16, endIndent: 16, color: Colors.grey.shade400,),
+            const Spacer(),
+            if (fieldToolbar != null)
+              fieldToolbar!,
+            if (fieldToolbar != null)
+              const Spacer(),
+            if (selectedField != null && patternHasMultipleFields)
+              Row(
+                children: [
+                  Tooltip(
+                    message: 'Move back',
+                    child: IconButton(
+                      onPressed: onMoveBack, 
+                      icon: const Icon(Icons.flip_to_back)
+                    ),
+                  ),
+                  Tooltip(
+                    message: 'Move foreward',
+                    child: IconButton(
+                      onPressed: onMoveForward, 
+                      icon: const Icon(Icons.flip_to_front)
+                    ),
+                  ),
+                  hspacing,
+                ],
+              )
+          ],
+        ),
+      ),
+    );
+  }
+}
