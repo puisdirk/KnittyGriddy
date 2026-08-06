@@ -22,6 +22,7 @@ class PatternFieldControl extends StatefulWidget {
   final KnittingPattern knittingPattern;
   final PatternField field;
   final ChangeNotifier? fieldChangeNotifier;
+  final GlobalKey? editorKey;
   final bool selected;
   final bool viewMode;
   final void Function() onSelect;
@@ -32,6 +33,7 @@ class PatternFieldControl extends StatefulWidget {
     required this.knittingPattern,
     required this.field,
     required this.fieldChangeNotifier,
+    this.editorKey,
     required this.selected,
     required this.viewMode,
     required this.onSelect,
@@ -95,6 +97,7 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
           knittingPattern: widget.knittingPattern,
           field: widget.field as PatternTextEditorField,
           fleatherController: widget.fieldChangeNotifier as FleatherController,
+          editorKey: widget.editorKey as GlobalKey<EditorState>?,
           selected: widget.selected,
           viewMode: widget.viewMode,
           onChanged: widget.onChanged,

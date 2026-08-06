@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:knitty_griddy/charts/chart_chooser/chart_chooser_view.dart';
 import 'package:knitty_griddy/drawings/drawing_chooser/drawing_chooser_view.dart';
 import 'package:knitty_griddy/patterns/pattern_chooser/pattern_chooser_view.dart';
@@ -21,6 +23,21 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (kIsWeb) BrowserContextMenu.disableContextMenu();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+
+    if (kIsWeb) BrowserContextMenu.enableContextMenu();
+  }
+
   Page page = Page.charts;
 
   @override

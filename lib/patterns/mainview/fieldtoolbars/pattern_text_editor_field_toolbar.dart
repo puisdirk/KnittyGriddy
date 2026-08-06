@@ -1,11 +1,14 @@
 import 'package:fleather/fleather.dart';
 import 'package:flutter/material.dart';
+import 'package:knitty_griddy/charts/stitch_icon.dart';
+import 'package:knitty_griddy/charts/stitchrepo/basic_stitches_set.dart';
+import 'package:knitty_griddy/patterns/mainview/fieldtoolbars/insert_stitch_symbol_embed_button.dart';
 import 'package:knitty_griddy/patterns/mainview/infinite_indentation_button.dart';
 
 class PatternTextEditorFieldToolbar extends StatelessWidget {
   final FleatherController fleatherController;
   final EdgeInsetsGeometry? padding;
-  final GlobalKey<EditorState>? editorKey;
+  final GlobalKey? editorKey;
 
   const PatternTextEditorFieldToolbar({
     required this.fleatherController,
@@ -54,7 +57,7 @@ class PatternTextEditorFieldToolbar extends StatelessWidget {
 
     return FleatherToolbar(
       key: key,
-      editorKey: editorKey,
+      editorKey: editorKey as GlobalKey<EditorState>,
       padding: padding,
       children: [
         ToggleStyleButton(
@@ -213,7 +216,20 @@ class PatternTextEditorFieldToolbar extends StatelessWidget {
         VerticalDivider(
             indent: 16, endIndent: 16, color: Colors.grey.shade400),
 
-        // TODO: button for knitting symbols
+        Tooltip(
+          message: 'Stitch symbol',
+          preferBelow: false,
+          child: InsertStitchSymbolEmbedButton(
+            controller: fleatherController, 
+            icon: StitchIcon(
+              stitchDefinition: BasicStitchesSet.sssp, 
+              iconSize: 18, 
+              iconColor: Theme.of(context).iconTheme.color,
+            )
+          ),
+        ),
+        VerticalDivider(
+            indent: 16, endIndent: 16, color: Colors.grey.shade400),
 
         /// ################################################################
 
