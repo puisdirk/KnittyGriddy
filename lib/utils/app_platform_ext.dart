@@ -6,4 +6,6 @@ class AppPlatformExt {
 
   static bool get isWeb => AppPlatform.isWeb;
   static bool get isDesktop => AppPlatform.isLinux || AppPlatform.isWindows || AppPlatform.isMacOS;
+  static bool get isWindows => AppPlatform.isWindows;
+  static bool get isMacOS => AppPlatform.isMacOS;
 }

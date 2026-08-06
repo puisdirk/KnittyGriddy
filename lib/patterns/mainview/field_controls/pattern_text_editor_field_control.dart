@@ -8,6 +8,7 @@ class PatternTextEditorFieldControl extends StatelessWidget {
   final KnittingPattern knittingPattern;
   final PatternTextEditorField field;
   final FleatherController fleatherController;
+  final GlobalKey<EditorState>? editorKey;
   final bool selected;
   final bool viewMode;
   final void Function(PatternTextEditorField changedField) onChanged;
@@ -17,6 +18,7 @@ class PatternTextEditorFieldControl extends StatelessWidget {
     required this.knittingPattern,
     required this.field,
     required this.fleatherController,
+    this.editorKey,
     required this.selected,
     required this.viewMode,
     required this.onChanged,
@@ -32,6 +34,7 @@ class PatternTextEditorFieldControl extends StatelessWidget {
         knittingPattern: knittingPattern, 
         field: field,
         fleatherController: fleatherController,
+        editorKey: editorKey,
         selected: selected,
         viewMode: viewMode,
         onChanged: onChanged,

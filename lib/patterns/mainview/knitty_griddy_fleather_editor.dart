@@ -1,7 +1,10 @@
 import 'dart:convert';
+import 'dart:math' as math;
 
 import 'package:fleather/fleather.dart';
 import 'package:flutter/material.dart';
+import 'package:knitty_griddy/charts/stitchrepo/stitch_definition.dart';
+import 'package:knitty_griddy/patterns/mainview/styled_stitch_icon.dart';
 import 'package:knitty_griddy/patterns/model/fields/pattern_text_editor_field.dart';
 import 'package:knitty_griddy/patterns/model/knitting_pattern.dart';
 
@@ -9,6 +12,7 @@ class KnittyGriddyFleatherEditor extends StatefulWidget {
   final KnittingPattern knittingPattern;
   final PatternTextEditorField field;
   final FleatherController fleatherController;
+  final GlobalKey<EditorState>? editorKey;
   final bool selected;
   final bool viewMode;
   final void Function(PatternTextEditorField changedField) onChanged;
@@ -18,6 +22,7 @@ class KnittyGriddyFleatherEditor extends StatefulWidget {
     required this.knittingPattern,
     required this.field,
     required this.fleatherController,
+    this.editorKey,
     required this.selected,
     required this.viewMode,
     required this.onChanged,
@@ -79,6 +84,7 @@ class _KnittyGriddyFleatherEditorState extends State<KnittyGriddyFleatherEditor>
         Expanded(
           child: widget.viewMode ?
           FleatherField(
+            embedBuilder: _embedBuilder,
             readOnly: true,
             showCursor: false,
             padding: const EdgeInsets.only(
@@ -92,13 +98,30 @@ class _KnittyGriddyFleatherEditorState extends State<KnittyGriddyFleatherEditor>
           )
           :
           FleatherEditor(
+            embedBuilder: _embedBuilder,
             autofocus: false,
             padding: const EdgeInsets.all(5),
             controller: widget.fleatherController,
+            editorKey: widget.editorKey,
             focusNode: _fleatherFocusNode,
           ),
         ),
       ],
     );
   }
+
+  Widget _embedBuilder(BuildContext context, EmbedNode node) {
+    if (node.value.type == 'stitch') {
+      final StitchDefinition stitchDefinition = StitchDefinition.fromJson(node.value.data['stitchdefinition']);
+
+      return StyledStitchIcon(
+        stitchDefinition: stitchDefinition,
+        style: node.style,
+        lineStyle: node.parent.style,
+      );
+    }
+
+    return defaultFleatherEmbedBuilder(context, node);
+  }
+
 }
