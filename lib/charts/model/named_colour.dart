@@ -1,4 +1,6 @@
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
 @immutable
@@ -32,6 +34,11 @@ class NamedColour {
       'ismaincolor': isMainColor,
     };
   }
+
+  String get contentHashCode => jsonEncode({
+      'color': {'red': color.red, 'blue': color.blue, 'green': color.green, 'alpha': color.alpha},
+      'ismaincolor': isMainColor,
+    });
 
   static NamedColour fromJson(Map<String, dynamic> json) {
     return NamedColour(

@@ -1,4 +1,6 @@
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/charts/stitchrepo/basic_stitches_set.dart';
 import 'package:knitty_griddy/utils/constants.dart';
@@ -53,6 +55,8 @@ class StitchCell {
       'stitchdefinitioncolumn': stitchDefinitionColumn,
     };
   }
+
+  String get contentHashCode => jsonEncode(toJson());
 
   static StitchCell fromJson(Map<String, dynamic> json) {
     return StitchCell(

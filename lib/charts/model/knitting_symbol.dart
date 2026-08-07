@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:knitty_griddy/charts/model/basicshapes/knitting_symbol_arc.dart';
@@ -59,6 +61,13 @@ class KnittingSymbol {
       'rotationrad': rotationRad,
     };
   }
+
+  String get contentHashCode => jsonEncode({
+      'parts': parts.map((p) => p.contentHashCode).toList(),
+      'scale': {'x': scale.dx, 'y': scale.dy},
+      'translation': {'x': translation.dx, 'y': translation.dy},
+      'rotationrad': rotationRad,
+    });
 
   static KnittingSymbol fromJson(Map<String, dynamic> json) {
     List<KnittingSymbolPart> parts = [];

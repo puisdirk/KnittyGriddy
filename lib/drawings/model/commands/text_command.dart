@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -113,6 +114,18 @@ class TextCommand extends DrawingCommand {
       'textcolour': {'red': textColor.red, 'blue': textColor.blue, 'green': textColor.green, 'alpha': textColor.alpha},
     };
   }
+
+  @override
+  String get contentHashCode => jsonEncode({
+    'type': DrawingCommandTypes.textCommand.name,
+    'label': label,
+    'text': text,
+    'anchor': anchorPointId,
+    'italic': italic,
+    'bold': bold,
+    'textsize': textSize,
+    'textcolour': {'red': textColor.red, 'blue': textColor.blue, 'green': textColor.green, 'alpha': textColor.alpha},
+  });
 
   static TextCommand fromJson(Map<String, dynamic> json) {
     return TextCommand(

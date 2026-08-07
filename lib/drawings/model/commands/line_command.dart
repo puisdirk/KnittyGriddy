@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -152,6 +153,14 @@ class LineCommand extends DrawingCommand {
       'to': toPointId,
     };
   }
+
+  @override
+  String get contentHashCode => jsonEncode({
+      'type': DrawingCommandTypes.lineCommand.name,
+      'label': label,
+      'from': fromPointId,
+      'to': toPointId,
+    });
 
   static LineCommand fromJson(Map<String, dynamic> json) {
     return LineCommand(

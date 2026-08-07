@@ -1,4 +1,6 @@
 
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/drawings/formulas/formula_expression.dart';
@@ -166,6 +168,17 @@ class IncludedPartCommand extends DrawingCommand {
       'moverrides': measurementOverrides.map((m) => m.toJson()).toList(),
     };
   }
+
+  @override
+  String get contentHashCode => jsonEncode({
+      'type': DrawingCommandTypes.includedPartCommand.name,
+      'label': label,
+      'partdrawingid': partDrawingId,
+      'partid': partId,
+      'partlabel': partLabel,
+      'anchor': anchorPointId,
+      'moverrides': measurementOverrides.map((m) => m.contentHashCode).toList(),
+    });
 
   static IncludedPartCommand fromJson(Map<String, dynamic> json) {
     List<MeasurementOverride> moverrides = [];

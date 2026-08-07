@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
@@ -136,6 +138,11 @@ class Drawing extends AbstractDrawing {
       'parts': usedPartDrawings.map((e) => e.toJson()).toList(),
     };
   }
+
+  String get contentHashCode => jsonEncode({
+      'commands': commands.map((e) => e.contentHashCode).toList(),
+      'parts': usedPartDrawings.map((e) => e.id).toList(),
+    });
 
   static Drawing fromJson(Map<String, dynamic> json) {
     List<DrawingCommand> commands = AbstractDrawing.commandsFromJson(json);

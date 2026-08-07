@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:math';
 import 'dart:ui';
 
@@ -184,6 +185,21 @@ class TapeCommand extends DrawingCommand {
       'stsg': stitchesGauge,
     };
   }
+
+  @override
+  String get contentHashCode => jsonEncode({
+    'type': DrawingCommandTypes.tapeCommand.name,
+    'label': label,
+    'from': fromPointId,
+    'lineid': lineId,
+    'lineandcurveids': lineAndCurveIds.toList(),
+    'directiontype': directionType.name,
+    'tapetype': tapeType.name,
+    'to': toPointId,
+    'unit': unit.name,
+    'rg': rowsGauge,
+    'stsg': stitchesGauge,
+  });
 
   static TapeCommand fromJson(Map<String, dynamic> json) {
     return TapeCommand(

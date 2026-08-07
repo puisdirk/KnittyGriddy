@@ -1,4 +1,5 @@
 
+import 'dart:convert';
 import 'dart:math';
 import 'dart:ui';
 
@@ -294,6 +295,24 @@ class CurveCommand extends DrawingCommand {
       'cctrl2': cubicCtrlPointId2,
     };
   }
+
+  @override
+  String get contentHashCode => jsonEncode({
+      'type': DrawingCommandTypes.curveCommand.name,
+      'label': label,
+      'from': startPointId,
+      'to': endPointId,
+      'cdt': curveDefinitionType.name,
+      'qamp': quadAmplitudeFormula,
+      'qslant': quadSlantFormula,
+      'qctrl': quadCtrlPointId,
+      'camp1': cubicAmplitudeFormula1,
+      'cslant1': cubicSlantFormula1,
+      'camp2': cubicAmplitudeFormula2,
+      'cslant2': cubicSlantFormula2,
+      'cctrl1': cubicCtrlPointId1,
+      'cctrl2': cubicCtrlPointId2,
+    });
 
   static CurveCommand fromJson(Map<String, dynamic> json) {
     return CurveCommand(

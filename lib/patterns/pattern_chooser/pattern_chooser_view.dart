@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:id_gen/id_gen.dart';
 import 'package:knitty_griddy/charts/model/charts_model.dart';
 import 'package:knitty_griddy/charts/model/knitting_chart.dart';
 import 'package:knitty_griddy/drawings/model/drawing.dart';
@@ -78,18 +79,49 @@ class _PatternChooserViewState extends State<PatternChooserView> {
                   if (pattern != null) {
                     for (PatternField field in pattern.fields) {
                       if (field is PatternChartField && field.chart != null) {
+                        KnittingChart chart = field.chart!;
                         // Store unknown charts
                         if (context.mounted) {
-                          if (!Provider.of<ChartsModel>(context, listen: false).hasChart(field.chart!)) {
-                            // Store it (will also load stitchdefinitions)
-                            KnittingChart newChart = await Provider.of<ChartsModel>(context, listen: false).saveChartAndAux(field.chart!);
+                          if (!Provider.of<ChartsModel>(context, listen: false).hasChart(chart)) {
+                            // Maybe it has one with the same contents
+                            KnittingChart? similar = await Provider.of<ChartsModel>(context, listen: false).getSimilarChart(chart);
+                            if (similar != null) {
+                              pattern = pattern!.copyWith(
+                                fields: pattern.fields.map((f) => f.id != field.id ? f : (f as PatternChartField).copyWith(
+                                  chart: similar)
+                                ).toList()
+                              );
+                              if (context.mounted) {
+                                Provider.of<PatternsModel>(context, listen: false).savePattern(pattern);
+                              }
+                            } else {
+                              // We don't have this chart or something similar, so we want to store it (will also load stitchdefinitions)
 
-                            pattern = pattern!.copyWith(
-                              fields: pattern.fields.map((f) => f.id != field.id ? f : (f as PatternChartField).copyWith(
-                                chart: newChart)).toList()
-                            );
-                            if (context.mounted) {
-                              Provider.of<PatternsModel>(context, listen: false).savePattern(pattern);
+                              // we may have a chart with the same id
+                              if (context.mounted) {
+                                if (Provider.of<ChartsModel>(context, listen: false).hasChartWithId(chart.id)) {
+                                  String newId = const UuidV4Gen().get();
+                                  chart = chart.copyWith(id: newId);
+                                  pattern = pattern!.copyWith(
+                                    fields: pattern.fields.map((f) => f.id != field.id ? f : (f as PatternChartField).copyWith(
+                                      chart: chart
+                                    )).toList()
+                                  );
+                                }
+                              }
+
+                              if (context.mounted) {
+                                KnittingChart newChart = await Provider.of<ChartsModel>(context, listen: false).saveChartAndAux(chart);
+
+                                pattern = pattern!.copyWith(
+                                  fields: pattern.fields.map((f) => f.id != field.id ? f : (f as PatternChartField).copyWith(
+                                    chart: newChart)
+                                  ).toList()
+                                );
+                                if (context.mounted) {
+                                  Provider.of<PatternsModel>(context, listen: false).savePattern(pattern);
+                                }
+                              }
                             }
                           }
 
@@ -97,33 +129,53 @@ class _PatternChooserViewState extends State<PatternChooserView> {
                       } else if (field is PatternTextEditorField) {
                         // TODO: load knitting symbols
                       } else if (field is PatternDrawingField && field.drawing != null) {
-                        if (context.mounted) {
-                          if (!Provider.of<DrawingsModel>(context, listen: false).hasDrawing(field.drawing!)) {
-                            // Store it (will also load the parts)
-                            Drawing newDrawing = await Provider.of<DrawingsModel>(context, listen: false).saveDrawingAndAux(field.drawing!);
+                        Drawing drawing = field.drawing!;
 
-                            pattern = pattern!.copyWith(
-                              fields: pattern.fields.map((f) => f.id != field.id ? f : (f as PatternDrawingField).copyWith(
-                                drawing: newDrawing
-                              )).toList()
-                            );
-                            if (context.mounted) {
-                              Provider.of<PatternsModel>(context, listen: false).savePattern(pattern);
+                        if (context.mounted) {
+                          if (!Provider.of<DrawingsModel>(context, listen: false).hasDrawing(drawing)) {
+                            // Maybe there is one with the same contents
+                            Drawing? similar = await Provider.of<DrawingsModel>(context, listen: false).getSimilarDrawing(drawing);
+                            if (similar != null) {
+                              pattern = pattern!.copyWith(
+                                fields: pattern.fields.map((f) => f.id != field.id ? f : (f as PatternDrawingField).copyWith(
+                                  drawing: similar
+                                )).toList()
+                              );
+                              if (context.mounted) {
+                                Provider.of<PatternsModel>(context, listen: false).savePattern(pattern);
+                              }
+                            } else {
+                              // we may have a drawing with the same id
+                              if (context.mounted) {
+                                if (Provider.of<DrawingsModel>(context, listen: false).hasDrawingWithId(drawing.id)) {
+                                  String newId = const UuidV4Gen().get();
+                                  drawing = drawing.copyWith(id: newId);
+                                  pattern = pattern!.copyWith(
+                                    fields: pattern.fields.map((f) => f.id != field.id ? f : (f as PatternDrawingField).copyWith(
+                                      drawing: drawing
+                                    )).toList()
+                                  );
+                                }
+                              }
+                              // Store it (will also load the parts)
+                              if (context.mounted) {
+                                Drawing newDrawing = await Provider.of<DrawingsModel>(context, listen: false).saveDrawingAndAux(drawing);
+                              
+                                pattern = pattern!.copyWith(
+                                  fields: pattern.fields.map((f) => f.id != field.id ? f : (f as PatternDrawingField).copyWith(
+                                    drawing: newDrawing
+                                  )).toList()
+                                );
+                                if (context.mounted) {
+                                  Provider.of<PatternsModel>(context, listen: false).savePattern(pattern);
+                                }
+                              }
                             }
                           }
                         }
-                      } else {
-                        print('Possibly forgot some code here in pattern_chooser_view');
                       }
-
-                      // TODO: for drawings, load parts
-
-                      // TODO: other field types
-                      
-
                     }
                   }
-
                 } on PatternOperationException catch(e) {
                   if (context.mounted) {
                     showDialog(context: context, builder: (context) => 

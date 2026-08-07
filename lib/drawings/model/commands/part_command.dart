@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
@@ -192,6 +194,15 @@ class PartCommand extends DrawingCommand {
       'anchor': anchorPointId,
     };
   }
+
+  // Remark: below will never get called as I only check for Drawings, not PartDrawings
+  @override
+  String get contentHashCode => jsonEncode({
+    'type': DrawingCommandTypes.partCommand.name,
+    'label': label,
+    'ids': commandIds.toList(),
+    'anchor': anchorPointId,
+  });
 
   static PartCommand fromJson(Map<String, dynamic> json) {
     return PartCommand(

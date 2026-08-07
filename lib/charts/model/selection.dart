@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:knitty_griddy/charts/model/cell_address.dart';
 
 const Selection emptySelection = Selection(selectedCells: {});
@@ -22,6 +24,10 @@ class Selection {
       'selectedcells': selectedCells.map((c) => c.toJson()).toList(),
     };
   }
+
+  String get contentHashCode => jsonEncode({
+      'selectedcells': selectedCells.map((c) => c.contentHashCode).toList(),
+    });
 
   static Selection fromJson(Map<String, dynamic> json) {
     Set<CellAddress> cells = {};

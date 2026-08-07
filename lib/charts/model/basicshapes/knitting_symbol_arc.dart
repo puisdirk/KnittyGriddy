@@ -1,4 +1,5 @@
 
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -90,6 +91,21 @@ class KnittingSymbolArc extends KnittingSymbolPart {
       'strokewidth': strokeWidth,
     };
   }
+
+  @override
+  String get contentHashCode => jsonEncode({
+      'type': knittingSymbolArcType,
+      'height': height,
+      'width': width,
+      'startangle': startAngle,
+      'sweepangle': sweepAngle,
+      'closed': closed,
+      'scale': {'x': scale.dx, 'y': scale.dy},
+      'translation': {'x': translation.dx, 'y': translation.dy},
+      'rotationrad': rotationRad,
+      'filled': filled,
+      'strokewidth': strokeWidth,
+    });
 
   static KnittingSymbolArc fromJson(Map<String, dynamic> json) {
     return KnittingSymbolArc(

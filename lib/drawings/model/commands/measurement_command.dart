@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
@@ -169,6 +171,17 @@ class MeasurementCommand extends DrawingCommand {
       'unit': unit.name,
     };
   }
+
+  @override
+  String get contentHashCode => jsonEncode({
+      'type': DrawingCommandTypes.measurementCommand.name,
+      'label': label,
+      'min': minValue,
+      'max': maxValue,
+      'val': value,
+      'dec': decimals,
+      'unit': unit.name,
+    });
 
   static MeasurementCommand fromJson(Map<String, dynamic> json) {
     return MeasurementCommand(
