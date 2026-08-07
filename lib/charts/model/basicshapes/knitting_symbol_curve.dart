@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_spinbox/material.dart';
 import 'package:knitty_griddy/charts/model/knitting_symbol.dart';
@@ -100,6 +102,20 @@ class KnittingSymbolCurve extends KnittingSymbolPart {
       'strokewidth': strokeWidth,
     };
   }
+
+  @override
+  String get contentHashCode => jsonEncode({
+      'type': knittingSymbolCurveType,
+      'length': length,
+      'amplitude': amplitude,
+      'slant': slant,
+      'closed': closed,
+      'scale': {'x': scale.dx, 'y': scale.dy},
+      'translation': {'x': translation.dx, 'y': translation.dy},
+      'rotationrad': rotationRad,
+      'filled': filled,
+      'strokewidth': strokeWidth,
+    });
 
   static KnittingSymbolCurve fromJson(Map<String, dynamic> json) {
     return KnittingSymbolCurve(

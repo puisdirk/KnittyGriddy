@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -91,6 +92,19 @@ class KnittingSymbolText extends KnittingSymbolPart {
       'strokewidth': strokeWidth,
     };
   }
+
+  @override
+  String get contentHashCode => jsonEncode({
+      'type':knittingSymbolTextType,
+      'text': text,
+      'bold': bold,
+      'italic': italic,
+      'scale': {'x': scale.dx, 'y': scale.dy},
+      'translation': {'x': translation.dx, 'y': translation.dy},
+      'rotationrad': rotationRad,
+      'filled': filled,
+      'strokewidth': strokeWidth,
+    });
 
   static KnittingSymbolText fromJson(Map<String, dynamic> json) {
     return KnittingSymbolText(

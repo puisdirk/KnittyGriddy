@@ -1,4 +1,5 @@
 
+import 'dart:convert';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -227,6 +228,23 @@ class PointCommand extends DrawingCommand {
       'isl2id': intersectionLine2Id,
     };
   }
+
+  @override
+  String get contentHashCode => jsonEncode({
+    'type': DrawingCommandTypes.pointCommand.name,
+    'label': label,
+    'pdt': pointDefinitionType.name,
+    'frompointid': fromPointId,
+    'distance': distanceFormula,
+    'direction': direction.name,
+    'angle': directionAngleFormula,
+    'onlineid': onLineId,
+    'onlinefraction': onLineFractionFormula,
+    'oncurveid': onCurveId,
+    'oncurvefraction': onCurveFractionFormula,
+    'isl1id': intersectionLine1Id,
+    'isl2id': intersectionLine2Id,
+  });
 
   static PointCommand fromJson(Map<String, dynamic> json) {
     return PointCommand(

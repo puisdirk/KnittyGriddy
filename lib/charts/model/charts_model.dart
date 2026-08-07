@@ -86,11 +86,27 @@ class ChartsModel extends ChangeNotifier {
 
     if (oldModel.knittingChart != _lastSaved!.knittingChart) {
       await _repository.saveChart(_lastSaved!.knittingChart);
+      _chartsModelObject = _chartsModelObject.copyWith(
+        chartInfos: _chartsModelObject.chartInfos.map((ci) => 
+          ci.id != _chartsModelObject.knittingChart.id ? ci : ci.copyWith(
+            contentHashCode: _chartsModelObject.knittingChart.contentHashCode
+          )
+        ).toList()
+      );
+      await _saveChartInfos();
     }
   }
 
   Future<void> saveCurrentChart() async {
     await _repository.saveChart(_chartsModelObject.knittingChart);
+    _chartsModelObject = _chartsModelObject.copyWith(
+      chartInfos: _chartsModelObject.chartInfos.map((ci) => 
+        ci.id != _chartsModelObject.knittingChart.id ? ci : ci.copyWith(
+          contentHashCode: _chartsModelObject.knittingChart.contentHashCode
+        )
+      ).toList()
+    );
+    await _saveChartInfos();
   }
 
   Future<void> _saveChartInfos() async {
@@ -100,9 +116,12 @@ class ChartsModel extends ChangeNotifier {
   Future<void> createNewChart(String name) async {
     final String id = const UuidV4Gen().get();
 
+    KnittingChart chart = KnittingChart(id: id, name: name);
+
     _chartsModelObject = _chartsModelObject.copyWith(
-      chartInfos: List.from(_chartsModelObject.chartInfos)..add(ChartInfo(id: id, name: name)),
-      knittingChart: KnittingChart(id: id, name: name)
+      chartInfos: List.from(_chartsModelObject.chartInfos)..add(
+        ChartInfo(id: id, name: name, contentHashCode: chart.contentHashCode)),
+      knittingChart: chart,
     );
 
     await autoSave();
@@ -119,7 +138,12 @@ class ChartsModel extends ChangeNotifier {
     if (chart != null && !chartInfos.any((pi) => pi.id == chart.id)) {
       await _repository.saveChart(chart);
       _chartsModelObject = _chartsModelObject.copyWith(
-        chartInfos: [..._chartsModelObject.chartInfos, ChartInfo(id: chart.id, name: chart.name, description: chart.description)],
+        chartInfos: [..._chartsModelObject.chartInfos, ChartInfo(
+          id: chart.id, 
+          name: chart.name, 
+          description: chart.description,
+          contentHashCode: chart.contentHashCode,
+        )],
       );
       _saveChartInfos();
       notifyListeners();
@@ -157,7 +181,24 @@ class ChartsModel extends ChangeNotifier {
   }
 
   bool hasChart(KnittingChart chart) {
-    return chartInfos.any((ci) => ci.id == chart.id && ci.name == chart.name);
+    return chartInfos.any((ci) => 
+      ci.id == chart.id && 
+      ci.name == chart.name && 
+      ci.description == chart.description &&
+      ci.contentHashCode == chart.contentHashCode
+    );
+  }
+
+  bool hasChartWithId(String id) {
+    return chartInfos.any((ci) => ci.id == id);
+  }
+
+  Future<KnittingChart?> getSimilarChart(KnittingChart original) async {
+    List<ChartInfo> candidates = _chartsModelObject.chartInfos.where((ci) => ci.contentHashCode == original.contentHashCode).toList();
+    if (candidates.isNotEmpty) {
+      return await getChart(candidates.first);
+    }
+    return null;
   }
 
   Future<KnittingChart> saveChartAndAux(KnittingChart chart) async {
@@ -181,7 +222,14 @@ class ChartsModel extends ChangeNotifier {
     await _repository.saveChart(chart);
     
     _chartsModelObject = _chartsModelObject.copyWith(
-      chartInfos: [..._chartsModelObject.chartInfos, ChartInfo(id: chart.id, name: chart.name, description: chart.description)]
+      chartInfos: [..._chartsModelObject.chartInfos, 
+        ChartInfo(
+          id: chart.id, 
+          name: chart.name, 
+          description: chart.description,
+          contentHashCode: chart.contentHashCode,
+        )
+      ]
     );
 
     _saveChartInfos();

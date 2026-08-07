@@ -177,6 +177,14 @@ class DrawingsModel extends ChangeNotifier {
 
     if (oldModel.drawing != _lastSaved!.drawing) {
       await _repository.saveDrawing(_lastSaved!.drawing);
+      _drawingsModelObject = _drawingsModelObject.copyWith(
+        drawingInfos: _drawingsModelObject.drawingInfos.map((di) =>
+          di.id != _drawingsModelObject.drawing.id ? di : di.copyWith(
+            contentHashCode: _drawingsModelObject.drawing.contentHashCode
+          )
+        ).toList()
+      );
+      await _saveDrawingInfos();
     }
   }
 
@@ -186,7 +194,8 @@ class DrawingsModel extends ChangeNotifier {
     _drawingsModelObject = _drawingsModelObject.copyWith(
       drawingInfos: drawingInfos.map((di) => di.id != drawing.id ? di : di.copyWith(
         name: _drawingsModelObject.drawing.name,
-        description: _drawingsModelObject.drawing.description
+        description: _drawingsModelObject.drawing.description,
+        contentHashCode: _drawingsModelObject.drawing.contentHashCode,
       )).toList()
     );
 
@@ -200,9 +209,11 @@ class DrawingsModel extends ChangeNotifier {
   Future<void> createNewDrawing(String name) async {
     final String id = const UuidV4Gen().get();
 
+    Drawing newDrawing = Drawing(id: id, name: name);
+
     _drawingsModelObject = _drawingsModelObject.copyWith(
-      drawingInfos: List.from(_drawingsModelObject.drawingInfos)..add(DrawingInfo(id: id, name: name)),
-      drawing: Drawing(id: id, name: name)
+      drawingInfos: List.from(_drawingsModelObject.drawingInfos)..add(DrawingInfo(id: id, name: name, contentHashCode: newDrawing.contentHashCode)),
+      drawing: newDrawing
     );
 
     await autoSave();
@@ -233,6 +244,7 @@ class DrawingsModel extends ChangeNotifier {
           id: drawing.id, 
           name: drawing.name, 
           description: drawing.description,
+          contentHashCode: drawing.contentHashCode
         )],
       );
 
@@ -288,6 +300,18 @@ class DrawingsModel extends ChangeNotifier {
     return drawingInfos.any((di) => di.id == drawing.id && di.name == drawing.name);
   }
 
+  bool hasDrawingWithId(String id) {
+    return drawingInfos.any((di) => di.id == id);
+  }
+
+  Future<Drawing?> getSimilarDrawing(Drawing original) async {
+    List<DrawingInfo> candidates = _drawingsModelObject.drawingInfos.where((di) => di.contentHashCode == drawing.contentHashCode).toList();
+    if (candidates.isNotEmpty) {
+      return await getDrawing(candidates.first);
+    }
+    return null;
+  }
+
   Future<Drawing> saveDrawingAndAux(Drawing drawing) async {
 
     // Import unknown parts
@@ -320,7 +344,12 @@ class DrawingsModel extends ChangeNotifier {
     await _repository.saveDrawing(drawing);
 
     _drawingsModelObject = _drawingsModelObject.copyWith(
-      drawingInfos: [..._drawingsModelObject.drawingInfos, DrawingInfo(id: drawing.id, name: drawing.name, description: drawing.description)]
+      drawingInfos: [..._drawingsModelObject.drawingInfos, DrawingInfo(
+        id: drawing.id, 
+        name: drawing.name, 
+        description: drawing.description,
+        contentHashCode: drawing.contentHashCode
+      )]
     );
 
     _saveDrawingInfos();
@@ -370,7 +399,8 @@ class DrawingsModel extends ChangeNotifier {
     _drawingsModelObject = _drawingsModelObject.copyWith(
       drawingInfos: _drawingsModelObject.drawingInfos.map((di) => di.id != _drawingsModelObject.drawing.id ? di : di.copyWith(
         name: _drawingsModelObject.drawing.name,
-        description: _drawingsModelObject.drawing.description
+        description: _drawingsModelObject.drawing.description,
+        contentHashCode: _drawingsModelObject.drawing.contentHashCode,
       )).toList()
     );
 

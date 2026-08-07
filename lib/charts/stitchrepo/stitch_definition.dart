@@ -1,4 +1,6 @@
 
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/utils/math_utitilies.dart';
@@ -69,6 +71,15 @@ class StitchDefinition {
       'produces': produces,
     };
   }
+
+  String get contentHashCode => jsonEncode({
+      'abbreviation': abbreviation, 
+      'symbols': symbols.map((s) => s.contentHashCode).toList(),
+      'category': category,
+      'description': description,
+      'consumes': consumes,
+      'produces': produces,
+    });
 
   static StitchDefinition fromJson(Map<String, dynamic> json) {
     List<KnittingSymbol> symbols = [];

@@ -64,7 +64,7 @@ class PatternDrawingField extends PatternField {
     );
   }
 
-  DrawingInfo get drawingInfo => drawing == null ? DrawingInfo.emptyDrawingInfo : DrawingInfo(id: drawing!.id, name: drawing!.name, description: drawing!.description);
+  DrawingInfo get drawingInfo => drawing == null ? DrawingInfo.emptyDrawingInfo : DrawingInfo(id: drawing!.id, name: drawing!.name, description: drawing!.description, contentHashCode: drawing!.contentHashCode);
 
   @override
   Map<String, Object> toJson() {

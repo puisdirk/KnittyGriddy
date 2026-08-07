@@ -1,4 +1,6 @@
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
 enum GridType {
@@ -57,6 +59,8 @@ class ChartSettings {
 
   @override
   int get hashCode => rows.hashCode ^ columns.hashCode ^ gridType.hashCode;
+
+  String get contentHashCode => jsonEncode(toJson());
 
   @override
   bool operator ==(Object other) =>

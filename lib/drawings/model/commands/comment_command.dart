@@ -1,4 +1,5 @@
 
+import 'dart:convert';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -93,6 +94,13 @@ class CommentCommand extends DrawingCommand {
       'comment': comment,
     };
   }
+
+  @override
+  String get contentHashCode => jsonEncode({
+      'type': DrawingCommandTypes.commentCommand.name,
+      'label': label,
+      'comment': comment,
+    });
 
   static CommentCommand fromJson(Map<String, dynamic> json) {
     return CommentCommand(

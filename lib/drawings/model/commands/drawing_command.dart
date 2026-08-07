@@ -67,6 +67,8 @@ abstract class DrawingCommand implements SameAs {
 
   String previewPath(AbstractDrawing drawing) { return ''; }
 
+  String get contentHashCode;
+  
   @override
   int get hashCode => id.hashCode ^ label.hashCode ^ valid.hashCode ^ validated.hashCode ^ errors.hashCode;
 

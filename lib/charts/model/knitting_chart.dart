@@ -1,4 +1,6 @@
 
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:knitty_griddy/charts/stitchrepo/basic_stitches_set.dart';
 import 'package:knitty_griddy/charts/model/cell_address.dart';
@@ -156,7 +158,16 @@ class KnittingChart {
     id.hashCode ^ name.hashCode ^ description.hashCode ^ chartSettings.hashCode ^ 
     stitches.hashCode ^ usedStitches.hashCode ^ usedColours.hashCode ^ 
     selection.hashCode ^ outline.hashCode;
-    
+
+  String get contentHashCode => jsonEncode({
+      'chartsettings': chartSettings.contentHashCode,
+      'stitches': stitches.map((stitch) => stitch.contentHashCode).toList(),
+      'usedstitches': usedStitches.map((stitch) => stitch.contentHashCode).toList(),
+      'usedcolours': usedColours.map((colour) => colour.contentHashCode).toList(),
+      'selection': selection.contentHashCode,
+      'outline': outline.map((addresss) => addresss.contentHashCode).toList()
+    });
+
   @override
   bool operator ==(Object other) =>
     identical(this, other) ||

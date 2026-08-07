@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:knitty_griddy/drawings/model/commands/measurement_command.dart';
 
 class MeasurementOverride {
@@ -47,6 +49,12 @@ class MeasurementOverride {
       'unit': unit.name
     };
   }
+
+  String get contentHashCode => jsonEncode({
+      'measurementlabel': measurementLabel,
+      'formula': formula,
+      'unit': unit.name
+    });
 
   static MeasurementOverride fromJson(Map<String, dynamic> json) {
     return MeasurementOverride(

@@ -68,6 +68,7 @@ abstract class KnittingSymbolPart {
   });
 
   Map<String, Object> toJson();
+  String get contentHashCode;
 
   void draw(Canvas canvas, Size size, Color color) {
     Paint ink = Paint()

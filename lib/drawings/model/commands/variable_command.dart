@@ -1,4 +1,6 @@
 
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:knitty_griddy/drawings/formulas/formula_expression.dart';
@@ -109,6 +111,13 @@ class VariableCommand extends DrawingCommand {
       'formula': formula,
     };
   }
+
+  @override
+  String get contentHashCode => jsonEncode({
+    'type': DrawingCommandTypes.variableCommand.name,
+    'label': label,
+    'formula': formula,
+  });
 
   static VariableCommand fromJson(Map<String, dynamic> json) {
     return VariableCommand(

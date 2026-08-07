@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_spinbox/material.dart';
 import 'package:knitty_griddy/charts/model/knitting_symbol.dart';
@@ -101,6 +103,23 @@ class KnittingSymbolRectangle extends KnittingSymbolPart {
       'strokewidth': strokeWidth,
     };
   }
+
+  @override
+  String get contentHashCode => jsonEncode({
+      'type': knittingSymbolRectangleType,
+      'height': height,
+      'width': width,
+      'rounded': rounded,
+      'topleftradius': topLeftRadius,
+      'toprightradius': topRightRadius,
+      'bottomleftradius': bottomLeftRadius,
+      'bottomrightradius': bottomRightRadius,
+      'scale': {'x': scale.dx, 'y': scale.dy},
+      'translation': {'x': translation.dx, 'y': translation.dy},
+      'rotationrad': rotationRad,
+      'filled': filled,
+      'strokewidth': strokeWidth,
+    });
 
   static KnittingSymbolRectangle fromJson(Map<String, dynamic> json) {
     return KnittingSymbolRectangle(

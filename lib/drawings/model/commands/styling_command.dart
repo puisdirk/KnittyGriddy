@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
@@ -160,6 +162,19 @@ class StylingCommand extends DrawingCommand {
       'arrowsize': arrowSize.name,
     };
   }
+
+  @override
+  String get contentHashCode => jsonEncode({
+    'type': DrawingCommandTypes.stylingCommand.name,
+    'label': label,
+    'colour': {'red': color.red, 'blue': color.blue, 'green': color.green, 'alpha': color.alpha},
+    'thickness': thickness,
+    'dashstyle': dashStyle.name,
+    'ids': commandIds.toList(),
+    'startarrow': startArrow.name,
+    'endarrow': endArrow.name,
+    'arrowsize': arrowSize.name,
+  });
 
   static StylingCommand fromJson(Map<String, dynamic> json) {
     return StylingCommand(

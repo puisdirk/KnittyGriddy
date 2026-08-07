@@ -1,4 +1,6 @@
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/charts/model/basicshapes/stateless_text_entry_control.dart';
 import 'package:knitty_griddy/charts/model/knitting_symbol.dart';
@@ -58,6 +60,17 @@ class KnittingSymbolPath extends KnittingSymbolPart {
       'strokewidth': strokeWidth,
     };
   }
+
+  @override
+  String get contentHashCode => jsonEncode({
+      'type': knittingSymbolPathType,
+      'path': path,
+      'scale': {'x': scale.dx, 'y': scale.dy},
+      'translation': {'x': translation.dx, 'y': translation.dy},
+      'rotationrad': rotationRad,
+      'filled': filled,
+      'strokewidth': strokeWidth,
+    });
 
   static KnittingSymbolPath fromJson(Map<String, dynamic> json) {
     return KnittingSymbolPath(

@@ -71,7 +71,7 @@ class PatternChartField extends PatternField {
     );
   }
 
-  ChartInfo get chartInfo => chart == null ? ChartInfo.emptyChartInfo : ChartInfo(id: chart!.id, name: chart!.name, description: chart!.description);
+  ChartInfo get chartInfo => chart == null ? ChartInfo.emptyChartInfo : ChartInfo(id: chart!.id, name: chart!.name, description: chart!.description, contentHashCode: chart!.contentHashCode);
 
   @override
   Map<String, Object> toJson() {

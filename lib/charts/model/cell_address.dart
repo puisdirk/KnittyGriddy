@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class CellAddress implements Comparable<CellAddress> {
   final int column;
   final int row;
@@ -13,6 +15,8 @@ class CellAddress implements Comparable<CellAddress> {
       'row': row,
     };
   }
+
+  String get contentHashCode => jsonEncode(toJson());
 
   static CellAddress fromJson(Map<String, dynamic> json) {
     return CellAddress(
