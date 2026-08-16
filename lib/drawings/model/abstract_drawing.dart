@@ -42,6 +42,8 @@ abstract class AbstractDrawing {
     Offset? offset,
   });
 
+  List<Color> get knownColours => const[];
+
   @override
   int get hashCode => id.hashCode ^ name.hashCode ^ description.hashCode ^ commands.hashCode ^ offset.hashCode;
 

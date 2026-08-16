@@ -89,11 +89,18 @@ class PatternsModel extends ChangeNotifier {
     }
   }
 
-  void updateKnittingPattern({
+  Future<void> updateKnittingPattern({
     required KnittingPattern oldPattern,
     required KnittingPattern newPattern,
-  }) {
+  }) async {
     _patternsModelObject = _patternsModelObject.copyWith(pattern: newPattern);
+
+    if (oldPattern.name != newPattern.name || oldPattern.description != newPattern.description) {
+      _patternsModelObject = _patternsModelObject.copyWith(
+        patternInfos: _patternsModelObject.patternInfos.map((pi) => pi.id != oldPattern.id ? pi : pi.copyWith(name: newPattern.name, description: newPattern.description)).toList()
+      );
+      await _savePatternInfos();
+    }
 
     notifyListeners();
   }

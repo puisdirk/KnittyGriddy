@@ -1,7 +1,7 @@
 import 'package:fleather/fleather.dart';
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/charts/stitchrepo/stitch_definition.dart';
-import 'package:knitty_griddy/patterns/mainview/fieldtoolbars/stitchicon_chooser_dialog.dart';
+import 'package:knitty_griddy/patterns/mainview/fleather/stitchicon_chooser_dialog.dart';
 
 class InsertStitchSymbolEmbedButton extends StatelessWidget {
   final FleatherController controller;

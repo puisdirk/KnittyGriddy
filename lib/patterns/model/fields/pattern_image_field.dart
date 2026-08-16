@@ -1,5 +1,6 @@
 
 import 'dart:convert';
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:knitty_griddy/patterns/model/fields/pattern_field.dart';
@@ -14,6 +15,8 @@ class PatternImageField extends PatternField {
     super.positionY,
     super.width,
     super.height,
+    super.contentOffsetX,
+    super.contentOffsetY,
     super.opacity,
     this.imageData,
   }) : super(fieldType: PatternFieldType.image);
@@ -23,6 +26,8 @@ class PatternImageField extends PatternField {
     double? positionY,
     double? width,
     double? height,
+    double? contentOffsetX,
+    double? contentOffsetY,
     int? opacity,
     Uint8List? imageData,
   }) {
@@ -32,6 +37,8 @@ class PatternImageField extends PatternField {
       positionY: positionY?? this.positionY,
       width: width?? this.width,
       height: height?? this.height,
+      contentOffsetX: contentOffsetX?? this.contentOffsetX,
+      contentOffsetY: contentOffsetY?? this.contentOffsetY,
       opacity: opacity?? this.opacity,
       imageData: imageData?? this.imageData,
     );
@@ -45,6 +52,8 @@ class PatternImageField extends PatternField {
       positionY: positionY,
       width: width,
       height: height,
+      contentOffsetX: contentOffsetX,
+      contentOffsetY: contentOffsetY,
       opacity: opacity,
       imageData: null,
     );
@@ -56,6 +65,8 @@ class PatternImageField extends PatternField {
     double? positionY, 
     double? width, 
     double? height, 
+    double? contentOffsetX,
+    double? contentOffsetY,
     int? opacity,
   }) {
     return copyWith(
@@ -63,9 +74,14 @@ class PatternImageField extends PatternField {
       positionY: positionY?? this.positionY,
       width: width?? this.width,
       height: height?? this.height,
+      contentOffsetX: contentOffsetX?? this.contentOffsetX,
+      contentOffsetY: contentOffsetY?? this.contentOffsetY,
       opacity: opacity?? this.opacity,
     );
   }
+
+  @override
+  List<Color> get knownColours => const[];
 
   @override
   Map<String, Object> toJson() {
@@ -76,6 +92,8 @@ class PatternImageField extends PatternField {
       'y': positionY,
       'w': width,
       'h': height,
+      'ox': contentOffsetX,
+      'oy': contentOffsetY,
       'o': opacity,
       'image': base64.encode(imageData?? Uint8List(0)),
     };
@@ -88,6 +106,8 @@ class PatternImageField extends PatternField {
       positionY: json['y'] as double,
       width: json['w'] as double,
       height: json['h'] as double,
+      contentOffsetX: json['ox'] as double,
+      contentOffsetY: json['oy'] as double,
       opacity: json['o'] as int,
       imageData: base64.decode(json['image'] as String),
     );
@@ -104,6 +124,8 @@ class PatternImageField extends PatternField {
     positionY == other.positionY &&
     width == other.width &&
     height == other.height &&
+    contentOffsetX == other.contentOffsetX &&
+    contentOffsetY == other.contentOffsetY &&
     opacity == other.opacity &&
     listEquals(imageData, other.imageData);
   

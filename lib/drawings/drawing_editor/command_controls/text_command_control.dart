@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinbox/material.dart';
-import 'package:knitty_griddy/drawings/drawing_editor/command_controls/edit_style_colour_dialog.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/command_controls/small_label.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/command_controls/small_multiline_text_field.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/command_controls/small_text_field.dart';
 import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
 import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/text_command.dart';
+import 'package:knitty_griddy/pick_colour_dialog.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 
 class TextCommandControl extends StatefulWidget {
@@ -166,7 +166,10 @@ class _TextCommandControlState extends State<TextCommandControl> {
                 Color? newColor = await showDialog(
                   context: context,
                   builder: (context) {
-                    return EditStyleColourDialog(colour: widget.command.textColor);
+                    return PickColourDialog(
+                      initialColor: widget.command.textColor,
+                      knownColours: widget.drawing.knownColours,
+                    );
                   }
                 );
                 if (newColor != null && newColor != widget.command.textColor) {

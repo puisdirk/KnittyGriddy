@@ -104,7 +104,7 @@ class ChartsInMemoryModelRepository implements ChartsModelRepository {
       String jsonString = jsonEncode(jsonObject);
       await FilePicker.platform.saveFile(
         dialogTitle: 'Where do you want to store the output?',
-        fileName: '${chart.name}.kgp',
+        fileName: '${chart.name}.kgc',
         bytes: utf8.encode(jsonString),
       );
     } catch (e) {

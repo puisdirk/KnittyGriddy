@@ -1,17 +1,19 @@
 import 'package:fitted_scale/fitted_scale.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:knitty_griddy/patterns/mainview/field_controls/panel_field_components/border_radius_spin_box.dart';
 import 'package:knitty_griddy/patterns/mainview/field_controls/panel_field_components/border_width_and_colour_control.dart';
 import 'package:knitty_griddy/patterns/mainview/field_controls/panel_field_components/colour_well.dart';
 import 'package:knitty_griddy/patterns/model/fields/pattern_panel_field_style.dart';
+import 'package:knitty_griddy/pick_colour_control.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 
 class PatternFieldPanelStyleDialog extends StatefulWidget {
   final PatternPanelFieldStyle panelStyle;
+  final List<Color> knownColours;
 
   const PatternFieldPanelStyleDialog({
     required this.panelStyle,
+    required this.knownColours,
     super.key
   });
 
@@ -20,11 +22,15 @@ class PatternFieldPanelStyleDialog extends StatefulWidget {
 }
 
 enum ColorField {
-  backgroundColor,
-  leftBorderColor,
-  rightBorderColor,
-  topBorderColor,
-  bottomBorderColor,
+  backgroundColor(label: 'Background colour'),
+  leftBorderColor(label: 'Left border colour'),
+  rightBorderColor(label: 'Right border colour'),
+  topBorderColor(label: 'Top border colour'),
+  bottomBorderColor(label: 'Bottom border colour');
+
+  final String label;
+
+  const ColorField({required this.label});
 }
 
 enum BorderField {
@@ -59,6 +65,10 @@ class _PatternFieldPanelStyleDialogState extends State<PatternFieldPanelStyleDia
 
     super.initState();
   }
+
+  String get _currentColorFieldName => 
+    currentColorField == ColorField.backgroundColor ? currentColorField.label :
+      syncBorders ? 'Border color' : currentColorField.label;
 
   void _changeColour(Color newColor) {
     bool syncBorderColor = syncBorders && currentColorField != ColorField.backgroundColor;
@@ -103,201 +113,214 @@ class _PatternFieldPanelStyleDialogState extends State<PatternFieldPanelStyleDia
       title: const Text('Field settings'),
       content: SizedBox(
         width: 570,
-        height: 560,
+        height: 770,
         child: Center(
-          child: FittedScale(
-            scale: .8,
-            child: Column(
-              children: [
-                Row (
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text('Background color:', textAlign: TextAlign.end,),
-                    hspacing,
-                    ColourWell(
-                      selected: currentColorField == ColorField.backgroundColor, 
-                      color: panelStyle.backgroundColor,
-                      onTap: () {
-                        if (currentColorField != ColorField.backgroundColor) {
-                          setState(() {
-                            currentColorField = ColorField.backgroundColor;
-                            currentColor = panelStyle.backgroundColor;
-                          });
-                        }
-                      } ,
-                    ),
-                  ],
-                ),
-                vspacing,
-                Table(
-                  children: [
-                    TableRow(
-                      children: [
-                        TableCell(
-                          child: BorderRadiusSpinBox(
-                            corner: BorderCorner.topLeft, 
-                            initialValue: panelStyle.topLeftRadius, 
-                            onChanged: _changeBorderRadius
-                          ),
-                        ),
-                        TableCell(
-                          child: BorderWidthAndColourControl(
-                            borderField: BorderField.topBorder, 
-                            initialWidth: panelStyle.topBorderWidth, 
-                            colour: panelStyle.topBorderColor, 
-                            colourSelected: currentColorField == ColorField.topBorderColor, 
-                            onWidthChanged: _changeBorderWidth, 
-                            onColourSelected: () {
-                              if (currentColorField != ColorField.topBorderColor) {
+          child: Column(
+            children: [
+              vspacing,
+              FittedScale(
+                scale: .8,
+                child: SizedBox(
+                  width: 570,
+                  child: Column(
+                    children: [
+                      Row (
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text('Background color:', textAlign: TextAlign.end,),
+                          hspacing,
+                          ColourWell(
+                            selected: currentColorField == ColorField.backgroundColor, 
+                            color: panelStyle.backgroundColor,
+                            onTap: () {
+                              if (currentColorField != ColorField.backgroundColor) {
                                 setState(() {
-                                  currentColorField = ColorField.topBorderColor;
-                                  currentColor = panelStyle.topBorderColor;
+                                  currentColorField = ColorField.backgroundColor;
+                                  currentColor = panelStyle.backgroundColor;
                                 });
                               }
-                            },
-                          )
-                        ),
-                        TableCell(
-                          child: BorderRadiusSpinBox(
-                            corner: BorderCorner.topRight,
-                            initialValue: panelStyle.topRightRadius,
-                            onChanged: _changeBorderRadius,
+                            } ,
                           ),
-                        ),
-                      ]
-                    ),
-                    TableRow(
-                      children: [
-                        TableCell(
-                          verticalAlignment: TableCellVerticalAlignment.middle,
-                          child: BorderWidthAndColourControl(
-                            borderField: BorderField.leftBorder, 
-                            initialWidth: panelStyle.leftBorderWidth, 
-                            colour: panelStyle.leftBorderColor, 
-                            colourSelected: currentColorField == ColorField.leftBorderColor, 
-                            onWidthChanged: _changeBorderWidth, 
-                            onColourSelected: () {
-                              if (currentColorField != ColorField.leftBorderColor) {
-                                setState(() {
-                                  currentColorField = ColorField.leftBorderColor;
-                                  currentColor = panelStyle.leftBorderColor;
-                                });
-                              }
-                            },
-                          )
-                        ),
-                        TableCell(
-                          child: Padding(
-                            padding: const EdgeInsets.all(10),
-                            child: SizedBox(
-                              width: 200,
-                              height: 100,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: panelStyle.backgroundColor,
-                                  border: Border(
-                                    top: BorderSide(color: panelStyle.topBorderColor, width: panelStyle.topBorderWidth),
-                                    bottom: BorderSide(color: panelStyle.bottomBorderColor, width: panelStyle.bottomBorderWidth),
-                                    left: BorderSide(color: panelStyle.leftBorderColor, width: panelStyle.leftBorderWidth),
-                                    right: BorderSide(color: panelStyle.rightBorderColor, width: panelStyle.rightBorderWidth),
-                                  ),
-                                  borderRadius: BorderRadius.only(
-                                    topLeft: panelStyle.canSetRadius && panelStyle.topLeftRadius != PatternPanelFieldStyle.kDefaultBorderRadius ? Radius.circular(panelStyle.topLeftRadius) : Radius.zero,
-                                    topRight: panelStyle.canSetRadius && panelStyle.topRightRadius != PatternPanelFieldStyle.kDefaultBorderRadius ? Radius.circular(panelStyle.topRightRadius) : Radius.zero,
-                                    bottomLeft: panelStyle.canSetRadius && panelStyle.bottomLeftRadius != PatternPanelFieldStyle.kDefaultBorderRadius ? Radius.circular(panelStyle.bottomLeftRadius) : Radius.zero,
-                                    bottomRight: panelStyle.canSetRadius && panelStyle.bottomRightRadius != PatternPanelFieldStyle.kDefaultBorderRadius ? Radius.circular(panelStyle.bottomRightRadius) : Radius.zero,
-                                  )
+                        ],
+                      ),
+                      vspacing,
+                      Table(
+                        children: [
+                          TableRow(
+                            children: [
+                              TableCell(
+                                child: BorderRadiusSpinBox(
+                                  corner: BorderCorner.topLeft, 
+                                  initialValue: panelStyle.topLeftRadius, 
+                                  onChanged: _changeBorderRadius
                                 ),
-                                child: Center(
-                                  child: IconButton(
-                                    onPressed: () => setState(() => syncBorders = !syncBorders), 
-                                    icon: Icon(syncBorders ? Icons.lock : Icons.lock_open)
+                              ),
+                              TableCell(
+                                child: BorderWidthAndColourControl(
+                                  borderField: BorderField.topBorder, 
+                                  initialWidth: panelStyle.topBorderWidth, 
+                                  colour: panelStyle.topBorderColor, 
+                                  colourSelected: currentColorField == ColorField.topBorderColor, 
+                                  onWidthChanged: _changeBorderWidth, 
+                                  onColourSelected: () {
+                                    if (currentColorField != ColorField.topBorderColor) {
+                                      setState(() {
+                                        currentColorField = ColorField.topBorderColor;
+                                        currentColor = panelStyle.topBorderColor;
+                                      });
+                                    }
+                                  },
+                                )
+                              ),
+                              TableCell(
+                                child: BorderRadiusSpinBox(
+                                  corner: BorderCorner.topRight,
+                                  initialValue: panelStyle.topRightRadius,
+                                  onChanged: _changeBorderRadius,
+                                ),
+                              ),
+                            ]
+                          ),
+                          TableRow(
+                            children: [
+                              TableCell(
+                                verticalAlignment: TableCellVerticalAlignment.middle,
+                                child: BorderWidthAndColourControl(
+                                  borderField: BorderField.leftBorder, 
+                                  initialWidth: panelStyle.leftBorderWidth, 
+                                  colour: panelStyle.leftBorderColor, 
+                                  colourSelected: currentColorField == ColorField.leftBorderColor, 
+                                  onWidthChanged: _changeBorderWidth, 
+                                  onColourSelected: () {
+                                    if (currentColorField != ColorField.leftBorderColor) {
+                                      setState(() {
+                                        currentColorField = ColorField.leftBorderColor;
+                                        currentColor = panelStyle.leftBorderColor;
+                                      });
+                                    }
+                                  },
+                                )
+                              ),
+                              TableCell(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(10),
+                                  child: SizedBox(
+                                    width: 200,
+                                    height: 100,
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: panelStyle.backgroundColor,
+                                        border: Border(
+                                          top: BorderSide(color: panelStyle.topBorderColor, width: panelStyle.topBorderWidth),
+                                          bottom: BorderSide(color: panelStyle.bottomBorderColor, width: panelStyle.bottomBorderWidth),
+                                          left: BorderSide(color: panelStyle.leftBorderColor, width: panelStyle.leftBorderWidth),
+                                          right: BorderSide(color: panelStyle.rightBorderColor, width: panelStyle.rightBorderWidth),
+                                        ),
+                                        borderRadius: BorderRadius.only(
+                                          topLeft: panelStyle.canSetRadius && panelStyle.topLeftRadius != PatternPanelFieldStyle.kDefaultBorderRadius ? Radius.circular(panelStyle.topLeftRadius) : Radius.zero,
+                                          topRight: panelStyle.canSetRadius && panelStyle.topRightRadius != PatternPanelFieldStyle.kDefaultBorderRadius ? Radius.circular(panelStyle.topRightRadius) : Radius.zero,
+                                          bottomLeft: panelStyle.canSetRadius && panelStyle.bottomLeftRadius != PatternPanelFieldStyle.kDefaultBorderRadius ? Radius.circular(panelStyle.bottomLeftRadius) : Radius.zero,
+                                          bottomRight: panelStyle.canSetRadius && panelStyle.bottomRightRadius != PatternPanelFieldStyle.kDefaultBorderRadius ? Radius.circular(panelStyle.bottomRightRadius) : Radius.zero,
+                                        )
+                                      ),
+                                      child: Center(
+                                        child: IconButton(
+                                          onPressed: () => setState(() => syncBorders = !syncBorders), 
+                                          icon: Icon(syncBorders ? Icons.lock : Icons.lock_open)
+                                        ),
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
+                              TableCell(
+                                verticalAlignment: TableCellVerticalAlignment.middle,
+                                child: BorderWidthAndColourControl(
+                                  borderField: BorderField.rightBorder, 
+                                  initialWidth: panelStyle.rightBorderWidth, 
+                                  colour: panelStyle.rightBorderColor, 
+                                  colourSelected: currentColorField == ColorField.rightBorderColor, 
+                                  onWidthChanged: _changeBorderWidth, 
+                                  onColourSelected: () {
+                                    if (currentColorField != ColorField.rightBorderColor) {
+                                      setState(() {
+                                        currentColorField = ColorField.rightBorderColor;
+                                        currentColor = panelStyle.rightBorderColor;
+                                      });
+                                    }
+                                  },
+                                )
+                              ),
+                            ]
                           ),
-                        ),
-                        TableCell(
-                          verticalAlignment: TableCellVerticalAlignment.middle,
-                          child: BorderWidthAndColourControl(
-                            borderField: BorderField.rightBorder, 
-                            initialWidth: panelStyle.rightBorderWidth, 
-                            colour: panelStyle.rightBorderColor, 
-                            colourSelected: currentColorField == ColorField.rightBorderColor, 
-                            onWidthChanged: _changeBorderWidth, 
-                            onColourSelected: () {
-                              if (currentColorField != ColorField.rightBorderColor) {
-                                setState(() {
-                                  currentColorField = ColorField.rightBorderColor;
-                                  currentColor = panelStyle.rightBorderColor;
-                                });
-                              }
-                            },
+                          TableRow(
+                            children: [
+                              TableCell(
+                                child: BorderRadiusSpinBox(
+                                  corner: BorderCorner.bottomLeft, 
+                                  initialValue: panelStyle.bottomLeftRadius, 
+                                  onChanged: _changeBorderRadius
+                                )
+                              ),
+                              TableCell(
+                                child: BorderWidthAndColourControl(
+                                  borderField: BorderField.bottomBorder, 
+                                  initialWidth: panelStyle.bottomBorderWidth, 
+                                  colour: panelStyle.bottomBorderColor, 
+                                  colourSelected: currentColorField == ColorField.bottomBorderColor, 
+                                  onWidthChanged: _changeBorderWidth, 
+                                  onColourSelected: () {
+                                    if (currentColorField != ColorField.bottomBorderColor) {
+                                      setState(() {
+                                        currentColorField = ColorField.bottomBorderColor;
+                                        currentColor = panelStyle.bottomBorderColor;
+                                      });
+                                    }
+                                  }
+                                )
+                              ),
+                              TableCell(
+                                child: BorderRadiusSpinBox(
+                                  corner: BorderCorner.bottomRight, 
+                                  initialValue: panelStyle.bottomRightRadius, 
+                                  onChanged: _changeBorderRadius
+                                )
+                              ),
+                            ]
                           )
-                        ),
-                      ]
-                    ),
-                    TableRow(
-                      children: [
-                        TableCell(
-                          child: BorderRadiusSpinBox(
-                            corner: BorderCorner.bottomLeft, 
-                            initialValue: panelStyle.bottomLeftRadius, 
-                            onChanged: _changeBorderRadius
-                          )
-                        ),
-                        TableCell(
-                          child: BorderWidthAndColourControl(
-                            borderField: BorderField.bottomBorder, 
-                            initialWidth: panelStyle.bottomBorderWidth, 
-                            colour: panelStyle.bottomBorderColor, 
-                            colourSelected: currentColorField == ColorField.bottomBorderColor, 
-                            onWidthChanged: _changeBorderWidth, 
-                            onColourSelected: () {
-                              if (currentColorField != ColorField.bottomBorderColor) {
-                                setState(() {
-                                  currentColorField = ColorField.bottomBorderColor;
-                                  currentColor = panelStyle.bottomBorderColor;
-                                });
-                              }
-                            }
-                          )
-                        ),
-                        TableCell(
-                          child: BorderRadiusSpinBox(
-                            corner: BorderCorner.bottomRight, 
-                            initialValue: panelStyle.bottomRightRadius, 
-                            onChanged: _changeBorderRadius
-                          )
-                        ),
-                      ]
-                    )
-                  ],
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-                vspacing,
-                vspacing,
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SizedBox(
-                      width: 570,
-                      child: Center(
-                        child: FittedScale(
-                          scale: .6,
-                          child: ColorPicker(
-                            displayThumbColor: true,
-                            portraitOnly: true,
-                            pickerColor: currentColor,
-                            onColorChanged: (value) => _changeColour(value),
-                          ),
-                        ),
+              ),
+              const SizedBox(height: 20,),
+              const Divider(indent: 15, endIndent: 15, color: Colors.grey,),
+              const SizedBox(height: 20,),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  const SizedBox(width: 30,),
+                  Text('$_currentColorFieldName:'),
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    width: 570,
+                    child: Center(
+                      child: PickColourControl(
+                        initialColor: currentColor,
+                        knownColours: widget.knownColours,
+                        knownColoursLabel: 'Pattern colours',
+                        onChanged: _changeColour,
                       ),
                     ),
-                  ],
-                ),
-              ]
-            ),
+                  ),
+                ],
+              ),
+            ]
           ),
         ),
       ),

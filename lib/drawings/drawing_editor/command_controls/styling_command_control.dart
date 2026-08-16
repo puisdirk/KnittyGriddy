@@ -1,13 +1,13 @@
 import 'package:fitted_scale/fitted_scale.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinbox/material.dart';
-import 'package:knitty_griddy/drawings/drawing_editor/command_controls/edit_style_colour_dialog.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/command_controls/small_label.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/command_controls/small_text_field.dart';
 import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
 import 'package:knitty_griddy/drawings/model/commands/arrow_painter.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/styling_command.dart';
+import 'package:knitty_griddy/pick_colour_dialog.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 import 'package:knitty_griddy/utils/dashed_painter.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -108,7 +108,10 @@ class _StylingCommandControlState extends State<StylingCommandControl> {
                 Color? newColor = await showDialog(
                   context: context,
                   builder: (context) {
-                    return EditStyleColourDialog(colour: widget.command.color);
+                    return PickColourDialog(
+                      initialColor: widget.command.color,
+                      knownColours: widget.drawing.knownColours,
+                    );
                   }
                 );
                 if (newColor != null && newColor != widget.command.color) {

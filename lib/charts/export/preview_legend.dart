@@ -19,7 +19,7 @@ class PreviewLegend extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        StitchIcon(stitchDefinition: def, iconSize: 16,),
+        StitchIcon(stitchDefinition: def, iconSize: 16, withBorder: true,),
         const SizedBox(width: 10,),
         Column(
           mainAxisAlignment: MainAxisAlignment.start,

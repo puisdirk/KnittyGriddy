@@ -8,11 +8,13 @@ class StitchIcon extends StatelessWidget {
   final StitchDefinition stitchDefinition;
   final Color? iconColor;
   final double iconSize;
+  final bool withBorder;
 
   const StitchIcon({
     required this.stitchDefinition,
     double? iconSize,
     this.iconColor,
+    this.withBorder = false,
     super.key
   }) : iconSize = iconSize?? stitchCellHeight;
 
@@ -29,7 +31,15 @@ class StitchIcon extends StatelessWidget {
               for (int column = 0; column < stitchDefinition.columns; column++) 
                 Positioned(
                   left: column * stitchCellWidth, 
-                  child: KnittingSymbolControl(knittingSymbol: stitchDefinition.symbolAt(column), symbolColor: iconColor))
+                  child: KnittingSymbolControl(knittingSymbol: stitchDefinition.symbolAt(column), symbolColor: iconColor)
+                ),
+              if (withBorder)
+                Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.shade600
+                    )
+                  ),
+                )
             ],
           ),
       ),

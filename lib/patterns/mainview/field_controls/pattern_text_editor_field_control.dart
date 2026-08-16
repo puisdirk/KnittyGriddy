@@ -1,6 +1,6 @@
 import 'package:fleather/fleather.dart';
 import 'package:flutter/material.dart';
-import 'package:knitty_griddy/patterns/mainview/knitty_griddy_fleather_editor.dart';
+import 'package:knitty_griddy/patterns/mainview/fleather/knitty_griddy_fleather_editor.dart';
 import 'package:knitty_griddy/patterns/model/fields/pattern_text_editor_field.dart';
 import 'package:knitty_griddy/patterns/model/knitting_pattern.dart';
 

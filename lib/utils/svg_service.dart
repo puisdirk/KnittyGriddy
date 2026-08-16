@@ -13,6 +13,7 @@ import 'package:knitty_griddy/charts/model/stitch_cell.dart';
 import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/part_command.dart';
+import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
 import 'package:knitty_griddy/drawings/model/part_drawing.dart';
 import 'package:knitty_griddy/utils/color_utilities.dart';
 import 'package:knitty_griddy/utils/constants.dart';
@@ -23,6 +24,7 @@ class SvgService {
     for (DrawingCommand command in drawing.commands) {
       // For PartDrawings, we only draw the parts
       if (drawing is PartDrawing && command is! PartCommand) continue;
+      if (command is PointCommand) continue;
       drawingGroup += command.toSvg(drawingSize, drawing);
     }
     drawingGroup += '</g>';

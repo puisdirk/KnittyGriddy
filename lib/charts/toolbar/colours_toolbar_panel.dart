@@ -1,8 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/charts/model/named_colour.dart';
-import 'package:knitty_griddy/charts/toolbar/add_new_colour_dialog.dart';
-import 'package:knitty_griddy/charts/toolbar/edit_colour_dialog.dart';
+import 'package:knitty_griddy/charts/toolbar/pick_named_colour_dialog.dart';
 import 'package:knitty_griddy/charts/model/selection.dart';
 import 'package:knitty_griddy/charts/model/app_state.dart';
 import 'package:knitty_griddy/charts/model/charts_model.dart';
@@ -89,13 +88,23 @@ class ColoursToolbarPanel extends StatelessWidget {
                                         IconButton(
                                           icon: const Icon(Icons.edit), 
                                           iconSize: iconWidth, 
-                                          onPressed: () => 
-                                            showDialog(
+                                          onPressed: () async {
+                                            NamedColour? newNamedColour = await showDialog(
+                                              barrierDismissible: false,
                                               context: context,
                                               builder: (context) {
-                                                return EditColourDialog(colour: colour, usedColours: usedColours);
+                                                return PickNamedColourDialog(
+                                                  initialColour: colour,
+                                                  usedColours: usedColours.where((nc) => nc != colour).toList()
+                                                );
                                               }
-                                            ),
+                                            );
+                                            if (newNamedColour != null) {
+                                              if (context.mounted) {
+                                                Provider.of<ChartsModel>(context, listen: false).setNamedColour(colour, newNamedColour);
+                                              }
+                                            }
+                                          },
                                         ),
                                       if (appState.currentTool == Tool.select)
                                         IconButton(
@@ -122,19 +131,27 @@ class ColoursToolbarPanel extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     IconButton.outlined(
-                      onPressed: () => showDialog(
-                        context: context,
-                        builder: (context) {
-                          return AddNewColourDialog(usedColours: usedColours);
+                      onPressed: () async {
+                        NamedColour? newNamedColour = await showDialog(
+                          barrierDismissible: false,
+                          context: context,
+                          builder: (context) {
+                            return PickNamedColourDialog(usedColours: usedColours);
+                          }
+                        );
+                        if (newNamedColour != null) {
+                          if (context.mounted) {
+                            Provider.of<ChartsModel>(context, listen: false).addNamedColour(newNamedColour);
+                          }
                         }
-                      ),
+                      },
                       icon: const Icon(Icons.add)
                     ),
                     const SizedBox(width: 20,),
                     IconButton.outlined(
                       onPressed: () => Provider.of<ChartsModel>(context, listen: false).pruneUnusedColours(), 
                       icon: const Icon(Icons.content_cut)
-                    )
+                    ),
                   ],
                 )
               ),

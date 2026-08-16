@@ -2,10 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/charts/toolbar/colours_toolbar_panel.dart';
 import 'package:knitty_griddy/charts/toolbar/grid_options_toolbar_panel.dart';
-import 'package:knitty_griddy/charts/toolbar/settings_toolbar_panel.dart';
 import 'package:knitty_griddy/charts/toolbar/stitches_toolbar_panel.dart';
 import 'package:knitty_griddy/charts/model/app_state.dart';
-import 'package:knitty_griddy/charts/model/knitting_chart.dart';
 import 'package:knitty_griddy/charts/model/charts_model.dart';
 import 'package:provider/provider.dart';
 
@@ -35,12 +33,7 @@ class KnittingToolbar extends StatelessWidget {
                     selector: (_, model) => model.appState,
                     builder: (context, appState, _) {
                       if (appState.mouseOption == MouseOption.settings) {
-                        return Selector<ChartsModel, KnittingChart>(
-                          selector: (_, model) => model.knittingChart,
-                          builder: (context, chart, _) {
-                            return SettingsToolbarPanel(chart: chart);
-                          }
-                        );
+                        return const SizedBox.expand();
                       }
                       return const StitchesToolbarPanel();
                     }
@@ -48,7 +41,15 @@ class KnittingToolbar extends StatelessWidget {
                 ),
                 const VerticalDivider(indent: 10, endIndent: 10,),
                 SizedBox(height: 200, width: areawidth * 0.20, 
-                  child: const ColoursToolbarPanel()
+                  child: Selector<ChartsModel, AppState>(
+                    selector: (_, model) => model.appState,
+                    builder: (context, appState, _) {
+                      if (appState.mouseOption == MouseOption.settings) {
+                        return const SizedBox.expand();
+                      }
+                      return const ColoursToolbarPanel();
+                    }
+                  )
                 ),
               ],
             ),

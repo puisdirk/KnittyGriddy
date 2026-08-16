@@ -8,6 +8,8 @@ import 'package:knitty_griddy/drawings/model/commands/included_part_command.dart
 import 'package:knitty_griddy/drawings/model/commands/measurement_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/meaurement_override.dart';
 import 'package:knitty_griddy/drawings/model/commands/part_command.dart';
+import 'package:knitty_griddy/drawings/model/commands/styling_command.dart';
+import 'package:knitty_griddy/drawings/model/commands/text_command.dart';
 import 'package:knitty_griddy/drawings/model/part_drawing.dart';
 import 'package:knitty_griddy/drawings/partrepo/part_repository.dart';
 
@@ -31,6 +33,7 @@ class Drawing extends AbstractDrawing {
   });
 
   bool get validated => !commands.any((c) => !c.validated);
+  bool get valid => !commands.any((c) => !c.valid);
 
   Drawing copyWith({
     String? id,
@@ -65,6 +68,23 @@ class Drawing extends AbstractDrawing {
       offset: offset?? this.offset,
       usedPartDrawings: usedPartDrawings,
     );
+  }
+
+  @override
+  List<Color> get knownColours {
+    Set<Color> colors = {};
+    for (StylingCommand stylingCommand in commands.whereType()) {
+      colors.add(stylingCommand.color);
+    }
+    for (TextCommand textCommand in commands.whereType()) {
+      colors.add(textCommand.textColor);
+    }
+
+    colors.remove(Colors.black);
+    colors.remove(Colors.white);
+    colors.remove(Colors.transparent);
+
+    return colors.toList();
   }
 
   // We store the drawings of included parts inside the drawing. If the part gets

@@ -37,6 +37,13 @@ class _PatternDrawingFieldToolbarState extends State<PatternDrawingFieldToolbar>
   }
 
   @override
+  void didUpdateWidget(covariant PatternDrawingFieldToolbar oldWidget) {
+    field = widget.field;
+
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Row(
       children: [
