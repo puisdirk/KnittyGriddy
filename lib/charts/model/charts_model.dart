@@ -2,7 +2,6 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:id_gen/id_gen.dart';
 import 'package:knitty_griddy/charts/stitchrepo/basic_stitches_set.dart';
 import 'package:knitty_griddy/charts/stitchrepo/stitch_set.dart';
@@ -157,6 +156,47 @@ class ChartsModel extends ChangeNotifier {
 
     _repository.deleteChart(chartId);
     _saveChartInfos();
+    notifyListeners();
+  }
+
+  bool _stitchBrokenOverEdge(KnittingChart chart, StitchCell cell) {
+    StitchDefinition stitchDef = StitchRepository.getStitchDefinitionById(cell.stitchDefinitionId);
+    if (stitchDef.columns < 2) return false;
+
+    if (cell.column - cell.stitchDefinitionColumn + stitchDef.columns - 1 >= chart.chartSettings.columns) {
+      return true;
+    }
+
+    return false;
+  }
+
+  Future<void> updateChart(KnittingChart newChart) async {
+    KnittingChart healedChart = newChart;
+    if (newChart.chartSettings.columns < _chartsModelObject.knittingChart.chartSettings.columns) {
+      List<StitchCell> brokenStitches = [];
+        brokenStitches.addAll(newChart.stitches.where((stitch) => _stitchBrokenOverEdge(healedChart, stitch)
+      ).toList());
+      // Clear these broken stitches
+      healedChart = healedChart.copyWith(
+        stitches: healedChart.stitches.map((stitch) => 
+          brokenStitches.contains(stitch) ? stitch.copyWith(
+            stitchDefinitionId: BasicStitchesSet.noStitch.id, stitchDefinitionColumn: 0) : stitch
+        ).toList()
+      );
+    }
+
+    _chartsModelObject = _chartsModelObject.copyWith(
+      knittingChart: healedChart,
+      chartInfos: _chartsModelObject.chartInfos.map((ci) => ci.id != healedChart.id ? ci : ci.copyWith(
+        name: healedChart.name,
+        description: healedChart.description,
+        contentHashCode: healedChart.contentHashCode,
+      )).toList()
+    );
+
+    _storeForUndo();
+    await _saveChartInfos();
+    await saveCurrentChart();
     notifyListeners();
   }
 
@@ -548,7 +588,8 @@ class ChartsModel extends ChangeNotifier {
       knittingChart: _chartsModelObject.knittingChart.copyWith(
         stitches: _chartsModelObject.knittingChart.stitches.map((stitch) => 
           brokenStitches.contains(stitch) ? stitch.copyWith(
-            stitchDefinitionId: BasicStitchesSet.noStitch.id, stitchDefinitionColumn: 1) : stitch
+            stitchDefinitionId: BasicStitchesSet.noStitch.id, stitchDefinitionColumn: 0) : stitch
+//            stitchDefinitionId: BasicStitchesSet.noStitch.id, stitchDefinitionColumn: 1) : stitch
         ).toList()
       )
     );
@@ -635,7 +676,8 @@ class ChartsModel extends ChangeNotifier {
       knittingChart: _chartsModelObject.knittingChart.copyWith(
         stitches: _chartsModelObject.knittingChart.stitches.map((stitch) => 
           brokenStitches.contains(stitch) ? stitch.copyWith(
-            stitchDefinitionId: BasicStitchesSet.noStitch.id, stitchDefinitionColumn: 1) : stitch
+            stitchDefinitionId: BasicStitchesSet.noStitch.id, stitchDefinitionColumn: 0) : stitch
+//            stitchDefinitionId: BasicStitchesSet.noStitch.id, stitchDefinitionColumn: 1) : stitch
         ).toList()
       )
     );
@@ -930,22 +972,16 @@ class ChartsModel extends ChangeNotifier {
 
 // ************************ Edit or create colours *******************************************
 
-  void setNamedColour(NamedColour colour, Color newColor, String newName) {
+  void setNamedColour(NamedColour oldColour, NamedColour newColour) {
 
     _chartsModelObject = _chartsModelObject.copyWith(
       knittingChart: _chartsModelObject.knittingChart.copyWith(
         usedColours: _chartsModelObject.knittingChart.usedColours.map((col) =>
-          col.name != colour.name ? col : col.copyWith(
-            name: newName,
-            color: newColor
-          )
+          col != oldColour ? col : newColour
         ).toList(),
         stitches: _chartsModelObject.knittingChart.stitches.map((stitch) =>
-          stitch.colour != colour ? stitch : stitch.copyWith(
-            colour: stitch.colour.copyWith(
-              name: newName,
-              color: newColor
-            )
+          stitch.colour != oldColour ? stitch : stitch.copyWith(
+            colour: newColour
           )
         ).toList()
       )
@@ -955,10 +991,10 @@ class ChartsModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void addNamedColour(Color newColor, String newName) {
+  void addNamedColour(NamedColour colour) {
     _chartsModelObject = _chartsModelObject.copyWith(
       knittingChart: _chartsModelObject.knittingChart.copyWith(
-        usedColours: [..._chartsModelObject.knittingChart.usedColours, NamedColour(name: newName, color: newColor)]
+        usedColours: [..._chartsModelObject.knittingChart.usedColours, colour]
       )
     );
 

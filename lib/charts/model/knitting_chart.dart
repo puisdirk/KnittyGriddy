@@ -1,5 +1,6 @@
 
 import 'dart:convert';
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:knitty_griddy/charts/stitchrepo/basic_stitches_set.dart';
@@ -43,6 +44,8 @@ class KnittingChart {
     this.outline = const {},
   });
 
+  List<Color> get knownColours => usedColours.map((nc) => nc.color).toList()..add(chartSettings.outlineColor);
+
   KnittingChart copyWith({
     String? id,
     String? name,
@@ -64,6 +67,34 @@ class KnittingChart {
       usedColours: usedColours?? this.usedColours,
       selection: selection?? this.selection,
       outline: outline?? this.outline,
+    );
+  }
+
+  KnittingChart setNumberOfRowsAndCols(int rows, int cols) {
+    List<StitchCell> newStitches = 
+      List.from(stitches)..removeWhere((stitchCell) => stitchCell.row >= rows || stitchCell.column >= cols);
+
+    // Fill with noStitch  
+    for (int row = chartSettings.rows; row < rows; row++) {
+      for (int col = 0; col < chartSettings.columns; col++) {
+        newStitches.add(StitchCell(row: row, column: col, stitchDefinitionId: BasicStitchesSet.noStitchId, colour: defaultMainColor));
+      }
+    }
+    for (int col = chartSettings.columns; col < cols; col++) {
+      for (int row = 0; row < rows; row++) {
+        newStitches.add(StitchCell(row: row, column: col, stitchDefinitionId: BasicStitchesSet.noStitchId, colour: defaultMainColor));
+      }
+    }
+
+    // Remark: this doesn't heal broken stitches yet and doesn't prune unused stitches and colours
+
+    return copyWith(
+      chartSettings: chartSettings.copyWith(rows: rows, columns: cols),
+      outline: Set.from(outline)..removeWhere((cellAddress) => cellAddress.row > rows),
+      selection: selection.copyWith(
+        selectedCells: selection.selectedCells.where((cellAddress) => cellAddress.row <= rows).toSet()
+      ),
+      stitches: newStitches
     );
   }
 

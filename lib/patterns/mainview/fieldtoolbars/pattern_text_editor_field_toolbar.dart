@@ -3,15 +3,21 @@ import 'package:flutter/material.dart';
 import 'package:knitty_griddy/charts/stitch_icon.dart';
 import 'package:knitty_griddy/charts/stitchrepo/basic_stitches_set.dart';
 import 'package:knitty_griddy/patterns/mainview/fieldtoolbars/insert_stitch_symbol_embed_button.dart';
-import 'package:knitty_griddy/patterns/mainview/infinite_indentation_button.dart';
+import 'package:knitty_griddy/patterns/mainview/fleather/infinite_indentation_button.dart';
+import 'package:knitty_griddy/patterns/model/knitting_pattern.dart';
+import 'package:knitty_griddy/pick_colour_dialog.dart';
 
 class PatternTextEditorFieldToolbar extends StatelessWidget {
   final FleatherController fleatherController;
+  final KnittingPattern pattern;
   final EdgeInsetsGeometry? padding;
   final GlobalKey? editorKey;
+  final void Function() onTextStyleSettingsButtonClicked;
 
   const PatternTextEditorFieldToolbar({
     required this.fleatherController,
+    required this.pattern,
+    required this.onTextStyleSettingsButtonClicked,
     this.padding,
     this.editorKey,
     super.key
@@ -93,6 +99,20 @@ class PatternTextEditorFieldToolbar extends StatelessWidget {
               attributeKey: ParchmentAttribute.foregroundColor,
               nullColorLabel: FleatherLocalizations.of(context)!.foregroundColorAutomatic,
               builder: textColorBuilder,
+              pickColor: (context, nullColorLabel) async {
+                return await showDialog(context: context, builder: (context) {
+                  ParchmentStyle style = fleatherController.getSelectionStyle();
+                  Color initialColor = Colors.black;
+                  if (style.contains(ParchmentAttribute.foregroundColor)) {
+                    initialColor = Color(style.get(ParchmentAttribute.foregroundColor)!.value!);
+                  }
+                  return PickColourDialog(
+                    initialColor: initialColor,
+                    knownColours: pattern.knownColours,
+                  );
+                },
+                );
+              },
             ),
           );
         }),
@@ -107,6 +127,20 @@ class PatternTextEditorFieldToolbar extends StatelessWidget {
                 attributeKey: ParchmentAttribute.backgroundColor,
                 nullColorLabel: FleatherLocalizations.of(context)!.backgroundColorNoColor,
                 builder: backgroundColorBuilder,
+                pickColor: (context, nullColorLabel) async {
+                  return await showDialog(context: context, builder: (context) {
+                    ParchmentStyle style = fleatherController.getSelectionStyle();
+                    Color initialColor = Colors.white;
+                    if (style.contains(ParchmentAttribute.backgroundColor)) {
+                      initialColor = Color(style.get(ParchmentAttribute.backgroundColor)!.value!);
+                    }
+                    return PickColourDialog(
+                      initialColor: initialColor,
+                      knownColours: pattern.knownColours,
+                    );
+                  },
+                  );
+                },
               ),
             ),
           );
@@ -187,16 +221,7 @@ class PatternTextEditorFieldToolbar extends StatelessWidget {
         ),
 
         /// ################################################################
-        Tooltip(
-          message: 'Block',
-          preferBelow: false,
-          child: ToggleStyleButton(
-            attribute: ParchmentAttribute.block.code,
-            controller: fleatherController,
-            icon: Icons.code,
-          ),
-        ),
-        Tooltip(
+/*        Tooltip(
           message: 'Quote',
           preferBelow: false,
           child: ToggleStyleButton(
@@ -205,17 +230,9 @@ class PatternTextEditorFieldToolbar extends StatelessWidget {
             icon: Icons.format_quote,
           ),
         ),
-        Tooltip(
-          message: 'Horizontal line',
-          preferBelow: false,
-          child: InsertEmbedButton(
-            controller: fleatherController,
-            icon: Icons.horizontal_rule,
-          ),
-        ),
         VerticalDivider(
             indent: 16, endIndent: 16, color: Colors.grey.shade400),
-
+*/
         Tooltip(
           message: 'Stitch symbol',
           preferBelow: false,
@@ -232,7 +249,7 @@ class PatternTextEditorFieldToolbar extends StatelessWidget {
             indent: 16, endIndent: 16, color: Colors.grey.shade400),
 
         /// ################################################################
-
+/*
         UndoRedoButton.undo(
           controller: fleatherController,
         ),
@@ -240,6 +257,21 @@ class PatternTextEditorFieldToolbar extends StatelessWidget {
           controller: fleatherController,
         ),
 
+        VerticalDivider(
+            indent: 16, endIndent: 16, color: Colors.grey.shade400),
+*/
+        Tooltip(
+          message: 'Font settings',
+          preferBelow: false,
+          child: FLIconButton(
+            highlightElevation: 0,
+            hoverElevation: 0,
+            size: 32,
+            icon: Icon(Icons.settings, size: 16, color: Theme.of(context).iconTheme.color),
+            fillColor: Theme.of(context).canvasColor,
+            onPressed: onTextStyleSettingsButtonClicked
+          ),
+        )
       ],
     );
   }

@@ -1,7 +1,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:knitty_griddy/charts/editgrid/grid_settings_control.dart';
+import 'package:knitty_griddy/charts/maingrid/chart_settings_dialog.dart';
+import 'package:knitty_griddy/charts/model/knitting_chart.dart';
 import 'package:knitty_griddy/charts/toolbar/knitting_toolbar.dart';
 import 'package:knitty_griddy/charts/maingrid/chart_control.dart';
 import 'package:knitty_griddy/charts/export/export_page.dart';
@@ -54,6 +55,21 @@ class _ChartPageState extends State<ChartPage> {
         ),
         actions: [
           IconButton(
+            onPressed: () async {
+              KnittingChart? newKnittingChart = await showDialog(
+                context: context, 
+                builder: (context) => ChartSettingsDialog(knittingChart: Provider.of<ChartsModel>(context, listen: false).knittingChart),
+              );
+
+              if (newKnittingChart != null) {
+                if (context.mounted) {
+                  Provider.of<ChartsModel>(context, listen: false).updateChart(newKnittingChart);
+                }
+              }
+            }, 
+            icon: const Icon(Icons.settings)
+          ),
+          IconButton(
             icon: const Icon(Icons.ios_share),
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (context) => const ExportPage())
@@ -81,14 +97,7 @@ class _ChartPageState extends State<ChartPage> {
               scrollDirection: Axis.vertical,
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    GridSettingsControl(),
-                    SizedBox(height: 10,),
-                    ChartControl(),
-                  ],
-                ),
+                child: ChartControl(),
               ),
             ),
           ),

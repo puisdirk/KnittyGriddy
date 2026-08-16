@@ -31,25 +31,34 @@ class SelectionLayerPanel extends StatelessWidget {
               children: [
                 // Select all
                 Positioned(
-                  child: IconButton(
-                    onPressed: () => Provider.of<ChartsModel>(context, listen: false).selectAll(), 
-                    icon: const Icon(Icons.select_all)
+                  child: Tooltip(
+                    message: 'Select all',
+                    child: IconButton(
+                      onPressed: () => Provider.of<ChartsModel>(context, listen: false).selectAll(), 
+                      icon: const Icon(Icons.select_all)
+                    ),
                   )
                 ),
                 // Select none
                 Positioned(
                   right: stitchCellWidth, bottom: stitchCellHeight,
-                  child: IconButton(
-                    onPressed: () => Provider.of<ChartsModel>(context, listen: false).selectNone(), 
-                    icon: const Icon(Icons.deselect)
+                  child: Tooltip(
+                    message: 'Select none',
+                    child: IconButton(
+                      onPressed: () => Provider.of<ChartsModel>(context, listen: false).selectNone(), 
+                      icon: const Icon(Icons.deselect)
+                    ),
                   )
                 ),
                 // Invert selection
                 Positioned(
                   right: stitchCellWidth,
-                  child: IconButton(
-                    onPressed: () => Provider.of<ChartsModel>(context, listen: false).invertSelection(), 
-                    icon: const Icon(Icons.flaky)
+                  child: Tooltip(
+                    message: 'Invert selection',
+                    child: IconButton(
+                      onPressed: () => Provider.of<ChartsModel>(context, listen: false).invertSelection(), 
+                      icon: const Icon(Icons.flaky)
+                    ),
                   ),
                 ),
                 // Set marked cells
@@ -57,9 +66,13 @@ class SelectionLayerPanel extends StatelessWidget {
                   bottom: stitchCellHeight,
                   child: Transform.rotate(
                     angle: MathUtitilies.toRadians(45),
-                    child: IconButton(
-                      onPressed: () => Provider.of<ChartsModel>(context, listen: false).setOutline(), 
-                      icon: const Icon(Icons.api)
+                    child: Tooltip(
+                      message: 'Set outline',
+                      preferBelow: false,
+                      child: IconButton(
+                        onPressed: () => Provider.of<ChartsModel>(context, listen: false).setOutline(), 
+                        icon: const Icon(Icons.api)
+                      ),
                     ),
                   ),
                 ),
@@ -104,9 +117,12 @@ class SelectionLayerPanel extends StatelessWidget {
                   Positioned(
                     bottom: 0,
                     left: ((columns * stitchCellWidth) / 2) - stitchCellWidth,
-                    child: IconButton.outlined(
-                      onPressed: () => Provider.of<ChartsModel>(context, listen: false).toggleEvenColumns(), 
-                      icon: const Text('2-4-6'),
+                    child: Tooltip(
+                      message: 'Even columns',
+                      child: IconButton.outlined(
+                        onPressed: () => Provider.of<ChartsModel>(context, listen: false).toggleEvenColumns(), 
+                        icon: const Text('2-4-6'),
+                      ),
                     ),
                   ),
                 // Odd columns
@@ -114,9 +130,12 @@ class SelectionLayerPanel extends StatelessWidget {
                   Positioned(
                     bottom: 0,
                     left: ((columns * stitchCellWidth) / 2) + stitchCellWidth,
-                    child: IconButton.outlined(
-                      onPressed: () => Provider.of<ChartsModel>(context, listen: false).toggleOddColumns(), 
-                      icon: const Text('1-3-5'),
+                    child: Tooltip(
+                      message: 'Odd columns',
+                      child: IconButton.outlined(
+                        onPressed: () => Provider.of<ChartsModel>(context, listen: false).toggleOddColumns(), 
+                        icon: const Text('1-3-5'),
+                      ),
                     ),
                   ),
                 // Even rows
@@ -126,9 +145,12 @@ class SelectionLayerPanel extends StatelessWidget {
                     right: 0,
                     child: Transform.rotate(
                       angle: MathUtitilies.toRadians(90),
-                      child: IconButton.outlined(
-                        onPressed: () => Provider.of<ChartsModel>(context, listen: false).toggleEvenRows(), 
-                        icon: const Text('2-4-6'),
+                      child: Tooltip(
+                        message: 'Even rows',
+                        child: IconButton.outlined(
+                          onPressed: () => Provider.of<ChartsModel>(context, listen: false).toggleEvenRows(), 
+                          icon: const Text('2-4-6'),
+                        ),
                       ),
                     ),
                   ),
@@ -139,9 +161,12 @@ class SelectionLayerPanel extends StatelessWidget {
                     right: 0,
                     child: Transform.rotate(
                       angle: MathUtitilies.toRadians(90),
-                      child: IconButton.outlined(
-                        onPressed: () => Provider.of<ChartsModel>(context, listen: false).toggleOddRows(), 
-                        icon: const Text('1-3-5',),
+                      child: Tooltip(
+                        message: 'Odd rows',
+                        child: IconButton.outlined(
+                          onPressed: () => Provider.of<ChartsModel>(context, listen: false).toggleOddRows(), 
+                          icon: const Text('1-3-5',),
+                        ),
                       ),
                     ),
                   ),

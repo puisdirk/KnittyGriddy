@@ -1,4 +1,6 @@
+import 'package:fitted_scale/fitted_scale.dart';
 import 'package:flutter/material.dart';
+import 'package:knitty_griddy/patterns/mainview/fieldtoolbars/nudge_control.dart';
 import 'package:knitty_griddy/patterns/model/fields/pattern_field.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -76,6 +78,28 @@ class PatternToolbar extends StatelessWidget {
               fieldToolbar!,
             if (fieldToolbar != null)
               const Spacer(),
+            if (selectedField != null)
+              NudgeControl(
+                initialOffset: Offset(selectedField!.contentOffsetX, selectedField!.contentOffsetY), 
+                onNudged: (newOffset) => onChanged(selectedField!.abstractCopyWith(
+                  contentOffsetX: newOffset.dx,
+                  contentOffsetY: newOffset.dy)
+                ),
+              ),
+            if (selectedField != null && selectedField!.fieldType != PatternFieldType.panel)
+              Material(
+                child: FittedScale(
+                  scale: .5,
+                  child: Slider(
+                    min: 0,
+                    max: 255,
+                    value: selectedField!.opacity as double, 
+                    onChanged: (value) {
+                      onChanged(selectedField!.abstractCopyWith(opacity: value.toInt()));
+                    }
+                  ),
+                ),
+              ),
             if (selectedField != null && patternHasMultipleFields)
               Row(
                 children: [

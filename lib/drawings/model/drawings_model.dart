@@ -126,7 +126,17 @@ class DrawingsModel extends ChangeNotifier {
     if (oldDrawing is PartDrawing && newDrawing is PartDrawing) {
       PartRepository.updatePartDrawing(oldDrawing, newDrawing);
     } else {
-      _drawingsModelObject = _drawingsModelObject.copyWith(drawing: newDrawing as Drawing);
+      _drawingsModelObject = _drawingsModelObject.copyWith(
+        drawing: newDrawing as Drawing,
+        drawingInfos: _drawingsModelObject.drawingInfos.map((di) => 
+          di.id != newDrawing.id ? di : di.copyWith(
+            name: newDrawing.name,
+            description: newDrawing.description,
+            contentHashCode: newDrawing.contentHashCode
+          )
+        ).toList()
+      );
+      _saveDrawingInfos();
     }
 
     notifyListeners();

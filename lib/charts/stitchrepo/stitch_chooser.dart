@@ -97,7 +97,7 @@ class _StitchChooserState extends State<StitchChooser> {
       title: const Text('Add or remove stitches'),
       content: SizedBox(
         width: 600,
-        height: 400,
+        height: 600,
         child: Column(
           children: [
             Row(

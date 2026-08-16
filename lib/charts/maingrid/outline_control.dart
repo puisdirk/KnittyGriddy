@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/charts/model/cell_address.dart';
+import 'package:knitty_griddy/charts/model/chart_settings.dart';
 import 'package:knitty_griddy/charts/model/charts_model.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 import 'package:provider/provider.dart';
@@ -32,15 +33,20 @@ class OutlineControl extends StatelessWidget {
                   child: SizedBox(
                     width: stitchCellWidth,
                     height: stitchCellHeight,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        border: Border(
-                          top: outline.contains(CellAddress(column: address.column, row: address.row - 1)) ? BorderSide.none : const BorderSide(width: 2, color: Colors.orange),
-                          bottom: outline.contains(CellAddress(column: address.column, row: address.row + 1)) ? BorderSide.none : const BorderSide(width: 2, color: Colors.orange),
-                          left: outline.contains(CellAddress(column: address.column - 1, row: address.row)) ? BorderSide.none : const BorderSide(width: 2, color: Colors.orange),
-                          right: outline.contains(CellAddress(column: address.column + 1, row: address.row)) ? BorderSide.none : const BorderSide(width: 2, color: Colors.orange),
-                        )
-                      ),
+                    child: Selector<ChartsModel, ChartSettings>(
+                      selector: (_, model) => model.knittingChart.chartSettings,
+                      builder: (context, chartSettings, _) {
+                        return Container(
+                          decoration: BoxDecoration(
+                            border: Border(
+                              top: outline.contains(CellAddress(column: address.column, row: address.row - 1)) ? BorderSide.none : BorderSide(width: chartSettings.outlineThickness, color: chartSettings.outlineColor),
+                              bottom: outline.contains(CellAddress(column: address.column, row: address.row + 1)) ? BorderSide.none : BorderSide(width: chartSettings.outlineThickness, color: chartSettings.outlineColor),
+                              left: outline.contains(CellAddress(column: address.column - 1, row: address.row)) ? BorderSide.none : BorderSide(width: chartSettings.outlineThickness, color: chartSettings.outlineColor),
+                              right: outline.contains(CellAddress(column: address.column + 1, row: address.row)) ? BorderSide.none : BorderSide(width: chartSettings.outlineThickness, color: chartSettings.outlineColor),
+                            )
+                          ),
+                        );
+                      }
                     ),
                   )
                 ),

@@ -1,4 +1,8 @@
 
+import 'dart:ui';
+
+import 'package:knitty_griddy/utils/constants.dart';
+
 enum PatternFieldType {
   knittingchart,
   texteditor,
@@ -15,6 +19,8 @@ abstract class PatternField {
   final double positionY;
   final double width;
   final double height;
+  final double contentOffsetX;
+  final double contentOffsetY;
   final int opacity;
 
   static const double minWidth = 600;
@@ -27,6 +33,8 @@ abstract class PatternField {
     this.positionY = 0,
     this.width = minWidth,
     this.height = minHeight,
+    this.contentOffsetX = 0,
+    this.contentOffsetY = 0,
     this.opacity = 255,
   });
 
@@ -35,18 +43,25 @@ abstract class PatternField {
     double? positionY,
     double? width,
     double? height,
+    double? contentOffsetX,
+    double? contentOffsetY,
     int? opacity,
   });
+
+  List<Color> get knownColours;
 
   Map<String, Object> toJson();
 
   bool get fixedAspectRatio => true;
-  double get minimumHeight => 100;
-  double get minimumWidth => 100;
+  double get minimumHeight => 150;
+  double get minimumWidth => 150;
+  double get padding => kResizerShortSide;
+  double get leftpadding => kResizerShortSide;
+  double get bottompadding => kResizerShortSide;
 
   @override
   int get hashCode => id.hashCode ^ fieldType.hashCode ^ positionX.hashCode ^ positionY.hashCode ^
-    width.hashCode ^ height.hashCode ^ opacity.hashCode;
+    width.hashCode ^ height.hashCode ^ contentOffsetX.hashCode ^ contentOffsetY.hashCode ^ opacity.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -59,5 +74,7 @@ abstract class PatternField {
     positionY == other.positionY &&
     width == other.width &&
     height == other.height &&
+    contentOffsetX == other.contentOffsetX &&
+    contentOffsetY == other.contentOffsetY &&
     opacity == other.opacity;
 }

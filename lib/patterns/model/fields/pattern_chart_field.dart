@@ -1,3 +1,4 @@
+import 'dart:ui';
 
 import 'package:knitty_griddy/charts/export/knitting_chart_view_settings.dart';
 import 'package:knitty_griddy/charts/model/chart_info.dart';
@@ -14,6 +15,8 @@ class PatternChartField extends PatternField {
     super.positionY,
     super.width,
     super.height,
+    super.contentOffsetX,
+    super.contentOffsetY,
     super.opacity,
     this.chart,
     this.viewSettings = const KnittingChartViewSettings(),
@@ -24,6 +27,8 @@ class PatternChartField extends PatternField {
     double? positionY,
     double? width,
     double? height,
+    double? contentOffsetX,
+    double? contentOffsetY,
     int? opacity,
     KnittingChart? chart,
     KnittingChartViewSettings? viewSettings,
@@ -34,6 +39,8 @@ class PatternChartField extends PatternField {
       positionY: positionY?? this.positionY,
       width: width?? this.width,
       height: height?? this.height,
+      contentOffsetX: contentOffsetX?? this.contentOffsetX,
+      contentOffsetY: contentOffsetY?? this.contentOffsetY,
       opacity: opacity?? this.opacity,
       chart: chart?? this.chart,
       viewSettings: viewSettings?? this.viewSettings,
@@ -48,6 +55,8 @@ class PatternChartField extends PatternField {
       positionY: positionY,
       width: width,
       height: height,
+      contentOffsetX: contentOffsetX,
+      contentOffsetY: contentOffsetY,
       opacity: opacity,
       chart: null,
       viewSettings: viewSettings,
@@ -60,6 +69,8 @@ class PatternChartField extends PatternField {
     double? positionY, 
     double? width, 
     double? height, 
+    double? contentOffsetX,
+    double? contentOffsetY,
     int? opacity,
   }) {
     return copyWith(
@@ -67,11 +78,16 @@ class PatternChartField extends PatternField {
       positionY: positionY?? this.positionY,
       width: width?? this.width,
       height: height?? this.height,
+      contentOffsetX: contentOffsetX?? this.contentOffsetX,
+      contentOffsetY: contentOffsetY?? this.contentOffsetY,
       opacity: opacity?? this.opacity,
     );
   }
 
   ChartInfo get chartInfo => chart == null ? ChartInfo.emptyChartInfo : ChartInfo(id: chart!.id, name: chart!.name, description: chart!.description, contentHashCode: chart!.contentHashCode);
+
+  @override
+  List<Color> get knownColours => chart?.knownColours?? const[];
 
   @override
   Map<String, Object> toJson() {
@@ -83,6 +99,8 @@ class PatternChartField extends PatternField {
         'y': positionY,
         'w': width,
         'h': height,
+        'ox': contentOffsetX,
+        'oy': contentOffsetY,
         'o': opacity,
         'chart': chart!.toJson(),
         'settings': viewSettings.toJson(),
@@ -96,6 +114,8 @@ class PatternChartField extends PatternField {
       'y': positionY,
       'w': width,
       'h': height,
+      'ox': contentOffsetX,
+      'oy': contentOffsetY,
       'o': opacity,
       'settings': viewSettings.toJson(),
     };
@@ -113,6 +133,8 @@ class PatternChartField extends PatternField {
       positionY: json['y'] as double,
       width: json['w'] as double,
       height: json['h'] as double,
+      contentOffsetX: json['ox'] as double,
+      contentOffsetY: json['oy'] as double,
       opacity: json['o'] as int,
       chart: chart,
       viewSettings: KnittingChartViewSettings.fromJson(json['settings']),
@@ -130,6 +152,8 @@ class PatternChartField extends PatternField {
     positionY == other.positionY &&
     width == other.width &&
     height == other.height &&
+    contentOffsetX == other.contentOffsetX &&
+    contentOffsetY == other.contentOffsetY &&
     opacity == other.opacity &&
     chart == other.chart &&
     viewSettings == other.viewSettings;

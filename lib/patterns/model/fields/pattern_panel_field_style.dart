@@ -70,6 +70,14 @@ class PatternPanelFieldStyle {
     );
   }
 
+  List<Color> get knownColours => [
+    backgroundColor,
+    leftBorderColor,
+    rightBorderColor,
+    topBorderColor,
+    bottomBorderColor,
+  ];
+
   bool get canSetRadius => 
     leftBorderColor == rightBorderColor && 
     rightBorderColor == topBorderColor && 

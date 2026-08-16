@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:image_size_getter/image_size_getter.dart';
 import 'package:knitty_griddy/patterns/model/fields/pattern_image_field.dart';
 
 class PatternImageFieldToolbar extends StatefulWidget {
@@ -38,7 +39,13 @@ class _PatternImageFieldToolbarState extends State<PatternImageFieldToolbar> {
     final pickedFile = await imagePicker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       Uint8List imageData = await pickedFile.readAsBytes();
-      _updateField(field.copyWith(imageData: imageData));
+      Size res = ImageSizeGetter.getSizeResult(MemoryInput(imageData)).size;
+      double aspectRatio = res.height / res.width;
+      if (res.needRotate) {
+        aspectRatio = res.width / res.height;
+      }
+
+      _updateField(field.copyWith(height: field.width * aspectRatio, imageData: imageData));
     }
   }
  

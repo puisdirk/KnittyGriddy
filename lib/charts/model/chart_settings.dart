@@ -22,22 +22,30 @@ class ChartSettings {
   final int rows;
   final int columns;
   final GridType gridType;
+  final Color outlineColor;
+  final double outlineThickness;
 
   const ChartSettings({
     required this.rows,
     required this.columns,
     required this.gridType,
+    this.outlineColor = Colors.orange,
+    this.outlineThickness = 2,
   });
 
   ChartSettings copyWith({
     int? rows,
     int? columns,
     GridType? gridType,
+    Color? outlineColor,
+    double? outlineThickness,
   }) {
     return ChartSettings(
       rows: rows ?? this.rows, 
       columns: columns ?? this.columns,
       gridType: gridType?? this.gridType,
+      outlineColor: outlineColor?? this.outlineColor,
+      outlineThickness: outlineThickness?? this.outlineThickness,
     );
   }
 
@@ -45,7 +53,9 @@ class ChartSettings {
     return {
       'rows': rows,
       'columns': columns,
-      'gridtype': gridType.name
+      'gridtype': gridType.name,
+      'oc': outlineColor.value,
+      'ot': outlineThickness,
     };
   }
 
@@ -54,11 +64,13 @@ class ChartSettings {
       rows: json['rows'] as int, 
       columns: json['columns'] as int, 
       gridType: GridType.values.byName(json['gridtype'] as String),
+      outlineColor: Color(json['oc'] as int),
+      outlineThickness: json['ot'] as double,
     );
   }
 
   @override
-  int get hashCode => rows.hashCode ^ columns.hashCode ^ gridType.hashCode;
+  int get hashCode => rows.hashCode ^ columns.hashCode ^ gridType.hashCode ^ outlineColor.hashCode ^ outlineThickness.hashCode;
 
   String get contentHashCode => jsonEncode(toJson());
 
@@ -68,7 +80,9 @@ class ChartSettings {
       other is ChartSettings &&
       rows == other.rows &&
       columns == other.columns &&
-      gridType == other.gridType;
+      gridType == other.gridType &&
+      outlineColor == other.outlineColor &&
+      outlineThickness == other.outlineThickness;
 
   List<String> getLeftSideRowIndicators() {
     switch (gridType) {

@@ -102,7 +102,7 @@ class GridOptionsToolbarPanel extends StatelessWidget {
                     ),
                     child: IconButton(
                       onPressed: () => Provider.of<ChartsModel>(context, listen: false).setMouseOption(MouseOption.settings), 
-                      icon: const Icon(Icons.settings)
+                      icon: const Icon(Icons.grid_3x3)
                     ),
                   ),
                 ],

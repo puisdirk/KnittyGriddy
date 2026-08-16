@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/charts/export/knitting_chart_view_settings.dart';
-import 'package:knitty_griddy/charts/export/preview_legend.dart';
 import 'package:knitty_griddy/charts/model/knitting_chart.dart';
 import 'package:knitty_griddy/patterns/mainview/field_controls/chartfieldcomponents/chart_field_grid.dart';
+import 'package:knitty_griddy/patterns/mainview/field_controls/chartfieldcomponents/chart_field_preview_legend.dart';
 
 class PatternChartFieldControl extends StatelessWidget {
   final double opacity;
@@ -40,25 +40,25 @@ class PatternChartFieldControl extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       if (viewSettings.legendPosition == LegendPosition.top)
-                        PreviewLegend(exportSettings: viewSettings,),
+                        ChartFieldPreviewLegend(chart: chart!, exportSettings: viewSettings,),
                       Visibility(
                         visible: viewSettings.showGrid,
                         child: ChartFieldGrid(chart: chart!)
                       ),
                       if (viewSettings.legendPosition == LegendPosition.bottom)
-                        PreviewLegend(exportSettings: viewSettings,)
+                        ChartFieldPreviewLegend(chart: chart!, exportSettings: viewSettings,)
                     ],
                   ) :
                   Row(
                     children: [
                       if (viewSettings.legendPosition == LegendPosition.left)
-                        PreviewLegend(exportSettings: viewSettings,),
+                        ChartFieldPreviewLegend(chart: chart!, exportSettings: viewSettings,),
                       Visibility(
                         visible: viewSettings.showGrid,
                         child: ChartFieldGrid(chart: chart!)
                       ),
                       if (viewSettings.legendPosition == LegendPosition.right)
-                        PreviewLegend(exportSettings: viewSettings,),
+                        ChartFieldPreviewLegend(chart: chart!, exportSettings: viewSettings,),
                     ],
                   ),
             ),

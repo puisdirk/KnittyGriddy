@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:fitted_scale/fitted_scale.dart';
 import 'package:fleather/fleather.dart';
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/drawings/model/drawing.dart';
@@ -17,6 +16,7 @@ import 'package:knitty_griddy/patterns/model/fields/pattern_image_field.dart';
 import 'package:knitty_griddy/patterns/model/fields/pattern_panel_field.dart';
 import 'package:knitty_griddy/patterns/model/fields/pattern_text_editor_field.dart';
 import 'package:knitty_griddy/patterns/model/knitting_pattern.dart';
+import 'package:knitty_griddy/utils/constants.dart';
 
 class PatternFieldControl extends StatefulWidget {
   final KnittingPattern knittingPattern;
@@ -48,8 +48,6 @@ class PatternFieldControl extends StatefulWidget {
 
 class _PatternFieldControlState extends State<PatternFieldControl> {
 
-  static const double kDraggerHeight = 20;
-  static const double kResizerShortSide = 5;
   static const double kCornerResizerSize = 50;
 
   late double positionX;
@@ -60,6 +58,9 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
   late bool isFixedAspect;
   late double minimumWidth;
   late double minimumHeight;
+  late double patternWidth;
+  late double patternHeight;
+  late bool draggerAtBottom;
 
   @override
   void initState() {
@@ -71,6 +72,10 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
     isFixedAspect = widget.field.fixedAspectRatio;
     minimumWidth = widget.field.minimumWidth;
     minimumHeight = widget.field.minimumHeight;
+    patternWidth = widget.knittingPattern.pageLayout.pagewidth;
+    patternHeight = widget.knittingPattern.pageLayout.pageheight * widget.knittingPattern.pageLayout.numberOfPages;
+
+    draggerAtBottom = widget.field.positionY < kDraggerHeight;
 
     super.initState();
   }
@@ -81,15 +86,18 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
     positionY = widget.field.positionY;
     width = widget.field.width;
     height = widget.field.height;
-    aspect = height / width;
+    aspect = widget.field.height / widget.field.width;
     isFixedAspect = widget.field.fixedAspectRatio;
     minimumWidth = widget.field.minimumWidth;
     minimumHeight = widget.field.minimumHeight;
+    patternWidth = widget.knittingPattern.pageLayout.pagewidth;
+    patternHeight = widget.knittingPattern.pageLayout.pageheight * widget.knittingPattern.pageLayout.numberOfPages;
+
+    draggerAtBottom = widget.field.positionY < kDraggerHeight;
 
     super.didUpdateWidget(oldWidget);
   }
   
-
   Widget createPatternFieldControl() {
     switch (widget.field.fieldType) {
       case PatternFieldType.texteditor:
@@ -137,6 +145,75 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
     }
   }
 
+  Widget get _draggerRegion {
+    return MouseRegion(
+      cursor: widget.viewMode ? SystemMouseCursors.basic : SystemMouseCursors.grab,
+      child: Draggable(
+        feedback: Container(
+          color: Colors.transparent,
+          child: const SizedBox(width: kResizerShortSide, height: kResizerShortSide,),
+        ),
+        onDragStarted: () => widget.onSelect(),
+        onDragUpdate: (details) {
+          setState(() {
+            positionX = min(max(positionX + details.delta.dx, 0), patternWidth - width);
+            positionY = min(max(positionY + details.delta.dy, 0), patternHeight - height);
+          });
+        },
+        onDragEnd: (_) {
+          if (positionY < kDraggerHeight && !draggerAtBottom) {
+            setState(() => draggerAtBottom = true);
+          } else if (positionY > kDraggerHeight && draggerAtBottom) {
+            setState(() => draggerAtBottom = false);
+          }
+
+          widget.onChanged(widget.field.abstractCopyWith(
+            positionX: positionX, 
+            positionY: positionY
+          ));
+        },
+        child: Visibility(
+          visible: !widget.viewMode, maintainSize: true,maintainAnimation: true,maintainState: true,
+          child: GestureDetector(
+            onTap: widget.onSelect,
+            child: SizedBox(
+              width: width,
+              height: kDraggerHeight,
+              child: Container(
+                color: Colors.grey.shade400.withAlpha(50),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    if (widget.field.fieldType == PatternFieldType.drawing && (widget.field as PatternDrawingField).drawing != null && !(widget.field as PatternDrawingField).drawing!.valid)
+                      const Tooltip(
+                        message: 'Drawing is not valid',
+                        child: Padding(
+                          padding: EdgeInsets.only(left: 8.0),
+                          child: Icon(Icons.warning_amber, size: 16, color: Colors.red,),
+                        )
+                      ),
+                    if (widget.field.fieldType == PatternFieldType.drawing && (widget.field as PatternDrawingField).drawing != null && !(widget.field as PatternDrawingField).drawing!.valid)
+                      const Spacer(),
+                    MouseRegion(
+                      cursor: SystemMouseCursors.click,
+                      child: GestureDetector(
+                        onTap: () {
+                          widget.onSelect();
+                          Timer(const Duration(milliseconds: 10), () => widget.onDelete());
+                        },
+                        child: const Icon(Icons.delete_outlined, size: 16,)
+                      )
+                    ),
+                  ]
+                ),
+              ),
+            ),
+          ),
+        )
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
 
@@ -157,68 +234,8 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               // Top drag region
-              MouseRegion(
-                cursor: widget.viewMode ? SystemMouseCursors.basic : SystemMouseCursors.grab,
-                child: Draggable(
-                  feedback: Container(
-                    color: Colors.transparent,
-                    child: const SizedBox(width: kResizerShortSide, height: kResizerShortSide,),
-                  ),
-                  onDragStarted: () => widget.onSelect(),
-                  onDragUpdate: (details) {
-                    setState(() {
-                      positionX = max(positionX + details.delta.dx, 0);
-                      positionY = max(positionY + details.delta.dy, 0);
-                    });
-                  },
-                  onDragEnd: (_) => widget.onChanged(widget.field.abstractCopyWith(
-                      positionX: positionX, 
-                      positionY: positionY
-                    )),
-                  child: Visibility(
-                    visible: !widget.viewMode,maintainSize: true,maintainAnimation: true,maintainState: true,
-                    child: GestureDetector(
-                      onTap: widget.onSelect,
-                      child: SizedBox(
-                        width: width,
-                        height: kDraggerHeight,
-                        child: Container(
-                          color: Colors.grey.shade400.withAlpha(50),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              if (widget.field.fieldType != PatternFieldType.panel)
-                              Material(
-                                child: FittedScale(
-                                  scale: .5,
-                                  child: Slider(
-                                    min: 0,
-                                    max: 255,
-                                    value: widget.field.opacity as double, 
-                                    onChanged: (value) {
-                                      widget.onChanged(widget.field.abstractCopyWith(opacity: value.toInt()));
-                                    }
-                                  ),
-                                ),
-                              ),
-                              MouseRegion(
-                                cursor: SystemMouseCursors.click,
-                                child: GestureDetector(
-                                  onTap: () {
-                                    widget.onSelect();
-                                    Timer(const Duration(milliseconds: 10), () => widget.onDelete());
-                                  },
-                                  child: const Icon(Icons.delete_outlined, size: 16,)
-                                )
-                              ),
-                            ]
-                          ),
-                        ),
-                      ),
-                    ),
-                  )
-                ),
-              ),
+              if (!draggerAtBottom)
+                _draggerRegion,
               Expanded(
                 child: GestureDetector(
                   onTap: widget.onSelect,
@@ -226,10 +243,11 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
                     children: [
                       // Pattern control
                       Positioned(
-                        left: kResizerShortSide,
+                        left: widget.field.leftpadding + widget.field.contentOffsetX,
+                        top: widget.field.contentOffsetY,
                         child: SizedBox(
-                          width: width - (2 * kResizerShortSide),
-                          height: height - kDraggerHeight - kResizerShortSide,
+                          width: width - (2 * widget.field.padding),
+                          height: height - kDraggerHeight - widget.field.bottompadding,
                           child: createPatternFieldControl()
                         )
                       ),
@@ -248,10 +266,11 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
                               ),
                               onDragStarted: () => widget.onSelect(),
                               onDragUpdate: (details) {
-                                double newWidth = max(width + details.delta.dx, minimumWidth);
+                                double newWidth = min(max(width + details.delta.dx, minimumWidth), patternWidth - positionX);
                                 double newHeight = height;
                                 if (isFixedAspect) {
-                                  newHeight += aspect * details.delta.dx;
+                                  newHeight = min(aspect * newWidth, patternHeight - positionY);
+                                  newWidth = aspect * newHeight;
                                 }
                                 setState(() {
                                   width = newWidth;
@@ -280,11 +299,26 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
                               onDragStarted: () => widget.onSelect(),
                               onDragUpdate: (details) {
                                 double newWidth = max(width - details.delta.dx, minimumWidth);
-                                double newPositionX = positionX + details.delta.dx;
+                                double newPositionX = min(positionX + details.delta.dx, patternWidth - newWidth);
                                 double newHeight = height;
                                 if (isFixedAspect) {
-                                  newHeight -= aspect * details.delta.dx;
+                                  newHeight = aspect * newWidth;
                                 }
+                                if (newPositionX < 0) {
+                                  newWidth += newPositionX;
+                                  newPositionX = 0;
+                                  if (isFixedAspect) {
+                                    newHeight = aspect * newWidth;
+                                  }
+                                }
+
+                                if (positionY + newHeight > patternHeight) {
+                                  newHeight = patternHeight - positionY;
+                                  if (isFixedAspect) {
+                                    newWidth = aspect * newHeight;
+                                  }
+                                }
+
                                 setState(() {
                                   width = newWidth;
                                   height = newHeight;
@@ -313,10 +347,11 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
                               ),
                               onDragStarted: () => widget.onSelect(),
                               onDragUpdate: (details) {
-                                double newHeight = max(height + details.delta.dy, minimumHeight);
+                                double newHeight = min(max(height + details.delta.dy, minimumHeight), patternHeight - positionY);
                                 double newWidth = width;
                                 if (isFixedAspect) {
-                                  newWidth += aspect * details.delta.dy;
+                                  newWidth = min(aspect * newHeight, patternWidth);
+                                  newHeight = aspect * newWidth;
                                 }
                                 setState(() {
                                   width = newWidth;
@@ -348,10 +383,26 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
                                 double newPositionX = positionX + details.delta.dx;
                                 double newHeight = height;
                                 if (isFixedAspect) {
-                                  newHeight -= aspect * details.delta.dx;
+                                  newHeight = aspect * newWidth;
                                 } else {
                                   newHeight = max(height + details.delta.dy, minimumHeight);
                                 }
+
+                                if (newPositionX < 0) {
+                                  newWidth += newPositionX;
+                                  newPositionX = 0;
+                                  if (isFixedAspect) {
+                                    newHeight = aspect * newWidth;
+                                  }
+                                }
+
+                                if (positionY + newHeight > patternHeight) {
+                                  newHeight = patternHeight - positionY;
+                                  if (isFixedAspect) {
+                                    newWidth = aspect * newHeight;
+                                  }
+                                }
+
                                 setState(() {
                                   width = newWidth;
                                   height = newHeight;
@@ -383,10 +434,26 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
                                 double newPositionX = positionX + details.delta.dx;
                                 double newHeight = height;
                                 if (isFixedAspect) {
-                                  newHeight -= aspect * details.delta.dx;
+                                  newHeight = aspect * newWidth;
                                 } else {
                                   newHeight = max(height + details.delta.dy, minimumHeight);
                                 }
+
+                                if (newPositionX < 0) {
+                                  newWidth += newPositionX;
+                                  newPositionX = 0;
+                                  if (isFixedAspect) {
+                                    newHeight = aspect * newWidth;
+                                  }
+                                }
+
+                                if (positionY + newHeight > patternHeight) {
+                                  newHeight = patternHeight - positionY;
+                                  if (isFixedAspect) {
+                                    newWidth = aspect * newHeight;
+                                  }
+                                }
+
                                 setState(() {
                                   width = newWidth;
                                   height = newHeight;
@@ -415,13 +482,21 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
                               ),
                               onDragStarted: () => widget.onSelect(),
                               onDragUpdate: (details) {
-                                double newWidth = max(width + details.delta.dx, minimumWidth);
+                                double newWidth = min(max(width + details.delta.dx, minimumWidth), patternWidth - positionX);
                                 double newHeight = height;
                                 if (isFixedAspect) {
-                                  newHeight += aspect * details.delta.dx;
+                                  newHeight = aspect * newWidth;
                                 } else {
                                   newHeight = max(height + details.delta.dy, minimumHeight);
                                 }
+
+                                if (newHeight > patternHeight - positionY) {
+                                  newHeight = patternHeight - positionY;
+                                  if (isFixedAspect) {
+                                    newWidth = aspect * newHeight;
+                                  }
+                                }
+
                                 setState(() {
                                   width = newWidth;
                                   height = newHeight;
@@ -449,13 +524,21 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
                               ),
                               onDragStarted: () => widget.onSelect(),
                               onDragUpdate: (details) {
-                                double newWidth = max(width + details.delta.dx, minimumWidth);
+                                double newWidth = min(max(width + details.delta.dx, minimumWidth), patternWidth - positionX);
                                 double newHeight = height;
                                 if (isFixedAspect) {
-                                  newHeight += aspect * details.delta.dx;
+                                  newHeight = aspect * newWidth;
                                 } else {
                                   newHeight = max(height + details.delta.dy, minimumHeight);
                                 }
+
+                                if (newHeight > patternHeight - positionY) {
+                                  newHeight = patternHeight - positionY;
+                                  if (isFixedAspect) {
+                                    newWidth = aspect * newHeight;
+                                  }
+                                }
+
                                 setState(() {
                                   width = newWidth;
                                   height = newHeight;
@@ -471,6 +554,8 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
                   ),
                 )
               ),
+              if (draggerAtBottom)
+                _draggerRegion
             ],
           ),
         ),

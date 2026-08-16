@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:knitty_griddy/drawings/model/drawing.dart';
 import 'package:knitty_griddy/drawings/model/drawing_info.dart';
 import 'package:knitty_griddy/patterns/model/fields/pattern_field.dart';
@@ -11,6 +13,8 @@ class PatternDrawingField extends PatternField {
     super.positionY,
     super.width,
     super.height,
+    super.contentOffsetX,
+    super.contentOffsetY,
     super.opacity,
     this.drawing,
   }) : super(fieldType: PatternFieldType.drawing);
@@ -20,6 +24,8 @@ class PatternDrawingField extends PatternField {
     double? positionY,
     double? width,
     double? height,
+    double? contentOffsetX,
+    double? contentOffsetY,
     int? opacity,
     Drawing? drawing,
   }) {
@@ -29,6 +35,8 @@ class PatternDrawingField extends PatternField {
       positionY: positionY?? this.positionY,
       width: width?? this.width,
       height: height?? this.height,
+      contentOffsetX: contentOffsetX?? this.contentOffsetX,
+      contentOffsetY: contentOffsetY?? this.contentOffsetY,
       opacity: opacity?? this.opacity,
       drawing: drawing?? this.drawing,
     );
@@ -42,6 +50,8 @@ class PatternDrawingField extends PatternField {
       positionY: positionY,
       width: width,
       height: height,
+      contentOffsetX: contentOffsetX,
+      contentOffsetY: contentOffsetY,
       opacity: opacity,
       drawing: null,
     );
@@ -53,6 +63,8 @@ class PatternDrawingField extends PatternField {
     double? positionY, 
     double? width, 
     double? height, 
+    double? contentOffsetX,
+    double? contentOffsetY,
     int? opacity,
   }) {
     return copyWith(
@@ -60,11 +72,16 @@ class PatternDrawingField extends PatternField {
       positionY: positionY?? this.positionY,
       width: width?? this.width,
       height: height?? this.height,
+      contentOffsetX: contentOffsetX?? this.contentOffsetX,
+      contentOffsetY: contentOffsetY?? this.contentOffsetY,
       opacity: opacity?? this.opacity,
     );
   }
 
   DrawingInfo get drawingInfo => drawing == null ? DrawingInfo.emptyDrawingInfo : DrawingInfo(id: drawing!.id, name: drawing!.name, description: drawing!.description, contentHashCode: drawing!.contentHashCode);
+
+  @override
+  List<Color> get knownColours => drawing?.knownColours?? const[];
 
   @override
   Map<String, Object> toJson() {
@@ -76,6 +93,8 @@ class PatternDrawingField extends PatternField {
         'y': positionY,
         'w': width,
         'h': height,
+        'ox': contentOffsetX,
+        'oy': contentOffsetY,
         'o': opacity,
         'drawing': drawing!.toJson(),
       };
@@ -88,6 +107,8 @@ class PatternDrawingField extends PatternField {
       'y': positionY,
       'w': width,
       'h': height,
+      'ox': contentOffsetX,
+      'oy': contentOffsetY,
       'o': opacity,
     };
   }
@@ -95,7 +116,7 @@ class PatternDrawingField extends PatternField {
   static PatternDrawingField fromJson(Map<String, dynamic> json) {
     Drawing? drawing;
     if (json.containsKey('drawing')) {
-      drawing = Drawing.fromJson(json['drawing']).validate();
+      drawing = Drawing.fromJson(json['drawing']);//.validate();
     }
 
     return PatternDrawingField(
@@ -104,6 +125,8 @@ class PatternDrawingField extends PatternField {
       positionY: json['y'] as double,
       width: json['w'] as double,
       height: json['h'] as double,
+      contentOffsetX: json['ox'] as double,
+      contentOffsetY: json['oy'] as double,
       opacity: json['o'] as int,
       drawing: drawing,
     );
@@ -120,6 +143,8 @@ class PatternDrawingField extends PatternField {
     positionY == other.positionY &&
     width == other.width &&
     height == other.height &&
+    contentOffsetX == other.contentOffsetX &&
+    contentOffsetY == other.contentOffsetY &&
     opacity == other.opacity &&
     drawing == other.drawing;
   
