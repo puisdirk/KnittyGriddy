@@ -29,6 +29,7 @@ class PartCommand extends DrawingCommand {
   });
 
   PartCommand copyWith({
+    String? id,
     String? label,
     Set<String>? commandIds,
     String? anchorPointId,
@@ -38,7 +39,7 @@ class PartCommand extends DrawingCommand {
     bool? initiallyOpen,
   }) {
     return PartCommand(
-      id: id, 
+      id: id?? this.id, 
       version: version + 1,
       label: label?? this.label,
       commandIds: commandIds?? this.commandIds,
@@ -46,6 +47,14 @@ class PartCommand extends DrawingCommand {
       validated: validated?? this.validated,
       valid: valid?? this.valid,
       errors: errors?? this.errors,
+      initiallyOpen: initiallyOpen?? this.initiallyOpen,
+    );
+  }
+  @override
+  PartCommand abstractCopyWith({String? id, String? label, bool? initiallyOpen}) {
+    return copyWith(
+      id: id?? this.id,
+      label: label?? this.label,
       initiallyOpen: initiallyOpen?? this.initiallyOpen,
     );
   }

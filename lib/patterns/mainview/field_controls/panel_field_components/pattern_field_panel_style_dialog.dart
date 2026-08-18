@@ -34,10 +34,14 @@ enum ColorField {
 }
 
 enum BorderField {
-  leftBorder,
-  rightBorder,
-  topBorder,
-  bottomBorder,
+  leftBorder(label: 'Left'),
+  rightBorder(label: 'Right'),
+  topBorder(label: 'Top'),
+  bottomBorder(label: 'Bottom');
+
+  final String label;
+
+  const BorderField({required this.label});
 }
 
 enum BorderCorner {
@@ -68,7 +72,7 @@ class _PatternFieldPanelStyleDialogState extends State<PatternFieldPanelStyleDia
 
   String get _currentColorFieldName => 
     currentColorField == ColorField.backgroundColor ? currentColorField.label :
-      syncBorders ? 'Border color' : currentColorField.label;
+      syncBorders ? 'All borders colour' : currentColorField.label;
 
   void _changeColour(Color newColor) {
     bool syncBorderColor = syncBorders && currentColorField != ColorField.backgroundColor;
@@ -127,7 +131,7 @@ class _PatternFieldPanelStyleDialogState extends State<PatternFieldPanelStyleDia
                       Row (
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Text('Background color:', textAlign: TextAlign.end,),
+                          const Text('Background colour:', textAlign: TextAlign.end,),
                           hspacing,
                           ColourWell(
                             selected: currentColorField == ColorField.backgroundColor, 
@@ -160,7 +164,7 @@ class _PatternFieldPanelStyleDialogState extends State<PatternFieldPanelStyleDia
                                   borderField: BorderField.topBorder, 
                                   initialWidth: panelStyle.topBorderWidth, 
                                   colour: panelStyle.topBorderColor, 
-                                  colourSelected: currentColorField == ColorField.topBorderColor, 
+                                  colourSelected: currentColorField == ColorField.topBorderColor || (currentColorField != ColorField.backgroundColor && syncBorders), 
                                   onWidthChanged: _changeBorderWidth, 
                                   onColourSelected: () {
                                     if (currentColorField != ColorField.topBorderColor) {
@@ -189,7 +193,7 @@ class _PatternFieldPanelStyleDialogState extends State<PatternFieldPanelStyleDia
                                   borderField: BorderField.leftBorder, 
                                   initialWidth: panelStyle.leftBorderWidth, 
                                   colour: panelStyle.leftBorderColor, 
-                                  colourSelected: currentColorField == ColorField.leftBorderColor, 
+                                  colourSelected: currentColorField == ColorField.leftBorderColor || (currentColorField != ColorField.backgroundColor && syncBorders), 
                                   onWidthChanged: _changeBorderWidth, 
                                   onColourSelected: () {
                                     if (currentColorField != ColorField.leftBorderColor) {
@@ -239,7 +243,7 @@ class _PatternFieldPanelStyleDialogState extends State<PatternFieldPanelStyleDia
                                   borderField: BorderField.rightBorder, 
                                   initialWidth: panelStyle.rightBorderWidth, 
                                   colour: panelStyle.rightBorderColor, 
-                                  colourSelected: currentColorField == ColorField.rightBorderColor, 
+                                  colourSelected: currentColorField == ColorField.rightBorderColor || (currentColorField != ColorField.backgroundColor && syncBorders), 
                                   onWidthChanged: _changeBorderWidth, 
                                   onColourSelected: () {
                                     if (currentColorField != ColorField.rightBorderColor) {
@@ -267,7 +271,7 @@ class _PatternFieldPanelStyleDialogState extends State<PatternFieldPanelStyleDia
                                   borderField: BorderField.bottomBorder, 
                                   initialWidth: panelStyle.bottomBorderWidth, 
                                   colour: panelStyle.bottomBorderColor, 
-                                  colourSelected: currentColorField == ColorField.bottomBorderColor, 
+                                  colourSelected: currentColorField == ColorField.bottomBorderColor || (currentColorField != ColorField.backgroundColor && syncBorders), 
                                   onWidthChanged: _changeBorderWidth, 
                                   onColourSelected: () {
                                     if (currentColorField != ColorField.bottomBorderColor) {

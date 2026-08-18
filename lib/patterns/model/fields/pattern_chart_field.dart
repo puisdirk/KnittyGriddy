@@ -23,6 +23,7 @@ class PatternChartField extends PatternField {
   }) : super(fieldType: PatternFieldType.knittingchart);
 
   PatternChartField copyWith({
+    String? id,
     double? positionX,
     double? positionY,
     double? width,
@@ -34,7 +35,7 @@ class PatternChartField extends PatternField {
     KnittingChartViewSettings? viewSettings,
   }) {
     return PatternChartField(
-      id: id,
+      id: id?? this.id,
       positionX: positionX?? this.positionX,
       positionY: positionY?? this.positionY,
       width: width?? this.width,
@@ -65,6 +66,7 @@ class PatternChartField extends PatternField {
 
   @override
   PatternChartField abstractCopyWith({
+    String? id,
     double? positionX, 
     double? positionY, 
     double? width, 
@@ -74,6 +76,7 @@ class PatternChartField extends PatternField {
     int? opacity,
   }) {
     return copyWith(
+      id: id?? this.id,
       positionX: positionX?? this.positionX,
       positionY: positionY?? this.positionY,
       width: width?? this.width,

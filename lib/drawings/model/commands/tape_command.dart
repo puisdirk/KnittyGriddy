@@ -88,6 +88,7 @@ class TapeCommand extends DrawingCommand {
   });
 
   TapeCommand copyWith({
+    String? id,
     String? label,
     String? fromPointId,
     String? toPointId,
@@ -105,7 +106,7 @@ class TapeCommand extends DrawingCommand {
     bool? initiallyOpen,
   }) {
     return TapeCommand(
-      id: id, 
+      id: id?? this.id, 
       version: version + 1, 
       label: label?? this.label,
       fromPointId: fromPointId?? this.fromPointId,
@@ -121,6 +122,14 @@ class TapeCommand extends DrawingCommand {
       validated: validated?? this.validated,
       valid: valid?? this.valid,
       errors: errors?? this.errors,
+      initiallyOpen: initiallyOpen?? this.initiallyOpen,
+    );
+  }
+  @override
+  TapeCommand abstractCopyWith({String? id, String? label, bool? initiallyOpen}) {
+    return copyWith(
+      id: id?? this.id,
+      label: label?? this.label,
       initiallyOpen: initiallyOpen?? this.initiallyOpen,
     );
   }

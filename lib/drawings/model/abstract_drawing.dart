@@ -422,4 +422,18 @@ abstract class AbstractDrawing {
     return '$prefix$nextNum';
   }
 
+  String nextLabelForType(DrawingCommand cmd) {
+    if (cmd is MeasurementCommand) return nextLabel('m');
+    if (cmd is VariableCommand) return nextLabel('v');
+    if (cmd is PointCommand) return nextLabel('p');
+    if (cmd is LineCommand) return nextLabel('l');
+    if (cmd is CurveCommand) return nextLabel('c');
+    if (cmd is PartCommand) return nextLabel('part');
+    if (cmd is IncludedPartCommand) return nextLabel('subpart');
+    if (cmd is StylingCommand) return nextLabel('style');
+    if (cmd is TextCommand) return nextLabel('text');
+    if (cmd is TapeCommand) return nextLabel('tape');
+    return '';
+  }
+
 }

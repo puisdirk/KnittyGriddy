@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:knitty_griddy/charts/model/knitting_chart.dart';
 import 'package:knitty_griddy/drawings/model/drawing.dart';
 import 'package:knitty_griddy/patterns/model/fields/pattern_chart_field.dart';
 import 'package:knitty_griddy/patterns/model/fields/pattern_drawing_field.dart';

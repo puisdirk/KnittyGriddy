@@ -13,6 +13,7 @@ class PatternToolbar extends StatelessWidget {
   final void Function(PatternField newField) onChanged;
   final void Function() onMoveBack;
   final void Function() onMoveForward;
+  final void Function() onDuplicateSelectedField;
 
   const PatternToolbar({
     required this.selectedField,
@@ -22,6 +23,7 @@ class PatternToolbar extends StatelessWidget {
     required this.onChanged,
     required this.onMoveBack,
     required this.onMoveForward,
+    required this.onDuplicateSelectedField,
     super.key
   });
 
@@ -55,7 +57,7 @@ class PatternToolbar extends StatelessWidget {
               message: 'Add drawing',
               child: IconButton(
                 onPressed: () => onAddField(PatternFieldType.drawing),
-                icon: const Icon(Symbols.apparel)
+                icon: const Icon(Icons.design_services)
               ),
             ),
             Tooltip(
@@ -72,32 +74,51 @@ class PatternToolbar extends StatelessWidget {
                 icon: const Icon(Symbols.rectangle_add)
               ),
             ),
-            VerticalDivider(indent: 16, endIndent: 16, color: Colors.grey.shade400,),
             const Spacer(),
             if (fieldToolbar != null)
               fieldToolbar!,
             if (fieldToolbar != null)
               const Spacer(),
             if (selectedField != null)
-              NudgeControl(
-                initialOffset: Offset(selectedField!.contentOffsetX, selectedField!.contentOffsetY), 
-                onNudged: (newOffset) => onChanged(selectedField!.abstractCopyWith(
-                  contentOffsetX: newOffset.dx,
-                  contentOffsetY: newOffset.dy)
+              Tooltip(
+                message: 'Duplicate',
+                child: IconButton(
+                  iconSize: 18,
+                  onPressed: onDuplicateSelectedField, 
+                  icon: const Icon(Icons.content_copy)
+                ),
+              ),
+            if (selectedField != null)
+              Tooltip(
+                message: 'Move field content',
+                child: NudgeControl(
+                  initialOffset: Offset(selectedField!.contentOffsetX, selectedField!.contentOffsetY), 
+                  onNudged: (newOffset) => onChanged(selectedField!.abstractCopyWith(
+                    contentOffsetX: newOffset.dx,
+                    contentOffsetY: newOffset.dy)
+                  ),
                 ),
               ),
             if (selectedField != null && selectedField!.fieldType != PatternFieldType.panel)
-              Material(
-                child: FittedScale(
-                  scale: .5,
-                  child: Slider(
-                    min: 0,
-                    max: 255,
-                    value: selectedField!.opacity as double, 
-                    onChanged: (value) {
-                      onChanged(selectedField!.abstractCopyWith(opacity: value.toInt()));
-                    }
-                  ),
+              Tooltip(
+                message: 'Opacity',
+                child: Column(
+                  children: [
+                    Text('${((selectedField!.opacity / 255) * 100).toInt()}%', style: const TextStyle(fontSize: 10),),
+                    Material(
+                      child: FittedScale(
+                        scale: .5,
+                        child: Slider(
+                          min: 0,
+                          max: 255,
+                          value: selectedField!.opacity as double, 
+                          onChanged: (value) {
+                            onChanged(selectedField!.abstractCopyWith(opacity: value.toInt()));
+                          }
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             if (selectedField != null && patternHasMultipleFields)

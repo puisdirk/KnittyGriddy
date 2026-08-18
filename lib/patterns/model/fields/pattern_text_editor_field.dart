@@ -27,6 +27,7 @@ class PatternTextEditorField extends PatternField {
   }) : super(fieldType: PatternFieldType.texteditor);
 
   PatternTextEditorField copyWith({
+    String? id,
     double? positionX,
     double? positionY,
     double? width,
@@ -38,7 +39,7 @@ class PatternTextEditorField extends PatternField {
     String? docContents,
   }) {
     return PatternTextEditorField(
-      id: id, 
+      id: id?? this.id, 
       positionX: positionX?? this.positionX,
       positionY: positionY?? this.positionY,
       width: width?? this.width,
@@ -53,6 +54,7 @@ class PatternTextEditorField extends PatternField {
 
   @override
   PatternTextEditorField abstractCopyWith({
+    String? id,
     double? positionX, 
     double? positionY, 
     double? width, 
@@ -62,6 +64,7 @@ class PatternTextEditorField extends PatternField {
     int? opacity,
   }) {
     return copyWith(
+      id: id?? this.id,
       positionX: positionX,
       positionY: positionY,
       width: width,

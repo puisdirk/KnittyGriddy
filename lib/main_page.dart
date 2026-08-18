@@ -4,15 +4,17 @@ import 'package:flutter/services.dart';
 import 'package:knitty_griddy/charts/chart_chooser/chart_chooser_view.dart';
 import 'package:knitty_griddy/drawings/drawing_chooser/drawing_chooser_view.dart';
 import 'package:knitty_griddy/patterns/pattern_chooser/pattern_chooser_view.dart';
+import 'package:knitty_griddy/utils/constants.dart';
 
 enum Page {
-  patterns(label: 'Patterns'),
-  charts(label: 'Charts'),
-  drawings(label: 'Drawings');
+  patterns(label: 'Patterns', icon: Icons.auto_awesome_mosaic_outlined),
+  charts(label: 'Charts', icon: Icons.grid_on),
+  drawings(label: 'Drawings', icon: Icons.design_services);
 
   final String label;
+  final IconData icon;
 
-  const Page({required this.label});
+  const Page({required this.label, required this.icon});
 }
 
 class MainPage extends StatefulWidget {
@@ -54,7 +56,12 @@ class _MainPageState extends State<MainPage> {
             TabBar(
               tabs: [
                 for (Page p in Page.values)
-                  Tab(text: p.label,)
+                  Tab(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [Icon(p.icon), hspacing, Text(p.label)],
+                    ),
+                  )
               ]
             ),
             const Expanded(

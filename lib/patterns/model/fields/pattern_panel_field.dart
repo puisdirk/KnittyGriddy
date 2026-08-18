@@ -36,6 +36,7 @@ class PatternPanelField extends PatternField {
   double get leftpadding => 0;
 
   PatternPanelField copyWith({
+    String? id,
     double? positionX,
     double? positionY,
     double? width,
@@ -46,7 +47,7 @@ class PatternPanelField extends PatternField {
     PatternPanelFieldStyle? style,
   }) {
     return PatternPanelField(
-      id: id,
+      id: id?? this.id,
       positionX: positionX?? this.positionX,
       positionY: positionY?? this.positionY,
       width: width?? this.width,
@@ -60,6 +61,7 @@ class PatternPanelField extends PatternField {
 
   @override
   PatternPanelField abstractCopyWith({
+    String? id,
     double? positionX, 
     double? positionY, 
     double? width, 
@@ -69,6 +71,7 @@ class PatternPanelField extends PatternField {
     int? opacity,
   }) {
     return copyWith(
+      id: this.id,
       positionX: positionX?? this.positionX,
       positionY: positionY?? this.positionY,
       width: width?? this.width,

@@ -209,7 +209,7 @@ class _DrawingCommandsListState extends State<DrawingCommandsList> {
                           ]
                         ).validate());
                         widget.onSelect(newId);
-                      },
+                        },
                       icon: const Icon(Icons.extension_outlined),
                     ),
                   ),
@@ -231,7 +231,7 @@ class _DrawingCommandsListState extends State<DrawingCommandsList> {
                           ]
                         ).validate());
                         widget.onSelect(newId);
-                      }, 
+                        }, 
                       icon: const Icon(Symbols.apparel)),
                     ),
                 if (widget.drawing.commands.length > 1)
@@ -331,7 +331,7 @@ class _DrawingCommandsListState extends State<DrawingCommandsList> {
               child: ReorderableListView(
                 buildDefaultDragHandles: sorting,
                 children: [
-                  for (DrawingCommand command in widget.drawing.commands)
+                  for (DrawingCommand command in widget.drawing.commands.reversed)
                     DrawingCommandControl(
                       key: GlobalObjectKey(command.id),
                       drawing: widget.drawing,

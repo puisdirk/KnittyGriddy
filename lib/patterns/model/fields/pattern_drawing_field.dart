@@ -20,6 +20,7 @@ class PatternDrawingField extends PatternField {
   }) : super(fieldType: PatternFieldType.drawing);
 
   PatternDrawingField copyWith({
+    String? id,
     double? positionX,
     double? positionY,
     double? width,
@@ -30,7 +31,7 @@ class PatternDrawingField extends PatternField {
     Drawing? drawing,
   }) {
     return PatternDrawingField(
-      id: id,
+      id: id?? this.id,
       positionX: positionX?? this.positionX,
       positionY: positionY?? this.positionY,
       width: width?? this.width,
@@ -59,6 +60,7 @@ class PatternDrawingField extends PatternField {
 
   @override
   PatternDrawingField abstractCopyWith({
+    String? id,
     double? positionX, 
     double? positionY, 
     double? width, 
@@ -68,6 +70,7 @@ class PatternDrawingField extends PatternField {
     int? opacity,
   }) {
     return copyWith(
+      id: id?? this.id,
       positionX: positionX?? this.positionX,
       positionY: positionY?? this.positionY,
       width: width?? this.width,

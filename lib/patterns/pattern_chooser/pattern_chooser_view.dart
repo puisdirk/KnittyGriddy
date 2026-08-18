@@ -32,15 +32,15 @@ class _PatternChooserViewState extends State<PatternChooserView> {
     for (KnittingPatternInfo patternInfo in patternInfos) {
       cards.add(SizedBox(
         width: 300,
-        height: 100,
+        height: 130,
         child: PatternCard(patternInfo: patternInfo,),
       ));
     }
     
     // add a + card
     cards.add(SizedBox(
-      width: 100,
-      height: 100,
+      width: 130,
+      height: 130,
       child: Card(
         child: InkWell(
           borderRadius: const BorderRadius.all(Radius.circular(10)),
@@ -54,8 +54,12 @@ class _PatternChooserViewState extends State<PatternChooserView> {
               )
             );
           },
-          child: const Center(
-            child:  Icon(Icons.add, size: 48,)
+          child: const Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children:  [
+              Icon(Icons.auto_awesome_mosaic_outlined),
+              Icon(Icons.add, size: 48,)
+            ]
           ),
         )
       )

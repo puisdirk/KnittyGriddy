@@ -3,7 +3,6 @@ import 'package:knitty_griddy/patterns/mainview/field_controls/panel_field_compo
 import 'package:knitty_griddy/patterns/model/fields/pattern_panel_field.dart';
 import 'package:knitty_griddy/patterns/model/fields/pattern_panel_field_style.dart';
 import 'package:knitty_griddy/patterns/model/knitting_pattern.dart';
-import 'package:knitty_griddy/utils/constants.dart';
 
 class PatternPanelFieldToolbar extends StatelessWidget {
   final KnittingPattern pattern;
@@ -21,21 +20,23 @@ class PatternPanelFieldToolbar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        const Text('Style:'),
-        hspacing,
-        IconButton(
-          onPressed: () async {
-            PatternPanelFieldStyle? newStyle = await showDialog(
-              context: context, builder: (context) => PatternFieldPanelStyleDialog(
-                panelStyle: field.style,
-                knownColours: pattern.knownColours,
-              ),
-            );
-            if (newStyle != null && newStyle != field.style) {
-              onChanged(field.copyWith(style: newStyle));
-            }
-          }, 
-          icon: const Icon(Icons.palette)
+        Tooltip(
+          message: 'Panel style',
+          preferBelow: false,
+          child: IconButton(
+            onPressed: () async {
+              PatternPanelFieldStyle? newStyle = await showDialog(
+                context: context, builder: (context) => PatternFieldPanelStyleDialog(
+                  panelStyle: field.style,
+                  knownColours: pattern.knownColours,
+                ),
+              );
+              if (newStyle != null && newStyle != field.style) {
+                onChanged(field.copyWith(style: newStyle));
+              }
+            }, 
+            icon: const Icon(Icons.palette)
+          ),
         ),
       ],
     );

@@ -36,6 +36,7 @@ class TextCommand extends DrawingCommand {
   });
 
   TextCommand copyWith({
+    String? id,
     String? label,
     String? text,
     String? anchorPointId,
@@ -49,7 +50,7 @@ class TextCommand extends DrawingCommand {
     bool? initiallyOpen,
   }) {
     return TextCommand(
-      id: id, 
+      id: id?? this.id, 
       label: label?? this.label, 
       version: version + 1,
       text: text?? this.text,
@@ -61,6 +62,14 @@ class TextCommand extends DrawingCommand {
       validated: validated?? this.validated,
       valid: valid?? this.valid,
       errors: errors?? this.errors,
+      initiallyOpen: initiallyOpen?? this.initiallyOpen,
+    );
+  }
+  @override
+  TextCommand abstractCopyWith({String? id, String? label, bool? initiallyOpen}) {
+    return copyWith(
+      id: id?? this.id,
+      label: label?? this.label,
       initiallyOpen: initiallyOpen?? this.initiallyOpen,
     );
   }

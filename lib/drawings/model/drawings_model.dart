@@ -216,6 +216,30 @@ class DrawingsModel extends ChangeNotifier {
     await _repository.saveDrawingInfos(_drawingsModelObject.drawingInfos);
   }
 
+  Future<void> duplicateDrawing(DrawingInfo originalInfo) async {
+    Drawing original = await getDrawing(originalInfo);
+
+    final String id = const UuidV4Gen().get();
+
+    Drawing newDrawing = original.copyWith(
+      id: id,
+      name: '${original.name} copy',
+    );
+
+    await _repository.saveDrawing(newDrawing);
+
+    _drawingsModelObject = _drawingsModelObject.copyWith(
+      drawingInfos: [..._drawingsModelObject.drawingInfos, DrawingInfo(
+        id: newDrawing.id, 
+        name: newDrawing.name, 
+        contentHashCode: newDrawing.contentHashCode)
+      ]
+    );
+
+    _saveDrawingInfos();
+    notifyListeners();
+  }
+
   Future<void> createNewDrawing(String name) async {
     final String id = const UuidV4Gen().get();
 
