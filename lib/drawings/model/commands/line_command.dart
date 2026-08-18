@@ -67,6 +67,14 @@ class LineCommand extends DrawingCommand {
       storedEndCoordinate: storedEndCoordinate?? this.storedEndCoordinate,
     );
   }
+  @override
+  LineCommand abstractCopyWith({String? id, String? label, bool? initiallyOpen}) {
+    return copyWith(
+      id: id?? this.id,
+      label: label?? this.label,
+      initiallyOpen: initiallyOpen?? this.initiallyOpen,
+    );
+  }
 
   @override
   double get editHeight => 170;

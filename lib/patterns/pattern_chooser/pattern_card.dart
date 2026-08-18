@@ -5,6 +5,7 @@ import 'package:knitty_griddy/patterns/mainview/pattern_page.dart';
 import 'package:knitty_griddy/patterns/model/knitting_pattern_info.dart';
 import 'package:knitty_griddy/patterns/model/pattern_operation_exception.dart';
 import 'package:knitty_griddy/patterns/model/patterns_model.dart';
+import 'package:knitty_griddy/utils/constants.dart';
 import 'package:provider/provider.dart';
 
 class PatternCard extends StatelessWidget {
@@ -75,17 +76,42 @@ class PatternCard extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              ListTile(
-                mouseCursor: SystemMouseCursors.click,
-                trailing: IconButton(
-                  onPressed: () => _confirmToDelete(context), 
-                  icon: const Icon(Icons.delete)
+              Expanded(
+                child: ListTile(
+                  mouseCursor: SystemMouseCursors.click,
+                  leading: const Icon(Icons.auto_awesome_mosaic_outlined),
+                  title: Text(patternInfo.name),
+                  subtitle: Text(
+                    patternInfo.description,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
-                title: Text(patternInfo.name),
-                subtitle: Text(
-                  patternInfo.description,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
+              ),
+              SizedBox(
+                height: 40,
+                child: Row(
+                  children: [
+                    hspacing,
+                    Tooltip(
+                      message: 'Duplicate',
+                      child: IconButton(
+                        iconSize: 16,
+                        onPressed: () => Provider.of<PatternsModel>(context, listen: false).duplicatePattern(patternInfo), 
+                        icon: const Icon(Icons.content_copy)
+                      ),
+                    ),
+                    const Spacer(),
+                    Tooltip(
+                      message: 'Delete',
+                      child: IconButton(
+                        iconSize: 16,
+                        onPressed: () => _confirmToDelete(context), 
+                        icon: const Icon(Icons.delete)
+                      ),
+                    ),
+                    hspacing,
+                  ],
                 ),
               )
             ],

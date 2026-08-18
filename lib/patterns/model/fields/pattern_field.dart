@@ -4,11 +4,15 @@ import 'dart:ui';
 import 'package:knitty_griddy/utils/constants.dart';
 
 enum PatternFieldType {
-  knittingchart,
-  texteditor,
-  image,
-  drawing,
-  panel,
+  knittingchart(label: 'Chart'),
+  texteditor(label: 'Text'),
+  image(label: 'Image'),
+  drawing(label: 'Drawing'),
+  panel(label: 'Panel');
+
+  final String label;
+
+  const PatternFieldType({required this.label});
 }
 
 abstract class PatternField {
@@ -39,6 +43,7 @@ abstract class PatternField {
   });
 
   PatternField abstractCopyWith({
+    String? id,
     double? positionX,
     double? positionY,
     double? width,

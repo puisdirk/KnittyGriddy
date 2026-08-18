@@ -5,6 +5,7 @@ import 'package:knitty_griddy/drawings/model/drawing.dart';
 import 'package:knitty_griddy/drawings/model/drawing_info.dart';
 import 'package:knitty_griddy/drawings/model/drawing_operation_exception.dart';
 import 'package:knitty_griddy/drawings/model/drawings_model.dart';
+import 'package:knitty_griddy/utils/constants.dart';
 import 'package:provider/provider.dart';
 
 class DrawingCard extends StatelessWidget {
@@ -81,17 +82,42 @@ class DrawingCard extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              ListTile(
-                mouseCursor: SystemMouseCursors.click,
-                trailing: IconButton(
-                  onPressed: () => _confirmToDelete(context), 
-                  icon: const Icon(Icons.delete)
+              Expanded(
+                child: ListTile(
+                  mouseCursor: SystemMouseCursors.click,
+                  leading: const Icon(Icons.design_services),
+                  title: Text(drawingInfo.name, overflow: TextOverflow.ellipsis,),
+                  subtitle: Text(
+                    drawingInfo.description,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
-                title: Text(drawingInfo.name, overflow: TextOverflow.ellipsis,),
-                subtitle: Text(
-                  drawingInfo.description,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
+              ),
+              SizedBox(
+                height: 40,
+                child: Row(
+                  children: [
+                    hspacing,
+                    Tooltip(
+                      message: 'Duplicate',
+                      child: IconButton(
+                        iconSize: 16,
+                        onPressed: () => Provider.of<DrawingsModel>(context, listen: false).duplicateDrawing(drawingInfo), 
+                        icon: const Icon(Icons.content_copy)
+                      ),
+                    ),
+                    const Spacer(),
+                    Tooltip(
+                      message: 'Delete',
+                      child: IconButton(
+                        iconSize: 16,
+                        onPressed: () => _confirmToDelete(context), 
+                        icon: const Icon(Icons.delete)
+                      ),
+                    ),
+                    hspacing,
+                  ],
                 ),
               )
             ],

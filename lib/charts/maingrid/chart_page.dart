@@ -7,6 +7,7 @@ import 'package:knitty_griddy/charts/toolbar/knitting_toolbar.dart';
 import 'package:knitty_griddy/charts/maingrid/chart_control.dart';
 import 'package:knitty_griddy/charts/export/export_page.dart';
 import 'package:knitty_griddy/charts/model/charts_model.dart';
+import 'package:knitty_griddy/utils/constants.dart';
 import 'package:provider/provider.dart';
 
 class ChartPage extends StatefulWidget {
@@ -47,7 +48,10 @@ class _ChartPageState extends State<ChartPage> {
             Navigator.maybePop(context);
           },
         ),
-        title: Text('Chart - $chartname'),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [const Icon(Icons.grid_on), hspacing, Text('Chart - $chartname')]
+        ),
         backgroundColor: Colors.grey.shade300,
         bottom: const PreferredSize(
           preferredSize: Size(20000, 200), 

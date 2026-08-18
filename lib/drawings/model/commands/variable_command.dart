@@ -27,6 +27,7 @@ class VariableCommand extends DrawingCommand {
   });
 
   VariableCommand copyWith({
+    String? id,
     String? label,
     String? formula,
     bool? validated,
@@ -36,7 +37,7 @@ class VariableCommand extends DrawingCommand {
     double? storedValue,
   }) {
     return VariableCommand(
-      id: id, 
+      id: id?? this.id, 
       version: version + 1,
       label: label?? this.label,
       formula: formula?? this.formula,
@@ -45,6 +46,14 @@ class VariableCommand extends DrawingCommand {
       errors: errors?? this.errors,
       initiallyOpen: initiallyOpen?? this.initiallyOpen,
       storedValue: storedValue?? this.storedValue,
+    );
+  }
+  @override
+  VariableCommand abstractCopyWith({String? id, String? label, bool? initiallyOpen}) {
+    return copyWith(
+      id: id?? this.id,
+      label: label?? this.label,
+      initiallyOpen: initiallyOpen?? this.initiallyOpen,
     );
   }
 

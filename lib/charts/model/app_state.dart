@@ -32,7 +32,7 @@ class AppState {
   const AppState({
     this.selectedStitch = BasicStitchesSet.noStitch,
     this.selectedColour,
-    this.mouseOption = MouseOption.singleclick,
+    this.mouseOption = MouseOption.painting,
   });
 
   Tool get currentTool => mouseOption == MouseOption.selecting ? Tool.select : selectedStitch != null ? Tool.stitch : Tool.colour;

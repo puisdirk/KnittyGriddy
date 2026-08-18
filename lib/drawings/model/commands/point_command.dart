@@ -132,6 +132,14 @@ class PointCommand extends DrawingCommand {
       storedCoordinate: storedCoordinate?? this.storedCoordinate,
     );
   }
+  @override
+  PointCommand abstractCopyWith({String? id, String? label, bool? initiallyOpen}) {
+    return copyWith(
+      id: id?? this.id,
+      label: label?? this.label,
+      initiallyOpen: initiallyOpen?? this.initiallyOpen,
+    );
+  }
 
   @override
   double get editHeight {

@@ -29,7 +29,9 @@ class ChartFieldGrid extends StatelessWidget {
           Positioned(
             top: stitchCellHeight,
             left: stitchCellWidth,
-            child: ChartFieldOutlineControl(rows: chart.chartSettings.rows, columns: chart.chartSettings.columns, outline: chart.outline,)
+            child: ChartFieldOutlineControl(
+              chartSettings: chart.chartSettings,
+              outline: chart.outline,)
           ),
         ],
       ),

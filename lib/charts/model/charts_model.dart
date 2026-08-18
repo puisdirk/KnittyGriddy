@@ -112,6 +112,31 @@ class ChartsModel extends ChangeNotifier {
     await _repository.saveChartInfos(_chartsModelObject.chartInfos);
   }
 
+  Future<void> duplicateChart(ChartInfo originalInfo) async {
+    KnittingChart original = await getChart(originalInfo);
+
+    final String id = const UuidV4Gen().get();
+
+    KnittingChart newChart = original.copyWith(
+      id: id,
+      name: '${original.name} copy',
+    );
+
+    await _repository.saveChart(newChart);
+
+    _chartsModelObject = _chartsModelObject.copyWith(
+      chartInfos: [..._chartsModelObject.chartInfos, ChartInfo(
+        id: newChart.id, 
+        name: newChart.name, 
+        description: newChart.description,
+        contentHashCode: newChart.contentHashCode
+      )]
+    );
+
+    _saveChartInfos();
+    notifyListeners();
+  }
+
   Future<void> createNewChart(String name) async {
     final String id = const UuidV4Gen().get();
 

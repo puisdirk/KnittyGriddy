@@ -45,6 +45,7 @@ class MeasurementCommand extends DrawingCommand {
   });
 
   MeasurementCommand copyWith({
+    String? id,
     String? label,
     double? minValue,
     double? maxValue,
@@ -62,7 +63,7 @@ class MeasurementCommand extends DrawingCommand {
     if (val < min) val = min;
     if (val > max) val = max;
     return MeasurementCommand(
-      id: id, 
+      id: id?? this.id, 
       version: version + 1,
       label: label?? this.label,
       minValue: min,
@@ -73,6 +74,14 @@ class MeasurementCommand extends DrawingCommand {
       valid: valid?? this.valid,
       validated: validated?? this.validated,
       errors: errors?? this.errors,
+      initiallyOpen: initiallyOpen?? this.initiallyOpen,
+    );
+  }
+  @override
+  MeasurementCommand abstractCopyWith({String? id, String? label, bool? initiallyOpen}) {
+    return copyWith(
+      id: id?? this.id,
+      label: label?? this.label,
       initiallyOpen: initiallyOpen?? this.initiallyOpen,
     );
   }

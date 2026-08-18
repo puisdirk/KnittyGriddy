@@ -89,7 +89,11 @@ class PatternTextEditorFieldToolbar extends StatelessWidget {
           icon: Icons.format_strikethrough,
           controller: fleatherController,
         ),
-        const SizedBox(width: 1),
+
+        VerticalDivider(
+          indent: 10, endIndent: 10, color: Colors.grey.shade400
+        ),
+
         Builder(builder: (context) {
           return Tooltip(
             message: 'Text color',
@@ -147,7 +151,7 @@ class PatternTextEditorFieldToolbar extends StatelessWidget {
         }),
         
         VerticalDivider(
-          indent: 16, endIndent: 16, color: Colors.grey.shade400
+          indent: 10, endIndent: 10, color: Colors.grey.shade400
         ),
 
         ToggleStyleButton(
@@ -175,7 +179,7 @@ class PatternTextEditorFieldToolbar extends StatelessWidget {
         ),
         
         VerticalDivider(
-            indent: 16, endIndent: 16, color: Colors.grey.shade400
+            indent: 10, endIndent: 10, color: Colors.grey.shade400
         ),
 
         /// ################################################################
@@ -189,13 +193,13 @@ class PatternTextEditorFieldToolbar extends StatelessWidget {
         ),
         
         VerticalDivider(
-            indent: 16, endIndent: 16, color: Colors.grey.shade400),
+            indent: 10, endIndent: 10, color: Colors.grey.shade400),
 
         /// ################################################################
 
         SelectHeadingButton(controller: fleatherController),
         VerticalDivider(
-          indent: 16, endIndent: 16, color: Colors.grey.shade400
+          indent: 10, endIndent: 10, color: Colors.grey.shade400
         ),
 
         /// ################################################################
@@ -217,7 +221,7 @@ class PatternTextEditorFieldToolbar extends StatelessWidget {
         ),
 
         VerticalDivider(
-          indent: 16, endIndent: 16, color: Colors.grey.shade400
+          indent: 10, endIndent: 10, color: Colors.grey.shade400
         ),
 
         /// ################################################################
@@ -234,7 +238,7 @@ class PatternTextEditorFieldToolbar extends StatelessWidget {
             indent: 16, endIndent: 16, color: Colors.grey.shade400),
 */
         Tooltip(
-          message: 'Stitch symbol',
+          message: 'Insert stitch symbol',
           preferBelow: false,
           child: InsertStitchSymbolEmbedButton(
             controller: fleatherController, 
@@ -246,7 +250,7 @@ class PatternTextEditorFieldToolbar extends StatelessWidget {
           ),
         ),
         VerticalDivider(
-            indent: 16, endIndent: 16, color: Colors.grey.shade400),
+            indent: 10, endIndent: 10, color: Colors.grey.shade400),
 
         /// ################################################################
 /*

@@ -24,15 +24,15 @@ class _DrawingChooserViewState extends State<DrawingChooserView> {
     for (DrawingInfo drawingInfo in drawingInfos) {
       cards.add(SizedBox(
         width: 300,
-        height: 100,
+        height: 130,
         child: DrawingCard(drawingInfo: drawingInfo,),
       ));
     }
     
     // add a + card
     cards.add(SizedBox(
-      width: 100,
-      height: 100,
+      width: 130,
+      height: 130,
       child: Card(
         child: InkWell(
           borderRadius: const BorderRadius.all(Radius.circular(10)),
@@ -48,8 +48,13 @@ class _DrawingChooserViewState extends State<DrawingChooserView> {
               ),
             ));
           },
-          child: const Center(
-            child:  Icon(Icons.add, size: 48,)
+          child: const Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.design_services),
+              Icon(Icons.add, size: 48,)
+            ],
+            
           ),
         )
       )

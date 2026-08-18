@@ -68,6 +68,7 @@ class StylingCommand extends DrawingCommand {
   });
 
   StylingCommand copyWith({
+    String? id,
     String? label,
     Set<String>? commandIds,
     Color? color,
@@ -82,7 +83,7 @@ class StylingCommand extends DrawingCommand {
     bool? initiallyOpen,
   }) {
     return StylingCommand(
-      id: id, 
+      id: id?? this.id, 
       label: label?? this.label, 
       version: version + 1,
       commandIds: commandIds?? this.commandIds,
@@ -95,6 +96,14 @@ class StylingCommand extends DrawingCommand {
       validated: validated?? this.validated,
       valid: valid?? this.valid,
       errors: errors?? this.errors,
+      initiallyOpen: initiallyOpen?? this.initiallyOpen,
+    );
+  }
+  @override
+  StylingCommand abstractCopyWith({String? id, String? label, bool? initiallyOpen}) {
+    return copyWith(
+      id: id?? this.id,
+      label: label?? this.label,
       initiallyOpen: initiallyOpen?? this.initiallyOpen,
     );
   }

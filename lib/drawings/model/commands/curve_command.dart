@@ -122,6 +122,15 @@ class CurveCommand extends DrawingCommand {
   }
 
   @override
+  CurveCommand abstractCopyWith({String? id, String? label, bool? initiallyOpen}) {
+    return copyWith(
+      id: id?? this.id,
+      label: label?? this.label,
+      initiallyOpen: initiallyOpen?? this.initiallyOpen,
+    );
+  }
+
+  @override
   double get editHeight {
     if (curveDefinitionType == CurveDefinitionType.cubic) return 370;
     if (curveDefinitionType == CurveDefinitionType.cubicFromPoints) return 240;

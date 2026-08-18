@@ -53,10 +53,13 @@ class _PatternImageFieldToolbarState extends State<PatternImageFieldToolbar> {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        OutlinedButton.icon(
-          onPressed: () async => await _selectImage(), 
-          label: const Text('Set image'),
-          icon: const Icon(Icons.photo_camera),
+        Tooltip(
+          preferBelow: false,
+          message: 'Set image',
+          child: IconButton(
+            onPressed: () async => await _selectImage(), 
+            icon: const Icon(Icons.photo_camera),
+          ),
         ),
       ],
     );

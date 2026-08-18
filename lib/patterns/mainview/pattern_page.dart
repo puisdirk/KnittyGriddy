@@ -103,6 +103,70 @@ class _PatternPageState extends State<PatternPage> {
     });
   }
 
+  PatternField _createNewField(PatternFieldType type, double posX, double posY) {
+    final String id = const UuidV4Gen().get();
+    switch (type) {
+      case PatternFieldType.texteditor:
+        return PatternTextEditorField(
+          id: id,
+          positionX: posX,
+          positionY: posY
+        );
+      case PatternFieldType.knittingchart:
+        return PatternChartField(
+          id: id,
+          positionX: posX,
+          positionY: posY
+        );
+      case PatternFieldType.drawing:
+        return PatternDrawingField(
+          id: id,
+          positionX: posX,
+          positionY: posY
+        );
+      case PatternFieldType.image:
+        return PatternImageField(
+          id: id,
+          positionX: posX,
+          positionY: posY
+        );
+      case PatternFieldType.panel:
+        return PatternPanelField(
+          id: id,
+          positionX: posX,
+          positionY: posY
+        );
+    }
+  }
+
+  void _moveSelectedFieldForward () {
+    if (selectedField == null) return;
+
+    List<PatternField> newFields = List.from(stateKnittingPattern.fields);
+    int idx = newFields.indexWhere((f) => f.id == selectedField!.id);
+    if (idx < newFields.length - 1) {
+      PatternField temp = newFields.removeAt(idx);
+      newFields.insert(idx + 1, temp);
+      _storeAndSetKnittingPattern(stateKnittingPattern.copyWith(
+        fields: newFields,
+      ));
+    }
+  }
+
+  void _moveSelectedFieldBackward() {
+    if (selectedField == null) return;
+
+    List<PatternField> newFields = List.from(stateKnittingPattern.fields);
+    int idx = newFields.indexWhere((f) => f.id == selectedField!.id);
+    if (idx > 0) {
+      PatternField temp = newFields.removeAt(idx);
+      newFields.insert(idx - 1, temp);
+      _storeAndSetKnittingPattern(stateKnittingPattern.copyWith(
+        fields: newFields,
+      ));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     FocusScope.of(context).autofocus(_keyboardFocusNode);
@@ -116,7 +180,7 @@ class _PatternPageState extends State<PatternPage> {
             Navigator.maybePop(context);
           },
         ),
-        title: Row(mainAxisAlignment: MainAxisAlignment.center, children: [Text('Pattern - ${stateKnittingPattern.name}')]),
+        title: Row(mainAxisAlignment: MainAxisAlignment.center, children: [const Icon(Icons.auto_awesome_mosaic_outlined), hspacing, Text('Pattern - ${stateKnittingPattern.name}')]),
         backgroundColor: Colors.grey.shade300,
 /*        bottom: const PreferredSize(
           preferredSize: Size(20000, 200), 
@@ -130,6 +194,7 @@ class _PatternPageState extends State<PatternPage> {
               child: IconButton(
                 onPressed: () async {
                   KnittingPattern? newPattern = await showDialog(
+                    barrierDismissible: false,
                     context: context, 
                     builder: (context) => PatternSettingsDialog(pattern: stateKnittingPattern),
                   );
@@ -212,12 +277,8 @@ class _PatternPageState extends State<PatternPage> {
       body: KeyboardListener(
         focusNode: _keyboardFocusNode,
         autofocus: true,
-/*        onKeyEvent: (value) {
-          if (value is KeyDownEvent && value.logicalKey == LogicalKeyboardKey.keyC && 
-            (HardwareKeyboard.instance.isMetaPressed || HardwareKeyboard.instance.isControlPressed)) {
-              print('Gotcha');
-          }
-
+        onKeyEvent: (value) {
+          /*
           if (value is KeyDownEvent && value.logicalKey == LogicalKeyboardKey.keyZ && 
             (HardwareKeyboard.instance.isMetaPressed || HardwareKeyboard.instance.isControlPressed)) {
             if (HardwareKeyboard.instance.isShiftPressed) {
@@ -226,8 +287,48 @@ class _PatternPageState extends State<PatternPage> {
               Provider.of<PatternsModel>(context, listen: false).undo();
             }
           }
+          */
 
-        },*/
+          // left arrow key
+          if (selectedField != null && selectedField!.positionX > 0 && (value is KeyDownEvent || value is KeyRepeatEvent) && value.logicalKey == LogicalKeyboardKey.arrowLeft) {
+            _storeAndSetKnittingPattern(stateKnittingPattern.copyWith(
+              fields: stateKnittingPattern.fields.map((f) => f.id != selectedField!.id ? f : f.abstractCopyWith(
+                positionX: math.max(f.positionX - (HardwareKeyboard.instance.isShiftPressed ? 10 : 1), 0)
+              )).toList()
+            ));
+          }
+
+          // up arrow key
+          if (selectedField != null && selectedField!.positionY > 0 && (value is KeyDownEvent || value is KeyRepeatEvent) && value.logicalKey == LogicalKeyboardKey.arrowUp) {
+            _storeAndSetKnittingPattern(stateKnittingPattern.copyWith(
+              fields: stateKnittingPattern.fields.map((f) => f.id != selectedField!.id ? f : f.abstractCopyWith(
+                positionY: math.max(f.positionY - (HardwareKeyboard.instance.isShiftPressed ? 10 : 1), 0)
+              )).toList()
+            ));
+          }
+
+          // right arrow key
+          if (selectedField != null && (selectedField!.positionX + selectedField!.width) < stateKnittingPattern.pageLayout.pagewidth && 
+            (value is KeyDownEvent || value is KeyRepeatEvent) && value.logicalKey == LogicalKeyboardKey.arrowRight) {
+            _storeAndSetKnittingPattern(stateKnittingPattern.copyWith(
+              fields: stateKnittingPattern.fields.map((f) => f.id != selectedField!.id ? f : f.abstractCopyWith(
+                positionX: math.min(f.positionX + (HardwareKeyboard.instance.isShiftPressed ? 10 : 1), stateKnittingPattern.pageLayout.pagewidth - f.width)
+              )).toList()
+            ));
+          }
+
+          // Down arrow key
+          if (selectedField != null && (selectedField!.positionY + selectedField!.height) < (stateKnittingPattern.pageLayout.pageheight * stateKnittingPattern.pageLayout.numberOfPages) && 
+            (value is KeyDownEvent || value is KeyRepeatEvent) && value.logicalKey == LogicalKeyboardKey.arrowDown) {
+            _storeAndSetKnittingPattern(stateKnittingPattern.copyWith(
+              fields: stateKnittingPattern.fields.map((f) => f.id != selectedField!.id ? f : f.abstractCopyWith(
+                positionY: math.min(
+                  f.positionY + (HardwareKeyboard.instance.isShiftPressed ? 10 : 1), 
+                  (stateKnittingPattern.pageLayout.pageheight * stateKnittingPattern.pageLayout.numberOfPages) - f.height)
+              )).toList()
+            ));
+          }
+        },
         child:
           Shortcuts(
             shortcuts: {
@@ -346,34 +447,61 @@ class _PatternPageState extends State<PatternPage> {
                     visible: !viewMode,
                     child: PatternToolbar(
                       selectedField: selectedField,
+                      onDuplicateSelectedField: () {
+                        if (selectedField == null) return;
+
+                        String id = const UuidV4Gen().get();
+
+                        // move the new field 10 down and right
+                        double posX = selectedField!.positionX + 10;
+                        double posY = selectedField!.positionY + 10;
+
+                        // if that would tip it over the page edge, move in the other direction
+                        if (posX + selectedField!.width > stateKnittingPattern.pageLayout.pagewidth ||
+                          posY + selectedField!.height > stateKnittingPattern.pageLayout.pageheight) {
+                          posX = selectedField!.positionX - 10;
+                          posY = selectedField!.positionY - 10;
+                        }
+
+                        PatternField newField = selectedField!.abstractCopyWith(
+                          id: id,
+                          positionX: posX,
+                          positionY: posY,
+                        );
+
+                        switch (newField.fieldType) {
+                          case PatternFieldType.texteditor:
+                            _storeAndSetKnittingPattern(stateKnittingPattern.copyWith(
+                              fields: [...stateKnittingPattern.fields, newField]
+                            ), additionalState: () {
+                              ParchmentDocument document = ParchmentDocument.fromJson(jsonDecode((newField as PatternTextEditorField).docContents));
+                              FleatherController controller = FleatherController(document: document);
+                              fleatherControllers = Map.from(fleatherControllers)..addAll({id: controller});
+                              final GlobalKey<EditorState> editorKey = GlobalKey();
+                              fleaterEditorKeys = Map.from(fleaterEditorKeys)..addAll({id: editorKey});
+                              selectedField = newField;
+                            });
+                          break;
+                          case PatternFieldType.knittingchart:
+                          case PatternFieldType.drawing:
+                          case PatternFieldType.image:
+                          case PatternFieldType.panel:
+                            _storeAndSetKnittingPattern(stateKnittingPattern.copyWith(
+                              fields: [...stateKnittingPattern.fields, newField]
+                            ), additionalState: () {
+                              selectedField = newField;
+                            });
+                          break;
+                        }
+                      },
                       patternHasMultipleFields: stateKnittingPattern.fields.length > 1,
                       onChanged: (newField) {
                         _storeAndSetKnittingPattern(stateKnittingPattern.copyWith(
                           fields: stateKnittingPattern.fields.map((f) => f.id == newField.id ? newField : f).toList()
                         ), additionalState: () => selectedField = newField,);
                       },
-                      onMoveBack: () {
-                        List<PatternField> newFields = List.from(stateKnittingPattern.fields);
-                        int idx = newFields.indexWhere((f) => f.id == selectedField!.id);
-                        if (idx > 0) {
-                          PatternField temp = newFields.removeAt(idx);
-                          newFields.insert(idx - 1, temp);
-                          _storeAndSetKnittingPattern(stateKnittingPattern.copyWith(
-                            fields: newFields,
-                          ));
-                        }
-                      },
-                      onMoveForward: () {
-                        List<PatternField> newFields = List.from(stateKnittingPattern.fields);
-                        int idx = newFields.indexWhere((f) => f.id == selectedField!.id);
-                        if (idx < newFields.length - 1) {
-                          PatternField temp = newFields.removeAt(idx);
-                          newFields.insert(idx + 1, temp);
-                          _storeAndSetKnittingPattern(stateKnittingPattern.copyWith(
-                            fields: newFields,
-                          ));
-                        }
-                      },
+                      onMoveBack: _moveSelectedFieldBackward,
+                      onMoveForward: _moveSelectedFieldForward,
                       onAddField: (type) {
                         double posY = _verticalScrollController.offset;
                         double posX = PatternPageLayout.margin;
@@ -381,71 +509,29 @@ class _PatternPageState extends State<PatternPage> {
                         if (posY == 0) {
                           posY = PatternPageLayout.margin - kDraggerHeight;
                         }
-                        String id = const UuidV4Gen().get();
-                        switch (type) {
+                        PatternField newField = _createNewField(type, posX, posY);
+                        String id = newField.id;
+                        switch (newField.fieldType) {
                           case PatternFieldType.texteditor:
-                            PatternTextEditorField field = PatternTextEditorField(
-                              id: id,
-                              positionX: posX,
-                              positionY: posY
-                            );
                             _storeAndSetKnittingPattern(stateKnittingPattern.copyWith(
-                              fields: [...stateKnittingPattern.fields, field]
+                              fields: [...stateKnittingPattern.fields, newField]
                             ), additionalState: () {
-                              ParchmentDocument document = ParchmentDocument.fromJson(jsonDecode(field.docContents));
+                              ParchmentDocument document = ParchmentDocument.fromJson(jsonDecode((newField as PatternTextEditorField).docContents));
                               FleatherController controller = FleatherController(document: document);
                               fleatherControllers = Map.from(fleatherControllers)..addAll({id: controller});
                               final GlobalKey<EditorState> editorKey = GlobalKey();
                               fleaterEditorKeys = Map.from(fleaterEditorKeys)..addAll({id: editorKey});
-                              selectedField = field;
+                              selectedField = newField;
                             });
                           break;
                           case PatternFieldType.knittingchart:
-                            PatternChartField field = PatternChartField(
-                              id: id,
-                              positionX: posX,
-                              positionY: posY
-                            );
-                            _storeAndSetKnittingPattern(stateKnittingPattern.copyWith(
-                              fields: [...stateKnittingPattern.fields, field]
-                            ), additionalState: () {
-                              selectedField = field;
-                            });
-                          break;
                           case PatternFieldType.drawing:
-                            PatternDrawingField field = PatternDrawingField(
-                              id: id,
-                              positionX: posX,
-                              positionY: posY
-                            );
-                            _storeAndSetKnittingPattern(stateKnittingPattern.copyWith(
-                              fields: [...stateKnittingPattern.fields, field]
-                            ), additionalState: () {
-                              selectedField = field;
-                            });
-                          break;
                           case PatternFieldType.image:
-                            PatternImageField field = PatternImageField(
-                              id: id,
-                              positionX: posX,
-                              positionY: posY
-                            );
-                            _storeAndSetKnittingPattern(stateKnittingPattern.copyWith(
-                              fields: [...stateKnittingPattern.fields, field]
-                            ), additionalState: () {
-                              selectedField = field;
-                            });
-                          break;
                           case PatternFieldType.panel:
-                            PatternPanelField field = PatternPanelField(
-                              id: id,
-                              positionX: posX,
-                              positionY: posY
-                            );
                             _storeAndSetKnittingPattern(stateKnittingPattern.copyWith(
-                              fields: [...stateKnittingPattern.fields, field]
+                              fields: [...stateKnittingPattern.fields, newField]
                             ), additionalState: () {
-                              selectedField = field;
+                              selectedField = newField;
                             });
                           break;
                         }

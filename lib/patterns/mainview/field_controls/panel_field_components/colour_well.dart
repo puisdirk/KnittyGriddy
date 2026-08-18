@@ -24,7 +24,7 @@ class ColourWell extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(
             borderRadius: const BorderRadius.all(Radius.circular(5)),
-            border: Border.all(color: selected ? Colors.green.shade500 : Colors.grey, width: 2)
+            border: Border.all(color: selected ? Colors.green.shade500 : Colors.grey, width: selected ? 3 : 1)
           ), 
           width: kColourWellWidth, 
           height: kColourWellHeight,

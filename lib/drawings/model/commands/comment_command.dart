@@ -24,6 +24,7 @@ class CommentCommand extends DrawingCommand {
   });
 
   CommentCommand copyWith({
+    String? id,
     String? label,
     String? comment,
     bool? validated,
@@ -32,13 +33,22 @@ class CommentCommand extends DrawingCommand {
     bool? initiallyOpen,
   }) {
     return CommentCommand(
-      id: id, 
+      id: id?? this.id, 
       version: version + 1,
       label: label?? this.label,
       comment: comment?? this.comment,
       validated: validated?? this.validated,
       valid: valid?? this.valid,
       errors: errors?? this.errors,
+      initiallyOpen: initiallyOpen?? this.initiallyOpen,
+    );
+  }
+
+  @override
+  CommentCommand abstractCopyWith({String? id, String? label, bool? initiallyOpen}) {
+    return copyWith(
+      id: id?? this.id,
+      label: label?? this.label,
       initiallyOpen: initiallyOpen?? this.initiallyOpen,
     );
   }

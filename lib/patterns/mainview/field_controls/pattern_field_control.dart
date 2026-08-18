@@ -180,7 +180,7 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
               width: width,
               height: kDraggerHeight,
               child: Container(
-                color: Colors.grey.shade400.withAlpha(50),
+                color: widget.selected ? Colors.green.shade700.withAlpha(50) : Colors.grey.shade400.withAlpha(50),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
@@ -192,6 +192,9 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
                           child: Icon(Icons.warning_amber, size: 16, color: Colors.red,),
                         )
                       ),
+                    const Spacer(),
+                    Text(widget.field.fieldType.label),
+                    const Spacer(),
                     if (widget.field.fieldType == PatternFieldType.drawing && (widget.field as PatternDrawingField).drawing != null && !(widget.field as PatternDrawingField).drawing!.valid)
                       const Spacer(),
                     MouseRegion(
@@ -228,7 +231,7 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
             color: Colors.transparent,
             border: Border.all(
               color: widget.viewMode ? Colors.transparent : widget.selected ? Colors.greenAccent.shade700 : Colors.grey,
-            )
+            ),
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,

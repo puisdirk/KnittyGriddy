@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/drawing_editor_control.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/drawing_settings_dialog.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/drawing_toolbar.dart';
@@ -8,6 +7,7 @@ import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
 import 'package:knitty_griddy/drawings/model/drawing.dart';
 import 'package:knitty_griddy/drawings/model/drawings_model.dart';
 import 'package:knitty_griddy/drawings/model/part_drawing.dart';
+import 'package:knitty_griddy/utils/constants.dart';
 import 'package:knitty_griddy/utils/undo_redo_manager.dart';
 import 'package:provider/provider.dart';
 
@@ -26,13 +26,13 @@ class EditDrawingPage extends StatefulWidget {
 
 class _EditDrawingPageState extends State<EditDrawingPage> {
   late AbstractDrawing drawing;
-  late FocusNode _undoRedoFocusNode;
+//  late FocusNode _undoRedoFocusNode;
 
   final UndoRedoManager<AbstractDrawing> _undoRedoManager = UndoRedoManager();
 
   @override
   void initState() {
-    _undoRedoFocusNode = FocusNode();
+  //  _undoRedoFocusNode = FocusNode();
 
     drawing = widget.drawing;
     _undoRedoManager.store(drawing);
@@ -40,11 +40,12 @@ class _EditDrawingPageState extends State<EditDrawingPage> {
     super.initState();
   }
 
-  @override
+/*  @override
   void dispose() {
     _undoRedoFocusNode.dispose();
     super.dispose();
   }
+*/
 
   void _storeAndSetDrawing(AbstractDrawing newDrawing) {
     _undoRedoManager.store(newDrawing);
@@ -70,7 +71,7 @@ class _EditDrawingPageState extends State<EditDrawingPage> {
 
   @override
   Widget build(BuildContext context) {
-    FocusScope.of(context).autofocus(_undoRedoFocusNode);
+    //FocusScope.of(context).autofocus(_undoRedoFocusNode);
 
     return Scaffold(
       appBar: AppBar(
@@ -87,7 +88,8 @@ class _EditDrawingPageState extends State<EditDrawingPage> {
         title: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('${(widget.drawing is PartDrawing) ? 'Part Drawing' : 'Drawing'} - ${drawing.name}',),
+            const Icon(Icons.design_services), 
+            hspacing, Text('${(widget.drawing is PartDrawing) ? 'Part Drawing' : 'Drawing'} - ${drawing.name}',),
           ],
         ),
         backgroundColor: Colors.grey.shade300,
@@ -123,7 +125,7 @@ class _EditDrawingPageState extends State<EditDrawingPage> {
           ),
         ],
       ),
-      body: KeyboardListener(
+      body: /*KeyboardListener(
         focusNode: _undoRedoFocusNode, 
         autofocus: true,
         onKeyEvent: (value) {
@@ -136,16 +138,18 @@ class _EditDrawingPageState extends State<EditDrawingPage> {
             }
           }
         },
-        child: Center(
+        child:*/ Center(
           child: Padding(
             padding: const EdgeInsets.all(5.0),
               child: DrawingEditorControl(
                 drawing: drawing,
                 onDrawingChanged: (newDrawing) => _storeAndSetDrawing(newDrawing),
+                onUndo: _undo,
+                onRedo: _redo,
               ),
           ),
         )
-      ),
+      //),
     );
   }
 }

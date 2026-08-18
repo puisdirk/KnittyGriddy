@@ -41,6 +41,12 @@ abstract class DrawingCommand implements SameAs {
     this.initiallyOpen = false,
   });
 
+  DrawingCommand abstractCopyWith({
+    String? id,
+    String? label,
+    bool? initiallyOpen,
+  });
+
   double get editHeight;
   
   Map<String, Object> toJson();  

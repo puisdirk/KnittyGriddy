@@ -25,15 +25,15 @@ class _ChartChooserViewState extends State<ChartChooserView> {
     for (ChartInfo chartInfo in chartInfos) {
       cards.add(SizedBox(
         width: 300,
-        height: 100,
+        height: 130,
         child: ChartCard(chartInfo: chartInfo,),
       ));
     }
     
     // add a + card
     cards.add(SizedBox(
-      width: 100,
-      height: 100,
+      width: 130,
+      height: 130,
       child: Card(
         child: InkWell(
           borderRadius: const BorderRadius.all(Radius.circular(10)),
@@ -42,8 +42,12 @@ class _ChartChooserViewState extends State<ChartChooserView> {
             Provider.of<ChartsModel>(context, listen: false).createNewChart('Unnamed');
             Navigator.push(context, MaterialPageRoute(builder: (context) => const ChartPage(),));
           },
-          child: const Center(
-            child:  Icon(Icons.add, size: 48,)
+          child: const Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.grid_on),
+              Icon(Icons.add, size: 48,)
+            ],
           ),
         )
       )

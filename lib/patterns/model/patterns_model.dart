@@ -126,6 +126,30 @@ class PatternsModel extends ChangeNotifier {
     await _repository.savePatternInfos(_patternsModelObject.patternInfos);
   }
 
+  Future<void> duplicatePattern(KnittingPatternInfo originalInfo) async {
+    // TODO: replace with a getChart that also load the auxillaries
+    KnittingPattern original = await _repository.loadPattern(originalInfo.id);
+    
+    final String id = const UuidV4Gen().get();
+
+    KnittingPattern newPattern = original.copyWith(
+      id: id,
+      name: '${original.name} copy',
+    );
+    savePattern(newPattern);
+
+    _patternsModelObject = _patternsModelObject.copyWith(
+      patternInfos: [..._patternsModelObject.patternInfos, KnittingPatternInfo(
+        id: id, 
+        name: newPattern.name, 
+        description: newPattern.description,
+      )]
+    );
+
+    _savePatternInfos();
+    notifyListeners();
+  }
+
   Future<void> createNewPattern(String name) async {
     final String id = const UuidV4Gen().get();
 
