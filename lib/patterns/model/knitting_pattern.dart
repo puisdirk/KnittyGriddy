@@ -8,6 +8,7 @@ import 'package:knitty_griddy/patterns/model/fields/pattern_image_field.dart';
 import 'package:knitty_griddy/patterns/model/fields/pattern_panel_field.dart';
 import 'package:knitty_griddy/patterns/model/fields/pattern_text_editor_field.dart';
 import 'package:knitty_griddy/patterns/model/pattern_page_layout.dart';
+import 'package:knitty_griddy/utils/constants.dart';
 
 const String placeholderPatternId = '_placeholder_pattern_id_';
 const KnittingPattern placeholderPattern = KnittingPattern(
@@ -77,6 +78,7 @@ class KnittingPattern {
 
     Map<String, Object> toJson() {
     return {
+      'objectversion': objectversion,
       'id': id,
       'name': name,
       'description': description,

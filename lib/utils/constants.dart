@@ -4,6 +4,9 @@ import 'package:knitty_griddy/charts/stitchrepo/basic_stitches_set.dart';
 import 'package:knitty_griddy/charts/model/named_colour.dart';
 import 'package:knitty_griddy/charts/model/stitch_cell.dart';
 
+// Version of the json objects
+const int objectversion = 1;
+
 // Patterns
 // Field controls
 const double kDraggerHeight = 20;

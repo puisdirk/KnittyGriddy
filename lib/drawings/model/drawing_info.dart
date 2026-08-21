@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:knitty_griddy/utils/constants.dart';
 
 @immutable
 class DrawingInfo {
@@ -31,6 +32,7 @@ class DrawingInfo {
 
   Map<String, Object> toJson() {
     return {
+      'objectversion': objectversion,
       'id': id,
       'name': name,
       'description': description,

@@ -58,8 +58,8 @@ abstract class PatternField {
   Map<String, Object> toJson();
 
   bool get fixedAspectRatio => true;
-  double get minimumHeight => 150;
-  double get minimumWidth => 150;
+  double get minimumHeight => 100;
+  double get minimumWidth => 100;
   double get padding => kResizerShortSide;
   double get leftpadding => kResizerShortSide;
   double get bottompadding => kResizerShortSide;

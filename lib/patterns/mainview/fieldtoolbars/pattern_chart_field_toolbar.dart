@@ -31,6 +31,13 @@ class _PatternChartFieldToolbarState extends State<PatternChartFieldToolbar> {
     super.initState();
   }
 
+  @override
+  void didUpdateWidget(covariant PatternChartFieldToolbar oldWidget) {
+    field = widget.field;
+
+    super.didUpdateWidget(oldWidget);
+  }
+
   void _updateField(PatternChartField newField) {
     setState(() => field = newField);
     widget.onChanged(newField);

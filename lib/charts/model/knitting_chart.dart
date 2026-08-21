@@ -100,6 +100,7 @@ class KnittingChart {
 
   Map<String, Object> toJson() {
     return {
+      'objectversion': objectversion,
       'id': id,
       'name': name,
       'description': description,

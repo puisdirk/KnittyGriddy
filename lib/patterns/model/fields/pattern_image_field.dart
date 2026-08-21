@@ -45,6 +45,8 @@ class PatternImageField extends PatternField {
     );
   }
 
+  bool get hasImage => imageData != null && imageData!.isNotEmpty;
+
   PatternImageField clearImage() {
     // Note: we can't use copyWith here as passing null will keep the current image
     return PatternImageField(

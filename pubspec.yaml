@@ -94,7 +94,16 @@ flutter:
   assets:
     - assets/images/
     - assets/drawings/
-#    - assets/google_fonts/
+    - assets/google_fonts/Cookie/
+    - assets/google_fonts/Crimson_Text/
+    - assets/google_fonts/Felipa/
+    - assets/google_fonts/Fredoka/
+    - assets/google_fonts/Nunito/
+    - assets/google_fonts/Playwrite_AR/
+    - assets/google_fonts/Pontano_Sans/
+    - assets/google_fonts/Prata/
+    - assets/google_fonts/Roboto_Mono/
+
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

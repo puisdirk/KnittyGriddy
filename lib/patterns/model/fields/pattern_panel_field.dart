@@ -71,7 +71,7 @@ class PatternPanelField extends PatternField {
     int? opacity,
   }) {
     return copyWith(
-      id: this.id,
+      id: id?? this.id,
       positionX: positionX?? this.positionX,
       positionY: positionY?? this.positionY,
       width: width?? this.width,

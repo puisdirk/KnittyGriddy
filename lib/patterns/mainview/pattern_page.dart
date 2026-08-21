@@ -45,6 +45,8 @@ class PatternPage extends StatefulWidget {
 
 class _PatternPageState extends State<PatternPage> {
   late FocusNode _keyboardFocusNode;
+  bool keyboardShiftDown = false;
+  bool keyboardControlDown = false;
   PatternField? selectedField;
   late KnittingPattern stateKnittingPattern;
   late Map<String, FleatherController> fleatherControllers;
@@ -139,31 +141,67 @@ class _PatternPageState extends State<PatternPage> {
     }
   }
 
-  void _moveSelectedFieldForward () {
+  void _moveSelectedFieldForward (bool allTheWay) {
     if (selectedField == null) return;
 
     List<PatternField> newFields = List.from(stateKnittingPattern.fields);
     int idx = newFields.indexWhere((f) => f.id == selectedField!.id);
     if (idx < newFields.length - 1) {
       PatternField temp = newFields.removeAt(idx);
-      newFields.insert(idx + 1, temp);
+      if (allTheWay) {
+        newFields.add(temp);
+      } else {
+        newFields.insert(idx + 1, temp);
+      }
       _storeAndSetKnittingPattern(stateKnittingPattern.copyWith(
         fields: newFields,
       ));
     }
   }
 
-  void _moveSelectedFieldBackward() {
+  void _moveSelectedFieldBackward(bool allTheWay) {
     if (selectedField == null) return;
 
     List<PatternField> newFields = List.from(stateKnittingPattern.fields);
     int idx = newFields.indexWhere((f) => f.id == selectedField!.id);
     if (idx > 0) {
       PatternField temp = newFields.removeAt(idx);
-      newFields.insert(idx - 1, temp);
+      newFields.insert(allTheWay ? 0 : idx - 1, temp);
       _storeAndSetKnittingPattern(stateKnittingPattern.copyWith(
         fields: newFields,
       ));
+    }
+  }
+
+  void _onCycleSelectedField(PatternFieldType type, bool reversed) {
+    List<PatternField> fieldsOfType = stateKnittingPattern.fields.where((f) => f.fieldType == type).toList();
+    if (fieldsOfType.isEmpty) return;
+
+    if (fieldsOfType.length == 1) {
+      if (selectedField != fieldsOfType.first) {
+        setState(() => selectedField = fieldsOfType.first);
+      }
+      return;
+    }
+    
+    if (selectedField?.fieldType != type) {
+      setState(() => selectedField = reversed ? fieldsOfType.last : fieldsOfType.first);
+      return;
+    }
+    
+    int idx = fieldsOfType.indexWhere((f) => f.id == selectedField?.id);
+    if (idx != -1) {
+      if (idx == 0 && reversed) {
+        setState(() => selectedField = fieldsOfType.last);
+        return;
+      }
+      if (idx == fieldsOfType.length - 1 && !reversed) {
+        setState(() => selectedField = fieldsOfType.first);
+        return;
+      }
+
+      int newIdx = reversed ? idx - 1 : idx + 1;
+      setState(() => selectedField = fieldsOfType[newIdx]);
     }
   }
 
@@ -175,7 +213,7 @@ class _PatternPageState extends State<PatternPage> {
       appBar: AppBar(
         leading: BackButton(
           onPressed: () {
-            Provider.of<PatternsModel>(context, listen: false).saveCurrentPattern();
+            Provider.of<PatternsModel>(context, listen: false).saveCurrentPattern(clear: true);
             Provider.of<PatternsModel>(context, listen: false).clearUndoRedo();
             Navigator.maybePop(context);
           },
@@ -207,7 +245,7 @@ class _PatternPageState extends State<PatternPage> {
                       // Go through all the fields and move/resize them until they fit on the new size
                       Rect newPatternRect = Rect.fromLTWH(0, 0, newPattern.pageLayout.dimensions.width, newPattern.pageLayout.dimensions.height);
                       for (PatternField field in stateKnittingPattern.fields) {
-                        PatternField newField = field.abstractCopyWith();
+                        PatternField newField = field;
                         if (newField.positionY + newField.height > newPatternRect.height) {
                           newField = newField.abstractCopyWith(positionY: newPatternRect.height - newField.height);
                           if (newField.positionY < 0) {
@@ -290,43 +328,65 @@ class _PatternPageState extends State<PatternPage> {
           */
 
           // left arrow key
-          if (selectedField != null && selectedField!.positionX > 0 && (value is KeyDownEvent || value is KeyRepeatEvent) && value.logicalKey == LogicalKeyboardKey.arrowLeft) {
+          if (selectedField != null && selectedField!.fieldType != PatternFieldType.texteditor && 
+            selectedField!.positionX > 0 && (value is KeyDownEvent || value is KeyRepeatEvent) && 
+            value.logicalKey == LogicalKeyboardKey.arrowLeft) {
+            PatternField newField = selectedField!.abstractCopyWith(
+              positionX: math.max(selectedField!.positionX - (HardwareKeyboard.instance.isShiftPressed ? 10 : 1), 0)
+            );
             _storeAndSetKnittingPattern(stateKnittingPattern.copyWith(
-              fields: stateKnittingPattern.fields.map((f) => f.id != selectedField!.id ? f : f.abstractCopyWith(
-                positionX: math.max(f.positionX - (HardwareKeyboard.instance.isShiftPressed ? 10 : 1), 0)
-              )).toList()
-            ));
+              fields: stateKnittingPattern.fields.map((f) => f.id != selectedField!.id ? f : newField).toList()
+            ), additionalState: () => selectedField = newField,);
           }
 
           // up arrow key
-          if (selectedField != null && selectedField!.positionY > 0 && (value is KeyDownEvent || value is KeyRepeatEvent) && value.logicalKey == LogicalKeyboardKey.arrowUp) {
+          if (selectedField != null  && selectedField!.fieldType != PatternFieldType.texteditor && 
+            selectedField!.positionY > 0 && (value is KeyDownEvent || value is KeyRepeatEvent) && 
+            value.logicalKey == LogicalKeyboardKey.arrowUp) {
+            PatternField newField = selectedField!.abstractCopyWith(
+              positionY: math.max(selectedField!.positionY - (HardwareKeyboard.instance.isShiftPressed ? 10 : 1), 0)
+            );
             _storeAndSetKnittingPattern(stateKnittingPattern.copyWith(
-              fields: stateKnittingPattern.fields.map((f) => f.id != selectedField!.id ? f : f.abstractCopyWith(
-                positionY: math.max(f.positionY - (HardwareKeyboard.instance.isShiftPressed ? 10 : 1), 0)
-              )).toList()
-            ));
+              fields: stateKnittingPattern.fields.map((f) => f.id != selectedField!.id ? f : newField).toList()
+            ), additionalState: () => selectedField = newField,);
           }
 
           // right arrow key
-          if (selectedField != null && (selectedField!.positionX + selectedField!.width) < stateKnittingPattern.pageLayout.pagewidth && 
+          if (selectedField != null  && selectedField!.fieldType != PatternFieldType.texteditor && 
+            (selectedField!.positionX + selectedField!.width) < stateKnittingPattern.pageLayout.pagewidth && 
             (value is KeyDownEvent || value is KeyRepeatEvent) && value.logicalKey == LogicalKeyboardKey.arrowRight) {
+            PatternField newField = selectedField!.abstractCopyWith(
+              positionX: math.min(selectedField!.positionX + (HardwareKeyboard.instance.isShiftPressed ? 10 : 1), stateKnittingPattern.pageLayout.pagewidth - selectedField!.width)
+            );
             _storeAndSetKnittingPattern(stateKnittingPattern.copyWith(
-              fields: stateKnittingPattern.fields.map((f) => f.id != selectedField!.id ? f : f.abstractCopyWith(
-                positionX: math.min(f.positionX + (HardwareKeyboard.instance.isShiftPressed ? 10 : 1), stateKnittingPattern.pageLayout.pagewidth - f.width)
-              )).toList()
-            ));
+              fields: stateKnittingPattern.fields.map((f) => f.id != selectedField!.id ? f : newField).toList()
+            ), additionalState: () => selectedField = newField,);
           }
 
           // Down arrow key
-          if (selectedField != null && (selectedField!.positionY + selectedField!.height) < (stateKnittingPattern.pageLayout.pageheight * stateKnittingPattern.pageLayout.numberOfPages) && 
+          if (selectedField != null  && selectedField!.fieldType != PatternFieldType.texteditor && 
+            (selectedField!.positionY + selectedField!.height) < (stateKnittingPattern.pageLayout.pageheight * stateKnittingPattern.pageLayout.numberOfPages) && 
             (value is KeyDownEvent || value is KeyRepeatEvent) && value.logicalKey == LogicalKeyboardKey.arrowDown) {
+            PatternField newField = selectedField!.abstractCopyWith(
+              positionY: math.min(
+                selectedField!.positionY + (HardwareKeyboard.instance.isShiftPressed ? 10 : 1), 
+                (stateKnittingPattern.pageLayout.pageheight * stateKnittingPattern.pageLayout.numberOfPages) - selectedField!.height)
+            );
             _storeAndSetKnittingPattern(stateKnittingPattern.copyWith(
-              fields: stateKnittingPattern.fields.map((f) => f.id != selectedField!.id ? f : f.abstractCopyWith(
-                positionY: math.min(
-                  f.positionY + (HardwareKeyboard.instance.isShiftPressed ? 10 : 1), 
-                  (stateKnittingPattern.pageLayout.pageheight * stateKnittingPattern.pageLayout.numberOfPages) - f.height)
-              )).toList()
-            ));
+              fields: stateKnittingPattern.fields.map((f) => f.id != selectedField!.id ? f : newField).toList()
+            ), additionalState: () => selectedField = newField);
+          }
+
+          final bool shiftDown = HardwareKeyboard.instance.isShiftPressed;
+          final bool setShift = (shiftDown != keyboardShiftDown);
+          final bool controlDown = HardwareKeyboard.instance.isControlPressed;
+          final bool setControl = controlDown != keyboardControlDown;
+          
+          if (setShift || setControl) {
+            setState(() {
+              keyboardShiftDown = shiftDown;
+              keyboardControlDown = controlDown;
+            });
           }
         },
         child:
@@ -447,6 +507,11 @@ class _PatternPageState extends State<PatternPage> {
                     visible: !viewMode,
                     child: PatternToolbar(
                       selectedField: selectedField,
+                      fieldIsAtBottom: stateKnittingPattern.fields.isNotEmpty && selectedField == stateKnittingPattern.fields.first,
+                      fieldIsAtTop: stateKnittingPattern.fields.isNotEmpty && selectedField == stateKnittingPattern.fields.last,
+                      keyboardShiftDown: keyboardShiftDown,
+                      keyboardControlDown: keyboardControlDown,
+                      onCycleSelectedField: _onCycleSelectedField,
                       onDuplicateSelectedField: () {
                         if (selectedField == null) return;
 
@@ -507,7 +572,7 @@ class _PatternPageState extends State<PatternPage> {
                         double posX = PatternPageLayout.margin;
                         // If we didn't scroll, place the new field inside the margins
                         if (posY == 0) {
-                          posY = PatternPageLayout.margin - kDraggerHeight;
+                          posY = PatternPageLayout.margin;
                         }
                         PatternField newField = _createNewField(type, posX, posY);
                         String id = newField.id;
@@ -577,11 +642,12 @@ class _PatternPageState extends State<PatternPage> {
                               builder: (context) => TextEditorFieldSettingsDialog(settings: (selectedField as PatternTextEditorField).settings)
                             );
                             if (newSettings != null) {
+                              PatternTextEditorField newField = (selectedField as PatternTextEditorField).copyWith(
+                                settings: newSettings
+                              );
                               _storeAndSetKnittingPattern(stateKnittingPattern.copyWith(
-                                fields: stateKnittingPattern.fields.map((f) => f.id != selectedField!.id ? f : (f as PatternTextEditorField).copyWith(
-                                  settings: newSettings
-                                )).toList()
-                              ));
+                                fields: stateKnittingPattern.fields.map((f) => f.id != selectedField!.id ? f : newField).toList()
+                              ), additionalState: (() => selectedField = newField));
                             }
                           },
                         ) :
@@ -608,7 +674,10 @@ class _PatternPageState extends State<PatternPage> {
                                       size: Size(
                                         stateKnittingPattern.pageLayout.pagewidth, 
                                         stateKnittingPattern.pageLayout.pageheight * stateKnittingPattern.pageLayout.numberOfPages),
-                                      painter: PageMarginPainter(pageLayout: stateKnittingPattern.pageLayout),
+                                      painter: PageMarginPainter(
+                                        pageLayout: stateKnittingPattern.pageLayout,
+                                        viewMode: viewMode
+                                      ),
                                     ),
                                   ),
                                   for (PatternField field in stateKnittingPattern.fields)
@@ -663,35 +732,40 @@ class _PatternPageState extends State<PatternPage> {
 
 class PageMarginPainter extends CustomPainter {
   final PatternPageLayout pageLayout;
+  final bool viewMode;
 
   const PageMarginPainter({
     required this.pageLayout,
+    required this.viewMode,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
-    Paint marginPaint = Paint()..color = Colors.blue..style = PaintingStyle.stroke;
 
-    Path leftMargin = Path()
-      ..moveTo(PatternPageLayout.margin, 0)
-      ..lineTo(PatternPageLayout.margin, pageLayout.pageheight * pageLayout.numberOfPages);
-    Path rightMargin = Path()
-      ..moveTo(pageLayout.pagewidth - PatternPageLayout.margin, 0)
-      ..lineTo(pageLayout.pagewidth - PatternPageLayout.margin, pageLayout.pageheight * pageLayout.numberOfPages);
-    
-    DashedPainter.pattern(enableCaching: false, dashPattern: DashStyle.shortStripes.dashPattern).paint(canvas, leftMargin, marginPaint);
-    DashedPainter.pattern(enableCaching: false, dashPattern: DashStyle.shortStripes.dashPattern).paint(canvas, rightMargin, marginPaint);
+    if (!viewMode) {
+      Paint marginPaint = Paint()..color = Colors.blue..style = PaintingStyle.stroke;
 
-    for (int page = 0; page < pageLayout.numberOfPages; page++) {
-      Path topPath = Path()
-        ..moveTo(0, (page * pageLayout.pageheight) + PatternPageLayout.margin)
-        ..lineTo(pageLayout.pagewidth, (page * pageLayout.pageheight) + PatternPageLayout.margin);
-      Path bottomPath = Path()
-        ..moveTo(0, ((page + 1) * pageLayout.pageheight) - PatternPageLayout.margin)
-        ..lineTo(pageLayout.pagewidth, ((page + 1) * pageLayout.pageheight) - PatternPageLayout.margin);
+      Path leftMargin = Path()
+        ..moveTo(PatternPageLayout.margin, 0)
+        ..lineTo(PatternPageLayout.margin, pageLayout.pageheight * pageLayout.numberOfPages);
+      Path rightMargin = Path()
+        ..moveTo(pageLayout.pagewidth - PatternPageLayout.margin, 0)
+        ..lineTo(pageLayout.pagewidth - PatternPageLayout.margin, pageLayout.pageheight * pageLayout.numberOfPages);
+      
+      DashedPainter.pattern(enableCaching: false, dashPattern: DashStyle.shortStripes.dashPattern).paint(canvas, leftMargin, marginPaint);
+      DashedPainter.pattern(enableCaching: false, dashPattern: DashStyle.shortStripes.dashPattern).paint(canvas, rightMargin, marginPaint);
 
-      DashedPainter.pattern(enableCaching: false, dashPattern: DashStyle.shortStripes.dashPattern).paint(canvas, topPath, marginPaint);
-      DashedPainter.pattern(enableCaching: false, dashPattern: DashStyle.shortStripes.dashPattern).paint(canvas, bottomPath, marginPaint);
+      for (int page = 0; page < pageLayout.numberOfPages; page++) {
+        Path topPath = Path()
+          ..moveTo(0, (page * pageLayout.pageheight) + PatternPageLayout.margin)
+          ..lineTo(pageLayout.pagewidth, (page * pageLayout.pageheight) + PatternPageLayout.margin);
+        Path bottomPath = Path()
+          ..moveTo(0, ((page + 1) * pageLayout.pageheight) - PatternPageLayout.margin)
+          ..lineTo(pageLayout.pagewidth, ((page + 1) * pageLayout.pageheight) - PatternPageLayout.margin);
+
+        DashedPainter.pattern(enableCaching: false, dashPattern: DashStyle.shortStripes.dashPattern).paint(canvas, topPath, marginPaint);
+        DashedPainter.pattern(enableCaching: false, dashPattern: DashStyle.shortStripes.dashPattern).paint(canvas, bottomPath, marginPaint);
+      }
     }
 
     // Draw page bottom if needed
@@ -733,17 +807,17 @@ class PageMarginPainter extends CustomPainter {
       }
     }
 
-    if (pageLayout.showGrid) {
+    if (pageLayout.showGrid && !viewMode) {
       Paint gridPaint = Paint()..color = Colors.grey.withAlpha(150)..style = PaintingStyle.stroke;
       double oneCm = 10 * PatternPageLayout.pixelsPerMM;
       for (int page = 0; page < pageLayout.numberOfPages; page++) {
         // Vertical
         for (double xOffset = PatternPageLayout.margin + oneCm; xOffset < pageLayout.pagewidth - PatternPageLayout.margin; xOffset += oneCm) {
-          Path gridLine = Path()..moveTo(xOffset, PatternPageLayout.margin)..lineTo(xOffset, pageLayout.pageheight - PatternPageLayout.margin);
+          Path gridLine = Path()..moveTo(xOffset, (page * pageLayout.pageheight) + PatternPageLayout.margin)..lineTo(xOffset, (page * pageLayout.pageheight) + pageLayout.pageheight - PatternPageLayout.margin);
           DashedPainter.pattern(enableCaching: false, dashPattern: DashStyle.dots.dashPattern).paint(canvas, gridLine, gridPaint);
         }
         // Horizontal
-        for (double yOffset = PatternPageLayout.margin + oneCm; yOffset < pageLayout.pageheight - PatternPageLayout.margin; yOffset += oneCm) {
+        for (double yOffset = (page * pageLayout.pageheight) + PatternPageLayout.margin + oneCm; yOffset < (page * pageLayout.pageheight) + pageLayout.pageheight - PatternPageLayout.margin; yOffset += oneCm) {
           Path gridLine = Path()..moveTo(PatternPageLayout.margin, yOffset)..lineTo(pageLayout.pagewidth - PatternPageLayout.margin, yOffset);
           DashedPainter.pattern(enableCaching: false, dashPattern: DashStyle.dots.dashPattern).paint(canvas, gridLine, gridPaint);
         }        
@@ -753,7 +827,7 @@ class PageMarginPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant PageMarginPainter oldDelegate) {
-    return pageLayout != oldDelegate.pageLayout;
+    return pageLayout != oldDelegate.pageLayout || viewMode != oldDelegate.viewMode;
   }
 
 }

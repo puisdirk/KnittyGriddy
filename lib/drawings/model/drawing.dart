@@ -12,6 +12,7 @@ import 'package:knitty_griddy/drawings/model/commands/styling_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/text_command.dart';
 import 'package:knitty_griddy/drawings/model/part_drawing.dart';
 import 'package:knitty_griddy/drawings/partrepo/part_repository.dart';
+import 'package:knitty_griddy/utils/constants.dart';
 
 const String placeholderDrawingId = '_placeholder_drawing_id_';
 const Drawing placeholderDrawing = Drawing(
@@ -151,6 +152,7 @@ class Drawing extends AbstractDrawing {
 
   Map<String, Object> toJson() {
     return {
+      'objectversion': objectversion,
       'id': id,
       'name': name,
       'description': description,

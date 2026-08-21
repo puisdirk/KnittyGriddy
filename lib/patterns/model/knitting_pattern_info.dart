@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:knitty_griddy/utils/constants.dart';
 
 @immutable
 class KnittingPatternInfo {
@@ -38,6 +39,7 @@ class KnittingPatternInfo {
 
     Map<String, Object> toJson() {
     return {
+      'objectversion': objectversion,
       'id': id,
       'name': name,
       'description': description,

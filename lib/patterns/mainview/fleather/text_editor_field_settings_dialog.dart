@@ -37,7 +37,7 @@ class _TextEditorFieldSettingsDialogState extends State<TextEditorFieldSettingsD
 
   @override
   void initState() {
-    newSettings = widget.settings.copyWith();
+    newSettings = widget.settings;
 
     ParchmentDocument document = ParchmentDocument.fromJson(jsonDecode(kSampleContent));
     _fleatherController = FleatherController(document: document);
@@ -47,7 +47,7 @@ class _TextEditorFieldSettingsDialogState extends State<TextEditorFieldSettingsD
 
   @override
   void didUpdateWidget(covariant TextEditorFieldSettingsDialog oldWidget) {
-    newSettings = widget.settings.copyWith();
+    newSettings = widget.settings;
 
     super.didUpdateWidget(oldWidget);
   }

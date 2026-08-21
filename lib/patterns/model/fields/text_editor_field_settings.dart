@@ -5,7 +5,6 @@ import 'package:google_fonts/google_fonts.dart';
 enum FontFamily {
   roboto(label: 'Roboto Mono', comment: 'Default for windows and linux'),
   menlo(label: 'Menlo', comment: 'Default for MacOS'),
-  finlandica(label: 'Finlandica', comment: 'Official typeface of Finland, designed by Helsinki Type Studio, Niklas Ekholm, Juho Hiilivirta, Jaakko Suomalainen'),
   pontano(label: 'Pontano', comment: 'Pontano Sans, minimalist and light weighted Sans Serif, designed by Vernon Adams'),
   fredoka(label: 'Fredoka', comment: 'Big, round, bold font, designed by Milena Brandão for Hafontia'),
   nunito(label: 'Nunito', comment: 'Well balanced sans serif, designed by Vernon Adams, Cyreal, Jacques Le Bailly'),
@@ -51,8 +50,6 @@ class TextEditorFieldSettings {
         return TextStyle(fontFamily: 'Menlo', fontFamilyFallback: const['Roboto Mono'], fontSize: fontSize, height: fontHeight);
       case FontFamily.felipa:
         return GoogleFonts.felipa(fontSize: fontSize, height: fontHeight);
-      case FontFamily.finlandica:
-        return GoogleFonts.finlandica(fontSize: fontSize, height: fontHeight);
       case FontFamily.crimson:
         return GoogleFonts.crimsonText(fontSize: fontSize, height: fontHeight);
       case FontFamily.prata:

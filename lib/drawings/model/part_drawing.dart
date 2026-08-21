@@ -5,6 +5,7 @@ import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/part_command.dart';
 import 'package:knitty_griddy/drawings/model/part_info.dart';
 import 'package:knitty_griddy/utils/collection_utilities.dart';
+import 'package:knitty_griddy/utils/constants.dart';
 
 @immutable
 class PartDrawing extends AbstractDrawing {
@@ -82,6 +83,7 @@ class PartDrawing extends AbstractDrawing {
 
   Map<String, Object> toJson() {
     return {
+      'objectversion': objectversion,
       'id': id,
       'name': name,
       'description': description,

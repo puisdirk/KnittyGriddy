@@ -23,6 +23,12 @@ class PatternsModelObject {
     );
   }
 
+  PatternsModelObject clear() {
+    return PatternsModelObject(
+      patternInfos: patternInfos
+    );
+  }
+
   @override
   int get hashCode => pattern.hashCode ^ patternInfos.hashCode;
 
