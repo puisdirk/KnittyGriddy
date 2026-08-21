@@ -109,7 +109,7 @@ class PatternsModel extends ChangeNotifier {
     await _repository.savePattern(pattern);
   }
 
-  Future<void> saveCurrentPattern() async {
+  Future<void> saveCurrentPattern({bool clear = false}) async {
     await _repository.savePattern(_patternsModelObject.pattern);
 
     _patternsModelObject = _patternsModelObject.copyWith(
@@ -120,6 +120,10 @@ class PatternsModel extends ChangeNotifier {
     );
 
     await _savePatternInfos();
+
+    if (clear) {
+      _patternsModelObject = _patternsModelObject.clear();
+    }
   }
 
   Future<void> _savePatternInfos() async {

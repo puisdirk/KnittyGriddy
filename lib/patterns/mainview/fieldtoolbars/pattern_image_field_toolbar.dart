@@ -29,6 +29,13 @@ class _PatternImageFieldToolbarState extends State<PatternImageFieldToolbar> {
     super.initState();
   }
 
+  @override
+  void didUpdateWidget(covariant PatternImageFieldToolbar oldWidget) {
+    field = widget.field;
+    
+    super.didUpdateWidget(oldWidget);
+  }
+
   void _updateField(PatternImageField newField) {
     setState(() => field = newField);
     widget.onChanged(newField);

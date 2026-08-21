@@ -215,10 +215,10 @@ class _PatternFieldPanelStyleDialogState extends State<PatternFieldPanelStyleDia
                                       decoration: BoxDecoration(
                                         color: panelStyle.backgroundColor,
                                         border: Border(
-                                          top: BorderSide(color: panelStyle.topBorderColor, width: panelStyle.topBorderWidth),
-                                          bottom: BorderSide(color: panelStyle.bottomBorderColor, width: panelStyle.bottomBorderWidth),
-                                          left: BorderSide(color: panelStyle.leftBorderColor, width: panelStyle.leftBorderWidth),
-                                          right: BorderSide(color: panelStyle.rightBorderColor, width: panelStyle.rightBorderWidth),
+                                          top: panelStyle.topBorderWidth == 0 ? BorderSide.none : BorderSide(color: panelStyle.topBorderColor, width: panelStyle.topBorderWidth),
+                                          bottom: panelStyle.bottomBorderWidth == 0 ? BorderSide.none : BorderSide(color: panelStyle.bottomBorderColor, width: panelStyle.bottomBorderWidth),
+                                          left: panelStyle.leftBorderWidth == 0 ? BorderSide.none : BorderSide(color: panelStyle.leftBorderColor, width: panelStyle.leftBorderWidth),
+                                          right: panelStyle.rightBorderWidth == 0 ? BorderSide.none : BorderSide(color: panelStyle.rightBorderColor, width: panelStyle.rightBorderWidth),
                                         ),
                                         borderRadius: BorderRadius.only(
                                           topLeft: panelStyle.canSetRadius && panelStyle.topLeftRadius != PatternPanelFieldStyle.kDefaultBorderRadius ? Radius.circular(panelStyle.topLeftRadius) : Radius.zero,

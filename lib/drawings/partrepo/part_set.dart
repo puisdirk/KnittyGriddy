@@ -1,4 +1,5 @@
 import 'package:knitty_griddy/drawings/model/part_drawing.dart';
+import 'package:knitty_griddy/utils/constants.dart';
 
 class PartSet {
 
@@ -31,6 +32,7 @@ class PartSet {
 
   Map<String, Object> toJson() {
     return {
+      'objectversion': objectversion,
       'id': id,
       'name': name,
       'parts': _partDrawings.map((p) => p.toJson()).toList(),

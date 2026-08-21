@@ -23,22 +23,25 @@ class PatternDrawingFieldControl extends StatelessWidget {
     return drawing == null ? GestureDetector(onTap: onSelect, child: Container(color: Colors.transparent,)) :
     GestureDetector(
       onTap: onSelect,
-      child: FittedBox(
-        child: SizedBox(
-          width: bbox.width,
-          height: bbox.height,
-          child: LayoutBuilder(
-            builder: (context, constraints) {              
-              return ClipRect(
-                child: Opacity(
-                  opacity: opacity == 0 ? 0 : opacity / 255,
-                  child: CustomPaint(
-                    painter: DrawingPainter(drawing: drawing!),
-                    size: constraints.biggest,
+      child: Container(
+        color: Colors.transparent,
+        child: FittedBox(
+          child: SizedBox(
+            width: bbox.width,
+            height: bbox.height,
+            child: LayoutBuilder(
+              builder: (context, constraints) {              
+                return ClipRect(
+                  child: Opacity(
+                    opacity: opacity == 0 ? 0 : opacity / 255,
+                    child: CustomPaint(
+                      painter: DrawingPainter(drawing: drawing!),
+                      size: constraints.biggest,
+                    ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
         ),
       ),

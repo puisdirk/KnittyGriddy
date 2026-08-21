@@ -80,7 +80,7 @@ class ChartsJsonFilesModelRepository implements ChartsModelRepository {
   Future<void> saveChartInfos(List<ChartInfo> chartInfos) async {
     await _initAppDirectoryPath();
 
-    Map<String, Object> jsonObject = {'chartInfos': chartInfos.map((pi) => pi.toJson()).toList()};
+    Map<String, Object> jsonObject = {'chartInfos': chartInfos.map((ci) => ci.toJson()).toList()};
     try {
       String jsonString = codec.encode(jsonObject);
       File infosFile =  File(p.join(appDirectoryPath!, 'chartInfos.json'));

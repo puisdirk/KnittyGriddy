@@ -31,7 +31,7 @@ class _PatternSettingsDialogState extends State<PatternSettingsDialog> {
 
   @override
   void initState() {
-    newPattern = widget.pattern.copyWith();
+    newPattern = widget.pattern;
 
     nameController = TextEditingController(text: widget.pattern.name);
     nameController.addListener(_nameChanged);
@@ -40,6 +40,16 @@ class _PatternSettingsDialogState extends State<PatternSettingsDialog> {
     descriptonController.addListener(_descriptionChanged);
 
     super.initState();
+  }
+
+  @override
+  void didUpdateWidget(covariant PatternSettingsDialog oldWidget) {
+    newPattern = widget.pattern;
+
+    nameController.text = widget.pattern.name;
+    descriptonController.text = widget.pattern.description;
+
+    super.didUpdateWidget(oldWidget);
   }
 
   @override

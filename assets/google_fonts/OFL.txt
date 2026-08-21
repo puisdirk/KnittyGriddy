@@ -1,7 +1,6 @@
 Copyright (c) 2011 by Ania Kruk (hello@aniakruk.com), with Reserved Font Name "Cookie".
 Copyright 2010 The Crimson Text Project Authors (https://github.com/googlefonts/Crimson)
 Copyright (c) 2011 Fontstage (info@fontstage.com), with Reserved Font Names, "Felipa"
-Copyright 2026 The Finlandica Project Authors (https://github.com/HelsinkiTypeStudio/FinlandicaText)
 Copyright 2016 The Fredoka Project Authors (https://github.com/hafontia/Fredoka-One)
 Copyright 2014 The Nunito Project Authors (https://github.com/googlefonts/nunito)
 Copyright 2023 The Playwrite Project Authors (https://github.com/TypeTogether/Playwrite)

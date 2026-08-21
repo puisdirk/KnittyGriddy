@@ -1,4 +1,5 @@
 import 'package:knitty_griddy/charts/stitchrepo/stitch_definition.dart';
+import 'package:knitty_griddy/utils/constants.dart';
 
 class StitchSet {
 
@@ -31,6 +32,7 @@ class StitchSet {
 
   Map<String, Object> toJson() {
     return {
+      'objectversion': objectversion,
       'id': id,
       'name': name,
       'defs': _definitions.map((def) => def.toJson()).toList(),

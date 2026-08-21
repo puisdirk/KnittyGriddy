@@ -19,14 +19,14 @@ import 'package:knitty_griddy/utils/app_platform_ext.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  /*
+  
   GoogleFonts.config.allowRuntimeFetching = false;
   
   LicenseRegistry.addLicense(() async* {
     final String license = await rootBundle.loadString('google_fonts/OFL.txt');
     yield LicenseEntryWithLineBreaks(<String>['google_fonts'], license);
   });
-*/
+
   final ChartsModelRepository chartsRepo = 
     AppPlatformExt.isWeb ? ChartsInMemoryModelRepository() : 
       AppPlatformExt.isDesktop ?  ChartsJsonFilesModelRepository() : const ChartsNoOpModelRepository();
