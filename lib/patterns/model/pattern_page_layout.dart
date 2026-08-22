@@ -78,6 +78,8 @@ class PatternPageLayout {
   static const double pixelsPerMM = 5;
   static const double marginInMM = 10;
   static const double margin = marginInMM * pixelsPerMM;
+  static const double maxPageWidth = 594;
+  static const double maxPageHeight = PatternPageLayout.maxPageWidth;
 
   double get pageheight => getDimensionsInMM().height * pixelsPerMM;
   double get pagewidth => getDimensionsInMM().width * pixelsPerMM;

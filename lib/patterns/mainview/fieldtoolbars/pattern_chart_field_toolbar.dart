@@ -3,6 +3,7 @@ import 'package:knitty_griddy/charts/export/knitting_chart_view_settings.dart';
 import 'package:knitty_griddy/charts/model/chart_info.dart';
 import 'package:knitty_griddy/charts/model/charts_model.dart';
 import 'package:knitty_griddy/charts/model/knitting_chart.dart';
+import 'package:knitty_griddy/patterns/mainview/fieldtoolbars/chart_picker.dart';
 import 'package:knitty_griddy/patterns/model/fields/pattern_chart_field.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 import 'package:provider/provider.dart';
@@ -47,28 +48,25 @@ class _PatternChartFieldToolbarState extends State<PatternChartFieldToolbar> {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        const Text('Chart:'),
-        hspacing,
-        DropdownButton<ChartInfo>(
-          autofocus: false, 
-          focusColor: Colors.transparent,
-          borderRadius: const BorderRadius.all(Radius.circular(10)),
-          underline: Container(),
-          padding: const EdgeInsets.only(left: 10, right: 5),
-          items: [
-            const DropdownMenuItem(value: ChartInfo.emptyChartInfo, child: Text('')),
-            for (ChartInfo chartInfo in Provider.of<ChartsModel>(context, listen: false).chartInfos)
-              DropdownMenuItem(value: chartInfo, child: Text(chartInfo.name))
-          ], 
-          onChanged: (value) async {
-            if (value == ChartInfo.emptyChartInfo) {
-              _updateField(field.clearChart());
-            } else {
-              KnittingChart newChart = await Provider.of<ChartsModel>(context, listen: false).getChart(value!);
-              _updateField(field.copyWith(chart: newChart));
+        TextButton.icon(
+          onPressed: () async {
+            ChartInfo? newChartInfo = await showDialog(
+              context: context, 
+              barrierDismissible: false,
+              builder: (context) => const ChartPicker(),
+            );
+
+            if (newChartInfo != null && newChartInfo != ChartInfo.emptyChartInfo) {
+              if (context.mounted) {
+                KnittingChart newChart = await Provider.of<ChartsModel>(context, listen: false).getChart(newChartInfo);
+                _updateField(field.copyWith(chart: newChart));
+              }
             }
-          },
-          value: field.chartInfo,
+          }, 
+          label: field.chart == null ? 
+            const Text('No chart selected', style: TextStyle(color: Colors.black, fontStyle: FontStyle.italic)) :
+            Text(field.chart!.name, style: const TextStyle(color: Colors.black)),
+          icon: const Icon(Icons.grid_on, color: Colors.black),
         ),
         hspacing,
         if (field.chart != null)

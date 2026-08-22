@@ -225,6 +225,13 @@ class ChartsModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  List<ChartInfo> filteredChartInfos(String filter) {
+    return chartInfos.where((ci) =>
+      ci.name.toLowerCase().contains(filter.toLowerCase()) ||
+      ci.description.toLowerCase().contains(filter.toLowerCase())
+    ).toList();
+  }
+
   Future<KnittingChart> getChart(ChartInfo chartInfo) async {
     KnittingChart chart = await _repository.loadChart(chartInfo.id);
     // Import unknown stitches

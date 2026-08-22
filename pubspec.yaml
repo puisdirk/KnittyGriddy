@@ -67,6 +67,7 @@ dependencies:
   fleather: 1.19.0
   google_fonts: 6.3.0
   image_size_getter: ^2.3.0
+  flutter_popup: ^3.3.9
 
 dev_dependencies:
   flutter_test:

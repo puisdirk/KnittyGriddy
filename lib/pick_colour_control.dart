@@ -25,7 +25,6 @@ class _PickColourControlState extends State<PickColourControl> {
 
   void _colorChanged(Color newColor) {
     setState(() => currentColour = newColor);
-    widget.onChanged(newColor);
   }
 
   @override
@@ -33,6 +32,13 @@ class _PickColourControlState extends State<PickColourControl> {
     currentColour = widget.initialColor;
 
     super.initState();
+  }
+
+  @override
+  void didUpdateWidget(covariant PickColourControl oldWidget) {
+    currentColour = widget.initialColor;
+
+    super.didUpdateWidget(oldWidget);
   }
 
   @override
@@ -54,7 +60,7 @@ class _PickColourControlState extends State<PickColourControl> {
                 height: 20,
                 colorCodeHasColor: true,
                 enableOpacity: true,
-                showMaterialName: true,
+                showMaterialName: false,
                 showColorName: true,
                 showColorCode: true,
                 opacityTrackHeight: 10,
@@ -64,6 +70,9 @@ class _PickColourControlState extends State<PickColourControl> {
                 color: currentColour,
                 onColorChanged: (value) {
                   _colorChanged(value);
+                },
+                onColorChangeEnd: (value) {
+                  widget.onChanged(value);
                 },
               ),
               if (widget.knownColours.isNotEmpty)
@@ -82,13 +91,19 @@ class _PickColourControlState extends State<PickColourControl> {
                               runSpacing: 4,
                               children: [
                                 for (Color col in widget.knownColours)
-                                  ColorIndicator(
-                                    width: 20,
-                                    height: 20,
-                                    borderRadius: 6,
-                                    hasBorder: true,
-                                    color: col,
-                                    onSelect: () => _colorChanged(col),
+                                  Tooltip(
+                                    message: ColorTools.nameThatColor(col.withAlpha(0xFF)),
+                                    child: ColorIndicator(
+                                      width: 20,
+                                      height: 20,
+                                      borderRadius: 6,
+                                      hasBorder: true,
+                                      color: col,
+                                      onSelect: () {
+                                        _colorChanged(col);
+                                        widget.onChanged(col);
+                                      }
+                                    ),
                                   )
                               ],
                             ),

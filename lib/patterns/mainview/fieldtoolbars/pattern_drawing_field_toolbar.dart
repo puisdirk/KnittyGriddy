@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:knitty_griddy/drawings/drawing_chooser/drawing_chooser_view.dart';
 import 'package:knitty_griddy/drawings/model/drawing.dart';
 import 'package:knitty_griddy/drawings/model/drawing_info.dart';
 import 'package:knitty_griddy/drawings/model/drawings_model.dart';
+import 'package:knitty_griddy/patterns/mainview/fieldtoolbars/drawing_picker.dart';
 import 'package:knitty_griddy/patterns/model/fields/pattern_drawing_field.dart';
-import 'package:knitty_griddy/utils/constants.dart';
 import 'package:provider/provider.dart';
 
-class PatternDrawingFieldToolbar extends StatefulWidget {
+class PatternDrawingFieldToolbar extends StatelessWidget {
   final PatternDrawingField field;
   final void Function(PatternDrawingField newField) onChanged;
 
@@ -17,58 +18,28 @@ class PatternDrawingFieldToolbar extends StatefulWidget {
   });
 
   @override
-  State<PatternDrawingFieldToolbar> createState() => _PatternDrawingFieldToolbarState();
-}
-
-class _PatternDrawingFieldToolbarState extends State<PatternDrawingFieldToolbar> {
-
-  late PatternDrawingField field;
-
-  @override
-  void initState() {
-    field = widget.field;
-
-    super.initState();
-  }
-
-  void _updateField(PatternDrawingField newField) {
-    setState(() => field = newField);
-    widget.onChanged(newField);
-  }
-
-  @override
-  void didUpdateWidget(covariant PatternDrawingFieldToolbar oldWidget) {
-    field = widget.field;
-
-    super.didUpdateWidget(oldWidget);
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        const Text('Drawing:'),
-        hspacing,
-        DropdownButton<DrawingInfo>(
-          autofocus: false, 
-          focusColor: Colors.transparent,
-          borderRadius: const BorderRadius.all(Radius.circular(10)),
-          underline: Container(),
-          padding: const EdgeInsets.only(left: 10, right: 5),
-          items: [
-            const DropdownMenuItem(value: DrawingInfo.emptyDrawingInfo, child: Text('')),
-            for (DrawingInfo drawingInfo in Provider.of<DrawingsModel>(context, listen: false).drawingInfos)
-              DropdownMenuItem(value: drawingInfo, child: Text(drawingInfo.name))
-          ], 
-          onChanged: (value) async {
-            if (value == DrawingInfo.emptyDrawingInfo) {
-              _updateField(field.clearDrawing());
-            } else {
-              Drawing newDrawing = await Provider.of<DrawingsModel>(context, listen: false).getDrawing(value!);
-              _updateField(field.copyWith(drawing: newDrawing.validate()));
+        TextButton.icon(
+          onPressed: () async {
+            DrawingInfo? newDrawingInfo = await showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (context) => const DrawingPicker(),
+            );
+
+            if (newDrawingInfo != null && newDrawingInfo != DrawingInfo.emptyDrawingInfo) {
+              if (context.mounted) {
+                Drawing newDrawing = await Provider.of<DrawingsModel>(context, listen: false).getDrawing(newDrawingInfo);
+                onChanged(field.copyWith(drawing: newDrawing.validate()));
+              }
             }
-          },
-          value: field.drawingInfo,
+          }, 
+          icon: const Icon(Icons.design_services, color: Colors.black,),
+          label: field.drawing == null ? 
+            const Text('No drawing selected', style: TextStyle(color: Colors.black, fontStyle: FontStyle.italic)) : 
+            Text(field.drawing!.name, style: const TextStyle(color: Colors.black)),
         ),
       ],
     );

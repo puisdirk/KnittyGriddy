@@ -7,6 +7,8 @@ class PatternPanelFieldStyle {
   static const Color kDefaultBorderColor = Colors.black;
   static const double kDefaultBorderWidth = 1;
   static const double kDefaultBorderRadius = 0;
+  static const double kDefaultMaxWidth = 0;
+  static const double kDefaultMaxHeight = 0;
 
   final Color backgroundColor;
   final Color leftBorderColor;
@@ -21,6 +23,8 @@ class PatternPanelFieldStyle {
   final double topRightRadius;
   final double bottomLeftRadius;
   final double bottomRightRadius;
+  final double maxWidth;
+  final double maxHeight;
 
   const PatternPanelFieldStyle({
     this.backgroundColor = kDefaultBackgroundColor,
@@ -36,6 +40,8 @@ class PatternPanelFieldStyle {
     this.topRightRadius = kDefaultBorderRadius,
     this.bottomLeftRadius = kDefaultBorderRadius,
     this.bottomRightRadius = kDefaultBorderRadius,
+    this.maxWidth = kDefaultMaxWidth,
+    this.maxHeight = kDefaultMaxHeight,
   });
 
   PatternPanelFieldStyle copyWith({
@@ -52,6 +58,8 @@ class PatternPanelFieldStyle {
     double? topRightRadius,
     double? bottomLeftRadius,
     double? bottomRightRadius,
+    double? maxWidth,
+    double? maxHeight,
   }) {
     return PatternPanelFieldStyle(
       backgroundColor: backgroundColor?? this.backgroundColor,
@@ -67,6 +75,8 @@ class PatternPanelFieldStyle {
       topRightRadius: topRightRadius?? this.topRightRadius,
       bottomLeftRadius: bottomLeftRadius?? this.bottomLeftRadius,
       bottomRightRadius: bottomRightRadius?? this.bottomRightRadius,
+      maxWidth: maxWidth?? this.maxWidth,
+      maxHeight: maxHeight?? this.maxHeight,
     );
   }
 
@@ -139,6 +149,14 @@ class PatternPanelFieldStyle {
       o['bbcol'] = {'red': bottomBorderColor.red, 'blue': bottomBorderColor.blue, 'green': bottomBorderColor.green, 'alpha': bottomBorderColor.alpha};
     }
 
+    if (maxWidth != kDefaultMaxWidth) {
+      o['mw'] = maxWidth;
+    }
+
+    if (maxHeight != kDefaultMaxHeight) {
+      o['mh'] = maxHeight;
+    }
+
     return o;
   }
 
@@ -157,6 +175,8 @@ class PatternPanelFieldStyle {
       topRightRadius: json.containsKey('trr') ? json['trr'] as double : kDefaultBorderRadius,
       bottomLeftRadius: json.containsKey('blr') ? json['blr'] as double : kDefaultBorderRadius,
       bottomRightRadius: json.containsKey('brr') ? json['brr'] as double : kDefaultBorderRadius,
+      maxWidth: json.containsKey('mw') ? json['mw'] as double : kDefaultMaxWidth,
+      maxHeight: json.containsKey('mh') ? json['mh'] as double : kDefaultMaxHeight,
     );
   }
 
@@ -177,11 +197,14 @@ class PatternPanelFieldStyle {
     topLeftRadius == other.topLeftRadius &&
     topRightRadius == other.topRightRadius &&
     bottomLeftRadius == other.bottomLeftRadius &&
-    bottomRightRadius == other.bottomRightRadius;
+    bottomRightRadius == other.bottomRightRadius &&
+    maxWidth == other.maxWidth &&
+    maxHeight == other.maxHeight;
 
   @override
   int get hashCode => super.hashCode ^ backgroundColor.hashCode ^
     leftBorderColor.hashCode ^ rightBorderColor.hashCode ^ topBorderColor.hashCode ^ bottomBorderColor.hashCode ^
     leftBorderWidth.hashCode ^ rightBorderWidth.hashCode ^ topBorderWidth.hashCode ^ bottomBorderWidth.hashCode ^
-    topLeftRadius.hashCode ^ topRightRadius.hashCode ^ bottomLeftRadius.hashCode ^ bottomRightRadius.hashCode;
+    topLeftRadius.hashCode ^ topRightRadius.hashCode ^ bottomLeftRadius.hashCode ^ bottomRightRadius.hashCode ^
+    maxWidth.hashCode ^ maxHeight.hashCode;
 }
