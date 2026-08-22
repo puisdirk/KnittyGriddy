@@ -42,6 +42,13 @@ class DrawingsModel extends ChangeNotifier {
     return pd;
   }
 
+  List<DrawingInfo> filteredDrawingInfos(String filter) {
+    return drawingInfos.where((di) => 
+      di.name.toLowerCase().contains(filter.toLowerCase()) ||
+      di.description.toLowerCase().contains(filter.toLowerCase())
+    ).toList();
+  }
+
   List<PartSet> filteredPartSets(String filter) {
     return PartRepository.filteredPartSets(filter);
   }

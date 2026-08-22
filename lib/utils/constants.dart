@@ -20,8 +20,10 @@ const TextStyle smallStyleBlue = TextStyle(fontSize: 10, color: Color.fromARGB(2
 
 // General
 
-const SizedBox hspacing = SizedBox(width: 10,);
-const SizedBox vspacing = SizedBox(height: 10,);
+const double hspacewidth = 10;
+const double vspaceheight = 10;
+const SizedBox hspacing = SizedBox(width: hspacewidth,);
+const SizedBox vspacing = SizedBox(height: vspaceheight,);
 
 const Color selectedColor = Colors.purple;
 const Color selectedColorLight = Color.fromARGB(60, 156, 39, 176);

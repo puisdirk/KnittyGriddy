@@ -333,7 +333,7 @@ class _DrawingCommandsListState extends State<DrawingCommandsList> {
                 children: [
                   for (DrawingCommand command in widget.drawing.commands.reversed)
                     DrawingCommandControl(
-                      key: GlobalObjectKey(command.id),
+                      key: ValueKey(command.id),
                       drawing: widget.drawing,
                       command: command, 
                       sorting: sorting, 

@@ -15,21 +15,25 @@ class PatternPanelFieldControl extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onSelect,
-      child: Container(
-        decoration: BoxDecoration(
-          color: panelStyle.backgroundColor,
-          border: Border(
-            top: panelStyle.topBorderWidth == 0 ? BorderSide.none : BorderSide(color: panelStyle.topBorderColor, width: panelStyle.topBorderWidth),
-            bottom: panelStyle.bottomBorderWidth == 0 ? BorderSide.none : BorderSide(color: panelStyle.bottomBorderColor, width: panelStyle.bottomBorderWidth),
-            left: panelStyle.leftBorderWidth == 0 ? BorderSide.none : BorderSide(color: panelStyle.leftBorderColor, width: panelStyle.leftBorderWidth),
-            right: panelStyle.rightBorderWidth == 0 ? BorderSide.none : BorderSide(color: panelStyle.rightBorderColor, width: panelStyle.rightBorderWidth),
+      child: Center(
+        child: Container(
+          height: panelStyle.maxHeight == PatternPanelFieldStyle.kDefaultMaxHeight ? null : panelStyle.maxHeight,
+          width: panelStyle.maxWidth == PatternPanelFieldStyle.kDefaultMaxWidth ? null : panelStyle.maxWidth,
+          decoration: BoxDecoration(
+            color: panelStyle.backgroundColor,
+            border: Border(
+              top: panelStyle.topBorderWidth == 0 ? BorderSide.none : BorderSide(color: panelStyle.topBorderColor, width: panelStyle.topBorderWidth),
+              bottom: panelStyle.bottomBorderWidth == 0 ? BorderSide.none : BorderSide(color: panelStyle.bottomBorderColor, width: panelStyle.bottomBorderWidth),
+              left: panelStyle.leftBorderWidth == 0 ? BorderSide.none : BorderSide(color: panelStyle.leftBorderColor, width: panelStyle.leftBorderWidth),
+              right: panelStyle.rightBorderWidth == 0 ? BorderSide.none : BorderSide(color: panelStyle.rightBorderColor, width: panelStyle.rightBorderWidth),
+            ),
+            borderRadius: BorderRadius.only(
+              topLeft: panelStyle.canSetRadius && panelStyle.topLeftRadius != PatternPanelFieldStyle.kDefaultBorderRadius ? Radius.circular(panelStyle.topLeftRadius) : Radius.zero,
+              topRight: panelStyle.canSetRadius && panelStyle.topRightRadius != PatternPanelFieldStyle.kDefaultBorderRadius ? Radius.circular(panelStyle.topRightRadius) : Radius.zero,
+              bottomLeft: panelStyle.canSetRadius && panelStyle.bottomLeftRadius != PatternPanelFieldStyle.kDefaultBorderRadius ? Radius.circular(panelStyle.bottomLeftRadius) : Radius.zero,
+              bottomRight: panelStyle.canSetRadius && panelStyle.bottomRightRadius != PatternPanelFieldStyle.kDefaultBorderRadius ? Radius.circular(panelStyle.bottomRightRadius) : Radius.zero,
+            )
           ),
-          borderRadius: BorderRadius.only(
-            topLeft: panelStyle.canSetRadius && panelStyle.topLeftRadius != PatternPanelFieldStyle.kDefaultBorderRadius ? Radius.circular(panelStyle.topLeftRadius) : Radius.zero,
-            topRight: panelStyle.canSetRadius && panelStyle.topRightRadius != PatternPanelFieldStyle.kDefaultBorderRadius ? Radius.circular(panelStyle.topRightRadius) : Radius.zero,
-            bottomLeft: panelStyle.canSetRadius && panelStyle.bottomLeftRadius != PatternPanelFieldStyle.kDefaultBorderRadius ? Radius.circular(panelStyle.bottomLeftRadius) : Radius.zero,
-            bottomRight: panelStyle.canSetRadius && panelStyle.bottomRightRadius != PatternPanelFieldStyle.kDefaultBorderRadius ? Radius.circular(panelStyle.bottomRightRadius) : Radius.zero,
-          )
         ),
       ),
     );

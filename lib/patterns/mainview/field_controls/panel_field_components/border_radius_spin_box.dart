@@ -16,7 +16,7 @@ class BorderRadiusSpinBox extends StatelessWidget {
   });
 
   static const double kSpinBoxWidth = 140;
-  static const double kMaxBorderRadius = 100;
+  static const double kMaxBorderRadius = 600;
 
   @override
   Widget build(BuildContext context) {
