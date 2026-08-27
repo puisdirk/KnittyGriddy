@@ -14,6 +14,7 @@ import 'package:knitty_griddy/drawings/storage/drawings_json_files_model_reposit
 import 'package:knitty_griddy/patterns/storage/patterns_in_memory_model_repository.dart';
 import 'package:knitty_griddy/patterns/storage/patterns_json_files_model_repository.dart';
 import 'package:knitty_griddy/patterns/storage/patterns_model_repository.dart';
+
 import 'package:knitty_griddy/patterns/storage/patterns_no_op_model_repository.dart';
 import 'package:knitty_griddy/utils/app_platform_ext.dart';
 

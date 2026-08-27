@@ -98,7 +98,7 @@ class _CommentCommandControlState extends State<CommentCommandControl> {
         Row(
           children: [
             SmallMultilineTextField(
-              key: GlobalObjectKey('${widget.command.id}-${widget.command.version}-comment'),
+              key: ValueKey('${widget.command.id}-${widget.command.version}-comment'),
               width: _fieldWidth,
               lines: 3,
               initialText: widget.command.comment,

@@ -165,7 +165,7 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
             const Icon(Symbols.line_curve),
             hspacing,
             DropdownButton<CurveDefinitionType>(
-              key: GlobalObjectKey('${widget.command.id}-cdt'),
+              key: ValueKey('${widget.command.id}-cdt'),
               isDense: true,
               autofocus: false,
               style: smallStyle,
@@ -191,7 +191,7 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
             SmallLabel(label: 'Label', width: labelWidth,),
             hspacing,
             SmallTextField(
-              key: GlobalObjectKey('${widget.command.id}-${widget.command.version}-label'),
+              key: ValueKey('${widget.command.id}-${widget.command.version}-label'),
               initialText: widget.command.label,
               width: 100,
               onTextChanged: curveLabelChanged,
@@ -204,7 +204,7 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
             SmallLabel(label: 'From', width: labelWidth,),
             hspacing,
             DropdownButton<String>(
-              key: GlobalObjectKey('${widget.command.id}-from'),
+              key: ValueKey('${widget.command.id}-from'),
               isDense: true,
               autofocus: false,
               style: smallStyle,
@@ -233,7 +233,7 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
             SmallLabel(label: 'To', width: labelWidth,),
             hspacing,
             DropdownButton<String>(
-              key: GlobalObjectKey('${widget.command.id}-to'),
+              key: ValueKey('${widget.command.id}-to'),
               isDense: true,
               autofocus: false,
               style: smallStyle,
@@ -266,7 +266,7 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
                   hspacing,
                   FormulaFieldControl(
                     drawing: widget.drawing,
-                    key: GlobalObjectKey('${widget.command.id}-${widget.command.version}-qamp'),
+                    key: ValueKey('${widget.command.id}-${widget.command.version}-qamp'),
                     formula: widget.command.quadAmplitudeFormula, 
                     width: 240, 
                     excludeCommand: widget.command, 
@@ -281,7 +281,7 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
                   hspacing,
                   FormulaFieldControl(
                     drawing: widget.drawing,
-                    key: GlobalObjectKey('${widget.command.id}-${widget.command.version}-qslant'),
+                    key: ValueKey('${widget.command.id}-${widget.command.version}-qslant'),
                     formula: widget.command.quadSlantFormula, 
                     width: 240, 
                     excludeCommand: widget.command,
@@ -300,7 +300,7 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
                   hspacing,
                   FormulaFieldControl(
                     drawing: widget.drawing,
-                    key: GlobalObjectKey('${widget.command.id}-${widget.command.version}-camp1'),
+                    key: ValueKey('${widget.command.id}-${widget.command.version}-camp1'),
                     formula: widget.command.cubicAmplitudeFormula1, 
                     width: 240, 
                     excludeCommand: widget.command, 
@@ -315,7 +315,7 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
                   hspacing,
                   FormulaFieldControl(
                     drawing: widget.drawing,
-                    key: GlobalObjectKey('${widget.command.id}-${widget.command.version}-cslant1'),
+                    key: ValueKey('${widget.command.id}-${widget.command.version}-cslant1'),
                     formula: widget.command.cubicSlantFormula1, 
                     width: 240, 
                     excludeCommand: widget.command,
@@ -330,7 +330,7 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
                   hspacing,
                   FormulaFieldControl(
                     drawing: widget.drawing,
-                    key: GlobalObjectKey('${widget.command.id}-${widget.command.version}-camp2'),
+                    key: ValueKey('${widget.command.id}-${widget.command.version}-camp2'),
                     formula: widget.command.cubicAmplitudeFormula2, 
                     width: 240, 
                     excludeCommand: widget.command, 
@@ -345,7 +345,7 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
                   hspacing,
                   FormulaFieldControl(
                     drawing: widget.drawing,
-                    key: GlobalObjectKey('${widget.command.id}-${widget.command.version}-cslant2'),
+                    key: ValueKey('${widget.command.id}-${widget.command.version}-cslant2'),
                     formula: widget.command.cubicSlantFormula2, 
                     width: 240, 
                     excludeCommand: widget.command,
@@ -361,7 +361,7 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
               SmallLabel(label: 'Control point', width: labelWidth,),
               hspacing,
               DropdownButton<String>(
-                key: GlobalObjectKey('${widget.command.id}-qctrl'),
+                key: ValueKey('${widget.command.id}-qctrl'),
                 isDense: true,
                 autofocus: false,
                 style: smallStyle,
@@ -392,7 +392,7 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
                   SmallLabel(label: 'Control point 1', width: labelWidth,),
                   hspacing,
                   DropdownButton<String>(
-                    key: GlobalObjectKey('${widget.command.id}-cctrl1'),
+                    key: ValueKey('${widget.command.id}-cctrl1'),
                     isDense: true,
                     autofocus: false,
                     style: smallStyle,
@@ -420,7 +420,7 @@ class _CurveCommandControlState extends State<CurveCommandControl> {
                   SmallLabel(label: 'Control point 2', width: labelWidth,),
                   hspacing,
                   DropdownButton<String>(
-                    key: GlobalObjectKey('${widget.command.id}-cctrl2'),
+                    key: ValueKey('${widget.command.id}-cctrl2'),
                     isDense: true,
                     autofocus: false,
                     style: smallStyle,

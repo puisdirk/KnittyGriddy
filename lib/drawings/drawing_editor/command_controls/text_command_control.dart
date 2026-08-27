@@ -86,7 +86,7 @@ class _TextCommandControlState extends State<TextCommandControl> {
             const SmallLabel(label: 'Label',),
             hspacing,
             SmallTextField(
-              key: GlobalObjectKey('${widget.command.id}-${widget.command.version}-label'),
+              key: ValueKey('${widget.command.id}-${widget.command.version}-label'),
               initialText: widget.command.label,
               width: 100,
               onTextChanged: labelChanged,
@@ -95,7 +95,7 @@ class _TextCommandControlState extends State<TextCommandControl> {
             const SmallLabel(label: 'Anchor'),
             hspacing,
             DropdownButton<String>(
-              key: GlobalObjectKey('${widget.command.id}-anchor'),
+              key: ValueKey('${widget.command.id}-anchor'),
               isDense: true,
               autofocus: false,
               style: smallStyle,
@@ -142,7 +142,7 @@ class _TextCommandControlState extends State<TextCommandControl> {
             SizedBox(
               width: 180,
               child: SpinBox(
-                key: GlobalObjectKey('${widget.command.id}-textSize'),
+                key: ValueKey('${widget.command.id}-textSize'),
                 textStyle: smallStyle,
                 onChanged: (value) {
                   if (value != widget.command.textSize) {

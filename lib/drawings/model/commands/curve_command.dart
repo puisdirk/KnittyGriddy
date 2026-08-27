@@ -633,7 +633,7 @@ class CurveCommand extends DrawingCommand {
 
     Offset middle = Offset(drawingSize.width / 2, drawingSize.height / 2);
 
-    StylingCommand? styling = drawing.styleFor(id);
+    StylingCommand? styling = drawing.styleFor(id)?? stylings.where((s) => s.commandIds.any((c) => c == id)).firstOrNull;
     if (styling == null) {
       // Look for id in format drawingid.id
       if (stylings.any((s) => s.commandIds.any((sid) => sid.startsWith('${drawing.id}.$id')))) {
@@ -695,7 +695,7 @@ class CurveCommand extends DrawingCommand {
     if (path == null) return;
 
     Paint paint = Paint()..style = PaintingStyle.stroke;
-    StylingCommand? styling = drawing.styleFor(id);
+    StylingCommand? styling = drawing.styleFor(id)?? stylings.where((s) => s.commandIds.any((c) => c == id)).firstOrNull;
     if (styling == null) {
       // Look for id in format drawingid.id
       if (stylings.any((s) => s.commandIds.any((sid) => sid.startsWith('${drawing.id}.$id')))) {

@@ -91,7 +91,7 @@ class _MeasurementCommandControlState extends State<MeasurementCommandControl> {
             const SmallLabel(label: 'Label'),
             hspacing,
             SmallTextField(
-              key: GlobalObjectKey('${widget.command.id}-${widget.command.version}-label'),
+              key: ValueKey('${widget.command.id}-${widget.command.version}-label'),
               initialText: widget.command.label,
               width: 100,
               onTextChanged: labelChanged,
@@ -100,7 +100,7 @@ class _MeasurementCommandControlState extends State<MeasurementCommandControl> {
             const SmallLabel(label: 'Unit'),
             hspacing,
             DropdownButton<Unit>(
-              key: GlobalObjectKey('${widget.command.id}-unit'),
+              key: ValueKey('${widget.command.id}-unit'),
               isDense: true,
               autofocus: false,
               style: smallStyle,
@@ -133,7 +133,7 @@ class _MeasurementCommandControlState extends State<MeasurementCommandControl> {
             SizedBox(
               width: 180,
               child: SpinBox(
-                key: GlobalObjectKey('${widget.command.id}-dec'),
+                key: ValueKey('${widget.command.id}-dec'),
                 textStyle: smallStyle,
                 onChanged: (value) {
                   if (value != widget.command.decimals.toDouble()) {
@@ -155,7 +155,7 @@ class _MeasurementCommandControlState extends State<MeasurementCommandControl> {
             SizedBox(
               width: 180,
               child: SpinBox(
-                key: GlobalObjectKey('${widget.command.id}-min'),
+                key: ValueKey('${widget.command.id}-min'),
                 textStyle: smallStyle,
                 onChanged: (value) {
                   if (value != widget.command.minValue) {
@@ -179,7 +179,7 @@ class _MeasurementCommandControlState extends State<MeasurementCommandControl> {
             SizedBox(
               width: 180,
               child: SpinBox(
-                key: GlobalObjectKey('${widget.command.id}-max'),
+                key: ValueKey('${widget.command.id}-max'),
                 textStyle: smallStyle,
                 onChanged:(value) {
                   if (value != widget.command.maxValue) {
@@ -203,7 +203,7 @@ class _MeasurementCommandControlState extends State<MeasurementCommandControl> {
             SizedBox(
               width: 180,
               child: SpinBox(
-                key: GlobalObjectKey('${widget.command.id}-def'),
+                key: ValueKey('${widget.command.id}-def'),
                 textStyle: smallStyle,
                 onChanged: (value) {
                   if (value != widget.command.value) {

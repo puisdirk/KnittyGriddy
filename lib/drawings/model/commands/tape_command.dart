@@ -353,7 +353,7 @@ class TapeCommand extends DrawingCommand {
     if (!valid) return '';
 
     Offset middle = Offset(drawingSize.width / 2, drawingSize.height / 2);
-    StylingCommand? styling = drawing.styleFor(id);
+    StylingCommand? styling = drawing.styleFor(id)?? stylings.where((s) => s.commandIds.any((c) => c == id)).firstOrNull;
 
     String svg = '<g id="$label">';
 
@@ -781,7 +781,7 @@ class TapeCommand extends DrawingCommand {
 
     Offset middle = Offset(size.width / 2, size.height / 2);
     Paint paint = Paint()..style = PaintingStyle.stroke;
-    StylingCommand? styling = drawing.styleFor(id);
+    StylingCommand? styling = drawing.styleFor(id)?? stylings.where((s) => s.commandIds.any((c) => c == id)).firstOrNull;
     if (styling == null) {
       paint.color = (!forPreview && selected) ? selectedColor : (!forPreview && asPart && drawing is PartDrawing) ? partColor : Colors.grey.shade700;
       paint.strokeWidth = selected ? 2 : 1;

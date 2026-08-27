@@ -7,7 +7,7 @@ import 'package:knitty_griddy/drawings/formulas/variable_command_chooser.dart';
 import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/measurement_command.dart';
-import 'package:knitty_griddy/drawings/model/commands/variable_command.dart';
+import 'package:knitty_griddy/drawings/model/commands/repeat_command.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 import 'package:multi_trigger_autocomplete/multi_trigger_autocomplete.dart';
 
@@ -16,7 +16,9 @@ class FormulaFieldControl extends StatefulWidget {
   final String formula;
   final double width;
   final String? unitLabel;
-  final DrawingCommand excludeCommand;
+  final DrawingCommand? excludeCommand;
+  final RepeatCommand? repeatContext;
+  final List<String> excludeLabels;
   final void Function(String newFormula) onFormulaChanged;
 
   const FormulaFieldControl({
@@ -24,7 +26,9 @@ class FormulaFieldControl extends StatefulWidget {
     required this.formula,
     required this.width,
     this.unitLabel,
-    required this.excludeCommand,
+    this.excludeCommand,
+    this.excludeLabels = const[],
+    this.repeatContext,
     required this.onFormulaChanged,
     super.key
   });
@@ -86,12 +90,20 @@ class _FormulaFieldControlState extends State<FormulaFieldControl> {
           trigger: '!', 
           optionsViewBuilder: (context, autocompleteQuery, textEditingController) {
             return VariableCommandChooser(
-              drawing: widget.drawing,
-              excludeCommand: widget.excludeCommand,
+              //drawing: widget.drawing,
+              //excludeCommand: widget.excludeCommand,
+              //repeatContext: widget.repeatContext,
+              variableLabels: [
+                ...widget.drawing.variables.map((v) => v.label),
+                ...widget.repeatContext == null ? [] : 
+                    widget.repeatContext!.variables.where((c) => 
+                      c.id != widget.excludeCommand?.id && !widget.excludeLabels.contains(c.label)).map((v) => v.label),
+                ...widget.repeatContext == null ? [] : ['RepeatValue'],
+              ],
               query: autocompleteQuery.query.toLowerCase(),
-              onChooseVariable: (VariableCommand command) {
+              onChooseVariable: (String label) {
                 final MultiTriggerAutocompleteState autocompleteState = MultiTriggerAutocomplete.of(context);
-                autocompleteState.acceptAutocompleteOption(command.label.replaceAll(' ', '_'));
+                autocompleteState.acceptAutocompleteOption(label.replaceAll(' ', '_'));
               }
             );
           }

@@ -153,7 +153,7 @@ class _PointCommandControlState extends State<PointCommandControl> {
             const Icon(Symbols.line_start_circle),
             hspacing,
             DropdownButton<PointDefinitionType>(
-              key: GlobalObjectKey('${widget.command.id}-pdt'),
+              key: ValueKey('${widget.command.id}-pdt'),
               isDense: true,
               autofocus: false,
               style: smallStyle,
@@ -179,7 +179,7 @@ class _PointCommandControlState extends State<PointCommandControl> {
             const SmallLabel(label: 'Label'),
             hspacing,
             SmallTextField(
-              key: GlobalObjectKey('${widget.command.id}-${widget.command.version}-label'),
+              key: ValueKey('${widget.command.id}-${widget.command.version}-label'),
               initialText: widget.command.label,
               width: 100,
               onTextChanged: pointLabelChanged,
@@ -198,7 +198,7 @@ class _PointCommandControlState extends State<PointCommandControl> {
                   hspacing,
                   FormulaFieldControl(
                     drawing: widget.drawing,
-                    key: GlobalObjectKey('${widget.command.id}-${widget.command.version}-${widget.command.version}-dist'),
+                    key: ValueKey('${widget.command.id}-${widget.command.version}-${widget.command.version}-dist'),
                     formula: widget.command.distanceFormula,
                     width: 240, 
                     excludeCommand: widget.command,
@@ -212,7 +212,7 @@ class _PointCommandControlState extends State<PointCommandControl> {
                   const SmallLabel(label: 'Direction'),
                   hspacing,
                   DropdownButton<RelativePointDirection>(
-                    key: GlobalObjectKey('${widget.command.id}-dir'),
+                    key: ValueKey('${widget.command.id}-dir'),
                     isDense: true,
                     autofocus: false,
                     style: smallStyle,
@@ -234,7 +234,7 @@ class _PointCommandControlState extends State<PointCommandControl> {
                   if (widget.command.direction == RelativePointDirection.angle)
                     FormulaFieldControl(
                       drawing: widget.drawing,
-                      key: GlobalObjectKey('${widget.command.id}-${widget.command.version}-angle'),
+                      key: ValueKey('${widget.command.id}-${widget.command.version}-angle'),
                       formula: widget.command.directionAngleFormula,
                       width: 155, 
                       excludeCommand: widget.command,
@@ -249,7 +249,7 @@ class _PointCommandControlState extends State<PointCommandControl> {
                   const SmallLabel(label: 'Of'),
                   hspacing,
                   DropdownButton<String>(
-                    key: GlobalObjectKey('${widget.command.id}-of'),
+                    key: ValueKey('${widget.command.id}-of'),
                     isDense: true,
                     autofocus: false,
                     style: smallStyle,
@@ -283,7 +283,7 @@ class _PointCommandControlState extends State<PointCommandControl> {
                   const SmallLabel(label: 'Line'),
                   hspacing,
                   DropdownButton<String>(
-                    key: GlobalObjectKey('${widget.command.id}-line'),
+                    key: ValueKey('${widget.command.id}-line'),
                     isDense: true,
                     autofocus: false,
                     style: smallStyle,
@@ -311,7 +311,7 @@ class _PointCommandControlState extends State<PointCommandControl> {
                   hspacing,
                   FormulaFieldControl(
                     drawing: widget.drawing,
-                    key: GlobalObjectKey('${widget.command.id}-${widget.command.version}-linefrac'),
+                    key: ValueKey('${widget.command.id}-${widget.command.version}-linefrac'),
                     formula: widget.command.onLineFractionFormula,
                     width: 240, 
                     excludeCommand: widget.command,
@@ -331,7 +331,7 @@ class _PointCommandControlState extends State<PointCommandControl> {
                   const SmallLabel(label: 'Curve'),
                   hspacing,
                   DropdownButton<String>(
-                    key: GlobalObjectKey('${widget.command.id}-curve'),
+                    key: ValueKey('${widget.command.id}-curve'),
                     isDense: true,
                     autofocus: false,
                     style: smallStyle,
@@ -359,7 +359,7 @@ class _PointCommandControlState extends State<PointCommandControl> {
                   hspacing,
                   FormulaFieldControl(
                     drawing: widget.drawing,
-                    key: GlobalObjectKey('${widget.command.id}-${widget.command.version}-curvefrac'),
+                    key: ValueKey('${widget.command.id}-${widget.command.version}-curvefrac'),
                     formula: widget.command.onCurveFractionFormula,
                     width: 240, 
                     excludeCommand: widget.command,
@@ -377,7 +377,7 @@ class _PointCommandControlState extends State<PointCommandControl> {
                   const SmallLabel(label: 'Line 1'),
                   hspacing,
                   DropdownButton<String>(
-                    key: GlobalObjectKey('${widget.command.id}-line1'),
+                    key: ValueKey('${widget.command.id}-line1'),
                     isDense: true,
                     autofocus: false,
                     style: smallStyle,
@@ -404,7 +404,7 @@ class _PointCommandControlState extends State<PointCommandControl> {
                   const SmallLabel(label: 'Line 2'),
                   hspacing,
                   DropdownButton<String>(
-                    key: GlobalObjectKey('${widget.command.id}-line2'),
+                    key: ValueKey('${widget.command.id}-line2'),
                     isDense: true,
                     autofocus: false,
                     style: smallStyle,

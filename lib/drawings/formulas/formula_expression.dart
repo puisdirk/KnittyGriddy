@@ -5,6 +5,7 @@ import 'package:knitty_griddy/drawings/model/commands/included_part_command.dart
 import 'package:knitty_griddy/drawings/model/commands/line_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/measurement_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
+import 'package:knitty_griddy/drawings/model/commands/repeat_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/variable_command.dart';
 import 'package:petitparser/petitparser.dart';
 
@@ -125,13 +126,13 @@ class FormulaExpression {
     return formula;
   }
 
-  static FormulaParseResult validate({required String formula, required AbstractDrawing drawing, String? label}) {
+  static FormulaParseResult validate({required String formula, required AbstractDrawing drawing, String? label, RepeatCommand? repeatContext, int? repeatValue}) {
     if (formula.isEmpty) {
       return FormulaParseResult.error(errorMessage: 'Requires ${label?? 'a value'}');
     }
 
     try {
-      final Result d = FormulaGrammar(drawing: drawing).parse(formula);
+      final Result d = FormulaGrammar(drawing: drawing, repeatContext: repeatContext, repeatValue: repeatValue).parse(formula);
       if (d is Success) {
         return FormulaParseResult.valid(val: d.value as double);
       } else {

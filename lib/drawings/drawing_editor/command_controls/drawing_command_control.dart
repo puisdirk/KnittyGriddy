@@ -6,6 +6,7 @@ import 'package:knitty_griddy/drawings/drawing_editor/command_controls/line_comm
 import 'package:knitty_griddy/drawings/drawing_editor/command_controls/measurement_command_control.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/command_controls/part_command_control.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/command_controls/point_command_control.dart';
+import 'package:knitty_griddy/drawings/drawing_editor/command_controls/repeat_command_control.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/command_controls/styling_command_control.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/command_controls/tape_command_control.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/command_controls/text_command_control.dart';
@@ -19,6 +20,7 @@ import 'package:knitty_griddy/drawings/model/commands/line_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/measurement_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/part_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
+import 'package:knitty_griddy/drawings/model/commands/repeat_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/styling_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/tape_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/text_command.dart';
@@ -180,6 +182,17 @@ class _DrawingCommandControlState extends State<DrawingCommandControl> {
         editing: editing,
         onChangeLabel: widget.onChangeLabel,
         onChanged: widget.onChanged,
+      );
+    }
+
+    if (widget.command is RepeatCommand) {
+      return RepeatCommandControl(
+        drawing: widget.drawing, 
+        command: widget.command as RepeatCommand, 
+        sorting: widget.sorting, 
+        editing: editing, 
+        onChangeLabel: widget.onChangeLabel, 
+        onChanged: widget.onChanged
       );
     }
 

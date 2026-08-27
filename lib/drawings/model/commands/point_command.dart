@@ -352,7 +352,13 @@ class PointCommand extends DrawingCommand {
   }
 
   @override
-  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const[], bool drawDirectionArrow = false, bool forPreview = false}) {
+  void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {
+    bool asPart = false, 
+    String prefixLabel = '', 
+    List<StylingCommand> stylings = const[], 
+    bool drawDirectionArrow = false, 
+    bool forPreview = false
+  }) {
     if (!valid) return;
     if (forPreview) return;
 
@@ -393,6 +399,7 @@ class PointCommand extends DrawingCommand {
     canvas.drawParagraph(paragraph,  coordinate.translate(2, 0));
   }
 
+  // TODO: passing storedCoordinate null doesn't do anything
   @override
   PointCommand clearValidation() {
     return copyWith(validated: false, valid: false, errors: const[], storedCoordinate: null);

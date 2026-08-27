@@ -17,6 +17,7 @@ enum DrawingCommandTypes {
   stylingCommand,
   textCommand,
   tapeCommand,
+  repeatCommand,
 }
 
 @immutable
@@ -30,6 +31,8 @@ abstract class DrawingCommand implements SameAs {
   final List<String> errors;
 
   final bool initiallyOpen;
+
+  Iterable<String> get labels => [];
 
   const DrawingCommand({
     required this.id,
@@ -60,6 +63,7 @@ abstract class DrawingCommand implements SameAs {
   DrawingCommand deleteReference({required String commandId});
   DrawingCommand changePartDrawingReference({required String oldId, required String newId});
   DrawingCommand dependentLabelChanged(String oldLabel, String newLabel);
+  // TODO: can't I implement this here by calling abstractCopy?
   DrawingCommand setInitiallyClosed();
 
   DrawingCommand clearValidation();
@@ -68,6 +72,7 @@ abstract class DrawingCommand implements SameAs {
   // Get the Ids of dependent commands
   Set<String> dependencies(AbstractDrawing drawing);
 
+  // TODO: can't I implement this here by calling abstractCopy?
   DrawingCommand markAsCyclic(String cycleDescription);
   bool get hasErrors => validated && !valid && errors.isNotEmpty;
 

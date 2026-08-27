@@ -32,6 +32,8 @@ const Color partColor = Colors.blue;
 // For controlling the ellipsis in view mode
 const double commandControlViewWidth = 250;
 const double commandControlViewWidthNoError = commandControlViewWidth + 30;
+const double repeatcommandControlViewWidth = 200;
+const double repeatcommandControlViewWidthNoError = repeatcommandControlViewWidth + 30;
 
 // Warning: also change defaultStitches when changing these
 const int defaultGridRows = 10;

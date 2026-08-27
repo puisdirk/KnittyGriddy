@@ -1,19 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
-import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
-import 'package:knitty_griddy/drawings/model/commands/variable_command.dart';
 
 import '../../utils/constants.dart';
 
 class VariableCommandChooser extends StatelessWidget {
-  final AbstractDrawing drawing;
-  final DrawingCommand? excludeCommand;
+  final List<String> variableLabels;
   final String query;
-  final ValueSetter<VariableCommand> onChooseVariable;
+  final ValueSetter<String> onChooseVariable;
 
   const VariableCommandChooser({
-    required this.drawing,
-    this.excludeCommand,
+    required this.variableLabels,
     required this.query,
     required this.onChooseVariable,
     super.key
@@ -21,14 +16,14 @@ class VariableCommandChooser extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<VariableCommand> variables = 
-      drawing.variables.where(
-        (m) => m.id != excludeCommand?.id && m.label.toLowerCase().contains(query)).toList();
+
+    final List<String> variables = variableLabels.where((v) => v.toLowerCase().contains(query)).toList();
+
     if (variables.isEmpty) {
       return const SizedBox.shrink();
     }
 
-    variables.sort((a, b) => a.label.compareTo(b.label));
+    variables.sort();
 
     return ConstrainedBox(
       constraints: const BoxConstraints(maxHeight: 260),
@@ -45,7 +40,7 @@ class VariableCommandChooser extends StatelessWidget {
           itemBuilder: (context, index) {
             return ListTile(
               tileColor: Colors.white,
-              title: Text(variables.elementAt(index).label, style: smallStyle,),
+              title: Text(variables.elementAt(index), style: smallStyle,),
               onTap: () => onChooseVariable(variables.elementAt(index)), 
             );
           },
