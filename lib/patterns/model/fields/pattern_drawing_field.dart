@@ -87,6 +87,9 @@ class PatternDrawingField extends PatternField {
   List<Color> get knownColours => drawing?.knownColours?? const[];
 
   @override
+  bool get fixedAspectRatio => false;
+
+  @override
   Map<String, Object> toJson() {
     if (drawing != null) {
       return {

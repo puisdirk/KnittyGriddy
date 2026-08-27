@@ -94,7 +94,7 @@ class _IncludedPartCommandControlState extends State<IncludedPartCommandControl>
             const SmallLabel(label: 'Label'),
             hspacing,
             SmallTextField(
-              key: GlobalObjectKey('${widget.command.id}-${widget.command.version}-label'),
+              key: ValueKey('${widget.command.id}-${widget.command.version}-label'),
               initialText: widget.command.label,
               width: 100,
               onTextChanged: labelChanged,
@@ -156,7 +156,7 @@ class _IncludedPartCommandControlState extends State<IncludedPartCommandControl>
             const SmallLabel(label: 'Anchor'),
             hspacing,
             DropdownButton<String>(
-              key: GlobalObjectKey('${widget.command.id}-anchor'),
+              key: ValueKey('${widget.command.id}-anchor'),
               isDense: true,
               autofocus: false,
               style: smallStyle,

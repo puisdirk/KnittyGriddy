@@ -82,7 +82,7 @@ class _VariableCommandControlState extends State<VariableCommandControl> {
             const SmallLabel(label: 'Label'),
             hspacing,
             SmallTextField(
-              key: GlobalObjectKey('${widget.command.id}-${widget.command.version}-label'),
+              key: ValueKey('${widget.command.id}-${widget.command.version}-label'),
               initialText: widget.command.label,
               width: 100,
               onTextChanged: labelChanged,
@@ -96,7 +96,7 @@ class _VariableCommandControlState extends State<VariableCommandControl> {
             hspacing,
             FormulaFieldControl(
               drawing: widget.drawing,
-              key: GlobalObjectKey('${widget.command.id}-${widget.command.version}-form'),
+              key: ValueKey('${widget.command.id}-${widget.command.version}-form'),
               excludeCommand: widget.command,
               width: 240,
               formula: widget.command.formula,

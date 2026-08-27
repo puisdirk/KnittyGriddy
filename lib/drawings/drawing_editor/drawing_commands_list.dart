@@ -10,6 +10,7 @@ import 'package:knitty_griddy/drawings/model/commands/measurement_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/meaurement_override.dart';
 import 'package:knitty_griddy/drawings/model/commands/part_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
+import 'package:knitty_griddy/drawings/model/commands/repeat_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/styling_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/tape_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/text_command.dart';
@@ -265,24 +266,46 @@ class _DrawingCommandsListState extends State<DrawingCommandsList> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Tooltip(
+                    message: 'Add Repeat',
+                    child: IconButton(
+                      onPressed: () {
+                        String newId = const UuidV4Gen().get();
+                        widget.onDrawingChanged(widget.drawing.abstractCopyWith(
+                          commands: [
+                            ...widget.drawing.commands,
+                            RepeatCommand(
+                              id: newId, 
+                              version: 0,
+                              label: widget.drawing.nextLabel('repeat'),
+                              initiallyOpen: true,
+                            )
+                          ]
+                        ).validate());
+                        widget.onSelect(newId);
+                      }, 
+                      icon: const Icon(Symbols.cycle, weight: 500,)
+                    ),
+                  ),
+                  Tooltip(
                     message: 'Add Style',
                     child: IconButton(
-                    onPressed: () {
-                      String newId = const UuidV4Gen().get();
-                      widget.onDrawingChanged(widget.drawing.abstractCopyWith(
-                        commands: [
-                          ...widget.drawing.commands,
-                          StylingCommand(
-                            id: newId, 
-                            version: 0,
-                            label: widget.drawing.nextLabel('style'),
-                            initiallyOpen: true,
-                          )
-                        ]
-                      ).validate());
-                      widget.onSelect(newId);
-                    }, 
-                    icon: const Icon(Symbols.palette)),
+                      onPressed: () {
+                        String newId = const UuidV4Gen().get();
+                        widget.onDrawingChanged(widget.drawing.abstractCopyWith(
+                          commands: [
+                            ...widget.drawing.commands,
+                            StylingCommand(
+                              id: newId, 
+                              version: 0,
+                              label: widget.drawing.nextLabel('style'),
+                              initiallyOpen: true,
+                            )
+                          ]
+                        ).validate());
+                        widget.onSelect(newId);
+                      }, 
+                      icon: const Icon(Symbols.palette, weight: 500,)
+                    ),
                   ),
                   Tooltip(
                     message: 'Add Text',
@@ -349,7 +372,11 @@ class _DrawingCommandsListState extends State<DrawingCommandsList> {
                       },
                       onChangeLabel: (DrawingCommand newCommand, String oldLabel) {
                         // We don't tell other commands about this if the change was a double-label correction
-                        bool isDoubleLabelCorrection = widget.drawing.commands.any((c) => c.id != newCommand.id && c.label == oldLabel);
+                        bool isDoubleLabelCorrection = 
+                          widget.drawing.commands.any((c) => 
+                            c.id != newCommand.id && 
+                            (c.label == oldLabel || (c is RepeatCommand && c.labels.contains(oldLabel)))
+                          );
 
                         widget.onDrawingChanged(widget.drawing.abstractCopyWith(
                           commands: widget.drawing.commands.map((c) {
@@ -420,15 +447,14 @@ class _DrawingCommandsListState extends State<DrawingCommandsList> {
                     ),
                 ],
                 onReorder: (oldIndex, newIndex) {
-                  List<DrawingCommand> reorderedCommands = List.from(widget.drawing.commands);
+                  List<DrawingCommand> reorderedCommands = List.from(widget.drawing.commands.reversed);
                   DrawingCommand temp = reorderedCommands.removeAt(oldIndex);
                   reorderedCommands.insert((newIndex > oldIndex) ? newIndex - 1 : newIndex, temp);
 
                   widget.onDrawingChanged(widget.drawing.abstractCopyWith(
-                    commands: reorderedCommands
+                    commands: reorderedCommands.reversed.toList()
                   ));
                 },
-                
               ),
             ),
           ],

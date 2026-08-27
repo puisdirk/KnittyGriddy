@@ -43,7 +43,7 @@ class _PickColourDialogState extends State<PickColourDialog> {
       content: SizedBox(
         height: 460,
         child: PickColourControl(
-          initialColor: widget.initialColor,
+          initialColor: currentColour,
           knownColours: widget.knownColours,
           onChanged: _colorChanged,
         ),

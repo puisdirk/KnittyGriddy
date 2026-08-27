@@ -8,6 +8,7 @@ import 'package:knitty_griddy/drawings/model/commands/included_part_command.dart
 import 'package:knitty_griddy/drawings/model/commands/measurement_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/meaurement_override.dart';
 import 'package:knitty_griddy/drawings/model/commands/part_command.dart';
+import 'package:knitty_griddy/drawings/model/commands/repeat_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/styling_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/text_command.dart';
 import 'package:knitty_griddy/drawings/model/part_drawing.dart';
@@ -80,10 +81,13 @@ class Drawing extends AbstractDrawing {
     for (TextCommand textCommand in commands.whereType()) {
       colors.add(textCommand.textColor);
     }
+    for (RepeatCommand repeatCommand in commands.whereType()) {
+      for (TextCommand textCommand in repeatCommand.commands.whereType()) {
+        colors.add(textCommand.textColor);
+      }
+    }
 
-    colors.remove(Colors.black);
-    colors.remove(Colors.white);
-    colors.remove(Colors.transparent);
+    colors.removeAll([Colors.black, Colors.white, Colors.transparent]);
 
     return colors.toList();
   }

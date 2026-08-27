@@ -86,7 +86,7 @@ class _PartCommandControlState extends State<PartCommandControl> {
             const SmallLabel(label: 'Label'),
             hspacing,
             SmallTextField(
-              key: GlobalObjectKey('${widget.command.id}-${widget.command.version}-label'),
+              key: ValueKey('${widget.command.id}-${widget.command.version}-label'),
               initialText: widget.command.label,
               width: 100,
               onTextChanged: labelChanged,
@@ -95,7 +95,7 @@ class _PartCommandControlState extends State<PartCommandControl> {
             const SmallLabel(label: 'Anchor'),
             hspacing,
             DropdownButton<String>(
-              key: GlobalObjectKey('${widget.command.id}-anchor'),
+              key: ValueKey('${widget.command.id}-anchor'),
               isDense: true,
               autofocus: false,
               style: smallStyle,
@@ -137,7 +137,7 @@ class _PartCommandControlState extends State<PartCommandControl> {
                     spacing: 10,
                     children: [
                       DropdownButton<DrawingCommand>(
-                        key: GlobalObjectKey('${widget.command.id}-chooser'),
+                        key: ValueKey('${widget.command.id}-chooser'),
                         isDense: true,
                         autofocus: false,
                         style: smallStyle,

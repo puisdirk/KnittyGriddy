@@ -11,6 +11,7 @@ import 'package:knitty_griddy/drawings/model/commands/line_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/measurement_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/part_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
+import 'package:knitty_griddy/drawings/model/commands/repeat_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/styling_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/tape_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/text_command.dart';
@@ -87,13 +88,16 @@ abstract class AbstractDrawing {
     lastTick = stopwatch.elapsedMilliseconds;
     int valstartTick = lastTick;
 
+    // Everything except repeats and styles
     int passes = 0;
     int maxPasses = 1000;
     while (true) {
-      if (clearedDrawing.commands.any((c) => !c.validated) && passes <= maxPasses) {
+      if (clearedDrawing.commands.any((c) => c is! RepeatCommand && c is! StylingCommand && !c.validated) && passes <= maxPasses) {
         printTiming('pass $passes');
         // We pass through the whole list on each loop as dependencies may not be solved yet
         List<DrawingCommand> passedCommands = clearedDrawing.commands.map((c) {
+          if (c is RepeatCommand || c is StylingCommand) return c;
+
           if (!c.validated) {
             DrawingCommand r = c.validate(clearedDrawing);
             printTiming('validation of ${r.label}: ${stopwatch.elapsedMilliseconds - lastTick}msec. Validated: ${r.validated}');
@@ -111,7 +115,56 @@ abstract class AbstractDrawing {
       }
     }
     //print('$passes validation passes for $name');
-    if (passes >= maxPasses) printTiming('validation overflow!!!!');
+    if (passes >= maxPasses) printTiming('!!!!!!!!!validation overflow!!!!');
+
+    // Repeat commands
+    passes = 0;
+    while (true) {
+      if (clearedDrawing.commands.any((c) => c is RepeatCommand && !c.validated) && passes <= maxPasses) {
+        List<DrawingCommand> passedCommands = clearedDrawing.commands.map((c) {
+          if (c is! RepeatCommand) return c;
+
+          if (!c.validated) {
+            DrawingCommand r = c.validate(clearedDrawing);
+            printTiming('validation of ${r.label}: ${stopwatch.elapsedMilliseconds - lastTick}msec. Validated: ${r.validated}');
+            lastTick = stopwatch.elapsedMilliseconds;
+            return r;
+          }
+          return c;
+        }).toList();
+        clearedDrawing = clearedDrawing.abstractCopyWith(
+          commands: passedCommands
+        );
+        passes++;
+      } else {
+        break;
+      }
+    }
+
+    // Styling commands
+    passes = 0;
+    while (true) {
+      if (clearedDrawing.commands.any((c) => c is StylingCommand && !c.validated) && passes <= maxPasses) {
+        List<DrawingCommand> passedCommands = clearedDrawing.commands.map((c) {
+          if (c is! StylingCommand) return c;
+
+          if (!c.validated) {
+            DrawingCommand r = c.validate(clearedDrawing);
+            printTiming('validation of ${r.label}: ${stopwatch.elapsedMilliseconds - lastTick}msec. Validated: ${r.validated}');
+            lastTick = stopwatch.elapsedMilliseconds;
+            return r;
+          }
+          return c;
+        }).toList();
+        clearedDrawing = clearedDrawing.abstractCopyWith(
+          commands: passedCommands
+        );
+        passes++;
+      } else {
+        break;
+      }
+    }
+
     printTiming('validated in $passes passes (${stopwatch.elapsedMilliseconds - valstartTick})');
 
     printTiming('----------- end validation (${stopwatch.elapsedMilliseconds}) ----------');
@@ -187,6 +240,8 @@ abstract class AbstractDrawing {
         case DrawingCommandTypes.tapeCommand:
           commands.add(TapeCommand.fromJson(commandObject));
           break;
+        case DrawingCommandTypes.repeatCommand:
+          commands.add(RepeatCommand.fromJson(commandObject));
       }
     }
     return commands;
@@ -205,6 +260,9 @@ abstract class AbstractDrawing {
   List<DrawingCommand> get pointLinesAndCurvesIncluded => [...pointsIncluded, ...linesIncluded, ...curvesIncluded];
   List<DrawingCommand> get pointLinesCurvesAndTapesIncluded => [...pointsIncluded, ...linesIncluded, ...curvesIncluded, ...tapes];
   List<DrawingCommand> get linesCurvesAndTapesIncluded => [...linesIncluded, ...curvesIncluded, ...tapes];
+  List<RepeatCommand> get repeats => commands.whereType<RepeatCommand>().toList();
+  List<DrawingCommand> get linesCurvesTapesAndRepeatsIncluded => [...linesCurvesAndTapesIncluded, ...repeats];
+  List<DrawingCommand> get pointLinesCurvesRepeatsAndTapesIncluded => [...pointsIncluded, ...linesIncluded, ...curvesIncluded, ...tapes, ...repeats];
 
   StylingCommand? styleFor(String id) {
     if (commands.whereType<StylingCommand>().any((s) => s.commandIds.contains(id))) {
@@ -213,10 +271,13 @@ abstract class AbstractDrawing {
     return null;
   }
 
-  String commandLabelIncluded(String id) {
+  String commandLabelIncluded(String id, {RepeatCommand? repeatContext}) {
     if (id == originId) return origin.label;
-    if (pointLinesCurvesAndTapesIncluded.any((c) => c.id == id)) {
-      return pointLinesCurvesAndTapesIncluded.firstWhere((c) => c.id == id).label;
+    if (pointLinesCurvesRepeatsAndTapesIncluded.any((c) => c.id == id)) {
+      return pointLinesCurvesRepeatsAndTapesIncluded.firstWhere((c) => c.id == id).label;
+    }
+    if (repeatContext != null && repeatContext.commands.any((c) => c.id == id)) {
+      return repeatContext.commands.firstWhere((c) => c.id == id).label;
     }
     return '???';
   }
@@ -413,7 +474,7 @@ abstract class AbstractDrawing {
   String nextLabel(String prefix) {
     int nextNum = 1;
     while (true) {
-      if (commands.any((c) => c.label == '$prefix$nextNum')) {
+      if (commands.any((c) => c.label == '$prefix$nextNum' || c.labels.contains('$prefix$nextNum'))) {
         nextNum++;
       } else {
         break;
@@ -433,6 +494,7 @@ abstract class AbstractDrawing {
     if (cmd is StylingCommand) return nextLabel('style');
     if (cmd is TextCommand) return nextLabel('text');
     if (cmd is TapeCommand) return nextLabel('tape');
+    if (cmd is RepeatCommand) return nextLabel('repeat');
     return '';
   }
 

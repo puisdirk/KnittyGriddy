@@ -350,7 +350,7 @@ class LineCommand extends DrawingCommand {
     start += middle;
     end += middle;
 
-    StylingCommand? styling = drawing.styleFor(id);
+    StylingCommand? styling = drawing.styleFor(id)?? stylings.where((s) => s.commandIds.any((c) => c == id)).firstOrNull;
     if (styling == null) {
       // Look for id in format drawingid.id
       if (stylings.any((s) => s.commandIds.any((sid) => sid.startsWith('${drawing.id}.$id')))) {
@@ -397,7 +397,7 @@ class LineCommand extends DrawingCommand {
     end += middle;
 
     Paint paint = Paint()..style = PaintingStyle.stroke;
-    StylingCommand? styling = drawing.styleFor(id);
+    StylingCommand? styling = drawing.styleFor(id)?? stylings.where((s) => s.commandIds.any((c) => c == id)).firstOrNull;
     if (styling == null) {
       // Look for id in format drawingid.id
       if (stylings.any((s) => s.commandIds.any((sid) => sid.startsWith('${drawing.id}.$id')))) {

@@ -94,7 +94,7 @@ class VariableCommand extends DrawingCommand {
   VariableCommand deleteReference({required String commandId}) => this;
 
   @override
-  DrawingCommand dependentLabelChanged(String oldLabel, String newLabel) {
+  VariableCommand dependentLabelChanged(String oldLabel, String newLabel) {
     return copyWith(
       formula: FormulaExpression.replaceDependentLabel(formula: formula, oldLabel: oldLabel, newLabel: newLabel),
     );

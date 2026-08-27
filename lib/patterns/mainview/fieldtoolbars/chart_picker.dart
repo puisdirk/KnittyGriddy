@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/charts/model/chart_info.dart';
 import 'package:knitty_griddy/charts/model/charts_model.dart';
-import 'package:knitty_griddy/drawings/model/drawing_info.dart';
-import 'package:knitty_griddy/drawings/model/drawings_model.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';

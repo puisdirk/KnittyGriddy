@@ -55,7 +55,7 @@ class _StylingCommandControlState extends State<StylingCommandControl> {
 
     return Row(
       children: [
-        const Icon(Symbols.palette),
+        const Icon(Symbols.palette, weight: 500,),
         hspacing,
         SizedBox(
           width: widget.command.hasErrors ? commandControlViewWidth : commandControlViewWidthNoError,
@@ -81,7 +81,7 @@ class _StylingCommandControlState extends State<StylingCommandControl> {
         const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Symbols.palette),
+            Icon(Symbols.palette, weight: 500,),
             hspacing,
           ],
         ),
@@ -91,7 +91,7 @@ class _StylingCommandControlState extends State<StylingCommandControl> {
             const SmallLabel(label: 'Label', width: 60,),
             hspacing,
             SmallTextField(
-              key: GlobalObjectKey('${widget.command.id}-${widget.command.version}-label'),
+              key: ValueKey('${widget.command.id}-${widget.command.version}-label'),
               initialText: widget.command.label,
               width: 100,
               onTextChanged: labelChanged,
@@ -123,10 +123,20 @@ class _StylingCommandControlState extends State<StylingCommandControl> {
                 child: Container(
                   decoration: BoxDecoration(
                     borderRadius: const BorderRadius.all(Radius.circular(5)), 
-                    color: widget.command.color
+                    border: Border.all(color: Colors.grey)
                   ), 
                   width: 40, 
                   height: 30,
+                  child: Center(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: const BorderRadius.all(Radius.circular(3)),
+                        color: widget.command.color
+                      ),
+                      width: 34,
+                      height: 24,
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -140,7 +150,7 @@ class _StylingCommandControlState extends State<StylingCommandControl> {
             SizedBox(
               width: 180,
               child: SpinBox(
-                key: GlobalObjectKey('${widget.command.id}-linewidth'),
+                key: ValueKey('${widget.command.id}-linewidth'),
                 textStyle: smallStyle,
                 onChanged: (value) {
                   if (value != widget.command.thickness) {
@@ -167,7 +177,7 @@ class _StylingCommandControlState extends State<StylingCommandControl> {
                     const SmallLabel(label: 'Style', width: 60,),
                     hspacing,
                     DropdownButton<DashStyle>(
-                      key: GlobalObjectKey('${widget.command.id}-dashstyle'),
+                      key: ValueKey('${widget.command.id}-dashstyle'),
                       icon: SizedBox(width: 60, height: 20, child: CustomPaint(painter: DashStylePainter(dashStyle: widget.command.dashStyle, command: widget.command),),),
                       isDense: true,
                       autofocus: false,
@@ -200,7 +210,7 @@ class _StylingCommandControlState extends State<StylingCommandControl> {
                     const SmallLabel(label: 'Start arrow', width: 60,),
                     hspacing,
                     DropdownButton<ArrowType>(
-                      key: GlobalObjectKey('${widget.command.id}-startArrow'),
+                      key: ValueKey('${widget.command.id}-startArrow'),
                       icon: SizedBox(width: 60, height: 20, child: CustomPaint(painter: ArrowChooserPainter(atStart: true, arrowType: widget.command.startArrow, command: widget.command),),),
                       isDense: true,
                       autofocus: false,
@@ -233,7 +243,7 @@ class _StylingCommandControlState extends State<StylingCommandControl> {
                     const SmallLabel(label: 'End arrow', width: 60,),
                     hspacing,
                     DropdownButton<ArrowType>(
-                      key: GlobalObjectKey('${widget.command.id}-endArrow'),
+                      key: ValueKey('${widget.command.id}-endArrow'),
                       icon: SizedBox(width: 60, height: 20, child: CustomPaint(painter: ArrowChooserPainter(atStart: false, arrowType: widget.command.endArrow, command: widget.command),),),
                       isDense: true,
                       autofocus: false,
@@ -319,7 +329,7 @@ class _StylingCommandControlState extends State<StylingCommandControl> {
                     spacing: 10,
                     children: [
                       DropdownButton<DrawingCommand>(
-                        key: GlobalObjectKey('${widget.command.id}-chooser'),
+                        key: ValueKey('${widget.command.id}-chooser'),
                         isDense: true,
                         autofocus: false,
                         style: smallStyle,
@@ -327,7 +337,7 @@ class _StylingCommandControlState extends State<StylingCommandControl> {
                         focusColor: Colors.transparent,
                         underline: Container(),
                         items: [
-                          for (DrawingCommand cmd in widget.drawing.linesCurvesAndTapesIncluded.where((c) => !widget.command.commandIds.contains(c.id)))
+                          for (DrawingCommand cmd in widget.drawing.linesCurvesTapesAndRepeatsIncluded.where((c) => !widget.command.commandIds.contains(c.id)))
                             DropdownMenuItem(value: cmd, child: Text(cmd.label)),
                         ], 
                         onChanged: (value) {

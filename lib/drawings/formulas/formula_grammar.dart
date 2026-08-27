@@ -5,6 +5,7 @@ import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
 import 'package:knitty_griddy/drawings/model/commands/line_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/measurement_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
+import 'package:knitty_griddy/drawings/model/commands/repeat_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/variable_command.dart';
 import 'package:knitty_griddy/utils/math_utitilies.dart';
 import 'package:petitparser/petitparser.dart';
@@ -26,9 +27,13 @@ class FormulaException {
 class FormulaGrammar extends GrammarDefinition {
 
   final AbstractDrawing drawing;
+  final RepeatCommand? repeatContext;
+  final int? repeatValue;
 
   const FormulaGrammar({
-    required this.drawing
+    required this.drawing,
+    this.repeatContext,
+    this.repeatValue,
   }) : super();
 
   Result parse(String formula) {
@@ -119,7 +124,14 @@ class FormulaGrammar extends GrammarDefinition {
     }
 
     String varName = ((p[1]) as String).replaceAll('_', ' ');
-    VariableCommand? v = drawing.variableByName(varName);
+    if (varName == 'RepeatValue') {
+      if (repeatValue != null) {
+        return repeatValue;
+      }
+      throw const FormulaException(errorMessage: '!RepeatValue is reserved for formula\'s inside Repeat commands', shouldRetry: false);
+    }
+
+    VariableCommand? v = drawing.variableByName(varName)?? repeatContext?.variableByName(varName);
     if (v == null) {
       throw FormulaException(errorMessage: 'Variable $varName does not exist', shouldRetry: false);
     }
@@ -179,12 +191,12 @@ class FormulaGrammar extends GrammarDefinition {
         char(')').trim()  
       ).map5((_, p1label, __, p2label, ___) {
 
-            PointCommand? p1 = drawing.pointByName(p1label);
+            PointCommand? p1 = drawing.pointByName(p1label)?? repeatContext?.pointByName(p1label);
             if (p1 == null) throw FormulaException(errorMessage: 'Point $p1label does not exist', shouldRetry: false);
             if (!p1.validated) throw FormulaException(errorMessage: 'Point $p1label is not validated', shouldRetry: true);
             if (!p1.valid) throw FormulaException(errorMessage: 'Point $p1label has errors', shouldRetry: false);
 
-            PointCommand? p2 = drawing.pointByName(p2label);
+            PointCommand? p2 = drawing.pointByName(p2label)?? repeatContext?.pointByName(p2label);
             if (p2 == null) throw FormulaException(errorMessage: 'Point $p2label does not exist', shouldRetry: false);
             if (!p2.validated) throw FormulaException(errorMessage: 'Point $p2label is not validated', shouldRetry: true);
             if (!p2.valid) throw FormulaException(errorMessage: 'Point $p2label has errors', shouldRetry: false);
@@ -201,7 +213,7 @@ class FormulaGrammar extends GrammarDefinition {
         ((word() | char('.')).star()).flatten().trim(),
         char(')').trim()).map3((_, label, __) => label)
     ).map2((_, lineLabel) {
-      LineCommand? line = drawing.lineByName(lineLabel);
+      LineCommand? line = drawing.lineByName(lineLabel)?? repeatContext?.lineByName(lineLabel);
       if (line == null) {
         throw FormulaException(errorMessage: 'Line $lineLabel does not exist', shouldRetry: false);
       }

@@ -59,7 +59,7 @@ class _MainPageState extends State<MainPage> {
                   Tab(
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: [Icon(p.icon), hspacing, Text(p.label)],
+                      children: [Icon(p.icon,), hspacing, Text(p.label)],
                     ),
                   )
               ]

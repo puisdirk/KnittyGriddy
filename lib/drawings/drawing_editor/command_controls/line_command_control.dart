@@ -93,7 +93,7 @@ class _LineCommandControlState extends State<LineCommandControl> {
             const SmallLabel(label: 'Label'),
             hspacing,
             SmallTextField(
-              key: GlobalObjectKey('${widget.command.id}-${widget.command.version}-label'),
+              key: ValueKey('${widget.command.id}-${widget.command.version}-label'),
               initialText: widget.command.label,
               width: 100,
               onTextChanged: lineLabelChanged,
@@ -106,7 +106,7 @@ class _LineCommandControlState extends State<LineCommandControl> {
             const SmallLabel(label: 'From'),
             hspacing,
             DropdownButton<String>(
-              key: GlobalObjectKey('${widget.command.id}-from'),
+              key: ValueKey('${widget.command.id}-from'),
               isDense: true,
               autofocus: false,
               style: smallStyle,
@@ -135,7 +135,7 @@ class _LineCommandControlState extends State<LineCommandControl> {
             const SmallLabel(label: 'To'),
             hspacing,
             DropdownButton<String>(
-              key: GlobalObjectKey('${widget.command.id}-to'),
+              key: ValueKey('${widget.command.id}-to'),
               isDense: true,
               autofocus: false,
               style: smallStyle,

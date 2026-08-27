@@ -203,7 +203,7 @@ class TextCommand extends DrawingCommand {
   }
 
   @override
-  DrawingCommand dependentLabelChanged(String oldLabel, String newLabel) => this;
+  TextCommand dependentLabelChanged(String oldLabel, String newLabel) => this;
 
   @override
   String toSvg(Size drawingSize, AbstractDrawing drawing, {List<StylingCommand> stylings = const []}) {

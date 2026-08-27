@@ -94,7 +94,7 @@ class _TapeCommandControlState extends State<TapeCommandControl> {
             const Icon(Icons.straighten),
             hspacing,
             DropdownButton<TapeType>(
-              key: GlobalObjectKey('${widget.command.id}-tapetype'),
+              key: ValueKey('${widget.command.id}-tapetype'),
               isDense: true,
               autofocus: false,
               style: smallStyle,
@@ -120,7 +120,7 @@ class _TapeCommandControlState extends State<TapeCommandControl> {
             const SmallLabel(label: 'Label'),
             hspacing,
             SmallTextField(
-              key: GlobalObjectKey('${widget.command.id}-${widget.command.version}-label'),
+              key: ValueKey('${widget.command.id}-${widget.command.version}-label'),
               initialText: widget.command.label,
               width: 100,
               onTextChanged: lineLabelChanged,
@@ -138,7 +138,7 @@ class _TapeCommandControlState extends State<TapeCommandControl> {
                   const SmallLabel(label: 'From'),
                   hspacing,
                   DropdownButton<String>(
-                    key: GlobalObjectKey('${widget.command.id}-from'),
+                    key: ValueKey('${widget.command.id}-from'),
                     isDense: true,
                     autofocus: false,
                     style: smallStyle,
@@ -163,7 +163,7 @@ class _TapeCommandControlState extends State<TapeCommandControl> {
                   const SmallLabel(label: 'To'),
                   hspacing,
                   DropdownButton<String>(
-                    key: GlobalObjectKey('${widget.command.id}-to'),
+                    key: ValueKey('${widget.command.id}-to'),
                     isDense: true,
                     autofocus: false,
                     style: smallStyle,
@@ -194,7 +194,7 @@ class _TapeCommandControlState extends State<TapeCommandControl> {
               const SmallLabel(label: 'Line'),
               hspacing,
               DropdownButton<String>(
-                key: GlobalObjectKey('${widget.command.id}-line'),
+                key: ValueKey('${widget.command.id}-line'),
                 isDense: true,
                 autofocus: false,
                 style: smallStyle,
@@ -236,7 +236,7 @@ class _TapeCommandControlState extends State<TapeCommandControl> {
                       spacing: 10,
                       children: [
                         DropdownButton<DrawingCommand>(
-                          key: GlobalObjectKey('${widget.command.id}-linesandcurveschooser'),
+                          key: ValueKey('${widget.command.id}-linesandcurveschooser'),
                           isDense: true,
                           autofocus: false,
                           style: smallStyle,
@@ -277,7 +277,7 @@ class _TapeCommandControlState extends State<TapeCommandControl> {
                     const SmallLabel(label: 'Direction'),
                     hspacing,
                     DropdownButton<TapeDirectionType>(
-                      key: GlobalObjectKey('${widget.command.id}-directiontype'),
+                      key: ValueKey('${widget.command.id}-directiontype'),
                       isDense: true,
                       autofocus: false,
                       style: smallStyle,
@@ -306,7 +306,7 @@ class _TapeCommandControlState extends State<TapeCommandControl> {
             const SmallLabel(label: 'Unit'),
             hspacing,
             DropdownButton<TapeUnit>(
-              key: GlobalObjectKey('${widget.command.id}-unit'),
+              key: ValueKey('${widget.command.id}-unit'),
               isDense: true,
               autofocus: false,
               style: smallStyle,
@@ -336,7 +336,7 @@ class _TapeCommandControlState extends State<TapeCommandControl> {
               SizedBox(
                 width: 180,
                 child: SpinBox(
-                  key: GlobalObjectKey('${widget.command.id}-rowsgauge'),
+                  key: ValueKey('${widget.command.id}-rowsgauge'),
                   textStyle: smallStyle,
                   onChanged: (value) {
                     if (value != widget.command.rowsGauge) {
@@ -362,7 +362,7 @@ class _TapeCommandControlState extends State<TapeCommandControl> {
               SizedBox(
                 width: 180,
                 child: SpinBox(
-                  key: GlobalObjectKey('${widget.command.id}-stsgauge'),
+                  key: ValueKey('${widget.command.id}-stsgauge'),
                   textStyle: smallStyle,
                   onChanged: (value) {
                     if (value != widget.command.stitchesGauge) {

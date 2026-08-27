@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:knitty_griddy/drawings/drawing_chooser/drawing_chooser_view.dart';
 import 'package:knitty_griddy/drawings/model/drawing.dart';
 import 'package:knitty_griddy/drawings/model/drawing_info.dart';
 import 'package:knitty_griddy/drawings/model/drawings_model.dart';
