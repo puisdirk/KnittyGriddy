@@ -4,6 +4,7 @@ import 'package:knitty_griddy/charts/stitchrepo/stitch_definition.dart';
 import 'package:knitty_griddy/charts/export/knitting_chart_view_settings.dart';
 import 'package:knitty_griddy/charts/model/knitting_chart.dart';
 import 'package:knitty_griddy/charts/model/named_colour.dart';
+import 'package:knitty_griddy/utils/constants.dart';
 
 class ChartFieldPreviewLegend extends StatelessWidget {
   final KnittingChart chart;
@@ -20,7 +21,7 @@ class ChartFieldPreviewLegend extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         StitchIcon(stitchDefinition: def, iconSize: 16, withBorder: true,),
-        const SizedBox(width: 10,),
+        hspacing,
         Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -49,7 +50,7 @@ class ChartFieldPreviewLegend extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(width: 10,),
+        hspacing,
         Text(colour.name),
         const SizedBox(width: 20,)
       ]
@@ -86,7 +87,7 @@ class ChartFieldPreviewLegend extends StatelessWidget {
         }
 
         stsColumns.add(Column(mainAxisAlignment: MainAxisAlignment.start, crossAxisAlignment: CrossAxisAlignment.start, children: colWidgets,));
-        stsColumns.add(const SizedBox(width: 10,));
+        stsColumns.add(hspacing);
       }
       widgets.add(Row(children: stsColumns,));
     }
@@ -115,7 +116,7 @@ class ChartFieldPreviewLegend extends StatelessWidget {
         }
 
         colourColumns.add(Column(mainAxisAlignment: MainAxisAlignment.start, crossAxisAlignment: CrossAxisAlignment.start, children: columnWidgets,));
-        colourColumns.add(const SizedBox(width: 10,));
+        colourColumns.add(hspacing);
       }
 
       if (exportSettings.showStitches) {

@@ -14,7 +14,9 @@ enum Unit {
   meter(label: 'Meter', shortLabel: 'm'),
   inches(label: 'Inches', shortLabel: '"'),
   feet(label: 'Feet', shortLabel: 'ft'),
-  angle(label: 'Degrees', shortLabel: '°');
+  angle(label: 'Degrees', shortLabel: '°'),
+  colour(label: 'Colour', shortLabel: ''),
+  noUnit(label: 'None', shortLabel: '');
   
   final String label;
   final String shortLabel;
@@ -26,8 +28,11 @@ class MeasurementCommand extends DrawingCommand {
   final double minValue;
   final double maxValue;
   final double value;
+  final int colourValue;
   final int decimals;
   final Unit unit;
+
+  static const int kDefaultColour = 0xFF000000;
 
   const MeasurementCommand({
     required super.id,
@@ -36,6 +41,7 @@ class MeasurementCommand extends DrawingCommand {
     this.minValue = 0,
     this.maxValue = 100,
     this.value = 50,
+    this.colourValue = kDefaultColour,
     this.decimals = 0,
     this.unit = Unit.cm,
     super.valid,
@@ -50,6 +56,7 @@ class MeasurementCommand extends DrawingCommand {
     double? minValue,
     double? maxValue,
     double? value,
+    int? colourValue,
     int? decimals,
     Unit? unit,
     bool? validated,
@@ -69,6 +76,7 @@ class MeasurementCommand extends DrawingCommand {
       minValue: min,
       maxValue: max,
       value: val,
+      colourValue: colourValue?? this.colourValue,
       decimals: decimals?? this.decimals,
       unit: unit?? this.unit,
       valid: valid?? this.valid,
@@ -87,7 +95,7 @@ class MeasurementCommand extends DrawingCommand {
   }
 
   @override
-  double get editHeight => 330;
+  double get editHeight => unit == Unit.colour ? 140 : 330;
 
   @override
   Rect getBoundingBox(AbstractDrawing drawing) => Rect.zero;
@@ -118,6 +126,7 @@ class MeasurementCommand extends DrawingCommand {
       minValue == other.minValue &&
       maxValue == other.maxValue &&
       value == other.value &&
+      colourValue == other.colourValue &&
       decimals == other.decimals &&
       unit == other.unit &&
       valid == other.valid &&
@@ -134,12 +143,13 @@ class MeasurementCommand extends DrawingCommand {
       minValue == other.minValue &&
       maxValue == other.maxValue &&
       value == other.value &&
+      colourValue == other.colourValue &&
       decimals == other.decimals &&
       unit == other.unit;
 
   @override
   int get hashCode => super.hashCode ^ id.hashCode ^ label.hashCode ^
-    minValue.hashCode ^ maxValue.hashCode ^ value.hashCode ^ decimals.hashCode ^ unit.hashCode;
+    minValue.hashCode ^ maxValue.hashCode ^ value.hashCode ^ colourValue.hashCode ^ decimals.hashCode ^ unit.hashCode;
 
   @override
   MeasurementCommand clearValidation() {
@@ -176,6 +186,7 @@ class MeasurementCommand extends DrawingCommand {
       'min': minValue,
       'max': maxValue,
       'val': value,
+      'col': colourValue,
       'dec': decimals,
       'unit': unit.name,
     };
@@ -188,6 +199,7 @@ class MeasurementCommand extends DrawingCommand {
       'min': minValue,
       'max': maxValue,
       'val': value,
+      'col': colourValue,
       'dec': decimals,
       'unit': unit.name,
     });
@@ -200,6 +212,7 @@ class MeasurementCommand extends DrawingCommand {
       minValue: json['min'] as double,
       maxValue: json['max'] as double,
       value: json['val'] as double,
+      colourValue: json.containsKey('col') ? json['col'] as int : kDefaultColour,
       decimals: json['dec'] as int,
       unit: Unit.values.byName(json['unit'] as String),
     );
@@ -214,16 +227,18 @@ class MeasurementCommand extends DrawingCommand {
     if (label.isEmpty) { isvalid = false; retryValidation = false; validationErrors.add('Requires a label'); }
     if (drawing.commands.any((c) => c.id != id && c.label == label)) { isvalid = false; retryValidation = false; validationErrors.add('Label should be unique'); }
 
-    if (minValue >= maxValue) {
-      isvalid = false;
-      retryValidation = false;
-      errors.add('Minimum must be smaller than maximum');
-    }
+    if (unit != Unit.colour) {
+      if (minValue >= maxValue) {
+        isvalid = false;
+        retryValidation = false;
+        errors.add('Minimum must be smaller than maximum');
+      }
 
-    if (value < minValue || value > maxValue) {
-      isvalid = false;
-      retryValidation = false;
-      errors.add('Value must be between minimum and maximum');
+      if (value < minValue || value > maxValue) {
+        isvalid = false;
+        retryValidation = false;
+        errors.add('Value must be between minimum and maximum');
+      }
     }
 
     return copyWith(

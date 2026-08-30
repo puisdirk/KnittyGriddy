@@ -6,10 +6,12 @@ import 'package:knitty_griddy/patterns/mainview/field_controls/chartfieldcompone
 import 'package:knitty_griddy/utils/constants.dart';
 
 class ChartFieldGrid extends StatelessWidget {
+  final bool showNoStichCells;
   final KnittingChart chart;
   
   const ChartFieldGrid({
     required this.chart,
+    required this.showNoStichCells,
     super.key
   });
 
@@ -24,7 +26,12 @@ class ChartFieldGrid extends StatelessWidget {
           Positioned(
             top: stitchCellHeight,
             left: stitchCellWidth,
-            child: ChartFieldStitchesGrid(rows: chart.chartSettings.rows, columns: chart.chartSettings.columns, stitches: chart.stitches,)
+            child: ChartFieldStitchesGrid(
+              rows: chart.chartSettings.rows, 
+              columns: chart.chartSettings.columns, 
+              stitches: chart.stitches,
+              showNoStichCells: showNoStichCells,
+            )
           ),
           Positioned(
             top: stitchCellHeight,

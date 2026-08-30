@@ -8,26 +8,24 @@ enum LegendPosition {
 class KnittingChartViewSettings {
   final LegendPosition legendPosition;
   final bool showGrid;
+  final bool showNoStichCells;
   final bool showStitches;
   final bool showStitchDescriptions;
   final bool showColours;
 
   const KnittingChartViewSettings({
-    LegendPosition? legendPosition,
-    bool? showGrid,
-    bool? showStitches,
-    bool? showStitchDescriptions,
-    bool? showColours,
-  }) :
-    legendPosition = legendPosition?? LegendPosition.right,
-    showGrid = showGrid?? true,
-    showStitches = showStitches?? true,
-    showStitchDescriptions = showStitchDescriptions?? false,
-    showColours = showColours?? true;
+    this.legendPosition = LegendPosition.right,
+    this.showGrid = true,
+    this.showNoStichCells = true,
+    this.showStitches = true,
+    this.showStitchDescriptions = false,
+    this.showColours = true,
+  });
   
   KnittingChartViewSettings copyWith({
     LegendPosition? legendPosition,
     bool? showGrid,
+    bool? showNoStichCells,
     bool? showStitches,
     bool? showStitchDescriptions,
     bool? showColours,
@@ -35,6 +33,7 @@ class KnittingChartViewSettings {
     return KnittingChartViewSettings(
       legendPosition: legendPosition?? this.legendPosition,
       showGrid: showGrid?? this.showGrid,
+      showNoStichCells: showNoStichCells?? this.showNoStichCells,
       showStitches: showStitches?? this.showStitches,
       showStitchDescriptions: showStitchDescriptions?? this.showStitchDescriptions,
       showColours: showColours?? this.showColours,
@@ -45,6 +44,7 @@ class KnittingChartViewSettings {
     return {
       'pos': legendPosition.name,
       'grid': showGrid,
+      'nostitch': showNoStichCells,
       'sts': showStitches,
       'desc': showStitchDescriptions,
       'cols': showColours,
@@ -55,6 +55,7 @@ class KnittingChartViewSettings {
     return KnittingChartViewSettings(
       legendPosition: LegendPosition.values.byName(json['pos'] as String),
       showGrid: json['grid'] as bool,
+      showNoStichCells: json.containsKey('nostitch') ? json['nostitch'] as bool : true,
       showStitches: json['sts'] as bool,
       showStitchDescriptions: json['desc'] as bool,
       showColours: json['cols'] as bool,

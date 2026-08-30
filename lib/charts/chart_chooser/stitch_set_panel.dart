@@ -9,6 +9,7 @@ import 'package:knitty_griddy/charts/stitchrepo/stitch_definition.dart';
 import 'package:knitty_griddy/charts/stitchrepo/stitch_repository.dart';
 import 'package:knitty_griddy/charts/stitchrepo/stitch_set.dart';
 import 'package:knitty_griddy/charts/model/charts_model.dart';
+import 'package:knitty_griddy/utils/constants.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
@@ -46,7 +47,7 @@ class _StitchSetPanelState extends State<StitchSetPanel> {
           height: 50,
           child: Row(
             children: [
-              const SizedBox(width: 10,),
+              hspacing,
               OutlinedButton.icon(
                 onPressed: () async {
                   try {
@@ -82,7 +83,7 @@ class _StitchSetPanelState extends State<StitchSetPanel> {
                   label: const Text('New Stitch'),
                   icon: const Icon(Icons.add),
                 ),
-              const SizedBox(width: 10,),
+              hspacing,
               OutlinedButton.icon(
                 onPressed: () {
                   showDialog(
@@ -112,7 +113,7 @@ class _StitchSetPanelState extends State<StitchSetPanel> {
                 icon: const Icon(Icons.delete),
                 label: const Text('Delete Set'),
               ),
-              const SizedBox(width: 10,),
+              hspacing,
             ],
           ),
         ),
@@ -157,7 +158,7 @@ class _StitchSetPanelState extends State<StitchSetPanel> {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      const SizedBox(width: 10,),
+                      hspacing,
                       StitchIcon(stitchDefinition: def, iconSize: 20,),
                       const SizedBox(width: 20,),
                       Text(def.name),
@@ -209,7 +210,7 @@ class _StitchSetPanelState extends State<StitchSetPanel> {
                         }, 
                         icon: const Icon(Icons.delete),
                       ),
-                      const SizedBox(width: 10,),
+                      hspacing,
                     ],
                   ),
                 ),

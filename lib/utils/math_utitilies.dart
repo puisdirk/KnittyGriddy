@@ -77,6 +77,8 @@ class MathUtitilies {
       case Unit.feet:
         return value * 304.8;
       case Unit.angle:
+      case Unit.noUnit:
+      case Unit.colour:
         return value;
     }
   }
@@ -94,6 +96,8 @@ class MathUtitilies {
       case Unit.feet:
         return valueInMM / 304.8;
       case Unit.angle:
+      case Unit.noUnit:
+      case Unit.colour:
         return valueInMM;
     }
   }

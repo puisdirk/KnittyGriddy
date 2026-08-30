@@ -88,15 +88,15 @@ abstract class AbstractDrawing {
     lastTick = stopwatch.elapsedMilliseconds;
     int valstartTick = lastTick;
 
-    // Everything except repeats and styles
+    // Everything except repeats, styles and included parts
     int passes = 0;
     int maxPasses = 1000;
     while (true) {
-      if (clearedDrawing.commands.any((c) => c is! RepeatCommand && c is! StylingCommand && !c.validated) && passes <= maxPasses) {
+      if (clearedDrawing.commands.any((c) => c is! RepeatCommand && c is! StylingCommand && c is! IncludedPartCommand && !c.validated) && passes <= maxPasses) {
         printTiming('pass $passes');
         // We pass through the whole list on each loop as dependencies may not be solved yet
         List<DrawingCommand> passedCommands = clearedDrawing.commands.map((c) {
-          if (c is RepeatCommand || c is StylingCommand) return c;
+          if (c is RepeatCommand || c is StylingCommand || c is IncludedPartCommand) return c;
 
           if (!c.validated) {
             DrawingCommand r = c.validate(clearedDrawing);
@@ -114,8 +114,8 @@ abstract class AbstractDrawing {
         break;
       }
     }
-    //print('$passes validation passes for $name');
-    if (passes >= maxPasses) printTiming('!!!!!!!!!validation overflow!!!!');
+
+    if (passes >= maxPasses) printTiming('!!!!!!!!!validation overflow');
 
     // Repeat commands
     passes = 0;
@@ -141,6 +141,34 @@ abstract class AbstractDrawing {
       }
     }
 
+    if (passes >= maxPasses) printTiming('!!!!!!!!!validation overflow');
+
+    // Included part commands
+    passes = 0;
+    while (true) {
+      if (clearedDrawing.commands.any((c) => c is IncludedPartCommand && !c.validated) && passes <= maxPasses) {
+        List<DrawingCommand> passedCommands = clearedDrawing.commands.map((c) {
+          if (c is! IncludedPartCommand) return c;
+
+          if (!c.validated) {
+            DrawingCommand r = c.validate(clearedDrawing);
+            printTiming('validation of ${r.label}: ${stopwatch.elapsedMilliseconds - lastTick}msec. Validated: ${r.validated}');
+            lastTick = stopwatch.elapsedMilliseconds;
+            return r;
+          }
+          return c;
+        }).toList();
+        clearedDrawing = clearedDrawing.abstractCopyWith(
+          commands: passedCommands
+        );
+        passes++;
+      } else {
+        break;
+      }
+    }
+
+    if (passes >= maxPasses) printTiming('!!!!!!!!!validation overflow');
+
     // Styling commands
     passes = 0;
     while (true) {
@@ -164,6 +192,8 @@ abstract class AbstractDrawing {
         break;
       }
     }
+
+    if (passes >= maxPasses) printTiming('!!!!!!!!!validation overflow');
 
     printTiming('validated in $passes passes (${stopwatch.elapsedMilliseconds - valstartTick})');
 

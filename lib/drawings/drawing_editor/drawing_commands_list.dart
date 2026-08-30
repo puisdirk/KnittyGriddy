@@ -405,6 +405,8 @@ class _DrawingCommandsListState extends State<DrawingCommandsList> {
                                   // A measurement formula will always return in mm, so we add a funtion to convert
                                   switch (mcmd.unit) {
                                     case Unit.angle:
+                                    case Unit.noUnit:
+                                    case Unit.colour:
                                       break;
                                     case Unit.cm:
                                       formula = '#toCM($formula)';

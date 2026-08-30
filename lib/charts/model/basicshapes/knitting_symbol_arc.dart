@@ -218,7 +218,7 @@ class KnittingSymbolArc extends KnittingSymbolPart {
                 child: Text('Width'),
               ),
             ),
-            const SizedBox(width: 10,),
+            hspacing,
             SizedBox(
               width: 160,
               child: SpinBox(
@@ -252,7 +252,7 @@ class KnittingSymbolArc extends KnittingSymbolPart {
                 value: width
               ),
             ),
-            const SizedBox(width: 10,),
+            hspacing,
             const SizedBox(
               width: 50,
               child: Align(
@@ -260,7 +260,7 @@ class KnittingSymbolArc extends KnittingSymbolPart {
                 child: Text('Height'),
               ),
             ),
-            const SizedBox(width: 10,),
+            hspacing,
             SizedBox(
               width: 160,
               child: SpinBox(
@@ -306,7 +306,7 @@ class KnittingSymbolArc extends KnittingSymbolPart {
               child: Text('Start angle'),
             ),
           ),
-          const SizedBox(width: 10,),
+          hspacing,
           SizedBox(
             width: 160,
             child: SpinBox(
@@ -338,7 +338,7 @@ class KnittingSymbolArc extends KnittingSymbolPart {
               value: startAngle, 
             ),
           ),
-          const SizedBox(width: 10,),
+          hspacing,
           const SizedBox(
             width: 90,
             child: Align(
@@ -346,7 +346,7 @@ class KnittingSymbolArc extends KnittingSymbolPart {
               child: Text('Sweep angle'),
             ),
           ),
-          const SizedBox(width: 10,),
+          hspacing,
           SizedBox(
             width: 160,
             child: SpinBox(

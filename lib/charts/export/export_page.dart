@@ -10,6 +10,8 @@ import 'package:knitty_griddy/charts/export/preview_legend.dart';
 import 'package:knitty_griddy/charts/export/preview_stitches_grid.dart';
 import 'package:knitty_griddy/charts/model/chart_operation_exception.dart';
 import 'package:knitty_griddy/charts/model/charts_model.dart';
+import 'package:knitty_griddy/charts/model/knitting_chart.dart';
+import 'package:knitty_griddy/patterns/mainview/field_controls/chartfieldcomponents/chart_field_grid.dart';
 import 'package:knitty_griddy/utils/svg_service.dart';
 import 'package:provider/provider.dart';
 
@@ -28,6 +30,7 @@ class _ExportPageState extends State<ExportPage> {
   @override
   Widget build(BuildContext context) {
     const double toolbarHeight = 50;
+    KnittingChart chart = Provider.of<ChartsModel>(context, listen: false).knittingChart;
 
     return Scaffold(
       appBar: AppBar(
@@ -96,16 +99,24 @@ class _ExportPageState extends State<ExportPage> {
         key: drawingBoundaryKey, 
         child: Padding(
           padding: const EdgeInsets.all(20.0),
-          child: FittedBox(
+          child: (!exportSettings.showGrid && !exportSettings.showLegend) ?
+            const SizedBox(width: 10, height: 10,) :
+          FittedBox(
             child: exportSettings.showLegend == false ?
-              const PreviewStitchesGrid() :
+              Visibility(
+                visible: exportSettings.showGrid,
+                child: ChartFieldGrid(chart: chart, showNoStichCells: exportSettings.showNoStichCells),// const PreviewStitchesGrid()
+              ) :
               exportSettings.legendHorizontal ?
                 Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     if (exportSettings.legendPosition == LegendPosition.top)
                       RepaintBoundary(key: legendBoundaryKey, child: PreviewLegend(exportSettings: exportSettings,)),
-                    const PreviewStitchesGrid(),
+                    Visibility(
+                      visible: exportSettings.showGrid,
+                      child: ChartFieldGrid(chart: chart, showNoStichCells: exportSettings.showNoStichCells),//const PreviewStitchesGrid()
+                    ),
                     if (exportSettings.legendPosition == LegendPosition.bottom)
                       RepaintBoundary(key: legendBoundaryKey, child: PreviewLegend(exportSettings: exportSettings,)),
                   ],
@@ -114,7 +125,10 @@ class _ExportPageState extends State<ExportPage> {
                   children: [
                     if (exportSettings.legendPosition == LegendPosition.left)
                       RepaintBoundary(key: legendBoundaryKey, child: PreviewLegend(exportSettings: exportSettings,)),
-                    const PreviewStitchesGrid(),
+                    Visibility(
+                      visible: exportSettings.showGrid,
+                      child: ChartFieldGrid(chart: chart, showNoStichCells: exportSettings.showNoStichCells),//const PreviewStitchesGrid()
+                    ),
                     if (exportSettings.legendPosition == LegendPosition.right)
                       RepaintBoundary(key: legendBoundaryKey, child: PreviewLegend(exportSettings: exportSettings,)),
                   ],

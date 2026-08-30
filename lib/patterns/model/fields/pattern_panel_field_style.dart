@@ -130,23 +130,23 @@ class PatternPanelFieldStyle {
     }
 
     if (backgroundColor != kDefaultBackgroundColor) {
-      o['bgcol'] = {'red': backgroundColor.red, 'blue': backgroundColor.blue, 'green': backgroundColor.green, 'alpha': backgroundColor.alpha};
+      o['bgcol'] = backgroundColor.value;
     }
 
     if (leftBorderColor != kDefaultBorderColor) {
-      o['lbcol'] = {'red': leftBorderColor.red, 'blue': leftBorderColor.blue, 'green': leftBorderColor.green, 'alpha': leftBorderColor.alpha};
+      o['lbcol'] = leftBorderColor.value;
     }
 
     if (rightBorderColor != kDefaultBorderColor) {
-      o['rbcol'] = {'red': rightBorderColor.red, 'blue': rightBorderColor.blue, 'green': rightBorderColor.green, 'alpha': rightBorderColor.alpha};
+      o['rbcol'] = rightBorderColor.value;
     }
 
     if (topBorderColor != kDefaultBorderColor) {
-      o['tbcol'] = {'red': topBorderColor.red, 'blue': topBorderColor.blue, 'green': topBorderColor.green, 'alpha': topBorderColor.alpha};
+      o['tbcol'] = topBorderColor.value;
     }
 
     if (bottomBorderColor != kDefaultBorderColor) {
-      o['bbcol'] = {'red': bottomBorderColor.red, 'blue': bottomBorderColor.blue, 'green': bottomBorderColor.green, 'alpha': bottomBorderColor.alpha};
+      o['bbcol'] = bottomBorderColor.value;
     }
 
     if (maxWidth != kDefaultMaxWidth) {
@@ -162,11 +162,11 @@ class PatternPanelFieldStyle {
 
   static PatternPanelFieldStyle fromJson(Map<String, dynamic> json) {
     return PatternPanelFieldStyle(
-      backgroundColor: json.containsKey('bgcol') ? Color.fromARGB(json['bgcol']['alpha'] as int, json['bgcol']['red'] as int, json['bgcol']['green'] as int, json['bgcol']['blue'] as int) : kDefaultBackgroundColor,
-      leftBorderColor: json.containsKey('lbcol') ? Color.fromARGB(json['lbcol']['alpha'] as int, json['lbcol']['red'] as int, json['lbcol']['green'] as int, json['lbcol']['blue'] as int) : kDefaultBorderColor,
-      rightBorderColor: json.containsKey('rbcol') ? Color.fromARGB(json['rbcol']['alpha'] as int, json['rbcol']['red'] as int, json['rbcol']['green'] as int, json['rbcol']['blue'] as int) : kDefaultBorderColor,
-      topBorderColor: json.containsKey('tbcol') ? Color.fromARGB(json['tbcol']['alpha'] as int, json['tbcol']['red'] as int, json['tbcol']['green'] as int, json['tbcol']['blue'] as int) : kDefaultBorderColor,
-      bottomBorderColor: json.containsKey('bbcol') ? Color.fromARGB(json['bbcol']['alpha'] as int, json['bbcol']['red'] as int, json['bbcol']['green'] as int, json['bbcol']['blue'] as int) : kDefaultBorderColor,
+      backgroundColor: json.containsKey('bgcol') ? Color(json['bgcol'] as int) : kDefaultBackgroundColor,
+      leftBorderColor: json.containsKey('lbcol') ? Color(json['lbcol'] as int) : kDefaultBorderColor,
+      rightBorderColor: json.containsKey('rbcol') ? Color(json['rbcol'] as int) : kDefaultBorderColor,
+      topBorderColor: json.containsKey('tbcol') ? Color(json['tbcol'] as int) : kDefaultBorderColor,
+      bottomBorderColor: json.containsKey('bbcol') ? Color(json['bbcol'] as int) : kDefaultBorderColor,
       leftBorderWidth: json.containsKey('lbw') ? json['lbw'] as double : kDefaultBorderWidth,
       rightBorderWidth: json.containsKey('rbw') ? json['rbw'] as double : kDefaultBorderWidth,
       topBorderWidth: json.containsKey('tbw') ? json['tbw'] as double : kDefaultBorderWidth,

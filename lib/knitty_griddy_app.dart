@@ -44,6 +44,9 @@ class KnittyGriddyApp extends StatelessWidget {
         ),
       ], 
       builder: (context, child) {
+        // Make sure the loadOnStartup of the chart model is called so the basic stitchset becomes available
+        Provider.of<ChartsModel>(context, listen: false);
+
         Timer.periodic(const Duration(seconds: 20), 
           (timer) async {
             if (context.mounted) {

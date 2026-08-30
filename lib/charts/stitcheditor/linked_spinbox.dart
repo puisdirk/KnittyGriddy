@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinbox/material.dart';
+import 'package:knitty_griddy/utils/constants.dart';
 
 class LinkedSpinbox extends StatefulWidget {
   final Function(double value1, double value2) onChanged;
@@ -77,7 +78,7 @@ class _LinkedSpinboxState extends State<LinkedSpinbox> {
             )
           ]
         ),
-        const SizedBox(width: 10,),
+        hspacing,
         Stack(
           children: [
             Positioned(
@@ -113,7 +114,7 @@ class _LinkedSpinboxState extends State<LinkedSpinbox> {
             )
           ]
         ),
-        const SizedBox(width: 10,),
+        hspacing,
         MouseRegion(
           cursor: SystemMouseCursors.click,
           child: GestureDetector(

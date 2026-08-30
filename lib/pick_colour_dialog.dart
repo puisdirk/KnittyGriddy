@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/pick_colour_control.dart';
+import 'package:knitty_griddy/utils/constants.dart';
 
 class PickColourDialog extends StatefulWidget {
   final List<Color> knownColours;
@@ -41,7 +42,7 @@ class _PickColourDialogState extends State<PickColourDialog> {
     return AlertDialog(
       title: const Text('Pick a colour'),
       content: SizedBox(
-        height: 460,
+        height: kColourPickerHeight + (widget.knownColours.isNotEmpty ? kKnowColoursHeight : 0),
         child: PickColourControl(
           initialColor: currentColour,
           knownColours: widget.knownColours,

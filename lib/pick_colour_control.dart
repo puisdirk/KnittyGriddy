@@ -48,7 +48,7 @@ class _PickColourControlState extends State<PickColourControl> {
       children: [
         SizedBox(
           width: 370,
-          height: 455,
+          height: kColourPickerHeight + (widget.knownColours.isNotEmpty ? kKnowColoursHeight : 0),
           child: Column(
             children: [
               ColorPicker(
@@ -84,7 +84,7 @@ class _PickColourControlState extends State<PickColourControl> {
                         vspacing,
                         SizedBox(
                           width: 350,
-                          height: 50,
+                          height: kKnowColoursHeight,
                           child: SingleChildScrollView(
                             child: Wrap(
                               spacing: 4,

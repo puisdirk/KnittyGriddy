@@ -6,7 +6,11 @@ import 'package:knitty_griddy/drawings/drawing_editor/command_controls/small_lab
 import 'package:knitty_griddy/drawings/drawing_editor/command_controls/small_text_field.dart';
 import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
 import 'package:knitty_griddy/drawings/model/commands/measurement_command.dart';
+import 'package:knitty_griddy/drawings/model/drawing.dart';
+import 'package:knitty_griddy/drawings/model/part_drawing.dart';
+import 'package:knitty_griddy/pick_colour_dialog.dart';
 import 'package:knitty_griddy/utils/constants.dart';
+import 'package:material_color_utilities/score/score.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 class MeasurementCommandControl extends StatefulWidget {
@@ -79,7 +83,6 @@ class _MeasurementCommandControlState extends State<MeasurementCommandControl> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Row(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Symbols.square_foot),
             hspacing,
@@ -108,8 +111,12 @@ class _MeasurementCommandControlState extends State<MeasurementCommandControl> {
               focusColor: Colors.transparent,
               underline: Container(),
               items: [
-                for (Unit unit in Unit.values)
-                  DropdownMenuItem(value: unit, child: Text(unit.label))
+                if (widget.drawing is PartDrawing)
+                  for (Unit unit in Unit.values.where((u) => u != Unit.colour))
+                    DropdownMenuItem(value: unit, child: Text(unit.label)),
+                if (widget.drawing is Drawing)
+                  for (Unit unit in Unit.values)
+                    DropdownMenuItem(value: unit, child: Text(unit.label)),
               ],
               value: widget.command.unit,
               onChanged: (value) {
@@ -128,97 +135,154 @@ class _MeasurementCommandControlState extends State<MeasurementCommandControl> {
         vspacing,
         Row(
           children: [
-            const SmallLabel(label: 'Decimals'),
-            hspacing,
-            SizedBox(
-              width: 180,
-              child: SpinBox(
-                key: ValueKey('${widget.command.id}-dec'),
-                textStyle: smallStyle,
-                onChanged: (value) {
-                  if (value != widget.command.decimals.toDouble()) {
-                    widget.onChanged(widget.command.copyWith(decimals: value.toInt()));
-                  }
-                },
-                min: 0,
-                max: 5,
-                value: widget.command.decimals.toDouble(),
-              ),
+            if (widget.command.unit != Unit.colour)
+            Column(
+              children: [
+                Row(
+                  children: [
+                    const SmallLabel(label: 'Decimals'),
+                    hspacing,
+                    SizedBox(
+                      width: 180,
+                      child: SpinBox(
+                        key: ValueKey('${widget.command.id}-dec'),
+                        textStyle: smallStyle,
+                        onChanged: (value) {
+                          if (value != widget.command.decimals.toDouble()) {
+                            widget.onChanged(widget.command.copyWith(decimals: value.toInt()));
+                          }
+                        },
+                        min: 0,
+                        max: 5,
+                        value: widget.command.decimals.toDouble(),
+                      ),
+                    )
+                  ]
+                ),
+                vspacing,
+                Row(
+                  children: [
+                    const SmallLabel(label: 'Min'),
+                    hspacing,
+                    SizedBox(
+                      width: 180,
+                      child: SpinBox(
+                        key: ValueKey('${widget.command.id}-min'),
+                        textStyle: smallStyle,
+                        onChanged: (value) {
+                          if (value != widget.command.minValue) {
+                            widget.onChanged(widget.command.copyWith(minValue: value));
+                          }
+                        },
+                        step: 1 / pow(10, widget.command.decimals),
+                        decimals: widget.command.decimals,
+                        value: widget.command.minValue,
+                        min: widget.command.unit == Unit.angle ? -360 : -100000,
+                        max: widget.command.unit == Unit.angle ? 360 : widget.command.maxValue,
+                      ),
+                    )
+                  ],
+                ),
+                vspacing,
+                Row(
+                  children: [
+                    const SmallLabel(label: 'Max'),
+                    hspacing,
+                    SizedBox(
+                      width: 180,
+                      child: SpinBox(
+                        key: ValueKey('${widget.command.id}-max'),
+                        textStyle: smallStyle,
+                        onChanged:(value) {
+                          if (value != widget.command.maxValue) {
+                            widget.onChanged(widget.command.copyWith(maxValue: value));
+                          }
+                        },
+                        step: 1 / pow(10, widget.command.decimals),
+                        decimals: widget.command.decimals,
+                        value: widget.command.maxValue,
+                        min: widget.command.unit == Unit.angle ? -360 : widget.command.minValue,
+                        max: widget.command.unit == Unit.angle ? 360 : 100000,
+                      ),
+                    )
+                  ],
+                ),
+                vspacing,
+                Row(
+                  children: [
+                    const SmallLabel(label: 'Default'),
+                    hspacing,
+                    SizedBox(
+                      width: 180,
+                      child: SpinBox(
+                        key: ValueKey('${widget.command.id}-def'),
+                        textStyle: smallStyle,
+                        onChanged: (value) {
+                          if (value != widget.command.value) {
+                            widget.onChanged(widget.command.copyWith(value: value));
+                          }
+                        },
+                        step: 1 / pow(10, widget.command.decimals),
+                        decimals: widget.command.decimals,
+                        value: widget.command.value,
+                        min: widget.command.unit == Unit.angle ? -360 : widget.command.minValue,
+                        max: widget.command.unit == Unit.angle ? 360 : widget.command.maxValue,
+                      ),
+                    )
+                  ],
+                ),
+              ],
+            ), // Column if not a colour
+            if (widget.command.unit == Unit.colour)
+            Column(
+              children: [
+                Row(
+                  children: [
+                    const SmallLabel(label: 'Default'),
+                    hspacing,
+                    GestureDetector(
+                      onTap: () async {
+                        Color? newColor = await showDialog(
+                          context: context, 
+                          builder: (context) => PickColourDialog(
+                            initialColor: Color(widget.command.colourValue),
+                            knownColours: widget.drawing.knownColours,
+                          ),
+                        );
+                        if (newColor != null && newColor.value != widget.command.colourValue) {
+                          widget.onChanged(widget.command.copyWith(
+                            colourValue: newColor.value
+                          ));
+                        }
+                      },
+                      child: MouseRegion(
+                        cursor: SystemMouseCursors.click,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: const BorderRadius.all(Radius.circular(5)), 
+                            border: Border.all(color: Colors.grey)
+                          ), 
+                          width: 40, 
+                          height: 30,
+                          child: Center(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: const BorderRadius.all(Radius.circular(3)),
+                                color: Color(widget.command.colourValue),
+                              ),
+                              width: 34,
+                              height: 24,
+                            ),
+                          ),
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+              ],
             )
-          ],
-        ),
-        vspacing,
-        Row(
-          children: [
-            const SmallLabel(label: 'Min'),
-            hspacing,
-            SizedBox(
-              width: 180,
-              child: SpinBox(
-                key: ValueKey('${widget.command.id}-min'),
-                textStyle: smallStyle,
-                onChanged: (value) {
-                  if (value != widget.command.minValue) {
-                    widget.onChanged(widget.command.copyWith(minValue: value));
-                  }
-                },
-                step: 1 / pow(10, widget.command.decimals),
-                decimals: widget.command.decimals,
-                value: widget.command.minValue,
-                min: widget.command.unit == Unit.angle ? -360 : -100000,
-                max: widget.command.unit == Unit.angle ? 360 : widget.command.maxValue,
-              ),
-            )
-          ],
-        ),
-        vspacing,
-        Row(
-          children: [
-            const SmallLabel(label: 'Max'),
-            hspacing,
-            SizedBox(
-              width: 180,
-              child: SpinBox(
-                key: ValueKey('${widget.command.id}-max'),
-                textStyle: smallStyle,
-                onChanged:(value) {
-                  if (value != widget.command.maxValue) {
-                    widget.onChanged(widget.command.copyWith(maxValue: value));
-                  }
-                },
-                step: 1 / pow(10, widget.command.decimals),
-                decimals: widget.command.decimals,
-                value: widget.command.maxValue,
-                min: widget.command.unit == Unit.angle ? -360 : widget.command.minValue,
-                max: widget.command.unit == Unit.angle ? 360 : 100000,
-              ),
-            )
-          ],
-        ),
-        vspacing,
-        Row(
-          children: [
-            const SmallLabel(label: 'Default'),
-            hspacing,
-            SizedBox(
-              width: 180,
-              child: SpinBox(
-                key: ValueKey('${widget.command.id}-def'),
-                textStyle: smallStyle,
-                onChanged: (value) {
-                  if (value != widget.command.value) {
-                    widget.onChanged(widget.command.copyWith(value: value));
-                  }
-                },
-                step: 1 / pow(10, widget.command.decimals),
-                decimals: widget.command.decimals,
-                value: widget.command.value,
-                min: widget.command.unit == Unit.angle ? -360 : widget.command.minValue,
-                max: widget.command.unit == Unit.angle ? 360 : widget.command.maxValue,
-              ),
-            )
-          ],
-        ),
+          ]
+        )
       ],
     );
   }

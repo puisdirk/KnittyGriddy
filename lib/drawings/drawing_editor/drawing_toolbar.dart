@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:knitty_griddy/utils/constants.dart';
 
 class DrawingToolbar extends StatefulWidget {
   final bool canUndo;
@@ -25,7 +26,7 @@ class _DrawingToolbarState extends State<DrawingToolbar> {
     return IntrinsicHeight(
       child: Row(
         children: [
-          const SizedBox(width: 10,),
+          hspacing,
           TextButton.icon(
             onPressed: widget.canUndo ? () => widget.undo() : null, 
             label: const Text('Undo'),

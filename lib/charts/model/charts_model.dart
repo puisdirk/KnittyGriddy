@@ -232,6 +232,11 @@ class ChartsModel extends ChangeNotifier {
     ).toList();
   }
 
+  void addStitchToImportedSet(StitchDefinition def) {
+    StitchRepository.addStitchToImportedSet(def);
+    notifyListeners();
+  }
+
   Future<KnittingChart> getChart(ChartInfo chartInfo) async {
     KnittingChart chart = await _repository.loadChart(chartInfo.id);
     // Import unknown stitches

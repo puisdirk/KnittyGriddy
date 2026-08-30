@@ -181,7 +181,7 @@ class KnittingSymbolCurve extends KnittingSymbolPart {
                 child: Text('Length'),
               ),
             ),
-            const SizedBox(width: 10,),
+            hspacing,
             SizedBox(
               width: 160,
               child: SpinBox(
@@ -225,7 +225,7 @@ class KnittingSymbolCurve extends KnittingSymbolPart {
                 child: Text('Amplitude'),
               ),
             ),
-            const SizedBox(width: 10,),
+            hspacing,
             SizedBox(
               width: 160,
               child: SpinBox(
@@ -269,7 +269,7 @@ class KnittingSymbolCurve extends KnittingSymbolPart {
                 child: Text('Slant'),
               ),
             ),
-            const SizedBox(width: 10,),
+            hspacing,
             SizedBox(
               width: 160,
               child: SpinBox(
@@ -313,7 +313,7 @@ class KnittingSymbolCurve extends KnittingSymbolPart {
                 child: Text('Closed'),
               ),
             ),
-            const SizedBox(width: 10,),
+            hspacing,
             Checkbox(
               value: closed, 
               onChanged: (value) {

@@ -8,11 +8,13 @@ class ChartFieldStitchesGrid extends StatelessWidget {
   final int columns;
   final int rows;
   final List<StitchCell> stitches;
+  final bool showNoStichCells;
 
   const ChartFieldStitchesGrid({
     required this.columns,
     required this.rows,
     required this.stitches,
+    required this.showNoStichCells,
     super.key
   });
 
@@ -25,7 +27,9 @@ class ChartFieldStitchesGrid extends StatelessWidget {
         children: [
           for (int row = 0; row < rows; row++)
             for (int col = 0; col < columns; col++)
-              ChartFieldStitchCellControl(stitchCell: stitches.firstWhere((cell) => cell.column == col && cell.row == row)
+              ChartFieldStitchCellControl(
+                stitchCell: stitches.firstWhere((cell) => cell.column == col && cell.row == row),
+                showNoStichCells: showNoStichCells,
             ),
           IgnorePointer(
             child: CustomPaint(

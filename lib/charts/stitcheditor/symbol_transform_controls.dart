@@ -36,7 +36,7 @@ class SymbolTransformControls extends StatelessWidget {
                 child: Text('Mirror')
               )
             ),
-            const SizedBox(width: 10,),
+            hspacing,
             IconButton.outlined(
               onPressed: () {
                 onChanged(
@@ -77,7 +77,7 @@ class SymbolTransformControls extends StatelessWidget {
                 child: Text('Translation')
               )
             ),
-            const SizedBox(width: 10,),
+            hspacing,
             SizedBox(
               width: 160,
               child: SpinBox(
@@ -89,7 +89,7 @@ class SymbolTransformControls extends StatelessWidget {
                 value: stitchDefinition.symbolAt(symbolColumn).translation.dx,
               ),
             ),
-            const SizedBox(width: 10,),
+            hspacing,
             SizedBox(
               width: 160,
               child: SpinBox(
@@ -113,7 +113,7 @@ class SymbolTransformControls extends StatelessWidget {
                 child: Text('Rotation'),
               ),
             ),
-            const SizedBox(width: 10,),
+            hspacing,
             Stack(
               children: [
                 Positioned(
@@ -146,7 +146,7 @@ class SymbolTransformControls extends StatelessWidget {
                 child: Text('Scale'),
               ),
             ),
-            const SizedBox(width: 10,),
+            hspacing,
             LinkedSpinbox(
               width: 160,
               min: -1000,

@@ -4,9 +4,11 @@ import 'package:knitty_griddy/drawings/drawing_editor/command_controls/small_lab
 import 'package:knitty_griddy/drawings/drawing_editor/command_controls/small_multiline_text_field.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/command_controls/small_text_field.dart';
 import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
+import 'package:knitty_griddy/drawings/model/commands/colour_reference.dart';
 import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/text_command.dart';
 import 'package:knitty_griddy/pick_colour_dialog.dart';
+import 'package:knitty_griddy/pick_colour_reference_dialog.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 
 class TextCommandControl extends StatefulWidget {
@@ -163,32 +165,54 @@ class _TextCommandControlState extends State<TextCommandControl> {
             hspacing,
             GestureDetector(
               onTap: () async {
-                Color? newColor = await showDialog(
+                ColourReference? newColorRef = await showDialog(
                   context: context,
                   builder: (context) {
-                    return PickColourDialog(
+                    return PickColourReferenceDialog(
+                      drawing: widget.drawing,
                       initialColor: widget.command.textColor,
                       knownColours: widget.drawing.knownColours,
                     );
                   }
                 );
-                if (newColor != null && newColor != widget.command.textColor) {
-                  widget.onChanged(widget.command.copyWith(textColor: newColor));
+                if (newColorRef != null && newColorRef != widget.command.textColor) {
+                  widget.onChanged(widget.command.copyWith(textColor: newColorRef));
                 }
               },
               child: MouseRegion(
                 cursor: SystemMouseCursors.click,
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.all(Radius.circular(5)), 
-                    color: widget.command.textColor
-                  ), 
-                  width: 40, 
-                  height: 30,
+                child: Row(
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: const BorderRadius.all(Radius.circular(5)), 
+                        border: Border.all(color: Colors.grey)
+                      ), 
+                      width: 40, 
+                      height: 30,
+                      child: Center(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: const BorderRadius.all(Radius.circular(3)),
+                            color: widget.command.textColor.color,
+                          ),
+                          width: 34,
+                          height: 24,
+                        ),
+                      ),
+                    ),
+                    hspacing,
+                    if (widget.command.textColor.measurementId.isNotEmpty)
+                      Text('@${widget.command.textColor.measurementLabel}', style: smallStyle,)                    
+                  ],
                 ),
               ),
             ),
-            hspacing,
+          ]
+        ),
+        vspacing,
+        Row(
+          children: [
             const SmallLabel(label: 'Style'),
             hspacing,
             SegmentedButton<String>(
