@@ -73,9 +73,9 @@ class _PartRepositoryPageState extends State<PartRepositoryPage> with TickerProv
                 children: [
                   Row(
                     children: [
-                      const SizedBox(width: 10,),
+                      hspacing,
                       const Text('Filter:'),
-                      const SizedBox(width: 10,),
+                      hspacing,
                       SizedBox(
                         width: 500,
                         child: TextField(controller: _filterController, autofocus: true,),
@@ -91,7 +91,7 @@ class _PartRepositoryPageState extends State<PartRepositoryPage> with TickerProv
                         label: const Text('Restore Basic Set'),
                         icon: const Icon(Symbols.refresh, weight: 700,),
                       ),
-                      const SizedBox(width: 10,),
+                      hspacing,
                       OutlinedButton.icon(
                         onPressed: () async {
                           try {
@@ -121,7 +121,7 @@ class _PartRepositoryPageState extends State<PartRepositoryPage> with TickerProv
                         label: const Text('Import Set'),
                         icon: const Icon(Symbols.download, weight: 700,),
                       ),
-                      const SizedBox(width: 10,),
+                      hspacing,
                       OutlinedButton.icon(
                         onPressed: () {
                           String id = Provider.of<DrawingsModel>(context, listen: false).createPartSet('Untitled', []);
@@ -133,7 +133,7 @@ class _PartRepositoryPageState extends State<PartRepositoryPage> with TickerProv
                         label: const Text('New Set'),
                         icon: const Icon(Symbols.create_new_folder, weight: 700,),
                       ),
-                      const SizedBox(width: 10,)
+                      hspacing
                     ],
                   ),
                   const SizedBox(height: 10,),

@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
 import 'package:knitty_griddy/drawings/model/commands/arrow_painter.dart';
+import 'package:knitty_griddy/drawings/model/commands/colour_reference.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/included_part_command.dart';
 
@@ -43,7 +44,7 @@ enum ArrowSize {
 
 class StylingCommand extends DrawingCommand {
   final Set<String> commandIds;
-  final Color color;
+  final ColourReference colorRef;
   final double thickness;
   final DashStyle dashStyle;
   final ArrowType startArrow;
@@ -55,7 +56,7 @@ class StylingCommand extends DrawingCommand {
     required super.label,
     required super.version,
     this.commandIds = const{},
-    this.color = Colors.black,
+    this.colorRef = const ColourReference(),
     this.thickness = 1,
     this.dashStyle = DashStyle.full,
     this.startArrow = ArrowType.none,
@@ -71,7 +72,7 @@ class StylingCommand extends DrawingCommand {
     String? id,
     String? label,
     Set<String>? commandIds,
-    Color? color,
+    ColourReference? colorRef,
     double? thickness,
     DashStyle? dashStyle,
     ArrowType? startArrow,
@@ -87,7 +88,7 @@ class StylingCommand extends DrawingCommand {
       label: label?? this.label, 
       version: version + 1,
       commandIds: commandIds?? this.commandIds,
-      color: color?? this.color,
+      colorRef: colorRef?? this.colorRef,
       thickness: thickness?? this.thickness,
       dashStyle: dashStyle?? this.dashStyle,
       startArrow: startArrow?? this.startArrow,
@@ -99,6 +100,7 @@ class StylingCommand extends DrawingCommand {
       initiallyOpen: initiallyOpen?? this.initiallyOpen,
     );
   }
+
   @override
   StylingCommand abstractCopyWith({String? id, String? label, bool? initiallyOpen}) {
     return copyWith(
@@ -110,6 +112,8 @@ class StylingCommand extends DrawingCommand {
 
   @override
   double get editHeight => 520;
+
+  Color get color => colorRef.color;
 
   @override
   Rect getBoundingBox(AbstractDrawing drawing) => Rect.zero;
@@ -127,10 +131,21 @@ class StylingCommand extends DrawingCommand {
   }
 
   @override
-  Set<String> dependencies(AbstractDrawing drawing) => commandIds;
+  Set<String> dependencies(AbstractDrawing drawing) {
+    Set<String> deps = {};
+    deps.addAll(commandIds);
+    if (colorRef.measurementId.isNotEmpty) {
+      deps.add(colorRef.measurementId);
+    }
+    return deps;
+  }
 
   @override
-  StylingCommand dependentLabelChanged(String oldLabel, String newLabel) => this;
+  StylingCommand dependentLabelChanged(String oldLabel, String newLabel) {
+   return copyWith(
+    colorRef: colorRef.dependentLabelChanged(oldLabel, newLabel)
+   );
+  }
 
   @override
   StylingCommand changePartDrawingReference({required String oldId, required String newId}) {
@@ -141,7 +156,10 @@ class StylingCommand extends DrawingCommand {
 
   @override
   StylingCommand deleteReference({required String commandId}) {
-    return copyWith(commandIds: commandIds.where((c) => c != commandId && !c.startsWith('$commandId.')).toSet());
+    return copyWith(
+      commandIds: commandIds.where((c) => c != commandId && !c.startsWith('$commandId.')).toSet(),
+      colorRef: colorRef.deleteReference(commandId: commandId),
+    );
   }
 
   @override
@@ -162,7 +180,7 @@ class StylingCommand extends DrawingCommand {
       'type': DrawingCommandTypes.stylingCommand.name,
       'id': id,
       'label': label,
-      'colour': {'red': color.red, 'blue': color.blue, 'green': color.green, 'alpha': color.alpha},
+      'colour': colorRef.toJson(),
       'thickness': thickness,
       'dashstyle': dashStyle.name,
       'ids': commandIds.toList(),
@@ -176,7 +194,7 @@ class StylingCommand extends DrawingCommand {
   String get contentHashCode => jsonEncode({
     'type': DrawingCommandTypes.stylingCommand.name,
     'label': label,
-    'colour': {'red': color.red, 'blue': color.blue, 'green': color.green, 'alpha': color.alpha},
+    'colour': colorRef.toJson(),
     'thickness': thickness,
     'dashstyle': dashStyle.name,
     'ids': commandIds.toList(),
@@ -190,7 +208,7 @@ class StylingCommand extends DrawingCommand {
       id: json['id'] as String, 
       label: json['label'] as String, 
       version: 0,
-      color: Color.fromARGB(json['colour']['alpha'] as int, json['colour']['red'] as int, json['colour']['green'] as int, json['colour']['blue'] as int),
+      colorRef: ColourReference.fromJson(json['colour']),
       thickness: json['thickness'] as double,
       dashStyle: DashStyle.values.byName(json['dashstyle'] as String),
       commandIds: (json['ids'] as List).map((o) => o as String).toSet(),
@@ -208,7 +226,7 @@ class StylingCommand extends DrawingCommand {
     id == other.id &&
     setEquals(commandIds, other.commandIds) &&
     label == other.label &&
-    color == other.color &&
+    colorRef == other.colorRef &&
     thickness == other.thickness &&
     dashStyle == other.dashStyle &&
     startArrow == other.startArrow &&
@@ -226,7 +244,7 @@ class StylingCommand extends DrawingCommand {
     id == other.id &&
     setEquals(commandIds, other.commandIds) &&
     label == other.label &&
-    color == other.color &&
+    colorRef == other.colorRef &&
     thickness == other.thickness &&
     dashStyle == other.dashStyle &&
     startArrow == other.startArrow &&
@@ -234,7 +252,7 @@ class StylingCommand extends DrawingCommand {
     arrowSize == other.arrowSize;
   
   @override
-  int get hashCode => super.hashCode ^ commandIds.hashCode ^ color.hashCode ^ thickness.hashCode ^ 
+  int get hashCode => super.hashCode ^ commandIds.hashCode ^ colorRef.hashCode ^ thickness.hashCode ^ 
     dashStyle.hashCode ^ startArrow.hashCode ^ endArrow.hashCode ^ arrowSize.hashCode;
 
   @override
@@ -276,10 +294,12 @@ class StylingCommand extends DrawingCommand {
       }
     }
 
+    // Check if the color reference is still the same
     return copyWith(
       valid: isvalid,
       validated: (isvalid || !retryValidation),
       errors: validationErrors,
+      colorRef: colorRef.checkForUpdate(drawing)
     );
   }
 

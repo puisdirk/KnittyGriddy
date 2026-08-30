@@ -80,9 +80,9 @@ class _StitchRepositoryPageState extends State<StitchRepositoryPage> with Ticker
                 children: [
                   Row(
                     children: [
-                      const SizedBox(width: 10,),
+                      hspacing,
                       const Text('Filter:'),
-                      const SizedBox(width: 10,),
+                      hspacing,
                       SizedBox(
                         width: 500,
                         child: TextField(controller: _filterController, autofocus: true,),
@@ -98,7 +98,7 @@ class _StitchRepositoryPageState extends State<StitchRepositoryPage> with Ticker
                         label: const Text('Restore Basic Set'),
                         icon: const Icon(Symbols.refresh, weight: 700,),
                       ),
-                      const SizedBox(width: 10,),
+                      hspacing,
                       OutlinedButton.icon(
                         onPressed: () async {
                           try {
@@ -128,7 +128,7 @@ class _StitchRepositoryPageState extends State<StitchRepositoryPage> with Ticker
                         label: const Text('Import Set'),
                         icon: const Icon(Symbols.download, weight: 700,),
                       ),
-                      const SizedBox(width: 10,),
+                      hspacing,
                       OutlinedButton.icon(
                         onPressed: () {
                           String id = Provider.of<ChartsModel>(context, listen: false).createStitchSet('Untitled', []);
@@ -140,7 +140,7 @@ class _StitchRepositoryPageState extends State<StitchRepositoryPage> with Ticker
                         label: const Text('New Set'),
                         icon: const Icon(Symbols.create_new_folder, weight: 700,),
                       ),
-                      const SizedBox(width: 10,)
+                      hspacing
                     ],
                   ),
                   const SizedBox(height: 10,),

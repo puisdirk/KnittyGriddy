@@ -3,6 +3,7 @@ import 'package:flutter_spinbox/material.dart';
 import 'package:knitty_griddy/charts/stitcheditor/symbol_part_transform_controls.dart';
 import 'package:knitty_griddy/charts/model/knitting_symbol.dart';
 import 'package:knitty_griddy/charts/stitchrepo/stitch_definition.dart';
+import 'package:knitty_griddy/utils/constants.dart';
 
 abstract class KnittingSymbolPart {
 
@@ -123,7 +124,7 @@ abstract class KnittingSymbolPart {
                   child: Text('Filled'),
                 ),
               ),
-              const SizedBox(width: 10,),
+              hspacing,
               Checkbox(
                 value: filled, 
                 onChanged: (value) {
@@ -150,7 +151,7 @@ abstract class KnittingSymbolPart {
                   ));
                 },
               ),
-              const SizedBox(width: 10,),
+              hspacing,
               if (filled == false)
                 const SizedBox(
                   width: 100,
@@ -159,7 +160,7 @@ abstract class KnittingSymbolPart {
                     child: Text('Stroke width'),
                   ),
                 ),
-              const SizedBox(width: 10,),
+              hspacing,
               if (filled == false)
                 SizedBox(
                   width: 160,

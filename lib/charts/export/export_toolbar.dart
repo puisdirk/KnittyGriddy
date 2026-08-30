@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_popup/flutter_popup.dart';
+import 'package:knitty_griddy/charts/export/chart_settings_popup.dart';
 import 'package:knitty_griddy/charts/export/knitting_chart_view_settings.dart';
+import 'package:knitty_griddy/utils/constants.dart';
 
 class ExportToolbar extends StatelessWidget {
   final double height;
@@ -27,91 +30,28 @@ class ExportToolbar extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          const SizedBox(width: 20,),
-          const Text('Legend'),
-          Row(
-            children: [
-              const SizedBox(
-                width: 120,
-                child: Align(
-                  alignment: Alignment.centerRight,
-                  child: Text('Stitches'),
-                ),
+          const Spacer(),
+          CustomPopup(
+            content: ChartSettingsPopup(
+              settings: exportSetting, 
+              onChanged: (newSettings) => settingsChanged( newSettings),
+            ),
+            backgroundColor: Colors.transparent,
+            contentDecoration: BoxDecoration(
+              border: Border.all(color: Colors.grey),
+              borderRadius: const BorderRadius.all(Radius.circular(8)),
+              color: Colors.white.withAlpha(150)
+            ),
+            arrowColor: Colors.grey,
+            child: const MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: Row(
+                children: [
+                  Icon(Icons.settings),
+                  Icon(Icons.arrow_drop_down)
+                ],
               ),
-              const SizedBox(width: 10,),
-              Checkbox(
-                value: exportSetting.showStitches, 
-                onChanged: (bool? value) => settingsChanged(exportSetting.copyWith(showStitches: value == true))
-              )
-            ],
-          ),
-          const SizedBox(width: 20,),
-          if (exportSetting.showStitches)
-          Row(
-            children: [
-              const SizedBox(
-                width: 120,
-                child: Align(
-                  alignment: Alignment.centerRight,
-                  child: Text('Descriptions'),
-                ),
-              ),
-              const SizedBox(width: 10,),
-              Checkbox(
-                value: exportSetting.showStitchDescriptions, 
-                onChanged: (bool? value) => settingsChanged(exportSetting.copyWith(showStitchDescriptions: value == true))
-              )
-            ],
-          ),
-          const SizedBox(width: 20,),
-          Row(
-            children: [
-              const SizedBox(
-                width: 120,
-                child: Align(
-                  alignment: Alignment.centerRight,
-                  child: Text('Colours'),
-                ),
-              ),
-              const SizedBox(width: 10,),
-              Checkbox(
-                value: exportSetting.showColours, 
-                onChanged: (bool? value) => settingsChanged(exportSetting.copyWith(showColours: value == true))
-              )
-            ],
-          ),
-          const SizedBox(width: 20,),
-          if (exportSetting.showLegend)
-          Row(
-            children: [
-              const SizedBox(
-                width: 100,
-                child: Align(
-                  alignment: Alignment.centerRight,
-                  child: Text('Position'),
-                ),
-              ),
-              const SizedBox(width: 10,),
-              DropdownButton<LegendPosition>(
-                autofocus: false, 
-                focusColor: Colors.transparent,
-                borderRadius: const BorderRadius.all(Radius.circular(10)),
-                underline: Container(),
-                padding: const EdgeInsets.only(left: 10, right: 5),
-                items: const [
-                  DropdownMenuItem(value: LegendPosition.left, child: Text('Left')),
-                  DropdownMenuItem(value: LegendPosition.right, child: Text('Right')),
-                  DropdownMenuItem(value: LegendPosition.top, child: Text('Top')),
-                  DropdownMenuItem(value: LegendPosition.bottom, child: Text('Bottom')),
-                ], 
-                value: exportSetting.legendPosition,
-                onChanged: (LegendPosition? position) { 
-                  if (position != null) { 
-                    settingsChanged(exportSetting.copyWith(legendPosition: position));
-                  } 
-                },
-              )
-            ],
+            ),
           ),
           const Spacer(),
           Row(
@@ -123,17 +63,17 @@ class ExportToolbar extends StatelessWidget {
                   child: Text('Export'),
                 ),
               ),
-              const SizedBox(width: 10,),
+              hspacing,
               OutlinedButton(
                 onPressed: exportToChart, 
                 child: const Text('Chart')
               ),
-              const SizedBox(width: 10,),
+              hspacing,
               OutlinedButton(
                 onPressed: exportToPNG, 
                 child: const Text('PNG'),
               ),
-              const SizedBox(width: 10,),
+              hspacing,
               OutlinedButton(
                 onPressed: exportToSVG, 
                 child: const Text('SVG'),

@@ -5,9 +5,10 @@ import 'package:knitty_griddy/drawings/drawing_editor/command_controls/small_lab
 import 'package:knitty_griddy/drawings/drawing_editor/command_controls/small_text_field.dart';
 import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
 import 'package:knitty_griddy/drawings/model/commands/arrow_painter.dart';
+import 'package:knitty_griddy/drawings/model/commands/colour_reference.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/styling_command.dart';
-import 'package:knitty_griddy/pick_colour_dialog.dart';
+import 'package:knitty_griddy/pick_colour_reference_dialog.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 import 'package:knitty_griddy/utils/dashed_painter.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -105,38 +106,46 @@ class _StylingCommandControlState extends State<StylingCommandControl> {
             hspacing,
             GestureDetector(
               onTap: () async {
-                Color? newColor = await showDialog(
+                ColourReference? newColorRef = await showDialog(
                   context: context,
                   builder: (context) {
-                    return PickColourDialog(
-                      initialColor: widget.command.color,
+                    return PickColourReferenceDialog(
+                      drawing: widget.drawing,
+                      initialColor: widget.command.colorRef,
                       knownColours: widget.drawing.knownColours,
                     );
                   }
                 );
-                if (newColor != null && newColor != widget.command.color) {
-                  widget.onChanged(widget.command.copyWith(color: newColor));
+                if (newColorRef != null && newColorRef != widget.command.colorRef) {
+                  widget.onChanged(widget.command.copyWith(colorRef: newColorRef));
                 }
               },
               child: MouseRegion(
                 cursor: SystemMouseCursors.click,
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.all(Radius.circular(5)), 
-                    border: Border.all(color: Colors.grey)
-                  ), 
-                  width: 40, 
-                  height: 30,
-                  child: Center(
-                    child: Container(
+                child: Row(
+                  children: [
+                    Container(
                       decoration: BoxDecoration(
-                        borderRadius: const BorderRadius.all(Radius.circular(3)),
-                        color: widget.command.color
+                        borderRadius: const BorderRadius.all(Radius.circular(5)), 
+                        border: Border.all(color: Colors.grey)
+                      ), 
+                      width: 40, 
+                      height: 30,
+                      child: Center(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: const BorderRadius.all(Radius.circular(3)),
+                            color: widget.command.color
+                          ),
+                          width: 34,
+                          height: 24,
+                        ),
                       ),
-                      width: 34,
-                      height: 24,
                     ),
-                  ),
+                    hspacing,
+                    if (widget.command.colorRef.measurementId.isNotEmpty)
+                      Text('@${widget.command.colorRef.measurementLabel}', style: smallStyle,)
+                  ],
                 ),
               ),
             ),
@@ -167,14 +176,13 @@ class _StylingCommandControlState extends State<StylingCommandControl> {
           ],
         ),
         vspacing,
-
         Row(
           children: [
             Column(
               children: [
                 Row(
                   children: [
-                    const SmallLabel(label: 'Style', width: 60,),
+                    const SmallLabel(label: 'Line style', width: 60,),
                     hspacing,
                     DropdownButton<DashStyle>(
                       key: ValueKey('${widget.command.id}-dashstyle'),
@@ -381,7 +389,7 @@ class DashStylePainter extends CustomPainter {
   
   @override
   void paint(Canvas canvas, Size size) {
-    Paint p = Paint()..color = command.color ..style = PaintingStyle.stroke..strokeWidth = command.thickness;
+    Paint p = Paint()..color = command.color..style = PaintingStyle.stroke..strokeWidth = command.thickness;
     if (dashStyle == DashStyle.full) {
       canvas.drawLine(Offset(4, size.height / 2) , Offset(size.width - 4, size.height / 2), p);
     } else {
@@ -392,7 +400,7 @@ class DashStylePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant DashStylePainter oldDelegate) {
-    return oldDelegate.command != command;
+    return oldDelegate.command != command || dashStyle != oldDelegate.dashStyle;
   }
 
 }
@@ -402,7 +410,11 @@ class ArrowChooserPainter extends CustomPainter {
   final StylingCommand command;
   final bool atStart;
 
-  const ArrowChooserPainter({required this.arrowType, required this.command, required this.atStart});
+  const ArrowChooserPainter({
+    required this.arrowType, 
+    required this.command, 
+    required this.atStart
+  });
 
   @override
   void paint(Canvas canvas, Size size) {

@@ -135,136 +135,139 @@ class _RepeatCommandControlState extends State<RepeatCommandControl> {
             ],
           ),
           vspacing,
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Tooltip(
-                message: 'Add variable',
-                child: IconButton(
-                  onPressed: () {
-                    String newLabel = widget.drawing.nextLabel('v');
-                    String newId = const UuidV4Gen().get();
-                    widget.onChanged(widget.command.copyWith(
-                      commands: [
-                        ...widget.command.commands,
-                        RepeatingVariableCommand(
-                          id: newId, 
-                          version: 0, 
-                          label: newLabel,
-                          initiallyOpen: true,
-                          wrappedVariable: VariableCommand(id: newId, version: 0, label: newLabel)
-                        )
-                      ]
-                    ));
-                  }, 
-                  icon: const Icon(Symbols.settop_component)
+          SizedBox(
+            width: 330,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Tooltip(
+                  message: 'Add variable',
+                  child: IconButton(
+                    onPressed: () {
+                      String newLabel = widget.drawing.nextLabel('v');
+                      String newId = const UuidV4Gen().get();
+                      widget.onChanged(widget.command.copyWith(
+                        commands: [
+                          ...widget.command.commands,
+                          RepeatingVariableCommand(
+                            id: newId, 
+                            version: 0, 
+                            label: newLabel,
+                            initiallyOpen: true,
+                            wrappedVariable: VariableCommand(id: newId, version: 0, label: newLabel)
+                          )
+                        ]
+                      ));
+                    }, 
+                    icon: const Icon(Symbols.settop_component)
+                  ),
                 ),
-              ),
-              const SizedBox(
-                height: 45,
-                child: VerticalDivider(indent: 10, endIndent: 10)
-              ),
-              IconButton(
-                  onPressed: () {
-                    String newLabel = widget.drawing.nextLabel('p');
-                    String newId = const UuidV4Gen().get();
-                    widget.onChanged(widget.command.copyWith(
-                      commands: [
-                        ...widget.command.commands,
-                        RepeatingPointCommand(
-                          id: newId, 
-                          version: 0, 
-                          label: newLabel,
-                          initiallyOpen: true,
-                          wrappedPoint:PointCommand(id: newId, version: 0, label: newLabel)
-                        )
-                      ]
-                    ));
-                  }, 
-                icon: const Icon(Symbols.line_start_circle)
-              ),
-              IconButton(
-                  onPressed: () {
-                    String newLabel = widget.drawing.nextLabel('l');
-                    String newId = const UuidV4Gen().get();
-                    widget.onChanged(widget.command.copyWith(
-                      commands: [
-                        ...widget.command.commands,
-                        RepeatingLineCommand(
-                          id: newId, 
-                          version: 0, 
-                          label: newLabel,
-                          initiallyOpen: true,
-                          wrappedLine: LineCommand(id: newId, version: 0, label: newLabel)
-                        )
-                      ]
-                    ));
-                  }, 
-                icon: const Icon(Symbols.pen_size_2)
-              ),
-              IconButton(
-                  onPressed: () {
-                    String newLabel = widget.drawing.nextLabel('c');
-                    String newId = const UuidV4Gen().get();
-                    widget.onChanged(widget.command.copyWith(
-                      commands: [
-                        ...widget.command.commands,
-                        RepeatingCurveCommand(
-                          id: newId, 
-                          version: 0, 
-                          label: newLabel,
-                          initiallyOpen: true,
-                          wrappedCurve: CurveCommand(id: newId, version: 0, label: newLabel)
-                        )
-                      ]
-                    ));
-                  }, 
-                icon: const Icon(Symbols.line_curve)
-              ),
-              const SizedBox(
-                height: 45,
-                child: VerticalDivider(indent: 10, endIndent: 10)
-              ),
-              IconButton(
-                  onPressed: () {
-                    String newLabel = widget.drawing.nextLabel('text');
-                    String newId = const UuidV4Gen().get();
-                    widget.onChanged(widget.command.copyWith(
-                      commands: [
-                        ...widget.command.commands,
-                        RepeatingTextCommand(
-                          id: newId, 
-                          version: 0, 
-                          label: newLabel,
-                          initiallyOpen: true,
-                          wrappedText: TextCommand(id: newId, version: 0, label: newLabel)
-                        )
-                      ]
-                    ));
-                  }, 
-                icon: const Icon(Symbols.title)
-              ),
-              if (widget.command.commands.length > 1)
                 const SizedBox(
                   height: 45,
                   child: VerticalDivider(indent: 10, endIndent: 10)
                 ),
-              if (widget.command.commands.length > 1)
-                Container(
-                  decoration: BoxDecoration(
-                    color: sorting ? Colors.blue.withAlpha(60) : null,
-                    shape: BoxShape.circle
+                IconButton(
+                    onPressed: () {
+                      String newLabel = widget.drawing.nextLabel('p');
+                      String newId = const UuidV4Gen().get();
+                      widget.onChanged(widget.command.copyWith(
+                        commands: [
+                          ...widget.command.commands,
+                          RepeatingPointCommand(
+                            id: newId, 
+                            version: 0, 
+                            label: newLabel,
+                            initiallyOpen: true,
+                            wrappedPoint:PointCommand(id: newId, version: 0, label: newLabel)
+                          )
+                        ]
+                      ));
+                    }, 
+                  icon: const Icon(Symbols.line_start_circle)
+                ),
+                IconButton(
+                    onPressed: () {
+                      String newLabel = widget.drawing.nextLabel('l');
+                      String newId = const UuidV4Gen().get();
+                      widget.onChanged(widget.command.copyWith(
+                        commands: [
+                          ...widget.command.commands,
+                          RepeatingLineCommand(
+                            id: newId, 
+                            version: 0, 
+                            label: newLabel,
+                            initiallyOpen: true,
+                            wrappedLine: LineCommand(id: newId, version: 0, label: newLabel)
+                          )
+                        ]
+                      ));
+                    }, 
+                  icon: const Icon(Symbols.pen_size_2)
+                ),
+                IconButton(
+                    onPressed: () {
+                      String newLabel = widget.drawing.nextLabel('c');
+                      String newId = const UuidV4Gen().get();
+                      widget.onChanged(widget.command.copyWith(
+                        commands: [
+                          ...widget.command.commands,
+                          RepeatingCurveCommand(
+                            id: newId, 
+                            version: 0, 
+                            label: newLabel,
+                            initiallyOpen: true,
+                            wrappedCurve: CurveCommand(id: newId, version: 0, label: newLabel)
+                          )
+                        ]
+                      ));
+                    }, 
+                  icon: const Icon(Symbols.line_curve)
+                ),
+                const SizedBox(
+                  height: 45,
+                  child: VerticalDivider(indent: 10, endIndent: 10)
+                ),
+                IconButton(
+                    onPressed: () {
+                      String newLabel = widget.drawing.nextLabel('text');
+                      String newId = const UuidV4Gen().get();
+                      widget.onChanged(widget.command.copyWith(
+                        commands: [
+                          ...widget.command.commands,
+                          RepeatingTextCommand(
+                            id: newId, 
+                            version: 0, 
+                            label: newLabel,
+                            initiallyOpen: true,
+                            wrappedText: TextCommand(id: newId, version: 0, label: newLabel)
+                          )
+                        ]
+                      ));
+                    }, 
+                  icon: const Icon(Symbols.title)
+                ),
+                if (widget.command.commands.length > 1)
+                  const SizedBox(
+                    height: 45,
+                    child: VerticalDivider(indent: 10, endIndent: 10)
                   ),
-                  child: Tooltip(
-                    message: sorting ? 'End reordering' : 'Reorder',
-                    child: IconButton(
-                      isSelected: sorting,
-                      onPressed: () => setState(() => sorting = !sorting), 
-                      icon: const Icon(Icons.sort),
+                if (widget.command.commands.length > 1)
+                  Container(
+                    decoration: BoxDecoration(
+                      color: sorting ? Colors.blue.withAlpha(60) : null,
+                      shape: BoxShape.circle
+                    ),
+                    child: Tooltip(
+                      message: sorting ? 'End reordering' : 'Reorder',
+                      child: IconButton(
+                        isSelected: sorting,
+                        onPressed: () => setState(() => sorting = !sorting), 
+                        icon: const Icon(Icons.sort),
+                      ),
                     ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
           vspacing,
           Expanded(

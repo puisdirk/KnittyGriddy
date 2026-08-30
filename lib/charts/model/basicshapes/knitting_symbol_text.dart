@@ -179,7 +179,7 @@ class KnittingSymbolText extends KnittingSymbolPart {
                 child: Text('Text'),
               ),
             ),
-            const SizedBox(width: 10,),
+            hspacing,
             StatelessTextEntryControl(
               initialText: text,
               width: 250,
@@ -207,7 +207,7 @@ class KnittingSymbolText extends KnittingSymbolPart {
                 ));
               }
             ),
-            const SizedBox(width: 10,),
+            hspacing,
             const SizedBox(
               width: 100,
               child: Align(
@@ -215,7 +215,7 @@ class KnittingSymbolText extends KnittingSymbolPart {
                 child: Text('Style'),
               ),
             ),
-            const SizedBox(width: 10,),
+            hspacing,
             SegmentedButton<String>(
               emptySelectionAllowed: true,
               multiSelectionEnabled: true,

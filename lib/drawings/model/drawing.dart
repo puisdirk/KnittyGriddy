@@ -75,15 +75,18 @@ class Drawing extends AbstractDrawing {
   @override
   List<Color> get knownColours {
     Set<Color> colors = {};
-    for (StylingCommand stylingCommand in commands.whereType()) {
+    for (MeasurementCommand measurementCommand in measurements.where((m) => m.unit == Unit.colour)) {
+      colors.add(Color(measurementCommand.colourValue));
+    }
+    for (StylingCommand stylingCommand in commands.whereType<StylingCommand>()) {
       colors.add(stylingCommand.color);
     }
-    for (TextCommand textCommand in commands.whereType()) {
-      colors.add(textCommand.textColor);
+    for (TextCommand textCommand in commands.whereType<TextCommand>()) {
+      colors.add(textCommand.textColor.color);
     }
-    for (RepeatCommand repeatCommand in commands.whereType()) {
+    for (RepeatCommand repeatCommand in commands.whereType<RepeatCommand>()) {
       for (TextCommand textCommand in repeatCommand.commands.whereType()) {
-        colors.add(textCommand.textColor);
+        colors.add(textCommand.textColor.color);
       }
     }
 

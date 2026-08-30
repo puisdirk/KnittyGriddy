@@ -29,20 +29,20 @@ class NamedColour {
   Map<String, Object> toJson() {
     return {
       'name': name,
-      'color': {'red': color.red, 'blue': color.blue, 'green': color.green, 'alpha': color.alpha},
+      'color': color.value,
       'ismaincolor': isMainColor,
     };
   }
 
   String get contentHashCode => jsonEncode({
-      'color': {'red': color.red, 'blue': color.blue, 'green': color.green, 'alpha': color.alpha},
+      'color': color.value,
       'ismaincolor': isMainColor,
     });
 
   static NamedColour fromJson(Map<String, dynamic> json) {
     return NamedColour(
       name: json['name'] as String, 
-      color: Color.fromARGB(json['color']['alpha'] as int, json['color']['red'] as int, json['color']['green'] as int, json['color']['blue'] as int),
+      color: Color(json['color'] as int),
       isMainColor: json['ismaincolor'] as bool,
     );
   }

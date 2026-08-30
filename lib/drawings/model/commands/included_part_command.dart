@@ -266,7 +266,11 @@ class IncludedPartCommand extends DrawingCommand {
         } else {
           MeasurementOverride mo = measurementOverrides.firstWhere((mo) => mo.measurementId == c.id);
           FormulaParseResult res = FormulaExpression.validate(formula: mo.formula, drawing: drawing);
-          return c.copyWith(value: res.result!);
+          if (res.isValid) {
+            return c.copyWith(value: res.result!);
+          } else {
+            return c;
+          }
         }
       }).toList()
     );
@@ -332,14 +336,20 @@ class IncludedPartCommand extends DrawingCommand {
       // Remark: could check if the part exists and is validated && valid, but I'm pretty sure this can never occur
     }
 
-    // Check if the measurement overrides have valid formula's
+    // Check if the measurement overrides have valid formula's and whether the values have changed
+    bool didDependentMeasurementChange = false;
     for (MeasurementOverride mo in measurementOverrides) {
-        FormulaParseResult res = FormulaExpression.validate(formula: mo.formula, drawing: drawing, label: 'a value');
-        if (res.isInvalid) {
-          isvalid = false;
-          if (!res.shouldRetry) retryValidation = false;
-          validationErrors.add('measurement ${mo.measurementLabel}: ${res.errorMessage}');
+      FormulaParseResult res = FormulaExpression.validate(formula: mo.formula, drawing: drawing, label: 'a value');
+      if (res.isInvalid) {
+        isvalid = false;
+        if (!res.shouldRetry) retryValidation = false;
+        validationErrors.add('measurement ${mo.measurementLabel}: ${res.errorMessage}');
+      } else if (storedOffsetPartDrawing != null && !didDependentMeasurementChange) {
+        MeasurementCommand? mcmd = storedOffsetPartDrawing!.measurementById(mo.measurementId);
+        if (mcmd != null && mcmd.value != res.result) {
+          didDependentMeasurementChange = true;
         }
+      }
     }
 
     Offset? newAnchorPointLocation;
@@ -369,7 +379,7 @@ class IncludedPartCommand extends DrawingCommand {
       }
     }
 
-    if (isvalid && (isDirty || newAnchorPointLocation != storedAnchorOffset) ||
+    if (isvalid && (isDirty || newAnchorPointLocation != storedAnchorOffset || didDependentMeasurementChange) ||
       (partDrawingId.isNotEmpty && storedOffsetPartDrawing == null)) {
       IncludedPartCommand copy = _calculateNewStoredPartDrawing(drawing);
       return copy.copyWith(

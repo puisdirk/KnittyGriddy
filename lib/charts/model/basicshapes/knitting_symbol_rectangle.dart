@@ -252,7 +252,7 @@ class KnittingSymbolRectangle extends KnittingSymbolPart {
                 child: Text('Width'),
               ),
             ),
-            const SizedBox(width: 10,),
+            hspacing,
             SizedBox(
               width: 160,
               child: SpinBox(
@@ -286,7 +286,7 @@ class KnittingSymbolRectangle extends KnittingSymbolPart {
                 value: width
               ),
             ),
-            const SizedBox(width: 10,),
+            hspacing,
             const SizedBox(
               width: 50,
               child: Align(
@@ -294,7 +294,7 @@ class KnittingSymbolRectangle extends KnittingSymbolPart {
                 child: Text('Height'),
               ),
             ),
-            const SizedBox(width: 10,),
+            hspacing,
             SizedBox(
               width: 160,
               child: SpinBox(
@@ -340,7 +340,7 @@ class KnittingSymbolRectangle extends KnittingSymbolPart {
                 child: Text('Rounded'),
               ),
             ),
-            const SizedBox(width: 10,),
+            hspacing,
             Checkbox(
               value: rounded, 
               onChanged: (value) {
@@ -380,7 +380,7 @@ class KnittingSymbolRectangle extends KnittingSymbolPart {
                 child: Text('Top left'),
               ),
             ),
-            const SizedBox(width: 10,),
+            hspacing,
             SizedBox(
               width: 160,
               child: SpinBox(
@@ -412,7 +412,7 @@ class KnittingSymbolRectangle extends KnittingSymbolPart {
                 },
               ),
             ),
-            const SizedBox(width: 10,),
+            hspacing,
             const SizedBox(
               width: 100,
               child: Align(
@@ -420,7 +420,7 @@ class KnittingSymbolRectangle extends KnittingSymbolPart {
                 child: Text('Top right'),
               ),
             ),
-            const SizedBox(width: 10,),
+            hspacing,
             SizedBox(
               width: 160,
               child: SpinBox(
@@ -465,7 +465,7 @@ class KnittingSymbolRectangle extends KnittingSymbolPart {
                 child: Text('Bottom left'),
               ),
             ),
-            const SizedBox(width: 10,),
+            hspacing,
             SizedBox(
               width: 160,
               child: SpinBox(
@@ -497,7 +497,7 @@ class KnittingSymbolRectangle extends KnittingSymbolPart {
                 },
               ),
             ),
-            const SizedBox(width: 10,),
+            hspacing,
             const SizedBox(
               width: 100,
               child: Align(
@@ -505,7 +505,7 @@ class KnittingSymbolRectangle extends KnittingSymbolPart {
                 child: Text('Bottom right'),
               ),
             ),
-            const SizedBox(width: 10,),
+            hspacing,
             SizedBox(
               width: 160,
               child: SpinBox(

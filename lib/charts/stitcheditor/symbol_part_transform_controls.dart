@@ -35,7 +35,7 @@ class SymbolPartTransformControls extends StatelessWidget {
                 child: Text('Mirror')
               )
             ),
-            const SizedBox(width: 10,),
+            hspacing,
             IconButton.outlined(
               onPressed: () {
                 onChanged(
@@ -72,7 +72,7 @@ class SymbolPartTransformControls extends StatelessWidget {
                 child: Text('Duplicate')
               )
             ),
-            const SizedBox(width: 10,),
+            hspacing,
             IconButton.outlined(
               onPressed: () {
                 List<KnittingSymbol> newSymbols = [];
@@ -104,7 +104,7 @@ class SymbolPartTransformControls extends StatelessWidget {
                 child: Text('Translation')
               )
             ),
-            const SizedBox(width: 10,),
+            hspacing,
             SizedBox(
               width: 160,
               child: SpinBox(
@@ -116,7 +116,7 @@ class SymbolPartTransformControls extends StatelessWidget {
                 value: stitchDefinition.symbolPartAt(symbolPartColumn, symbolPartRow).translation.dx,
               ),
             ),
-            const SizedBox(width: 10,),
+            hspacing,
             SizedBox(
               width: 160,
               child: SpinBox(
@@ -140,7 +140,7 @@ class SymbolPartTransformControls extends StatelessWidget {
                 child: Text('Rotation'),
               ),
             ),
-            const SizedBox(width: 10,),
+            hspacing,
             Stack(
               children: [
                 Positioned(
@@ -173,7 +173,7 @@ class SymbolPartTransformControls extends StatelessWidget {
                 child: Text('Scale'),
               ),
             ),
-            const SizedBox(width: 10,),
+            hspacing,
             LinkedSpinbox(
               width: 160,
               min: -1000,

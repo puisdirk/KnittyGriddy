@@ -49,7 +49,7 @@ class _PartSetPanelState extends State<PartSetPanel> {
           height: 50,
           child: Row(
             children: [
-              const SizedBox(width: 10,),
+              hspacing,
               OutlinedButton.icon(
                 onPressed: () async {
                   try {
@@ -189,7 +189,7 @@ class _PartSetPanelState extends State<PartSetPanel> {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        const SizedBox(width: 10,),
+                        hspacing,
                         const Icon(Symbols.apparel),
                         const SizedBox(width: 20,),
                         Text(partDrawing.name),
@@ -241,7 +241,7 @@ class _PartSetPanelState extends State<PartSetPanel> {
                           }, 
                           icon: const Icon(Icons.delete),
                         ),
-                        const SizedBox(width: 10,),
+                        hspacing,
                       ],
                     ),
                   ),
@@ -318,7 +318,7 @@ class _PartSetPanelState extends State<PartSetPanel> {
                                   }, 
                                   icon: const Icon(Icons.delete),
                                 ),
-                                const SizedBox(width: 10,),
+                                hspacing,
                               ],
                             ),
                             Row(

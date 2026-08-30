@@ -33,7 +33,7 @@ class PatternChartFieldControl extends StatelessWidget {
               child: viewSettings.showLegend == false ?
                 Visibility(
                   visible: viewSettings.showGrid,
-                  child: ChartFieldGrid(chart: chart!,)
+                  child: ChartFieldGrid(chart: chart!, showNoStichCells: viewSettings.showNoStichCells,)
                 ) :
                 viewSettings.legendHorizontal ?
                   Column(
@@ -43,7 +43,7 @@ class PatternChartFieldControl extends StatelessWidget {
                         ChartFieldPreviewLegend(chart: chart!, exportSettings: viewSettings,),
                       Visibility(
                         visible: viewSettings.showGrid,
-                        child: ChartFieldGrid(chart: chart!)
+                        child: ChartFieldGrid(chart: chart!, showNoStichCells: viewSettings.showNoStichCells)
                       ),
                       if (viewSettings.legendPosition == LegendPosition.bottom)
                         ChartFieldPreviewLegend(chart: chart!, exportSettings: viewSettings,)
@@ -55,7 +55,7 @@ class PatternChartFieldControl extends StatelessWidget {
                         ChartFieldPreviewLegend(chart: chart!, exportSettings: viewSettings,),
                       Visibility(
                         visible: viewSettings.showGrid,
-                        child: ChartFieldGrid(chart: chart!)
+                        child: ChartFieldGrid(chart: chart!, showNoStichCells: viewSettings.showNoStichCells)
                       ),
                       if (viewSettings.legendPosition == LegendPosition.right)
                         ChartFieldPreviewLegend(chart: chart!, exportSettings: viewSettings,),

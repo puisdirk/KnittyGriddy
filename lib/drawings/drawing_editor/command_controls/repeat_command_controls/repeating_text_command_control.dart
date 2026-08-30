@@ -4,11 +4,12 @@ import 'package:knitty_griddy/drawings/drawing_editor/command_controls/small_lab
 import 'package:knitty_griddy/drawings/drawing_editor/command_controls/small_multiline_text_field.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/command_controls/small_text_field.dart';
 import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
+import 'package:knitty_griddy/drawings/model/commands/colour_reference.dart';
 import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/repeat_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/repeat_commands/repeating_point_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/repeat_commands/repeating_text_command.dart';
-import 'package:knitty_griddy/pick_colour_dialog.dart';
+import 'package:knitty_griddy/pick_colour_reference_dialog.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 
 class RepeatingTextCommandControl extends StatelessWidget {
@@ -178,20 +179,21 @@ class RepeatingTextCommandControl extends StatelessWidget {
             hspacing,
             GestureDetector(
               onTap: () async {
-                Color? newColor = await showDialog(
+                ColourReference? newColorRef = await showDialog(
                   context: context,
                   builder: (context) {
-                    return PickColourDialog(
+                    return PickColourReferenceDialog(
+                      drawing: drawing,
                       initialColor: command.wrappedText.textColor,
                       knownColours: drawing.knownColours,
                     );
                   }
                 );
-                if (newColor != null && newColor != command.wrappedText.textColor) {
+                if (newColorRef != null && newColorRef != command.wrappedText.textColor) {
                   onChanged(
                     command.copyWith(
                       wrappedText: command.wrappedText.copyWith(
-                        textColor: newColor
+                        textColor: newColorRef
                       )
                     )
                   );
@@ -199,17 +201,39 @@ class RepeatingTextCommandControl extends StatelessWidget {
               },
               child: MouseRegion(
                 cursor: SystemMouseCursors.click,
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.all(Radius.circular(5)), 
-                    color: command.wrappedText.textColor
-                  ), 
-                  width: 40, 
-                  height: 30,
+                child: Row(
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: const BorderRadius.all(Radius.circular(5)), 
+                        border: Border.all(color: Colors.grey)
+                      ), 
+                      width: 40, 
+                      height: 30,
+                      child: Center(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: const BorderRadius.all(Radius.circular(3)),
+                            color: command.wrappedText.textColor.color
+                          ),
+                          width: 34,
+                          height: 24,
+                        ),
+                      ),
+                    ),
+                    hspacing,
+                    if (command.wrappedText.textColor.measurementId.isNotEmpty)
+                      Text('@${command.wrappedText.textColor.measurementLabel}')
+                  ],
                 ),
               ),
             ),
-            const SmallLabel(label: 'Style', width: 40,),
+          ]
+        ),
+        vspacing,
+        Row(
+          children: [
+            const SmallLabel(label: 'Style'),
             hspacing,
             SegmentedButton<String>(
               emptySelectionAllowed: true,

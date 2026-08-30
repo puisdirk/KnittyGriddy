@@ -8,6 +8,7 @@ import 'package:knitty_griddy/charts/model/charts_model.dart';
 import 'package:knitty_griddy/charts/model/chart_info.dart';
 import 'package:knitty_griddy/charts/stitch_icon.dart';
 import 'package:knitty_griddy/charts/stitchrepo/basic_stitches_set.dart';
+import 'package:knitty_griddy/utils/constants.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
@@ -87,7 +88,7 @@ class _ChartChooserViewState extends State<ChartChooserView> {
               label: const Text('Import Chart'),
               icon: const Icon(Symbols.download, weight: 700,),
             ),
-            const SizedBox(width: 10,),
+            hspacing,
             OutlinedButton.icon(
               onPressed: () => Navigator.push(
                 context, MaterialPageRoute(
@@ -95,7 +96,7 @@ class _ChartChooserViewState extends State<ChartChooserView> {
               label: const Text('Stitches'),
               icon: const StitchIcon(stitchDefinition: BasicStitchesSet.sssp, iconSize: 32, iconColor: Color.fromARGB(255, 41, 99, 138),) // const Icon(Symbols.auto_stories, weight: 700,),
             ),
-            const SizedBox(width: 10,)
+            hspacing
           ],
         ),
         Expanded(

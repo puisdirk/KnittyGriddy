@@ -604,6 +604,7 @@ class _PatternPageState extends State<PatternPage> {
                       fieldToolbar: 
                         selectedField?.fieldType == PatternFieldType.drawing ?
                           PatternDrawingFieldToolbar(
+                            pattern: widget.knittingPattern,
                             field: selectedField as PatternDrawingField, 
                             onChanged: (newField) => _storeAndSetKnittingPattern(stateKnittingPattern.copyWith(
                               fields: stateKnittingPattern.fields.map((f) => f.id != newField.id ? f : newField).toList()

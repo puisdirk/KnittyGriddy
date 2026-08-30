@@ -19,7 +19,7 @@ class MeasurementCommandChooser extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<MeasurementCommand> measurements = 
-      drawing.measurements.where((m) => m.label.toLowerCase().contains(query))
+      drawing.measurements.where((m) => m.unit != Unit.colour && m.label.toLowerCase().contains(query))
         .toList();
     if (measurements.isEmpty) {
       return const SizedBox.shrink();

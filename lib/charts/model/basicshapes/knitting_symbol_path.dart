@@ -6,6 +6,7 @@ import 'package:knitty_griddy/charts/model/basicshapes/stateless_text_entry_cont
 import 'package:knitty_griddy/charts/model/knitting_symbol.dart';
 import 'package:knitty_griddy/charts/model/knitting_symbol_part.dart';
 import 'package:knitty_griddy/charts/stitchrepo/stitch_definition.dart';
+import 'package:knitty_griddy/utils/constants.dart';
 import 'package:path_drawing/path_drawing.dart';
 
 const String knittingSymbolPathType = 'path';
@@ -163,7 +164,7 @@ KnittingSymbolPath(
                 child: Text('Path text'),
               ),
             ),
-            const SizedBox(width: 10,),
+            hspacing,
             StatelessTextEntryControl(
               initialText: path,
               width: 400,

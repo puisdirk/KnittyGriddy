@@ -1,7 +1,12 @@
+import 'dart:convert';
+
+import 'package:fleather/fleather.dart';
 import 'package:flutter/material.dart';
 import 'package:id_gen/id_gen.dart';
 import 'package:knitty_griddy/charts/model/charts_model.dart';
 import 'package:knitty_griddy/charts/model/knitting_chart.dart';
+import 'package:knitty_griddy/charts/stitchrepo/stitch_definition.dart';
+import 'package:knitty_griddy/charts/stitchrepo/stitch_repository.dart';
 import 'package:knitty_griddy/drawings/model/drawing.dart';
 import 'package:knitty_griddy/drawings/model/drawings_model.dart';
 import 'package:knitty_griddy/patterns/mainview/pattern_page.dart';
@@ -131,7 +136,22 @@ class _PatternChooserViewState extends State<PatternChooserView> {
 
                         }
                       } else if (field is PatternTextEditorField) {
-                        // TODO: load knitting symbols
+                        // load knitting symbols
+                        ParchmentDocument doc = ParchmentDocument.fromJson(jsonDecode(field.docContents));
+                        DeltaIterator iter = DeltaIterator(doc.toDelta());
+                        while(iter.hasNext) {
+                          Operation op = iter.next();
+                          if (op.data is Map) {
+                            if ((op.data as Map).containsKey('stitchdefinition')) {
+                              StitchDefinition def = StitchDefinition.fromJson((op.data as Map)['stitchdefinition']);
+                              if (!StitchRepository.hasStitch(def)) {
+                                if (context.mounted) {
+                                  Provider.of<ChartsModel>(context, listen: false).addStitchToImportedSet(def);
+                                }
+                              }
+                            }
+                          }
+                        }
                       } else if (field is PatternDrawingField && field.drawing != null) {
                         Drawing drawing = field.drawing!;
 

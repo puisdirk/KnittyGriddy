@@ -18,6 +18,10 @@ const TextStyle smallStyle = TextStyle(fontSize: 10, color: Colors.black);
 const TextStyle smallStyleBold = TextStyle(fontSize: 10, color: Colors.black, fontWeight: FontWeight.bold);
 const TextStyle smallStyleBlue = TextStyle(fontSize: 10, color: Color.fromARGB(255, 85, 105, 114));
 
+const double kKnowColoursHeight = 50;
+const double kColourPickerHeight = 410;
+const double kColourMeasurementsHeight = 140;
+
 // General
 
 const double hspacewidth = 10;

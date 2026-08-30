@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
+import 'package:knitty_griddy/drawings/model/commands/colour_reference.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/included_part_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
@@ -17,7 +18,7 @@ class TextCommand extends DrawingCommand {
   final bool italic;
   final bool bold;
   final int textSize;
-  final Color textColor;
+  final ColourReference textColor;
 
   const TextCommand({
     required super.id,
@@ -28,7 +29,7 @@ class TextCommand extends DrawingCommand {
     this.italic = false,
     this.bold = false,
     this.textSize = 12,
-    this.textColor = Colors.black,
+    this.textColor = const ColourReference(),
     super.validated,
     super.valid,
     super.errors,
@@ -43,7 +44,7 @@ class TextCommand extends DrawingCommand {
     bool? italic,
     bool? bold,
     int? textSize,
-    Color? textColor,
+    ColourReference? textColor,
     bool? validated,
     bool? valid,
     List<String>? errors,
@@ -120,7 +121,7 @@ class TextCommand extends DrawingCommand {
       'italic': italic,
       'bold': bold,
       'textsize': textSize,
-      'textcolour': {'red': textColor.red, 'blue': textColor.blue, 'green': textColor.green, 'alpha': textColor.alpha},
+      'textcolour': textColor.toJson(),
     };
   }
 
@@ -133,7 +134,7 @@ class TextCommand extends DrawingCommand {
     'italic': italic,
     'bold': bold,
     'textsize': textSize,
-    'textcolour': {'red': textColor.red, 'blue': textColor.blue, 'green': textColor.green, 'alpha': textColor.alpha},
+    'textcolour': textColor.toJson(),
   });
 
   static TextCommand fromJson(Map<String, dynamic> json) {
@@ -146,12 +147,12 @@ class TextCommand extends DrawingCommand {
       italic: json['italic'] as bool,
       bold: json['bold'] as bool,
       textSize: json['textsize'] as int,
-      textColor: Color.fromARGB(json['textcolour']['alpha'] as int, json['textcolour']['red'] as int, json['textcolour']['green'] as int, json['textcolour']['blue'] as int),
+      textColor: ColourReference.fromJson(json['textcolour']),
     );
   }
 
   @override
-  double get editHeight => 300;
+  double get editHeight => 310;
 
   @override
   Rect getBoundingBox(AbstractDrawing drawing) {
@@ -183,8 +184,10 @@ class TextCommand extends DrawingCommand {
 
   @override
   Set<String> dependencies(AbstractDrawing drawing) {
-    if (anchorPointId.isNotEmpty) return {anchorPointId};
-    return {};
+    Set<String> deps = {};
+    if (anchorPointId.isNotEmpty) deps.add(anchorPointId);
+    if (textColor.measurementId.isNotEmpty) deps.add(textColor.measurementId);
+    return deps;
   }
 
   @override
@@ -199,11 +202,18 @@ class TextCommand extends DrawingCommand {
 
   @override
   TextCommand deleteReference({required String commandId}) {
-    return copyWith(anchorPointId: (anchorPointId == commandId || anchorPointId.startsWith('$commandId.')) ? '' : anchorPointId);
+    return copyWith(
+      anchorPointId: (anchorPointId == commandId || anchorPointId.startsWith('$commandId.')) ? '' : anchorPointId,
+      textColor: textColor.deleteReference(commandId: commandId),
+    );
   }
 
   @override
-  TextCommand dependentLabelChanged(String oldLabel, String newLabel) => this;
+  TextCommand dependentLabelChanged(String oldLabel, String newLabel) {
+    return copyWith(
+      textColor: textColor.dependentLabelChanged(oldLabel, newLabel),
+    );
+  }
 
   @override
   String toSvg(Size drawingSize, AbstractDrawing drawing, {List<StylingCommand> stylings = const []}) {
@@ -219,6 +229,7 @@ class TextCommand extends DrawingCommand {
     Offset middle = Offset(drawingSize.width / 2, drawingSize.height / 2);
     coord += middle;
 
+    // TODO: this doesn't use the textColour??
     return '<g id="$label"><text font-size="12" font-family="Roboto" x="${coord.dx}" y="${coord.dy}">$text</text></g>';
 
   }
@@ -238,7 +249,7 @@ class TextCommand extends DrawingCommand {
     coord += middle;
 
     TextStyle style = TextStyle(
-      color: (!forPreview && selected) ? selectedColor : textColor,
+      color: (!forPreview && selected) ? selectedColor : textColor.color,
       fontSize: textSize.toDouble(),
       fontStyle: italic ? FontStyle.italic : FontStyle.normal,
       fontWeight: bold ? FontWeight.w700 : FontWeight.normal,
@@ -306,6 +317,7 @@ class TextCommand extends DrawingCommand {
       valid: isvalid,
       validated: (isvalid || !retryValidation),
       errors: validationErrors,
+      textColor: textColor.checkForUpdate(drawing),
     );
   }
 }
