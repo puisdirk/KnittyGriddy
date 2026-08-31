@@ -140,6 +140,7 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
       case PatternFieldType.panel:
         return PatternPanelFieldControl(
           panelStyle: (widget.field as PatternPanelField).style,
+          opacity: widget.field.opacity.toDouble(),
           onSelect: widget.onSelect,
         );
     }

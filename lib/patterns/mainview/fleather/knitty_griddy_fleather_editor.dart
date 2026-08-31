@@ -99,13 +99,28 @@ class _KnittyGriddyFleatherEditorState extends State<KnittyGriddyFleatherEditor>
               decoration: const InputDecoration(border: InputBorder.none),
             )
             :
-            FleatherEditor(
-              embedBuilder: _embedBuilder,
-              autofocus: false,
-              padding: const EdgeInsets.all(5),
-              controller: widget.fleatherController,
-              editorKey: widget.editorKey,
-              focusNode: _fleatherFocusNode,
+            // We override the undo/redo to do nothing (handled by our own undoredoManager in PatternPage)
+            Actions(
+              actions: <Type, Action<Intent>>{
+                UndoTextIntent: CallbackAction<UndoTextIntent>(
+                  onInvoke: (intent) {
+                    return null;
+                  }    
+                ),
+                RedoTextIntent: CallbackAction<RedoTextIntent>(
+                  onInvoke: (intent) {
+                    return null;
+                  }    
+                )
+              },
+              child: FleatherEditor(
+                embedBuilder: _embedBuilder,
+                autofocus: false,
+                padding: const EdgeInsets.all(5),
+                controller: widget.fleatherController,
+                editorKey: widget.editorKey,
+                focusNode: _fleatherFocusNode,
+              ),
             ),
           ),
         ),

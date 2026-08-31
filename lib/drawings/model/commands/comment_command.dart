@@ -45,10 +45,20 @@ class CommentCommand extends DrawingCommand {
   }
 
   @override
-  CommentCommand abstractCopyWith({String? id, String? label, bool? initiallyOpen}) {
+  CommentCommand abstractCopyWith({
+    String? id, 
+    String? label, 
+    bool? validated,
+    bool? valid,
+    List<String>? errors,
+    bool? initiallyOpen
+  }) {
     return copyWith(
       id: id?? this.id,
       label: label?? this.label,
+      validated: validated?? this.validated,
+      valid: valid?? this.valid,
+      errors: errors?? this.errors,
       initiallyOpen: initiallyOpen?? this.initiallyOpen,
     );
   }
@@ -60,24 +70,7 @@ class CommentCommand extends DrawingCommand {
   Rect getBoundingBox(AbstractDrawing drawing) => Rect.zero;
 
   @override
-  CommentCommand setInitiallyClosed() => copyWith(initiallyOpen: false);
-
-  @override
-  CommentCommand markAsCyclic(String cycleDescription) {
-    return copyWith(
-      validated: true,
-      valid: false,
-      errors: ['Cycle detected: $cycleDescription'],
-    );
-  }
-
-  @override
   Set<String> dependencies(AbstractDrawing drawing) => {};
-
-  @override
-  CommentCommand clearValidation() {
-    return copyWith(validated: false, valid: false, errors: const[]);
-  }
 
   @override
   CommentCommand changePartDrawingReference({required String oldId, required String newId}) => this;

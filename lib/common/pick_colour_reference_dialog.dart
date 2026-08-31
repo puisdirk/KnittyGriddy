@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
 import 'package:knitty_griddy/drawings/model/commands/colour_reference.dart';
 import 'package:knitty_griddy/drawings/model/commands/measurement_command.dart';
-import 'package:knitty_griddy/pick_colour_control.dart';
+import 'package:knitty_griddy/common/pick_colour_control.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 import 'package:knitty_griddy/utils/math_utitilies.dart';
 

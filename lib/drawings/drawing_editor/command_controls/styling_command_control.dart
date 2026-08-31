@@ -8,7 +8,7 @@ import 'package:knitty_griddy/drawings/model/commands/arrow_painter.dart';
 import 'package:knitty_griddy/drawings/model/commands/colour_reference.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/styling_command.dart';
-import 'package:knitty_griddy/pick_colour_reference_dialog.dart';
+import 'package:knitty_griddy/common/pick_colour_reference_dialog.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 import 'package:knitty_griddy/utils/dashed_painter.dart';
 import 'package:material_symbols_icons/symbols.dart';

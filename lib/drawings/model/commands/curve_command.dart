@@ -37,6 +37,9 @@ class CurveCommand extends DrawingCommand {
 
   final Offset? storedStartCoordinate;
   final Offset? storedEndCoordinate;
+  final Offset? storedQuadCtrlPointCoordinate;
+  final Offset? storedCubicCtrlPoint1Coordinate;
+  final Offset? storedCubicCtrlPoint2Coordinate;
 
   final CurveDefinitionType curveDefinitionType;
 
@@ -72,6 +75,9 @@ class CurveCommand extends DrawingCommand {
     super.initiallyOpen,
     this.storedStartCoordinate,
     this.storedEndCoordinate,
+    this.storedQuadCtrlPointCoordinate,
+    this.storedCubicCtrlPoint1Coordinate,
+    this.storedCubicCtrlPoint2Coordinate,
   }) : curveDefinitionType = curveDefinitionType?? CurveDefinitionType.quadratic;
 
   CurveCommand copyWith({
@@ -95,6 +101,9 @@ class CurveCommand extends DrawingCommand {
     bool? initiallyOpen,
     Offset? storedStartCoordinate,
     Offset? storedEndCoordinate,
+    Offset? storedQuadCtrlPointCoordinate,
+    Offset? storedCubicCtrlPoint1Coordinate,
+    Offset? storedCubicCtrlPoint2Coordinate,
   }) {
     return CurveCommand(
       id: id?? this.id,
@@ -118,14 +127,27 @@ class CurveCommand extends DrawingCommand {
       initiallyOpen: initiallyOpen?? this.initiallyOpen,
       storedStartCoordinate: storedStartCoordinate?? this.storedStartCoordinate,
       storedEndCoordinate: storedEndCoordinate?? this.storedEndCoordinate,
+      storedQuadCtrlPointCoordinate: storedQuadCtrlPointCoordinate?? this.storedQuadCtrlPointCoordinate,
+      storedCubicCtrlPoint1Coordinate: storedCubicCtrlPoint1Coordinate?? this.storedCubicCtrlPoint1Coordinate,
+      storedCubicCtrlPoint2Coordinate: storedCubicCtrlPoint2Coordinate?? this.storedCubicCtrlPoint2Coordinate,
     );
   }
 
   @override
-  CurveCommand abstractCopyWith({String? id, String? label, bool? initiallyOpen}) {
+  CurveCommand abstractCopyWith({
+    String? id, 
+    String? label, 
+    bool? validated,
+    bool? valid,
+    List<String>? errors,
+    bool? initiallyOpen
+  }) {
     return copyWith(
       id: id?? this.id,
       label: label?? this.label,
+      validated: validated?? this.validated,
+      valid: valid?? this.valid,
+      errors: errors?? this.errors,
       initiallyOpen: initiallyOpen?? this.initiallyOpen,
     );
   }
@@ -174,20 +196,6 @@ class CurveCommand extends DrawingCommand {
       if (p != null) return p.getBounds();
     }
     return Rect.zero;
-  }
-
-  @override
-  CurveCommand setInitiallyClosed() {
-    return copyWith(initiallyOpen: false);
-  }
-
-  @override
-  CurveCommand markAsCyclic(String cycleDescription) {
-    return copyWith(
-      validated: true,
-      valid: false,
-      errors: ['Cycle detected: $cycleDescription'],
-    );
   }
 
   @override
@@ -366,7 +374,10 @@ class CurveCommand extends DrawingCommand {
     valid == other.valid &&
     listEquals(errors, other.errors) &&
     storedStartCoordinate == other.storedStartCoordinate &&
-    storedEndCoordinate == other.storedEndCoordinate;
+    storedEndCoordinate == other.storedEndCoordinate &&
+    storedQuadCtrlPointCoordinate == other.storedQuadCtrlPointCoordinate &&
+    storedCubicCtrlPoint1Coordinate == other.storedCubicCtrlPoint1Coordinate &&
+    storedCubicCtrlPoint2Coordinate == other.storedCubicCtrlPoint2Coordinate;
 
   @override
   @override
@@ -391,11 +402,12 @@ class CurveCommand extends DrawingCommand {
 
   @override
   int get hashCode => super.hashCode ^ startPointId.hashCode ^ endPointId.hashCode ^ 
-    storedStartCoordinate.hashCode ^ storedEndCoordinate.hashCode ^
     curveDefinitionType.hashCode ^
     quadAmplitudeFormula.hashCode ^ quadSlantFormula.hashCode ^ quadCtrlPointId.hashCode ^
     cubicAmplitudeFormula1.hashCode ^ cubicSlantFormula1.hashCode ^ cubicAmplitudeFormula2.hashCode ^ cubicSlantFormula2.hashCode ^ 
-    cubicCtrlPointId1.hashCode ^ cubicCtrlPointId2.hashCode;
+    cubicCtrlPointId1.hashCode ^ cubicCtrlPointId2.hashCode ^
+    storedStartCoordinate.hashCode ^ storedEndCoordinate.hashCode ^ 
+    storedQuadCtrlPointCoordinate.hashCode ^ storedCubicCtrlPoint1Coordinate.hashCode ^ storedCubicCtrlPoint2Coordinate.hashCode;
 
   String _getPathSvg(AbstractDrawing drawing, Offset offset) {
     if (!valid) return '';
@@ -422,10 +434,11 @@ class CurveCommand extends DrawingCommand {
 
         return 'M${startCoordinate.dx},${startCoordinate.dy} Q${controlCoordinate.dx},${controlCoordinate.dy},${endCoordinate.dx},${endCoordinate.dy}';
       case CurveDefinitionType.quadraticFromPoints:
-        if (quadCtrlPointId.isEmpty) return '';
+/*        if (quadCtrlPointId.isEmpty) return '';
         PointCommand? ctrlPointCmd = drawing.pointById(quadCtrlPointId);
         if (ctrlPointCmd == null) return '';
-        Offset? ctrlPoint = ctrlPointCmd.getCoordinate(drawing);
+        Offset? ctrlPoint = ctrlPointCmd.getCoordinate(drawing);*/
+        Offset? ctrlPoint = getQuadCtrlCoordinate(drawing);
         if (ctrlPoint == null) return '';
         ctrlPoint = ctrlPoint.scale(1, -1);
         ctrlPoint += offset;
@@ -449,18 +462,12 @@ class CurveCommand extends DrawingCommand {
 
         return 'M${startCoordinate.dx},${startCoordinate.dy} C${controlCoordinate1.dx},${controlCoordinate1.dy},${controlCoordinate2.dx},${controlCoordinate2.dy},${endCoordinate.dx},${endCoordinate.dy}';
       case CurveDefinitionType.cubicFromPoints:
-        if (cubicCtrlPointId1.isEmpty) return '';
-        PointCommand? ctrlPoint1Cmd = drawing.pointById(cubicCtrlPointId1);
-        if (ctrlPoint1Cmd == null) return '';
-        Offset? ctrlPoint1 = ctrlPoint1Cmd.getCoordinate(drawing);
+        Offset? ctrlPoint1 = getCubicCtrlPoint1Coordinate(drawing);
         if (ctrlPoint1 == null) return '';
         ctrlPoint1 = ctrlPoint1.scale(1, -1);
         ctrlPoint1 += offset;
 
-        if (cubicCtrlPointId2.isEmpty) return '';
-        PointCommand? ctrlPoint2Cmd = drawing.pointById(cubicCtrlPointId2);
-        if (ctrlPoint2Cmd == null) return '';
-        Offset? ctrlPoint2 = ctrlPoint2Cmd.getCoordinate(drawing);
+        Offset? ctrlPoint2 = getCubicCtrlPoint2Coordinate(drawing);
         if (ctrlPoint2 == null) return '';
         ctrlPoint2 = ctrlPoint2.scale(1, -1);
         ctrlPoint2 += offset;
@@ -498,10 +505,7 @@ class CurveCommand extends DrawingCommand {
           controlCoordinate.dx, controlCoordinate.dy, 
           endCoordinate.dx, endCoordinate.dy);
       case CurveDefinitionType.quadraticFromPoints:
-        if (quadCtrlPointId.isEmpty) return null;
-        PointCommand? ctrlPointCmd = drawing.pointById(quadCtrlPointId);
-        if (ctrlPointCmd == null) return null;
-        Offset? ctrlPoint = ctrlPointCmd.getCoordinate(drawing);
+        Offset? ctrlPoint = getQuadCtrlCoordinate(drawing);
         if (ctrlPoint == null) return null;
         ctrlPoint = ctrlPoint.scale(1, -1);
         ctrlPoint += offset;
@@ -533,18 +537,12 @@ class CurveCommand extends DrawingCommand {
           controlCoordinate2.dx, controlCoordinate2.dy, 
           endCoordinate.dx, endCoordinate.dy);
       case CurveDefinitionType.cubicFromPoints:
-        if (cubicCtrlPointId1.isEmpty) return null;
-        PointCommand? ctrlPoint1Cmd = drawing.pointById(cubicCtrlPointId1);
-        if (ctrlPoint1Cmd == null) return null;
-        Offset? ctrlPoint1 = ctrlPoint1Cmd.getCoordinate(drawing);
+        Offset? ctrlPoint1 = getCubicCtrlPoint1Coordinate(drawing);
         if (ctrlPoint1 == null) return null;
         ctrlPoint1 = ctrlPoint1.scale(1, -1);
         ctrlPoint1 += offset;
 
-        if (cubicCtrlPointId2.isEmpty) return null;
-        PointCommand? ctrlPoint2Cmd = drawing.pointById(cubicCtrlPointId2);
-        if (ctrlPoint2Cmd == null) return null;
-        Offset? ctrlPoint2 = ctrlPoint2Cmd.getCoordinate(drawing);
+        Offset? ctrlPoint2 = getCubicCtrlPoint2Coordinate(drawing);
         if (ctrlPoint2 == null) return null;
         ctrlPoint2 = ctrlPoint2.scale(1, -1);
         ctrlPoint2 += offset;
@@ -582,10 +580,7 @@ class CurveCommand extends DrawingCommand {
 
         return ' M${startCoordinate.dx},${startCoordinate.dy} Q${controlCoordinate.dx},${controlCoordinate.dy} ${endCoordinate.dx},${endCoordinate.dy}';
       case CurveDefinitionType.quadraticFromPoints:
-        if (quadCtrlPointId.isEmpty) return '';
-        PointCommand? ctrlPointCmd = drawing.pointById(quadCtrlPointId);
-        if (ctrlPointCmd == null) return '';
-        Offset? ctrlPoint = ctrlPointCmd.getCoordinate(drawing);
+        Offset? ctrlPoint = getQuadCtrlCoordinate(drawing);
         if (ctrlPoint == null) return '';
         ctrlPoint = ctrlPoint.scale(1, -1);
 
@@ -608,17 +603,11 @@ class CurveCommand extends DrawingCommand {
 
         return ' M${startCoordinate.dx},${startCoordinate.dy} C${controlCoordinate1.dx},${controlCoordinate1.dy} ${controlCoordinate2.dx},${controlCoordinate2.dy} ${endCoordinate.dx},${endCoordinate.dy}';
       case CurveDefinitionType.cubicFromPoints:
-        if (cubicCtrlPointId1.isEmpty) return '';
-        PointCommand? ctrlPoint1Cmd = drawing.pointById(cubicCtrlPointId1);
-        if (ctrlPoint1Cmd == null) return '';
-        Offset? ctrlPoint1 = ctrlPoint1Cmd.getCoordinate(drawing);
+        Offset? ctrlPoint1 = getCubicCtrlPoint1Coordinate(drawing);
         if (ctrlPoint1 == null) return '';
         ctrlPoint1 = ctrlPoint1.scale(1, -1);
 
-        if (cubicCtrlPointId2.isEmpty) return '';
-        PointCommand? ctrlPoint2Cmd = drawing.pointById(cubicCtrlPointId2);
-        if (ctrlPoint2Cmd == null) return '';
-        Offset? ctrlPoint2 = ctrlPoint2Cmd.getCoordinate(drawing);
+        Offset? ctrlPoint2 = getCubicCtrlPoint2Coordinate(drawing);
         if (ctrlPoint2 == null) return '';
         ctrlPoint2 = ctrlPoint2.scale(1, -1);
 
@@ -766,10 +755,7 @@ class CurveCommand extends DrawingCommand {
         canvas.drawLine(controlCoordinate, endCoordinate, controlsPaint);
       }
       if (curveDefinitionType == CurveDefinitionType.quadraticFromPoints) {
-        if (quadCtrlPointId.isEmpty) return;
-        PointCommand? ctrlPointCmd = drawing.pointById(quadCtrlPointId);
-        if (ctrlPointCmd == null) return;
-        Offset? ctrlPoint = ctrlPointCmd.getCoordinate(drawing);
+        Offset? ctrlPoint = getQuadCtrlCoordinate(drawing);
         if (ctrlPoint == null) return;
         ctrlPoint = ctrlPoint.scale(1, -1);
         ctrlPoint += middle;
@@ -788,18 +774,12 @@ class CurveCommand extends DrawingCommand {
         canvas.drawLine(controlCoordinate2, endCoordinate, controlsPaint);
       }
       if (curveDefinitionType == CurveDefinitionType.cubicFromPoints) {
-        if (cubicCtrlPointId1.isEmpty) return;
-        PointCommand? ctrlPointCmd1 = drawing.pointById(cubicCtrlPointId1);
-        if (ctrlPointCmd1 == null) return;
-        Offset? ctrlPoint1 = ctrlPointCmd1.getCoordinate(drawing);
+        Offset? ctrlPoint1 = getCubicCtrlPoint1Coordinate(drawing);
         if (ctrlPoint1 == null) return;
         ctrlPoint1 = ctrlPoint1.scale(1, -1);
         ctrlPoint1 += middle;
         
-        if (cubicCtrlPointId2.isEmpty) return;
-        PointCommand? ctrlPointCmd2 = drawing.pointById(cubicCtrlPointId2);
-        if (ctrlPointCmd2 == null) return;
-        Offset? ctrlPoint2 = ctrlPointCmd2.getCoordinate(drawing);
+        Offset? ctrlPoint2 = getCubicCtrlPoint2Coordinate(drawing);
         if (ctrlPoint2 == null) return;
         ctrlPoint2 = ctrlPoint2.scale(1, -1);
         ctrlPoint2 += middle;
@@ -844,6 +824,18 @@ class CurveCommand extends DrawingCommand {
     return storedEndCoordinate;
   }
 
+  Offset? getQuadCtrlCoordinate(AbstractDrawing drawing) {
+    return storedQuadCtrlPointCoordinate;
+  }
+
+  Offset? getCubicCtrlPoint1Coordinate(AbstractDrawing drawing) {
+    return storedCubicCtrlPoint1Coordinate;
+  }
+
+  Offset? getCubicCtrlPoint2Coordinate(AbstractDrawing drawing) {
+    return storedCubicCtrlPoint2Coordinate;
+  }
+
   Offset getControlPointCoordinate(Offset startCoordinate, Offset endCoordinate, double amplitude, double slant) {
     double lineLength = MathUtitilies.distance(startCoordinate, endCoordinate);
     double ampLength = lineLength * amplitude;
@@ -863,10 +855,12 @@ class CurveCommand extends DrawingCommand {
     return MathUtitilies.relativepointatangle(ampStartPoint, -ampLength, perpendicularAngle);
   }
 
+  // TODO: passing nulls here doesn't do anything
   @override
   CurveCommand clearValidation() {
     return copyWith(validated: false, valid: false, errors: const[],
-      storedStartCoordinate: null, storedEndCoordinate: null);
+      storedStartCoordinate: null, storedEndCoordinate: null,
+      storedQuadCtrlPointCoordinate: null, storedCubicCtrlPoint1Coordinate: null, storedCubicCtrlPoint2Coordinate: null);
   }
   
   @override
@@ -940,6 +934,10 @@ class CurveCommand extends DrawingCommand {
       }
     }
 
+    PointCommand? quadCtrlPoint;
+    PointCommand? cubic1CtrlPoint;
+    PointCommand? cubic2CtrlPoint;
+
     switch (curveDefinitionType) {
       case CurveDefinitionType.quadratic:
         FormulaParseResult res = FormulaExpression.validate(formula: quadAmplitudeFormula, drawing: drawing, label: 'an amplitude');
@@ -962,8 +960,8 @@ class CurveCommand extends DrawingCommand {
           retryValidation = false;
           validationErrors.add('Requires a control point');
         } else if (quadCtrlPointId != originId) {
-          PointCommand? ctrlPoint = drawing.pointById(quadCtrlPointId);
-          if (ctrlPoint == null) {
+          quadCtrlPoint = drawing.pointById(quadCtrlPointId);
+          if (quadCtrlPoint == null) {
             isvalid = false;
             retryValidation = false;
             validationErrors.add('Control point does not exist');
@@ -974,13 +972,13 @@ class CurveCommand extends DrawingCommand {
               isvalid = false;
             }
           } else {
-            if (!ctrlPoint.validated) {
+            if (!quadCtrlPoint.validated) {
               // We are not valid, but we should retry
               isvalid = false;
-            } else if (!ctrlPoint.valid) {
+            } else if (!quadCtrlPoint.valid) {
               isvalid = false;
               retryValidation = false;
-              validationErrors.add('Control point ${ctrlPoint.label} has errors');
+              validationErrors.add('Control point ${quadCtrlPoint.label} has errors');
             }
           }
         }
@@ -1020,8 +1018,8 @@ class CurveCommand extends DrawingCommand {
           retryValidation = false;
           validationErrors.add('Requires first control point');
         } else if (cubicCtrlPointId1 != originId) {
-          PointCommand? ctrlPoint1 = drawing.pointById(cubicCtrlPointId1);
-          if (ctrlPoint1 == null) {
+          cubic1CtrlPoint = drawing.pointById(cubicCtrlPointId1);
+          if (cubic1CtrlPoint == null) {
             isvalid = false;
             retryValidation = false;
             validationErrors.add('First control point does not exist');
@@ -1032,13 +1030,13 @@ class CurveCommand extends DrawingCommand {
               isvalid = false;
             }
           } else {
-            if (!ctrlPoint1.validated) {
+            if (!cubic1CtrlPoint.validated) {
               // We are not valid, but we should retry
               isvalid = false;
-            } else if (!ctrlPoint1.valid) {
+            } else if (!cubic1CtrlPoint.valid) {
               isvalid = false;
               retryValidation = false;
-              validationErrors.add('First control point ${ctrlPoint1.label} has errors');
+              validationErrors.add('First control point ${cubic1CtrlPoint.label} has errors');
             }
           }
         }
@@ -1047,8 +1045,8 @@ class CurveCommand extends DrawingCommand {
           retryValidation = false;
           validationErrors.add('Requires second control point');
         } else if (cubicCtrlPointId2 != originId) {
-          PointCommand? ctrlPoint2 = drawing.pointById(cubicCtrlPointId2);
-          if (ctrlPoint2 == null) {
+          cubic2CtrlPoint = drawing.pointById(cubicCtrlPointId2);
+          if (cubic2CtrlPoint == null) {
             isvalid = false;
             retryValidation = false;
             validationErrors.add('Second control point does not exist');
@@ -1059,13 +1057,13 @@ class CurveCommand extends DrawingCommand {
               isvalid = false;
             }
           } else {
-            if (!ctrlPoint2.validated) {
+            if (!cubic2CtrlPoint.validated) {
               // We are not valid, but we should retry
               isvalid = false;
-            } else if (!ctrlPoint2.valid) {
+            } else if (!cubic2CtrlPoint.valid) {
               isvalid = false;
               retryValidation = false;
-              validationErrors.add('Second Control point ${ctrlPoint2.label} has errors');
+              validationErrors.add('Second Control point ${cubic2CtrlPoint.label} has errors');
             }
           }
         }
@@ -1076,8 +1074,11 @@ class CurveCommand extends DrawingCommand {
       valid: isvalid,
       validated: (isvalid || !retryValidation),
       errors: validationErrors,
-      storedStartCoordinate: isvalid ? fromPoint!.getCoordinate(drawing) : null,
-      storedEndCoordinate: isvalid ? toPoint!.getCoordinate(drawing) : null,
+      storedStartCoordinate: isvalid ? fromPoint?.getCoordinate(drawing) : null,
+      storedEndCoordinate: isvalid ? toPoint?.getCoordinate(drawing) : null,
+      storedQuadCtrlPointCoordinate: isvalid ? quadCtrlPoint?.getCoordinate(drawing) : null,
+      storedCubicCtrlPoint1Coordinate: isvalid ? cubic1CtrlPoint?.getCoordinate(drawing) : null,
+      storedCubicCtrlPoint2Coordinate: isvalid ? cubic2CtrlPoint?.getCoordinate(drawing) : null,
     );
   }
 }

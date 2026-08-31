@@ -115,10 +115,20 @@ class RepeatCommand extends DrawingCommand {
   }
 
   @override
-  RepeatCommand abstractCopyWith({String? id, String? label, bool? initiallyOpen}) {
+  RepeatCommand abstractCopyWith({
+    String? id, 
+    String? label, 
+    bool? validated,
+    bool? valid,
+    List<String>? errors,
+    bool? initiallyOpen
+  }) {
     return copyWith(
       id: id?? this.id,
       label: label?? this.label,
+      validated: validated?? this.validated,
+      valid: valid?? this.valid,
+      errors: errors?? this.errors,
       initiallyOpen: initiallyOpen?? this.initiallyOpen,
     );
   }
@@ -139,16 +149,6 @@ class RepeatCommand extends DrawingCommand {
 
     return completeRect;
   }
-
-  @override
-  RepeatCommand setInitiallyClosed() => copyWith(initiallyOpen: false);
-
-  @override
-  RepeatCommand markAsCyclic(String cycleDescription) => copyWith(
-    validated: true,
-    valid: false,
-    errors: ['Cycle detected: $cycleDescription'],
-  );
 
   @override
   RepeatCommand changePartDrawingReference({required String oldId, required String newId}) {

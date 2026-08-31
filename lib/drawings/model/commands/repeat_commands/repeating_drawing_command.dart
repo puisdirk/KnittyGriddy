@@ -41,6 +41,9 @@ abstract class RepeatingDrawingCommand implements SameAs {
   RepeatingDrawingCommand abstractCopyWith({
     String? id,
     String? label,
+    bool? validated,
+    bool? valid,
+    List<String>? errors,
     bool? initiallyOpen,
   });
 
@@ -58,8 +61,8 @@ abstract class RepeatingDrawingCommand implements SameAs {
   RepeatingDrawingCommand deleteReference({required String commandId});
   RepeatingDrawingCommand changePartDrawingReference({required String oldId, required String newId});
   RepeatingDrawingCommand dependentLabelChanged(String oldLabel, String newLabel);
-  // TODO: can't I implement this here by calling abstractCopy?
-  RepeatingDrawingCommand setInitiallyClosed();
+
+  RepeatingDrawingCommand setInitiallyClosed() => abstractCopyWith(initiallyOpen: false);
 
   RepeatingDrawingCommand clearValidation();
   RepeatingDrawingCommand validate(AbstractDrawing drawing, RepeatCommand repeatContext, int repeatValue);
@@ -67,8 +70,12 @@ abstract class RepeatingDrawingCommand implements SameAs {
   // Get the Ids of dependent commands
   Set<String> dependencies(AbstractDrawing drawing);
 
-  // TODO: can't I implement this here by calling abstractCopy?
-  RepeatingDrawingCommand markAsCyclic(String cycleDescription);
+  RepeatingDrawingCommand markAsCyclic(String cycleDescription) => abstractCopyWith(
+    validated: true,
+    valid: false,
+    errors: ['Cycle detected: $cycleDescription'],
+  );
+  
   bool get hasErrors => validated && !valid && errors.isNotEmpty;
 
   String previewPath(AbstractDrawing drawing, int repeatIndex) { return ''; }

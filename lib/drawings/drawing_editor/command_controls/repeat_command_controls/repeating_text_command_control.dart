@@ -9,7 +9,7 @@ import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/repeat_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/repeat_commands/repeating_point_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/repeat_commands/repeating_text_command.dart';
-import 'package:knitty_griddy/pick_colour_reference_dialog.dart';
+import 'package:knitty_griddy/common/pick_colour_reference_dialog.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 
 class RepeatingTextCommandControl extends StatelessWidget {

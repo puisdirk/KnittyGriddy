@@ -132,11 +132,22 @@ class PointCommand extends DrawingCommand {
       storedCoordinate: storedCoordinate?? this.storedCoordinate,
     );
   }
+
   @override
-  PointCommand abstractCopyWith({String? id, String? label, bool? initiallyOpen}) {
+  PointCommand abstractCopyWith({
+    String? id, 
+    String? label, 
+    bool? validated,
+    bool? valid,
+    List<String>? errors,
+    bool? initiallyOpen
+  }) {
     return copyWith(
       id: id?? this.id,
       label: label?? this.label,
+      validated: validated?? this.validated,
+      valid: valid?? this.valid,
+      errors: errors?? this.errors,
       initiallyOpen: initiallyOpen?? this.initiallyOpen,
     );
   }
@@ -168,20 +179,6 @@ class PointCommand extends DrawingCommand {
       }
     }
     return Rect.zero;
-  }
-
-  @override
-  PointCommand setInitiallyClosed() {
-    return copyWith(initiallyOpen: false);
-  }
-
-  @override
-  PointCommand markAsCyclic(String cycleDescription) {
-    return copyWith(
-      validated: true,
-      valid: false,
-      errors: ['Cycle detected: $cycleDescription'],
-    );
   }
 
   @override

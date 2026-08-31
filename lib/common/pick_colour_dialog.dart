@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:knitty_griddy/pick_colour_control.dart';
+import 'package:knitty_griddy/common/pick_colour_control.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 
 class PickColourDialog extends StatefulWidget {

@@ -5,7 +5,7 @@ import 'package:knitty_griddy/patterns/mainview/field_controls/panel_field_compo
 import 'package:knitty_griddy/patterns/mainview/field_controls/panel_field_components/colour_well.dart';
 import 'package:knitty_griddy/patterns/model/fields/pattern_panel_field_style.dart';
 import 'package:knitty_griddy/patterns/model/pattern_page_layout.dart';
-import 'package:knitty_griddy/pick_colour_control.dart';
+import 'package:knitty_griddy/common/pick_colour_control.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 
 class PatternFieldPanelStyleDialog extends StatefulWidget {

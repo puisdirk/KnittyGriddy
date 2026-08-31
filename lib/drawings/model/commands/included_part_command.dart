@@ -95,10 +95,20 @@ class IncludedPartCommand extends DrawingCommand {
   }
 
   @override
-  IncludedPartCommand abstractCopyWith({String? id, String? label, bool? initiallyOpen}) {
+  IncludedPartCommand abstractCopyWith({
+    String? id, 
+    String? label, 
+    bool? validated,
+    bool? valid,
+    List<String>? errors,
+    bool? initiallyOpen
+  }) {
     return copyWith(
       id: id?? this.id,
       label: label?? this.label,
+      validated: validated?? this.validated,
+      valid: valid?? this.valid,
+      errors: errors?? this.errors,
       initiallyOpen: initiallyOpen?? this.initiallyOpen,
     );
   }
@@ -115,20 +125,6 @@ class IncludedPartCommand extends DrawingCommand {
     PartCommand partCommand = storedOffsetPartDrawing!.parts.firstWhere((p) => p.id == partId);
 
     return partCommand.calculateBoundingBox(storedOffsetPartDrawing!);
-  }
-
-  @override
-  IncludedPartCommand setInitiallyClosed() {
-    return copyWith(initiallyOpen: false);
-  }
-
-  @override
-  IncludedPartCommand markAsCyclic(String cycleDescription) {
-    return copyWith(
-      validated: true,
-      valid: false,
-      errors: ['Cycle detected: $cycleDescription'],
-    );
   }
 
   @override
@@ -247,11 +243,6 @@ class IncludedPartCommand extends DrawingCommand {
   int get hashCode => super.hashCode ^ partDrawingId.hashCode ^ partId.hashCode ^ partLabel.hashCode ^
     storedOffsetPartDrawing.hashCode ^ storedAnchorOffset.hashCode ^ storedOffset.hashCode ^ 
     anchorPointId.hashCode ^ measurementOverrides.hashCode ^ isDirty.hashCode;
-
-  @override
-  IncludedPartCommand clearValidation() {
-    return copyWith(validated: false, valid: false, errors: const[]);
-  }
 
   IncludedPartCommand _calculateNewStoredPartDrawing(AbstractDrawing drawing) {
     if (partDrawingId.isEmpty || partId.isEmpty) return this;

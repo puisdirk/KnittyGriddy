@@ -48,11 +48,22 @@ class RepeatingTextCommand extends RepeatingDrawingCommand {
       wrappedText: wrappedText?? this.wrappedText,
     );
   }
+
   @override
-  RepeatingTextCommand abstractCopyWith({String? id, String? label, bool? initiallyOpen}) {
+  RepeatingTextCommand abstractCopyWith({
+    String? id, 
+    String? label, 
+    bool? validated,
+    bool? valid,
+    List<String>? errors,
+    bool? initiallyOpen
+  }) {
     return copyWith(
       id: id?? this.id,
       label: label?? this.label,
+      validated: validated?? this.validated,
+      valid: valid?? this.valid,
+      errors: errors?? this.errors,
       initiallyOpen: initiallyOpen?? this.initiallyOpen,
     );
   }
@@ -67,27 +78,13 @@ class RepeatingTextCommand extends RepeatingDrawingCommand {
   Rect getBoundingBox(AbstractDrawing drawing) => wrappedText.getBoundingBox(drawing);
 
   @override
-  RepeatingTextCommand setInitiallyClosed() {
-    return copyWith(initiallyOpen: false);
-  }
-
-  @override
-  RepeatingTextCommand markAsCyclic(String cycleDescription) {
-    return copyWith(
-      validated: true,
-      valid: false,
-      errors: ['Cycle detected: $cycleDescription'],
-    );
-  }
-
-  @override
   RepeatingTextCommand clearValidation() {
     return copyWith(
       validated: false, 
       valid: false, 
       retryValidation: true, 
       errors: const[], 
-      wrappedText: wrappedText.clearValidation(),
+      wrappedText: wrappedText.clearValidation() as TextCommand,
     );
   }
 
@@ -225,6 +222,7 @@ class RepeatingTextCommand extends RepeatingDrawingCommand {
       wrappedText: wrappedText.copyWith(
         valid: isvalid,
         validated: (isvalid || !retryValidation),
+        storedAnchorCoordinate: isvalid ? anchorPoint?.getCoordinate(drawing) : null,
       )
     );
   }

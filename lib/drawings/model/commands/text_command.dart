@@ -9,6 +9,7 @@ import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/included_part_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/styling_command.dart';
+import 'package:knitty_griddy/utils/color_utilities.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 import 'package:knitty_griddy/utils/math_utitilies.dart';
 
@@ -20,6 +21,8 @@ class TextCommand extends DrawingCommand {
   final int textSize;
   final ColourReference textColor;
 
+  final Offset? storedAnchorCoordinate;
+
   const TextCommand({
     required super.id,
     required super.label,
@@ -30,6 +33,7 @@ class TextCommand extends DrawingCommand {
     this.bold = false,
     this.textSize = 12,
     this.textColor = const ColourReference(),
+    this.storedAnchorCoordinate,
     super.validated,
     super.valid,
     super.errors,
@@ -45,6 +49,7 @@ class TextCommand extends DrawingCommand {
     bool? bold,
     int? textSize,
     ColourReference? textColor,
+    Offset? storedAnchorCoordinate,
     bool? validated,
     bool? valid,
     List<String>? errors,
@@ -60,17 +65,29 @@ class TextCommand extends DrawingCommand {
       bold: bold?? this.bold,
       textSize: textSize?? this.textSize,
       textColor: textColor?? this.textColor,
+      storedAnchorCoordinate: storedAnchorCoordinate?? this.storedAnchorCoordinate,
       validated: validated?? this.validated,
       valid: valid?? this.valid,
       errors: errors?? this.errors,
       initiallyOpen: initiallyOpen?? this.initiallyOpen,
     );
   }
+
   @override
-  TextCommand abstractCopyWith({String? id, String? label, bool? initiallyOpen}) {
+  TextCommand abstractCopyWith({
+    String? id, 
+    String? label, 
+    bool? validated,
+    bool? valid,
+    List<String>? errors,
+    bool? initiallyOpen
+  }) {
     return copyWith(
       id: id?? this.id,
       label: label?? this.label,
+      validated: validated?? this.validated,
+      valid: valid?? this.valid,
+      errors: errors?? this.errors,
       initiallyOpen: initiallyOpen?? this.initiallyOpen,
     );
   }
@@ -88,6 +105,7 @@ class TextCommand extends DrawingCommand {
       bold == other.bold &&
       textSize == other.textSize &&
       textColor == other.textColor &&
+      storedAnchorCoordinate == other.storedAnchorCoordinate &&
       valid == other.valid &&
       validated == other.validated &&
       listEquals(errors, other.errors);
@@ -108,7 +126,7 @@ class TextCommand extends DrawingCommand {
   
   @override
   int get hashCode => super.hashCode ^ text.hashCode ^ anchorPointId.hashCode ^ italic.hashCode ^ bold.hashCode ^
-    textSize.hashCode ^ textColor.hashCode;
+    textSize.hashCode ^ textColor.hashCode ^ storedAnchorCoordinate.hashCode;
 
   @override
   Map<String, Object> toJson() {
@@ -154,32 +172,23 @@ class TextCommand extends DrawingCommand {
   @override
   double get editHeight => 310;
 
+  Offset? getAnchorCoordinate(AbstractDrawing drawing) {
+    return storedAnchorCoordinate;
+  }
+
   @override
   Rect getBoundingBox(AbstractDrawing drawing) {
     if (!valid || text.isEmpty) return Rect.zero;
-    PointCommand? anchor = drawing.pointById(anchorPointId);
-    if (anchor == null) return Rect.zero;
+    Offset? anchorCoordinate = getAnchorCoordinate(drawing);
+//    PointCommand? anchor = drawing.pointById(anchorPointId);
+    if (anchorCoordinate == null) return Rect.zero;
     TextStyle style = TextStyle(
       fontSize: textSize.toDouble(), 
       fontStyle: italic ? FontStyle.italic : FontStyle.normal,
       fontWeight: bold ? FontWeight.w700 : FontWeight.normal);
     Size ts = MathUtitilies.textSize(text, style, maxLines: text.split('\n').length);
 
-    return Rect.fromLTWH(anchor.getCoordinate(drawing)!.dx, anchor.getCoordinate(drawing)!.dy, ts.width, ts.height);
-  }
-
-  @override
-  TextCommand setInitiallyClosed() {
-    return copyWith(initiallyOpen: false);
-  }
-
-  @override
-  TextCommand markAsCyclic(String cycleDescription) {
-    return copyWith(
-      validated: true,
-      valid: false,
-      errors: ['Cycle detected: $cycleDescription'],
-    );
+    return Rect.fromLTWH(anchorCoordinate.dx, anchorCoordinate.dy, ts.width, ts.height);
   }
 
   @override
@@ -188,11 +197,6 @@ class TextCommand extends DrawingCommand {
     if (anchorPointId.isNotEmpty) deps.add(anchorPointId);
     if (textColor.measurementId.isNotEmpty) deps.add(textColor.measurementId);
     return deps;
-  }
-
-  @override
-  TextCommand clearValidation() {
-    return copyWith(validated: false, valid: false, errors: const[]);
   }
 
   @override
@@ -219,18 +223,14 @@ class TextCommand extends DrawingCommand {
   String toSvg(Size drawingSize, AbstractDrawing drawing, {List<StylingCommand> stylings = const []}) {
     if (!valid) return '';
 
-    PointCommand? anchorPoint = drawing.pointById(anchorPointId);
-    if (anchorPoint == null) return '';
-
-    Offset? coord = anchorPoint.getCoordinate(drawing);
+    Offset? coord = getAnchorCoordinate(drawing);
     if (coord == null) return '';
     coord = coord.scale(1, -1);
 
     Offset middle = Offset(drawingSize.width / 2, drawingSize.height / 2);
     coord += middle;
 
-    // TODO: this doesn't use the textColour??
-    return '<g id="$label"><text font-size="12" font-family="Roboto" x="${coord.dx}" y="${coord.dy}">$text</text></g>';
+    return '<g id="$label"><text fill="${ColorUtilities.colorToSvhHex(textColor.color)}" font-style="${italic ? 'italic' : 'normal'}" font-weight="${bold ? 'bold' : 'normal'}" font-size="$textSize" font-family="Roboto" x="${coord.dx}" y="${coord.dy}">$text</text></g>';
 
   }
 
@@ -238,10 +238,7 @@ class TextCommand extends DrawingCommand {
   void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const [], bool drawDirectionArrow = false, bool forPreview = false}) {
     if (!valid) return;
 
-    PointCommand? anchorPoint = drawing.pointById(anchorPointId);
-    if (anchorPoint == null) return;
-
-    Offset? coord = anchorPoint.getCoordinate(drawing);
+    Offset? coord = getAnchorCoordinate(drawing);
     if (coord == null) return;
     coord = coord.scale(1, -1);
 
@@ -318,6 +315,7 @@ class TextCommand extends DrawingCommand {
       validated: (isvalid || !retryValidation),
       errors: validationErrors,
       textColor: textColor.checkForUpdate(drawing),
+      storedAnchorCoordinate: isvalid ? anchorPoint?.getCoordinate(drawing) : null,
     );
   }
 }

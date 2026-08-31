@@ -47,7 +47,6 @@ class _RepeatCommandControlState extends State<RepeatCommandControl> {
   String? selectedRepeatCommandId;
 
   void labelChanged(String newText) {
-    // TODO: will dependentLabelChanged be called by this?
     if (widget.command.label != newText) {
       widget.onChangeLabel(widget.command.copyWith(label: newText), widget.command.label);
     }
@@ -99,7 +98,6 @@ class _RepeatCommandControlState extends State<RepeatCommandControl> {
     return GestureDetector(
       onTap: () {
         setState(() => selectedRepeatCommandId = null);
-        // TODO: let outer layer know we got selected?
       },
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,

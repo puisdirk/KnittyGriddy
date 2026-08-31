@@ -7,8 +7,7 @@ import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
 import 'package:knitty_griddy/drawings/model/commands/colour_reference.dart';
 import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/text_command.dart';
-import 'package:knitty_griddy/pick_colour_dialog.dart';
-import 'package:knitty_griddy/pick_colour_reference_dialog.dart';
+import 'package:knitty_griddy/common/pick_colour_reference_dialog.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 
 class TextCommandControl extends StatefulWidget {

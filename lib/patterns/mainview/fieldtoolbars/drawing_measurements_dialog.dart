@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_popup/flutter_popup.dart';
 import 'package:flutter_spinbox/material.dart';
@@ -8,7 +7,7 @@ import 'package:knitty_griddy/drawings/drawing_editor/drawing_viewer.dart';
 import 'package:knitty_griddy/drawings/model/commands/measurement_command.dart';
 import 'package:knitty_griddy/drawings/model/drawing.dart';
 import 'package:knitty_griddy/patterns/mainview/field_controls/panel_field_components/colour_well.dart';
-import 'package:knitty_griddy/pick_colour_control.dart';
+import 'package:knitty_griddy/common/pick_colour_control.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 
 class DrawingMeasurementsDialog extends StatefulWidget {

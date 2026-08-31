@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/drawing_editor_control.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/drawing_settings_dialog.dart';
-import 'package:knitty_griddy/drawings/drawing_editor/drawing_toolbar.dart';
+import 'package:knitty_griddy/common/undo_redo_toolbar.dart';
 import 'package:knitty_griddy/drawings/export/export_drawing_page.dart';
 import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
 import 'package:knitty_griddy/drawings/model/drawing.dart';
@@ -26,26 +26,16 @@ class EditDrawingPage extends StatefulWidget {
 
 class _EditDrawingPageState extends State<EditDrawingPage> {
   late AbstractDrawing drawing;
-//  late FocusNode _undoRedoFocusNode;
 
   final UndoRedoManager<AbstractDrawing> _undoRedoManager = UndoRedoManager();
 
   @override
   void initState() {
-  //  _undoRedoFocusNode = FocusNode();
-
     drawing = widget.drawing;
     _undoRedoManager.store(drawing);
 
     super.initState();
   }
-
-/*  @override
-  void dispose() {
-    _undoRedoFocusNode.dispose();
-    super.dispose();
-  }
-*/
 
   void _storeAndSetDrawing(AbstractDrawing newDrawing) {
     _undoRedoManager.store(newDrawing);
@@ -95,7 +85,7 @@ class _EditDrawingPageState extends State<EditDrawingPage> {
         backgroundColor: Colors.grey.shade300,
         bottom: PreferredSize(
           preferredSize: const Size(2000, 40), 
-          child: DrawingToolbar(
+          child: UndoRedoToolbar(
             canUndo: _undoRedoManager.canUndo(),
             canRedo: _undoRedoManager.canRedo(),
             undo: _undo,
@@ -125,31 +115,17 @@ class _EditDrawingPageState extends State<EditDrawingPage> {
           ),
         ],
       ),
-      body: /*KeyboardListener(
-        focusNode: _undoRedoFocusNode, 
-        autofocus: true,
-        onKeyEvent: (value) {
-          if (value is KeyDownEvent && value.logicalKey == LogicalKeyboardKey.keyZ && 
-            (HardwareKeyboard.instance.isMetaPressed || HardwareKeyboard.instance.isControlPressed)) {
-            if (HardwareKeyboard.instance.isShiftPressed) {
-              _redo();
-            } else {
-              _undo();
-            }
-          }
-        },
-        child:*/ Center(
-          child: Padding(
-            padding: const EdgeInsets.all(5.0),
-              child: DrawingEditorControl(
-                drawing: drawing,
-                onDrawingChanged: (newDrawing) => _storeAndSetDrawing(newDrawing),
-                onUndo: _undo,
-                onRedo: _redo,
-              ),
-          ),
-        )
-      //),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(5.0),
+            child: DrawingEditorControl(
+              drawing: drawing,
+              onDrawingChanged: (newDrawing) => _storeAndSetDrawing(newDrawing),
+              onUndo: _undo,
+              onRedo: _redo,
+            ),
+        ),
+      )
     );
   }
 }

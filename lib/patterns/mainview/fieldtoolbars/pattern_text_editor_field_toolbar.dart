@@ -5,7 +5,7 @@ import 'package:knitty_griddy/charts/stitchrepo/basic_stitches_set.dart';
 import 'package:knitty_griddy/patterns/mainview/fieldtoolbars/insert_stitch_symbol_embed_button.dart';
 import 'package:knitty_griddy/patterns/mainview/fleather/infinite_indentation_button.dart';
 import 'package:knitty_griddy/patterns/model/knitting_pattern.dart';
-import 'package:knitty_griddy/pick_colour_dialog.dart';
+import 'package:knitty_griddy/common/pick_colour_dialog.dart';
 
 class PatternTextEditorFieldToolbar extends StatelessWidget {
   final FleatherController fleatherController;

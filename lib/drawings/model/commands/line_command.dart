@@ -67,11 +67,22 @@ class LineCommand extends DrawingCommand {
       storedEndCoordinate: storedEndCoordinate?? this.storedEndCoordinate,
     );
   }
+
   @override
-  LineCommand abstractCopyWith({String? id, String? label, bool? initiallyOpen}) {
+  LineCommand abstractCopyWith({
+    String? id, 
+    String? label, 
+    bool? validated,
+    bool? valid,
+    List<String>? errors,
+    bool? initiallyOpen
+  }) {
     return copyWith(
       id: id?? this.id,
       label: label?? this.label,
+      validated: validated?? this.validated,
+      valid: valid?? this.valid,
+      errors: errors?? this.errors,
       initiallyOpen: initiallyOpen?? this.initiallyOpen,
     );
   }
@@ -90,20 +101,6 @@ class LineCommand extends DrawingCommand {
     }
 
     return Rect.zero;
-  }
-
-  @override
-  LineCommand setInitiallyClosed() {
-    return copyWith(initiallyOpen: false);
-  }
-
-  @override
-  LineCommand markAsCyclic(String cycleDescription) {
-    return copyWith(
-      validated: true,
-      valid: false,
-      errors: ['Cycle detected: $cycleDescription'],
-    );
   }
 
   @override

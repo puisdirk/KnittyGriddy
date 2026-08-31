@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinbox/material.dart';
 import 'package:knitty_griddy/charts/model/chart_settings.dart';
 import 'package:knitty_griddy/charts/model/knitting_chart.dart';
-import 'package:knitty_griddy/pick_colour_dialog.dart';
+import 'package:knitty_griddy/common/pick_colour_dialog.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 
 class ChartSettingsDialog extends StatefulWidget {

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/charts/model/named_colour.dart';
-import 'package:knitty_griddy/pick_colour_control.dart';
+import 'package:knitty_griddy/common/pick_colour_control.dart';
 
 class PickNamedColourDialog extends StatefulWidget {
   final NamedColour initialColour;
