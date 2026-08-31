@@ -53,10 +53,20 @@ class RepeatingPointCommand extends RepeatingDrawingCommand {
   }
 
   @override
-  RepeatingPointCommand abstractCopyWith({String? id, String? label, bool? initiallyOpen}) {
+  RepeatingPointCommand abstractCopyWith({
+    String? id, 
+    String? label, 
+    bool? validated,
+    bool? valid,
+    List<String>? errors,
+    bool? initiallyOpen
+  }) {
     return copyWith(
       id: id?? this.id,
       label: label?? this.label,
+      validated: validated?? this.validated,
+      valid: valid?? this.valid,
+      errors: errors?? this.errors,
       initiallyOpen: initiallyOpen?? this.initiallyOpen,
     );
   }
@@ -70,18 +80,6 @@ class RepeatingPointCommand extends RepeatingDrawingCommand {
   @override
   Rect getBoundingBox(AbstractDrawing drawing) {
     return wrappedPoint.getBoundingBox(drawing);
-  }
-
-  @override
-  RepeatingPointCommand setInitiallyClosed() => copyWith(initiallyOpen: false);
-
-  @override
-  RepeatingPointCommand markAsCyclic(String cycleDescription) {
-    return copyWith(
-      validated: true,
-      valid: false,
-      errors: ['Cycle detected: $cycleDescription'],
-    );
   }
 
   @override

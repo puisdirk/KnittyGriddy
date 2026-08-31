@@ -18,7 +18,7 @@ class PatternToolbar extends StatelessWidget {
   final Widget? fieldToolbar;
   final void Function(PatternFieldType type) onAddField;
   final void Function(PatternFieldType type, bool reverse) onCycleSelectedField;
-  final void Function(PatternField newField) onChanged;
+  final void Function(PatternField newField, {bool? storeForUndo}) onChanged;
   final void Function(bool allTheWay) onMoveBack;
   final void Function(bool allTheWay) onMoveForward;
   final void Function() onDuplicateSelectedField;
@@ -132,8 +132,11 @@ class PatternToolbar extends StatelessWidget {
                           max: 255,
                           value: selectedField!.opacity as double, 
                           onChanged: (value) {
+                            onChanged(selectedField!.abstractCopyWith(opacity: value.toInt()), storeForUndo: false);
+                          },
+                          onChangeEnd: (value) {
                             onChanged(selectedField!.abstractCopyWith(opacity: value.toInt()));
-                          }
+                          },
                         ),
                       ),
                     ),

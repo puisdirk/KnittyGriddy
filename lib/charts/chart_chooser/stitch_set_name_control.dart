@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:knitty_griddy/change_name_control.dart';
+import 'package:knitty_griddy/common/change_name_control.dart';
 import 'package:knitty_griddy/charts/stitchrepo/stitch_set.dart';
 import 'package:knitty_griddy/charts/model/charts_model.dart';
 import 'package:provider/provider.dart';

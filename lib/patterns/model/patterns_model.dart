@@ -5,7 +5,6 @@ import 'package:knitty_griddy/patterns/model/knitting_pattern_info.dart';
 import 'package:knitty_griddy/patterns/model/patterns_model_object.dart';
 import 'package:knitty_griddy/patterns/model/patterns_save_model_object.dart';
 import 'package:knitty_griddy/patterns/storage/patterns_model_repository.dart';
-import 'package:knitty_griddy/utils/undo_redo_manager.dart';
 
 class PatternsModel extends ChangeNotifier {
 
@@ -15,44 +14,11 @@ class PatternsModel extends ChangeNotifier {
 
   PatternsSaveModelObject? _lastSaved;
 
-  final UndoRedoManager<KnittingPattern> _undoRedoManager;
-
   PatternsModel({
     required PatternsModelRepository repository,
   }) :
     _repository = repository,
-    _patternsModelObject = const PatternsModelObject(),
-    _undoRedoManager = UndoRedoManager() {
-      // Initialize the undo-redo manager
-      _storeForUndo();
-    }
-
-  void clearUndoRedo() {
-    _undoRedoManager.clear();
-  }
-
-  void _storeForUndo() {
-    if (_patternsModelObject.pattern != placeholderPattern) {
-      _undoRedoManager.store(_patternsModelObject.pattern.copyWith());
-    }
-  }
-
-  bool get canUndo => _undoRedoManager.canUndo();
-  bool get canRedo => _undoRedoManager.canRedo();
-
-  void undo() {
-    if (_undoRedoManager.canUndo()) {
-      _patternsModelObject = _patternsModelObject.copyWith(pattern: _undoRedoManager.undo());
-      notifyListeners();
-    }
-  }
-
-  void redo() {
-    if (_undoRedoManager.canRedo()) {
-      _patternsModelObject = _patternsModelObject.copyWith(pattern: _undoRedoManager.redo());
-      notifyListeners();
-    }
-  }
+    _patternsModelObject = const PatternsModelObject();
 
   List<KnittingPatternInfo> get patternInfos => _patternsModelObject.patternInfos;
   KnittingPattern get pattern => _patternsModelObject.pattern;
@@ -163,7 +129,6 @@ class PatternsModel extends ChangeNotifier {
     );
 
     await autoSave();
-    _storeForUndo();
     notifyListeners();
   }
 
@@ -201,7 +166,6 @@ class PatternsModel extends ChangeNotifier {
       pattern: patt
     );
 
-    _storeForUndo();
     notifyListeners();
   }
 
@@ -214,7 +178,6 @@ class PatternsModel extends ChangeNotifier {
       pattern: _patternsModelObject.pattern.copyWith(name: name)
     );
 
-    _storeForUndo();
     notifyListeners();
   }
 
@@ -227,7 +190,6 @@ class PatternsModel extends ChangeNotifier {
       pattern: _patternsModelObject.pattern.copyWith(description: description)
     );
 
-    _storeForUndo();
     notifyListeners();
   }
 }

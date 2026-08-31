@@ -26,9 +26,11 @@ import 'package:knitty_griddy/patterns/model/fields/text_editor_field_settings.d
 import 'package:knitty_griddy/patterns/model/knitting_pattern.dart';
 import 'package:knitty_griddy/patterns/model/pattern_page_layout.dart';
 import 'package:knitty_griddy/patterns/model/patterns_model.dart';
+import 'package:knitty_griddy/common/undo_redo_toolbar.dart';
 import 'package:knitty_griddy/utils/app_platform_ext.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 import 'package:knitty_griddy/utils/dashed_painter.dart';
+import 'package:knitty_griddy/utils/undo_redo_manager.dart';
 import 'package:provider/provider.dart';
 
 class PatternPage extends StatefulWidget {
@@ -56,11 +58,15 @@ class _PatternPageState extends State<PatternPage> {
 
   late ScrollController _verticalScrollController;
 
+  final UndoRedoManager<KnittingPattern> _undoRedoManager = UndoRedoManager();
+
   @override
   void initState() {
     _keyboardFocusNode = FocusNode();
 
     stateKnittingPattern = widget.knittingPattern;
+    _undoRedoManager.store(stateKnittingPattern);
+
     viewMode = widget.knittingPattern.fields.length > 2;
 
     _verticalScrollController = ScrollController();
@@ -89,8 +95,97 @@ class _PatternPageState extends State<PatternPage> {
     super.dispose();
   }
 
-  void _storeAndSetKnittingPattern(KnittingPattern newPattern, {void Function()? additionalState}) {
-    // undo/redo
+  void _undo() {
+    if (_undoRedoManager.canUndo()) {
+      KnittingPattern newPattern = _undoRedoManager.undo()!;
+
+      Map<String, FleatherController> newControllers = {};
+      Map<String, GlobalKey> newEditorKeys = {};
+      
+      // A textEditorField got deleted
+      for (PatternTextEditorField field in stateKnittingPattern.fields.whereType<PatternTextEditorField>().
+        where((f) => !newPattern.fields.any((oldf) => oldf.id == f.id))) {
+        FleatherController? ctrller = fleatherControllers[field.id];
+        ctrller?.dispose();
+      }
+      for (PatternTextEditorField field in newPattern.fields.whereType<PatternTextEditorField>()) {
+        if (!stateKnittingPattern.fields.any((oldf) => oldf.id == field.id)) {
+          // A textEditorField got added
+          ParchmentDocument document = ParchmentDocument.fromJson(jsonDecode(field.docContents));
+          newControllers[field.id] = FleatherController(document: document);
+          final GlobalKey<EditorState> editorKey = GlobalKey();
+          newEditorKeys[field.id] = editorKey;
+        } else {
+          // A textEditorField remained
+          fleatherControllers[field.id]!.dispose();
+          ParchmentDocument document = ParchmentDocument.fromJson(jsonDecode(field.docContents));
+          newControllers[field.id] = FleatherController(document: document);
+          newEditorKeys[field.id] = fleaterEditorKeys[field.id]!;
+        }
+      }
+
+      _setKnittingPattern(newPattern, additionalState: () {
+        fleatherControllers = newControllers;
+        fleaterEditorKeys = newEditorKeys;
+        if (selectedField != null) {
+          if (!newPattern.fields.any((f) => f.id == selectedField!.id)) {
+            selectedField = null;    
+          } else {
+            selectedField = newPattern.fields.firstWhere((f) => f.id == selectedField!.id);
+          }
+        }
+      });
+    }
+  }
+
+  void _redo() {
+    if (_undoRedoManager.canRedo()) {
+      KnittingPattern newPattern = _undoRedoManager.redo()!;
+
+      Map<String, FleatherController> newControllers = {};
+      Map<String, GlobalKey> newEditorKeys = {};
+      
+      // A textEditorField got deleted
+      for (PatternTextEditorField field in stateKnittingPattern.fields.whereType<PatternTextEditorField>().
+        where((f) => !newPattern.fields.any((oldf) => oldf.id == f.id))) {
+        FleatherController? ctrller = fleatherControllers[field.id];
+        ctrller?.dispose();
+      }
+      for (PatternTextEditorField field in newPattern.fields.whereType<PatternTextEditorField>()) {
+        if (!stateKnittingPattern.fields.any((oldf) => oldf.id == field.id)) {
+          // A textEditorField got added
+          ParchmentDocument document = ParchmentDocument.fromJson(jsonDecode(field.docContents));
+          newControllers[field.id] = FleatherController(document: document);
+          final GlobalKey<EditorState> editorKey = GlobalKey();
+          newEditorKeys[field.id] = editorKey;
+        } else {
+          // A textEditorField remained
+          fleatherControllers[field.id]!.dispose();
+          ParchmentDocument document = ParchmentDocument.fromJson(jsonDecode(field.docContents));
+          newControllers[field.id] = FleatherController(document: document);
+          newEditorKeys[field.id] = fleaterEditorKeys[field.id]!;
+        }
+      }
+
+      _setKnittingPattern(newPattern, additionalState: () {
+        fleatherControllers = newControllers;
+        fleaterEditorKeys = newEditorKeys;
+        if (selectedField != null) {
+          if (!newPattern.fields.any((f) => f.id == selectedField!.id)) {
+            selectedField = null;    
+          } else {
+            selectedField = newPattern.fields.firstWhere((f) => f.id == selectedField!.id);
+          }
+        }
+      });
+    }
+  }
+
+  void _storeAndSetKnittingPattern(KnittingPattern newPattern, {void Function()? additionalState, bool? storeForUndo}) {
+    if (storeForUndo != false) {
+      print('storeforundo');
+      _undoRedoManager.store(newPattern);
+    }
     _setKnittingPattern(newPattern, additionalState: additionalState);
   }
 
@@ -214,16 +309,21 @@ class _PatternPageState extends State<PatternPage> {
         leading: BackButton(
           onPressed: () {
             Provider.of<PatternsModel>(context, listen: false).saveCurrentPattern(clear: true);
-            Provider.of<PatternsModel>(context, listen: false).clearUndoRedo();
+            _undoRedoManager.clear();
             Navigator.maybePop(context);
           },
         ),
         title: Row(mainAxisAlignment: MainAxisAlignment.center, children: [const Icon(Icons.auto_awesome_mosaic_outlined), hspacing, Text('Pattern - ${stateKnittingPattern.name}')]),
         backgroundColor: Colors.grey.shade300,
-/*        bottom: const PreferredSize(
-          preferredSize: Size(20000, 200), 
-          child: KnittingToolbar(),
-        ),*/
+        bottom: PreferredSize(
+          preferredSize: const Size(2000, 40), 
+          child: UndoRedoToolbar(
+            canUndo: _undoRedoManager.canUndo(),
+            canRedo: _undoRedoManager.canRedo(),
+            undo: _undo,
+            redo: _redo,
+          ),
+        ),
         actions: [
           Visibility(
             visible: !viewMode,
@@ -316,16 +416,15 @@ class _PatternPageState extends State<PatternPage> {
         focusNode: _keyboardFocusNode,
         autofocus: true,
         onKeyEvent: (value) {
-          /*
+
           if (value is KeyDownEvent && value.logicalKey == LogicalKeyboardKey.keyZ && 
             (HardwareKeyboard.instance.isMetaPressed || HardwareKeyboard.instance.isControlPressed)) {
             if (HardwareKeyboard.instance.isShiftPressed) {
-              Provider.of<PatternsModel>(context, listen: false).redo();
+              _redo();
             } else {
-              Provider.of<PatternsModel>(context, listen: false).undo();
+              _undo();
             }
           }
-          */
 
           // left arrow key
           if (selectedField != null && selectedField!.fieldType != PatternFieldType.texteditor && 
@@ -560,10 +659,11 @@ class _PatternPageState extends State<PatternPage> {
                         }
                       },
                       patternHasMultipleFields: stateKnittingPattern.fields.length > 1,
-                      onChanged: (newField) {
+                      //onChanged: (newField) {
+                      onChanged: (newField, {storeForUndo}) {
                         _storeAndSetKnittingPattern(stateKnittingPattern.copyWith(
                           fields: stateKnittingPattern.fields.map((f) => f.id == newField.id ? newField : f).toList()
-                        ), additionalState: () => selectedField = newField,);
+                        ), additionalState: () => selectedField = newField, storeForUndo: storeForUndo);
                       },
                       onMoveBack: _moveSelectedFieldBackward,
                       onMoveForward: _moveSelectedFieldForward,

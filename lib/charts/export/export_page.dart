@@ -7,7 +7,6 @@ import 'package:knitty_griddy/charts/export/knitting_chart_view_settings.dart';
 import 'dart:ui' as ui;
 import 'package:knitty_griddy/charts/export/export_toolbar.dart';
 import 'package:knitty_griddy/charts/export/preview_legend.dart';
-import 'package:knitty_griddy/charts/export/preview_stitches_grid.dart';
 import 'package:knitty_griddy/charts/model/chart_operation_exception.dart';
 import 'package:knitty_griddy/charts/model/charts_model.dart';
 import 'package:knitty_griddy/charts/model/knitting_chart.dart';

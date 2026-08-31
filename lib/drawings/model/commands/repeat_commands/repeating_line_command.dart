@@ -50,10 +50,20 @@ class RepeatingLineCommand extends RepeatingDrawingCommand {
   }
 
   @override
-  RepeatingLineCommand abstractCopyWith({String? id, String? label, bool? initiallyOpen}) {
+  RepeatingLineCommand abstractCopyWith({
+    String? id, 
+    String? label, 
+    bool? validated,
+    bool? valid,
+    List<String>? errors,
+    bool? initiallyOpen
+  }) {
     return copyWith(
       id: id?? this.id,
       label: label?? this.label,
+      validated: validated?? this.validated,
+      valid: valid?? this.valid,
+      errors: errors?? this.errors,
       initiallyOpen: initiallyOpen?? this.initiallyOpen,
     );
   }
@@ -67,18 +77,6 @@ class RepeatingLineCommand extends RepeatingDrawingCommand {
   @override
   Rect getBoundingBox(AbstractDrawing drawing) {
     return wrappedLine.getBoundingBox(drawing);
-  }
-
-  @override
-  RepeatingLineCommand setInitiallyClosed() => copyWith(initiallyOpen: false);
-
-  @override
-  RepeatingLineCommand markAsCyclic(String cycleDescription) {
-    return copyWith(
-      validated: true,
-      valid: false,
-      errors: ['Cycle detected: $cycleDescription'],
-    );
   }
 
   @override

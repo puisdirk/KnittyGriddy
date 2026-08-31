@@ -47,33 +47,49 @@ abstract class DrawingCommand implements SameAs {
   DrawingCommand abstractCopyWith({
     String? id,
     String? label,
+    bool? validated,
+    bool? valid,
+    List<String>? errors,
     bool? initiallyOpen,
   });
 
+  // How much space does the control need?
   double get editHeight;
   
   Map<String, Object> toJson();  
+
   void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, 
     {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const[], 
      bool drawDirectionArrow = false, bool forPreview = false});
+  
   String toSvg(Size drawingSize, AbstractDrawing drawing, {List<StylingCommand> stylings = const[]});
 
   Rect getBoundingBox(AbstractDrawing drawing);
 
+  // React to a command being deleted by removing references to it
   DrawingCommand deleteReference({required String commandId});
-  DrawingCommand changePartDrawingReference({required String oldId, required String newId});
-  DrawingCommand dependentLabelChanged(String oldLabel, String newLabel);
-  // TODO: can't I implement this here by calling abstractCopy?
-  DrawingCommand setInitiallyClosed();
 
-  DrawingCommand clearValidation();
+  DrawingCommand changePartDrawingReference({required String oldId, required String newId});
+
+  // React to a change in label of a command we depend on
+  DrawingCommand dependentLabelChanged(String oldLabel, String newLabel);
+
+  // Make sure the control will stay closed once we close it
+  DrawingCommand setInitiallyClosed() => abstractCopyWith(initiallyOpen: false);
+
+  DrawingCommand clearValidation() => abstractCopyWith(validated: false, valid: false, errors: const[]);
+
   DrawingCommand validate(AbstractDrawing drawing);
 
   // Get the Ids of dependent commands
   Set<String> dependencies(AbstractDrawing drawing);
 
-  // TODO: can't I implement this here by calling abstractCopy?
-  DrawingCommand markAsCyclic(String cycleDescription);
+  DrawingCommand markAsCyclic(String cycleDescription) => abstractCopyWith(
+    validated: true,
+    valid: false,
+    errors: ['Cycle detected: $cycleDescription']
+  );
+
   bool get hasErrors => validated && !valid && errors.isNotEmpty;
 
   String previewPath(AbstractDrawing drawing) { return ''; }

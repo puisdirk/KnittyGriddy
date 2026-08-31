@@ -8,9 +8,8 @@ import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
 import 'package:knitty_griddy/drawings/model/commands/measurement_command.dart';
 import 'package:knitty_griddy/drawings/model/drawing.dart';
 import 'package:knitty_griddy/drawings/model/part_drawing.dart';
-import 'package:knitty_griddy/pick_colour_dialog.dart';
+import 'package:knitty_griddy/common/pick_colour_dialog.dart';
 import 'package:knitty_griddy/utils/constants.dart';
-import 'package:material_color_utilities/score/score.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 class MeasurementCommandControl extends StatefulWidget {

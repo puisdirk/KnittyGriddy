@@ -51,10 +51,20 @@ class RepeatingCurveCommand extends RepeatingDrawingCommand {
   }
 
   @override
-  RepeatingCurveCommand abstractCopyWith({String? id, String? label, bool? initiallyOpen}) {
+  RepeatingCurveCommand abstractCopyWith({
+    String? id, 
+    String? label, 
+    bool? validated,
+    bool? valid,
+    List<String>? errors,
+    bool? initiallyOpen
+  }) {
     return copyWith(
       id: id?? this.id,
       label: label?? this.label,
+      validated: validated?? this.validated,
+      valid: valid?? this.valid,
+      errors: errors?? this.errors,
       initiallyOpen: initiallyOpen?? this.initiallyOpen,
     );
   }
@@ -68,18 +78,6 @@ class RepeatingCurveCommand extends RepeatingDrawingCommand {
   @override
   Rect getBoundingBox(AbstractDrawing drawing) {
     return wrappedCurve.getBoundingBox(drawing);
-  }
-
-  @override
-  RepeatingCurveCommand setInitiallyClosed() => copyWith(initiallyOpen: false);
-
-  @override
-  RepeatingCurveCommand markAsCyclic(String cycleDescription) {
-    return copyWith(
-      validated: true,
-      valid: false,
-      errors: ['Cycle detected: $cycleDescription'],
-    );
   }
 
   @override
@@ -251,6 +249,10 @@ class RepeatingCurveCommand extends RepeatingDrawingCommand {
       }
     }
 
+    PointCommand? quadCtrlPoint;
+    PointCommand? cubic1CtrlPoint;
+    PointCommand? cubic2CtrlPoint;
+
     switch (wrappedCurve.curveDefinitionType) {
       case CurveDefinitionType.quadratic:
         FormulaParseResult res = FormulaExpression.validate(
@@ -285,8 +287,8 @@ class RepeatingCurveCommand extends RepeatingDrawingCommand {
           retryValidation = false;
           validationErrors.add('Requires a control point');
         } else if (wrappedCurve.quadCtrlPointId != originId) {
-          PointCommand? ctrlPoint = drawing.pointById(wrappedCurve.quadCtrlPointId)?? repeatContext.pointById(wrappedCurve.quadCtrlPointId);
-          if (ctrlPoint == null) {
+          quadCtrlPoint = drawing.pointById(wrappedCurve.quadCtrlPointId)?? repeatContext.pointById(wrappedCurve.quadCtrlPointId);
+          if (quadCtrlPoint == null) {
             isvalid = false;
             retryValidation = false;
             validationErrors.add('Control point does not exist');
@@ -297,13 +299,13 @@ class RepeatingCurveCommand extends RepeatingDrawingCommand {
               isvalid = false;
             }
           } else {
-            if (!ctrlPoint.validated) {
+            if (!quadCtrlPoint.validated) {
               // We are not valid, but we should retry
               isvalid = false;
-            } else if (!ctrlPoint.valid) {
+            } else if (!quadCtrlPoint.valid) {
               isvalid = false;
               retryValidation = false;
-              validationErrors.add('Control point ${ctrlPoint.label} has errors');
+              validationErrors.add('Control point ${quadCtrlPoint.label} has errors');
             }
           }
         }
@@ -367,8 +369,8 @@ class RepeatingCurveCommand extends RepeatingDrawingCommand {
           retryValidation = false;
           validationErrors.add('Requires first control point');
         } else if (wrappedCurve.cubicCtrlPointId1 != originId) {
-          PointCommand? ctrlPoint1 = drawing.pointById(wrappedCurve.cubicCtrlPointId1)?? repeatContext.pointById(wrappedCurve.cubicCtrlPointId1);
-          if (ctrlPoint1 == null) {
+          cubic1CtrlPoint = drawing.pointById(wrappedCurve.cubicCtrlPointId1)?? repeatContext.pointById(wrappedCurve.cubicCtrlPointId1);
+          if (cubic1CtrlPoint == null) {
             isvalid = false;
             retryValidation = false;
             validationErrors.add('First control point does not exist');
@@ -379,13 +381,13 @@ class RepeatingCurveCommand extends RepeatingDrawingCommand {
               isvalid = false;
             }
           } else {
-            if (!ctrlPoint1.validated) {
+            if (!cubic1CtrlPoint.validated) {
               // We are not valid, but we should retry
               isvalid = false;
-            } else if (!ctrlPoint1.valid) {
+            } else if (!cubic1CtrlPoint.valid) {
               isvalid = false;
               retryValidation = false;
-              validationErrors.add('First control point ${ctrlPoint1.label} has errors');
+              validationErrors.add('First control point ${cubic1CtrlPoint.label} has errors');
             }
           }
         }
@@ -394,8 +396,8 @@ class RepeatingCurveCommand extends RepeatingDrawingCommand {
           retryValidation = false;
           validationErrors.add('Requires second control point');
         } else if (wrappedCurve.cubicCtrlPointId2 != originId) {
-          PointCommand? ctrlPoint2 = drawing.pointById(wrappedCurve.cubicCtrlPointId2)?? repeatContext.pointById(wrappedCurve.cubicCtrlPointId2);
-          if (ctrlPoint2 == null) {
+          cubic2CtrlPoint = drawing.pointById(wrappedCurve.cubicCtrlPointId2)?? repeatContext.pointById(wrappedCurve.cubicCtrlPointId2);
+          if (cubic2CtrlPoint == null) {
             isvalid = false;
             retryValidation = false;
             validationErrors.add('Second control point does not exist');
@@ -406,13 +408,13 @@ class RepeatingCurveCommand extends RepeatingDrawingCommand {
               isvalid = false;
             }
           } else {
-            if (!ctrlPoint2.validated) {
+            if (!cubic2CtrlPoint.validated) {
               // We are not valid, but we should retry
               isvalid = false;
-            } else if (!ctrlPoint2.valid) {
+            } else if (!cubic2CtrlPoint.valid) {
               isvalid = false;
               retryValidation = false;
-              validationErrors.add('Second Control point ${ctrlPoint2.label} has errors');
+              validationErrors.add('Second Control point ${cubic2CtrlPoint.label} has errors');
             }
           }
         }
@@ -429,6 +431,9 @@ class RepeatingCurveCommand extends RepeatingDrawingCommand {
         validated: (isvalid || !retryValidation),
         storedStartCoordinate: isvalid ? fromPoint!.getCoordinate(drawing) : null,
         storedEndCoordinate: isvalid ? toPoint!.getCoordinate(drawing) : null,
+        storedQuadCtrlPointCoordinate: isvalid ? quadCtrlPoint?.getCoordinate(drawing) : null,
+        storedCubicCtrlPoint1Coordinate: isvalid ? cubic1CtrlPoint?.getCoordinate(drawing) : null,
+        storedCubicCtrlPoint2Coordinate: isvalid ? cubic2CtrlPoint?.getCoordinate(drawing) : null,
       ),
     );
   }

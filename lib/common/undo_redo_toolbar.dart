@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 
-class DrawingToolbar extends StatefulWidget {
+class UndoRedoToolbar extends StatefulWidget {
   final bool canUndo;
   final bool canRedo;
   final void Function() undo;
   final void Function() redo;
 
-  const DrawingToolbar({
+  const UndoRedoToolbar({
     required this.canUndo,
     required this.canRedo,
     required this.undo,
@@ -16,10 +16,10 @@ class DrawingToolbar extends StatefulWidget {
   });
 
   @override
-  State<DrawingToolbar> createState() => _DrawingToolbarState();
+  State<UndoRedoToolbar> createState() => _UndoRedoToolbarState();
 }
 
-class _DrawingToolbarState extends State<DrawingToolbar> {
+class _UndoRedoToolbarState extends State<UndoRedoToolbar> {
 
   @override
   Widget build(BuildContext context) {

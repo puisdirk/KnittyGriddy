@@ -1,6 +1,6 @@
 
 import 'package:flutter/material.dart';
-import 'package:knitty_griddy/change_name_control.dart';
+import 'package:knitty_griddy/common/change_name_control.dart';
 import 'package:knitty_griddy/drawings/model/drawings_model.dart';
 import 'package:knitty_griddy/drawings/partrepo/part_set.dart';
 import 'package:provider/provider.dart';

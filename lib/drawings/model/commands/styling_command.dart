@@ -102,10 +102,20 @@ class StylingCommand extends DrawingCommand {
   }
 
   @override
-  StylingCommand abstractCopyWith({String? id, String? label, bool? initiallyOpen}) {
+  StylingCommand abstractCopyWith({
+    String? id, 
+    String? label, 
+    bool? validated,
+    bool? valid,
+    List<String>? errors,
+    bool? initiallyOpen
+  }) {
     return copyWith(
       id: id?? this.id,
       label: label?? this.label,
+      validated: validated?? this.validated,
+      valid: valid?? this.valid,
+      errors: errors?? this.errors,
       initiallyOpen: initiallyOpen?? this.initiallyOpen,
     );
   }
@@ -117,18 +127,6 @@ class StylingCommand extends DrawingCommand {
 
   @override
   Rect getBoundingBox(AbstractDrawing drawing) => Rect.zero;
-
-  @override
-  StylingCommand setInitiallyClosed() => copyWith(initiallyOpen: false);
-
-  @override
-  StylingCommand markAsCyclic(String cycleDescription) {
-    return copyWith(
-      validated: true,
-      valid: false,
-      errors: ['Cycle detected: $cycleDescription']
-    );
-  }
 
   @override
   Set<String> dependencies(AbstractDrawing drawing) {
@@ -160,11 +158,6 @@ class StylingCommand extends DrawingCommand {
       commandIds: commandIds.where((c) => c != commandId && !c.startsWith('$commandId.')).toSet(),
       colorRef: colorRef.deleteReference(commandId: commandId),
     );
-  }
-
-  @override
-  DrawingCommand clearValidation() {
-    return copyWith(validated: false, valid: false, errors: const[],);
   }
 
   @override

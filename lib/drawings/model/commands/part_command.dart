@@ -50,11 +50,22 @@ class PartCommand extends DrawingCommand {
       initiallyOpen: initiallyOpen?? this.initiallyOpen,
     );
   }
+
   @override
-  PartCommand abstractCopyWith({String? id, String? label, bool? initiallyOpen}) {
+  PartCommand abstractCopyWith({
+    String? id, 
+    String? label, 
+    bool? validated,
+    bool? valid,
+    List<String>? errors,
+    bool? initiallyOpen
+  }) {
     return copyWith(
       id: id?? this.id,
       label: label?? this.label,
+      validated: validated?? this.validated,
+      valid: valid?? this.valid,
+      errors: errors?? this.errors,
       initiallyOpen: initiallyOpen?? this.initiallyOpen,
     );
   }
@@ -107,27 +118,8 @@ class PartCommand extends DrawingCommand {
   Rect getBoundingBox(AbstractDrawing drawing) => Rect.zero;
 
   @override
-  PartCommand setInitiallyClosed() {
-    return copyWith(initiallyOpen: false);
-  }
-
-  @override
-  PartCommand markAsCyclic(String cycleDescription) {
-    return copyWith(
-      validated: true,
-      valid: false,
-      errors: ['Cycle detected: $cycleDescription'],
-    );
-  }
-
-  @override
   Set<String> dependencies(AbstractDrawing drawing) {
     return commandIds;
-  }
-
-  @override
-  PartCommand clearValidation() {
-    return copyWith(validated: false, valid: false, errors: const[]);
   }
 
   @override

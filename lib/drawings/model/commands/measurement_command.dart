@@ -85,11 +85,22 @@ class MeasurementCommand extends DrawingCommand {
       initiallyOpen: initiallyOpen?? this.initiallyOpen,
     );
   }
+
   @override
-  MeasurementCommand abstractCopyWith({String? id, String? label, bool? initiallyOpen}) {
+  MeasurementCommand abstractCopyWith({
+    String? id, 
+    String? label, 
+    bool? validated,
+    bool? valid,
+    List<String>? errors,
+    bool? initiallyOpen
+  }) {
     return copyWith(
       id: id?? this.id,
       label: label?? this.label,
+      validated: validated?? this.validated,
+      valid: valid?? this.valid,
+      errors: errors?? this.errors,
       initiallyOpen: initiallyOpen?? this.initiallyOpen,
     );
   }
@@ -99,15 +110,6 @@ class MeasurementCommand extends DrawingCommand {
 
   @override
   Rect getBoundingBox(AbstractDrawing drawing) => Rect.zero;
-
-  @override
-  MeasurementCommand markAsCyclic(String cycleDescription) {
-    return copyWith(
-      validated: true,
-      valid: false,
-      errors: ['Cycle detected: $cycleDescription'],
-    );
-  }
 
   @override
   Set<String> dependencies(AbstractDrawing drawing) {
@@ -150,16 +152,6 @@ class MeasurementCommand extends DrawingCommand {
   @override
   int get hashCode => super.hashCode ^ id.hashCode ^ label.hashCode ^
     minValue.hashCode ^ maxValue.hashCode ^ value.hashCode ^ colourValue.hashCode ^ decimals.hashCode ^ unit.hashCode;
-
-  @override
-  MeasurementCommand clearValidation() {
-    return copyWith(validated: false, valid: false, errors: const[]);
-  }
-
-  @override
-  MeasurementCommand setInitiallyClosed() {
-    return copyWith(initiallyOpen: false);
-  }
 
   @override
   MeasurementCommand changePartDrawingReference({required String oldId, required String newId}) => this;
