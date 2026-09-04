@@ -256,7 +256,10 @@ class _EditStitchPageState extends State<EditStitchPage> {
                                 icon: const Icon(Symbols.category),
                                 onPressed: () async {
                                   List<List<KnittingSymbolPart>>? partsPerColumn = 
-                                    await showDialog(context: context, builder: (context) => const StitchPartsChooser());
+                                    await showDialog(
+                                      context: context, 
+                                      barrierDismissible: false,
+                                      builder: (context) => StitchPartsChooser(excludeDefinition: stitchDefinition));
                                   if (partsPerColumn != null && partsPerColumn.isNotEmpty) {
                                     List<KnittingSymbol> newSymbols = List.from(stitchDefinition.symbols);
                                     // If there's just one blank in the existing parts, remove it

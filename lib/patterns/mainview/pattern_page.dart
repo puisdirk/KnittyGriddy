@@ -1,12 +1,10 @@
 import 'dart:convert';
 import 'dart:math' as math;
-import 'dart:ui';
 
 import 'package:fleather/fleather.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:id_gen/id_gen.dart';
-import 'package:knitty_griddy/drawings/model/commands/styling_command.dart';
 import 'package:knitty_griddy/patterns/mainview/field_controls/pattern_field_control.dart';
 import 'package:knitty_griddy/patterns/mainview/fieldtoolbars/pattern_chart_field_toolbar.dart';
 import 'package:knitty_griddy/patterns/mainview/fieldtoolbars/pattern_drawing_field_toolbar.dart';
@@ -15,6 +13,8 @@ import 'package:knitty_griddy/patterns/mainview/fieldtoolbars/pattern_panel_fiel
 import 'package:knitty_griddy/patterns/mainview/fieldtoolbars/pattern_text_editor_field_toolbar.dart';
 import 'package:knitty_griddy/patterns/mainview/fieldtoolbars/pattern_toolbar.dart';
 import 'package:knitty_griddy/patterns/mainview/fleather/text_editor_field_settings_dialog.dart';
+import 'package:knitty_griddy/patterns/mainview/link_mode/links_mode_view.dart';
+import 'package:knitty_griddy/patterns/mainview/page_margin_painter.dart';
 import 'package:knitty_griddy/patterns/mainview/pattern_settings_dialog.dart';
 import 'package:knitty_griddy/patterns/model/fields/pattern_chart_field.dart';
 import 'package:knitty_griddy/patterns/model/fields/pattern_drawing_field.dart';
@@ -29,9 +29,15 @@ import 'package:knitty_griddy/patterns/model/patterns_model.dart';
 import 'package:knitty_griddy/common/undo_redo_toolbar.dart';
 import 'package:knitty_griddy/utils/app_platform_ext.dart';
 import 'package:knitty_griddy/utils/constants.dart';
-import 'package:knitty_griddy/utils/dashed_painter.dart';
 import 'package:knitty_griddy/utils/undo_redo_manager.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
+
+enum PatternPageMode {
+  edit,
+  view,
+  links,
+}
 
 class PatternPage extends StatefulWidget {
   final KnittingPattern knittingPattern;
@@ -53,7 +59,7 @@ class _PatternPageState extends State<PatternPage> {
   late KnittingPattern stateKnittingPattern;
   late Map<String, FleatherController> fleatherControllers;
   late Map<String, GlobalKey> fleaterEditorKeys;
-  late bool viewMode;
+  late PatternPageMode patternPageMode;
   late FleatherClipboardData? clipboardData;
 
   late ScrollController _verticalScrollController;
@@ -67,7 +73,7 @@ class _PatternPageState extends State<PatternPage> {
     stateKnittingPattern = widget.knittingPattern;
     _undoRedoManager.store(stateKnittingPattern);
 
-    viewMode = widget.knittingPattern.fields.length > 2;
+    patternPageMode = widget.knittingPattern.fields.length > 2 ? PatternPageMode.view : PatternPageMode.edit;
 
     _verticalScrollController = ScrollController();
 
@@ -75,7 +81,7 @@ class _PatternPageState extends State<PatternPage> {
 
     fleatherControllers = {};
     fleaterEditorKeys = {};
-    for (PatternTextEditorField field in widget.knittingPattern.fields.whereType<PatternTextEditorField>()) {
+    for (PatternTextEditorField field in widget.knittingPattern.textEditorFields) {
       ParchmentDocument document = ParchmentDocument.fromJson(jsonDecode(field.docContents));
       fleatherControllers[field.id] = FleatherController(document: document);
       final GlobalKey<EditorState> editorKey = GlobalKey();
@@ -103,12 +109,12 @@ class _PatternPageState extends State<PatternPage> {
       Map<String, GlobalKey> newEditorKeys = {};
       
       // A textEditorField got deleted
-      for (PatternTextEditorField field in stateKnittingPattern.fields.whereType<PatternTextEditorField>().
+      for (PatternTextEditorField field in stateKnittingPattern.textEditorFields.
         where((f) => !newPattern.fields.any((oldf) => oldf.id == f.id))) {
         FleatherController? ctrller = fleatherControllers[field.id];
         ctrller?.dispose();
       }
-      for (PatternTextEditorField field in newPattern.fields.whereType<PatternTextEditorField>()) {
+      for (PatternTextEditorField field in newPattern.textEditorFields) {
         if (!stateKnittingPattern.fields.any((oldf) => oldf.id == field.id)) {
           // A textEditorField got added
           ParchmentDocument document = ParchmentDocument.fromJson(jsonDecode(field.docContents));
@@ -146,12 +152,12 @@ class _PatternPageState extends State<PatternPage> {
       Map<String, GlobalKey> newEditorKeys = {};
       
       // A textEditorField got deleted
-      for (PatternTextEditorField field in stateKnittingPattern.fields.whereType<PatternTextEditorField>().
+      for (PatternTextEditorField field in stateKnittingPattern.textEditorFields.
         where((f) => !newPattern.fields.any((oldf) => oldf.id == f.id))) {
         FleatherController? ctrller = fleatherControllers[field.id];
         ctrller?.dispose();
       }
-      for (PatternTextEditorField field in newPattern.fields.whereType<PatternTextEditorField>()) {
+      for (PatternTextEditorField field in newPattern.textEditorFields) {
         if (!stateKnittingPattern.fields.any((oldf) => oldf.id == field.id)) {
           // A textEditorField got added
           ParchmentDocument document = ParchmentDocument.fromJson(jsonDecode(field.docContents));
@@ -183,7 +189,6 @@ class _PatternPageState extends State<PatternPage> {
 
   void _storeAndSetKnittingPattern(KnittingPattern newPattern, {void Function()? additionalState, bool? storeForUndo}) {
     if (storeForUndo != false) {
-      print('storeforundo');
       _undoRedoManager.store(newPattern);
     }
     _setKnittingPattern(newPattern, additionalState: additionalState);
@@ -317,16 +322,35 @@ class _PatternPageState extends State<PatternPage> {
         backgroundColor: Colors.grey.shade300,
         bottom: PreferredSize(
           preferredSize: const Size(2000, 40), 
-          child: UndoRedoToolbar(
-            canUndo: _undoRedoManager.canUndo(),
-            canRedo: _undoRedoManager.canRedo(),
-            undo: _undo,
-            redo: _redo,
+          child: Visibility(
+            visible: patternPageMode == PatternPageMode.edit, 
+            maintainSize: true, maintainState: true, maintainAnimation: true,
+            child: UndoRedoToolbar(
+              canUndo: _undoRedoManager.canUndo(),
+              canRedo: _undoRedoManager.canRedo(),
+              undo: _undo,
+              redo: _redo,
+            ),
           ),
         ),
         actions: [
+          SegmentedButton<PatternPageMode>(
+            emptySelectionAllowed: false,
+            multiSelectionEnabled: false,
+            segments: const[
+              ButtonSegment(value: PatternPageMode.edit, icon: Icon(Icons.edit)),
+              ButtonSegment(value: PatternPageMode.view, icon: Icon(Icons.visibility)),
+              // To reenable the semi-abandonded links-mode, uncomment here
+//              if (stateKnittingPattern.textEditorFields.length > 1)
+//                const ButtonSegment(value: PatternPageMode.links, icon: Icon(Symbols.conversion_path)),
+            ], 
+            selected: {patternPageMode},
+            onSelectionChanged: (newMode) => setState(() => patternPageMode = newMode.first),
+          ),
+          const SizedBox(width: 30,),
           Visibility(
-            visible: !viewMode,
+            visible: patternPageMode == PatternPageMode.edit,
+            maintainSize: true,maintainAnimation: true,maintainState: true,
             child: Tooltip(
               message: 'Pattern settings',
               child: IconButton(
@@ -336,65 +360,12 @@ class _PatternPageState extends State<PatternPage> {
                     context: context, 
                     builder: (context) => PatternSettingsDialog(pattern: stateKnittingPattern),
                   );
-            
                   if (newPattern != null) {
-                    List<PatternField> newFields = [];
-                    if (newPattern.pageLayout == stateKnittingPattern.pageLayout) {
-                      newFields.addAll(stateKnittingPattern.fields);
-                    } else {
-                      // Go through all the fields and move/resize them until they fit on the new size
-                      Rect newPatternRect = Rect.fromLTWH(0, 0, newPattern.pageLayout.dimensions.width, newPattern.pageLayout.dimensions.height);
-                      for (PatternField field in stateKnittingPattern.fields) {
-                        PatternField newField = field;
-                        if (newField.positionY + newField.height > newPatternRect.height) {
-                          newField = newField.abstractCopyWith(positionY: newPatternRect.height - newField.height);
-                          if (newField.positionY < 0) {
-                            // The pattern dimensions are not high enough to accomodate the field, so we need to resize it
-                            double newHeight = newPatternRect.height;
-                            double newWidth = newField.width;
-                            if (newField.fixedAspectRatio) {
-                              newWidth *= newField.height / newField.width;
-                            }
-                            newField = newField.abstractCopyWith(positionY: 0, height: newHeight, width: newWidth);
-                          }
-                        }
-            
-                        if (newField.positionX + newField.width > newPatternRect.width) {
-                          newField = newField.abstractCopyWith(positionX: newPatternRect.width - newField.width);
-                          if (newField.positionX < 0) {
-                            // The pattern dimensions are not wide enough to accomodate the field, so we need to resize it
-                            double newHeight = newField.height;
-                            double newWidth = newPatternRect.width;
-                            if (newField.fixedAspectRatio) {
-                              newHeight *= newField.height / newField.width;
-                            }
-                            newField = newField.abstractCopyWith(positionX: 0, height: newHeight, width: newWidth);
-                          }
-                        }
-            
-                        newFields.add(newField);
-                      }
-            
-                    }
-            
-                    _storeAndSetKnittingPattern(stateKnittingPattern.copyWith(
-                      name: newPattern.name,
-                      description: newPattern.description,
-                      fields: newFields,
-                      pageLayout: newPattern.pageLayout,
-                    ));
+                    _storeAndSetKnittingPattern(newPattern);
                   }
                 }, 
                 icon: const Icon(Icons.settings),
               ),
-            ),
-          ),
-          hspacing,
-          Tooltip(
-            message: viewMode? 'Switch to Edit mode' : 'Switch to View mode',
-            child: IconButton(
-              onPressed: () => setState(() => viewMode = !viewMode), 
-              icon: Icon(viewMode? Icons.edit : Icons.visibility)
             ),
           ),
           hspacing,
@@ -416,8 +387,7 @@ class _PatternPageState extends State<PatternPage> {
         focusNode: _keyboardFocusNode,
         autofocus: true,
         onKeyEvent: (value) {
-
-          if (value is KeyDownEvent && value.logicalKey == LogicalKeyboardKey.keyZ && 
+          if (patternPageMode == PatternPageMode.edit && value is KeyDownEvent && value.logicalKey == LogicalKeyboardKey.keyZ && 
             (HardwareKeyboard.instance.isMetaPressed || HardwareKeyboard.instance.isControlPressed)) {
             if (HardwareKeyboard.instance.isShiftPressed) {
               _redo();
@@ -427,7 +397,7 @@ class _PatternPageState extends State<PatternPage> {
           }
 
           // left arrow key
-          if (selectedField != null && selectedField!.fieldType != PatternFieldType.texteditor && 
+          if (patternPageMode == PatternPageMode.edit && selectedField != null && selectedField!.fieldType != PatternFieldType.texteditor && 
             selectedField!.positionX > 0 && (value is KeyDownEvent || value is KeyRepeatEvent) && 
             value.logicalKey == LogicalKeyboardKey.arrowLeft) {
             PatternField newField = selectedField!.abstractCopyWith(
@@ -439,7 +409,7 @@ class _PatternPageState extends State<PatternPage> {
           }
 
           // up arrow key
-          if (selectedField != null  && selectedField!.fieldType != PatternFieldType.texteditor && 
+          if (patternPageMode == PatternPageMode.edit && selectedField != null  && selectedField!.fieldType != PatternFieldType.texteditor && 
             selectedField!.positionY > 0 && (value is KeyDownEvent || value is KeyRepeatEvent) && 
             value.logicalKey == LogicalKeyboardKey.arrowUp) {
             PatternField newField = selectedField!.abstractCopyWith(
@@ -451,7 +421,7 @@ class _PatternPageState extends State<PatternPage> {
           }
 
           // right arrow key
-          if (selectedField != null  && selectedField!.fieldType != PatternFieldType.texteditor && 
+          if (patternPageMode == PatternPageMode.edit && selectedField != null  && selectedField!.fieldType != PatternFieldType.texteditor && 
             (selectedField!.positionX + selectedField!.width) < stateKnittingPattern.pageLayout.pagewidth && 
             (value is KeyDownEvent || value is KeyRepeatEvent) && value.logicalKey == LogicalKeyboardKey.arrowRight) {
             PatternField newField = selectedField!.abstractCopyWith(
@@ -463,7 +433,7 @@ class _PatternPageState extends State<PatternPage> {
           }
 
           // Down arrow key
-          if (selectedField != null  && selectedField!.fieldType != PatternFieldType.texteditor && 
+          if (patternPageMode == PatternPageMode.edit && selectedField != null  && selectedField!.fieldType != PatternFieldType.texteditor && 
             (selectedField!.positionY + selectedField!.height) < (stateKnittingPattern.pageLayout.pageheight * stateKnittingPattern.pageLayout.numberOfPages) && 
             (value is KeyDownEvent || value is KeyRepeatEvent) && value.logicalKey == LogicalKeyboardKey.arrowDown) {
             PatternField newField = selectedField!.abstractCopyWith(
@@ -500,7 +470,7 @@ class _PatternPageState extends State<PatternPage> {
               actions: <Type, Action<Intent>>{
                 CopyIntent: CallbackAction<CopyIntent>(
                   onInvoke: (intent) async {
-                    if (selectedField is! PatternTextEditorField) return;
+                    if (patternPageMode != PatternPageMode.edit || selectedField is! PatternTextEditorField) return;
 
                     FleatherController controller = fleatherControllers[selectedField!.id]!;
                     TextEditingValue textEditingValue = controller.plainTextEditingValue;
@@ -523,7 +493,7 @@ class _PatternPageState extends State<PatternPage> {
                 ),
                 PasteIntent: CallbackAction<PasteIntent>(
                   onInvoke: (intent) async {
-                    if (selectedField is! PatternTextEditorField) return;
+                    if (patternPageMode != PatternPageMode.edit || selectedField is! PatternTextEditorField) return;
 
                     FleatherController controller = fleatherControllers[selectedField!.id]!;
                     TextSelection selection = controller.selection;
@@ -564,7 +534,7 @@ class _PatternPageState extends State<PatternPage> {
                 ),
                 CutIntent: CallbackAction<CutIntent>(
                   onInvoke: (intent) async {
-                    if (selectedField is! PatternTextEditorField) return;
+                    if (patternPageMode != PatternPageMode.edit || selectedField is! PatternTextEditorField) return;
 
                     FleatherController controller = fleatherControllers[selectedField!.id]!;
                     TextEditingValue textEditingValue = controller.plainTextEditingValue;
@@ -593,7 +563,7 @@ class _PatternPageState extends State<PatternPage> {
               },
               child: Column(
                 children: [
-                  if (viewMode)
+                  if (patternPageMode != PatternPageMode.edit)
                     SizedBox(
                       height: 50,
                       child: Container(
@@ -603,7 +573,7 @@ class _PatternPageState extends State<PatternPage> {
                       ),
                     ),
                   Visibility(
-                    visible: !viewMode,
+                    visible: patternPageMode == PatternPageMode.edit,
                     child: PatternToolbar(
                       selectedField: selectedField,
                       fieldIsAtBottom: stateKnittingPattern.fields.isNotEmpty && selectedField == stateKnittingPattern.fields.first,
@@ -659,7 +629,6 @@ class _PatternPageState extends State<PatternPage> {
                         }
                       },
                       patternHasMultipleFields: stateKnittingPattern.fields.length > 1,
-                      //onChanged: (newField) {
                       onChanged: (newField, {storeForUndo}) {
                         _storeAndSetKnittingPattern(stateKnittingPattern.copyWith(
                           fields: stateKnittingPattern.fields.map((f) => f.id == newField.id ? newField : f).toList()
@@ -755,6 +724,12 @@ class _PatternPageState extends State<PatternPage> {
                         null,
                     ),
                   ),
+                  if (patternPageMode == PatternPageMode.links)
+                    LinksModeView(
+                      pattern: stateKnittingPattern,
+                      onChanged: (newPattern) => _storeAndSetKnittingPattern(newPattern),
+                    ),
+                  if (patternPageMode != PatternPageMode.links)
                   Expanded(
                     child: SingleChildScrollView(
                       scrollDirection: Axis.vertical,
@@ -777,7 +752,7 @@ class _PatternPageState extends State<PatternPage> {
                                         stateKnittingPattern.pageLayout.pageheight * stateKnittingPattern.pageLayout.numberOfPages),
                                       painter: PageMarginPainter(
                                         pageLayout: stateKnittingPattern.pageLayout,
-                                        viewMode: viewMode
+                                        patternPageMode: patternPageMode
                                       ),
                                     ),
                                   ),
@@ -788,26 +763,34 @@ class _PatternPageState extends State<PatternPage> {
                                       fieldChangeNotifier: fleatherControllers[field.id],
                                       editorKey: (field is PatternTextEditorField) ? fleaterEditorKeys[field.id] : null,
                                       selected: field.id == selectedField?.id, 
-                                      viewMode: viewMode,
+                                      viewMode: patternPageMode == PatternPageMode.view,
                                       onSelect: () => setState(() => selectedField = field), 
-                                      onDelete: () {
-                                        if (selectedField != null) {
-                                          String fieldId = selectedField!.id;
-                                          _storeAndSetKnittingPattern(stateKnittingPattern.copyWith(
-                                            fields: stateKnittingPattern.fields.where((f) => f.id != fieldId).toList()
-                                          ), additionalState: () {
-                                            if (selectedField is PatternTextEditorField) {
+                                      onDelete: (String fieldId) {
+                                        PatternField fieldToDelete = stateKnittingPattern.fields.firstWhere((f) => f.id == fieldId);
+                                        if (fieldToDelete is PatternTextEditorField) {
+                                          _storeAndSetKnittingPattern(stateKnittingPattern.removeTextField(fieldId),
+                                            additionalState: () {
                                               FleatherController? ctrl = fleatherControllers[fieldId];
                                               if (ctrl != null) {
                                                 ctrl.dispose();
                                                 fleatherControllers = Map.from(fleatherControllers)..remove(fieldId);
                                               }
                                               fleaterEditorKeys = Map.from(fleaterEditorKeys)..remove(fieldId);
+                                              if (selectedField?.id == fieldId) {
+                                                selectedField = null;
+                                              }
                                             }
-                                            selectedField = null;
+                                          );
+                                        } else {
+                                          _storeAndSetKnittingPattern(stateKnittingPattern.copyWith(
+                                            fields: stateKnittingPattern.fields.where((f) => f.id != fieldId).toList()
+                                          ), additionalState: () {                                          
+                                              if (selectedField?.id == fieldId) {
+                                                selectedField = null;
+                                              }
                                           });
                                         }
-                                      }, 
+                                      },
                                       onChanged: (changedField) => _storeAndSetKnittingPattern(
                                         stateKnittingPattern.copyWith(
                                           fields: stateKnittingPattern.fields.map((f) => f.id != changedField.id ? f : changedField).toList()
@@ -829,108 +812,6 @@ class _PatternPageState extends State<PatternPage> {
       ),
     );
   }
-}
-
-class PageMarginPainter extends CustomPainter {
-  final PatternPageLayout pageLayout;
-  final bool viewMode;
-
-  const PageMarginPainter({
-    required this.pageLayout,
-    required this.viewMode,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-
-    if (!viewMode) {
-      Paint marginPaint = Paint()..color = Colors.blue..style = PaintingStyle.stroke;
-
-      Path leftMargin = Path()
-        ..moveTo(PatternPageLayout.margin, 0)
-        ..lineTo(PatternPageLayout.margin, pageLayout.pageheight * pageLayout.numberOfPages);
-      Path rightMargin = Path()
-        ..moveTo(pageLayout.pagewidth - PatternPageLayout.margin, 0)
-        ..lineTo(pageLayout.pagewidth - PatternPageLayout.margin, pageLayout.pageheight * pageLayout.numberOfPages);
-      
-      DashedPainter.pattern(enableCaching: false, dashPattern: DashStyle.shortStripes.dashPattern).paint(canvas, leftMargin, marginPaint);
-      DashedPainter.pattern(enableCaching: false, dashPattern: DashStyle.shortStripes.dashPattern).paint(canvas, rightMargin, marginPaint);
-
-      for (int page = 0; page < pageLayout.numberOfPages; page++) {
-        Path topPath = Path()
-          ..moveTo(0, (page * pageLayout.pageheight) + PatternPageLayout.margin)
-          ..lineTo(pageLayout.pagewidth, (page * pageLayout.pageheight) + PatternPageLayout.margin);
-        Path bottomPath = Path()
-          ..moveTo(0, ((page + 1) * pageLayout.pageheight) - PatternPageLayout.margin)
-          ..lineTo(pageLayout.pagewidth, ((page + 1) * pageLayout.pageheight) - PatternPageLayout.margin);
-
-        DashedPainter.pattern(enableCaching: false, dashPattern: DashStyle.shortStripes.dashPattern).paint(canvas, topPath, marginPaint);
-        DashedPainter.pattern(enableCaching: false, dashPattern: DashStyle.shortStripes.dashPattern).paint(canvas, bottomPath, marginPaint);
-      }
-    }
-
-    // Draw page bottom if needed
-    if (pageLayout.numberOfPages > 1) {
-      Paint pageBottomPaint = Paint()..color = Colors.grey.shade400..style = PaintingStyle.stroke;
-      for (int page = 1; page <= pageLayout.numberOfPages; page++) {
-        Path pageBottom = Path()
-          ..moveTo(0, page * pageLayout.pageheight)
-          ..lineTo(pageLayout.pagewidth, page * pageLayout.pageheight);
-        DashedPainter.pattern(enableCaching: false, dashPattern: DashStyle.dots.dashPattern).paint(canvas, pageBottom, pageBottomPaint);
-      }
-    }
-
-    // Draw page numbers
-    if (pageLayout.showPageNumber) {
-      for (int page = 1; page <= pageLayout.numberOfPages; page++) {
-        TextStyle style = TextStyle(color: Colors.grey.shade600);
-        final ParagraphBuilder paragraphBuilder = ParagraphBuilder(
-          ParagraphStyle(
-            fontSize: 10,
-            fontFamily: style.fontFamily,
-            fontStyle: style.fontStyle,
-            fontWeight: style.fontWeight,
-            textAlign: TextAlign.justify,
-          ),
-        )
-        ..pushStyle(style.getTextStyle())
-        ..addText('$page');
-
-        final Paragraph paragraph = paragraphBuilder.build()
-        ..layout(ParagraphConstraints(width: size.width));
-
-        canvas.drawParagraph(paragraph, 
-          Offset(
-            pageLayout.pagewidth - PatternPageLayout.margin + 10, 
-            (page * pageLayout.pageheight) - PatternPageLayout.margin + 10
-          )
-        );
-      }
-    }
-
-    if (pageLayout.showGrid && !viewMode) {
-      Paint gridPaint = Paint()..color = Colors.grey.withAlpha(150)..style = PaintingStyle.stroke;
-      double oneCm = 10 * PatternPageLayout.pixelsPerMM;
-      for (int page = 0; page < pageLayout.numberOfPages; page++) {
-        // Vertical
-        for (double xOffset = PatternPageLayout.margin + oneCm; xOffset < pageLayout.pagewidth - PatternPageLayout.margin; xOffset += oneCm) {
-          Path gridLine = Path()..moveTo(xOffset, (page * pageLayout.pageheight) + PatternPageLayout.margin)..lineTo(xOffset, (page * pageLayout.pageheight) + pageLayout.pageheight - PatternPageLayout.margin);
-          DashedPainter.pattern(enableCaching: false, dashPattern: DashStyle.dots.dashPattern).paint(canvas, gridLine, gridPaint);
-        }
-        // Horizontal
-        for (double yOffset = (page * pageLayout.pageheight) + PatternPageLayout.margin + oneCm; yOffset < (page * pageLayout.pageheight) + pageLayout.pageheight - PatternPageLayout.margin; yOffset += oneCm) {
-          Path gridLine = Path()..moveTo(PatternPageLayout.margin, yOffset)..lineTo(pageLayout.pagewidth - PatternPageLayout.margin, yOffset);
-          DashedPainter.pattern(enableCaching: false, dashPattern: DashStyle.dots.dashPattern).paint(canvas, gridLine, gridPaint);
-        }        
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant PageMarginPainter oldDelegate) {
-    return pageLayout != oldDelegate.pageLayout || viewMode != oldDelegate.viewMode;
-  }
-
 }
 
 class CopyIntent extends Intent {

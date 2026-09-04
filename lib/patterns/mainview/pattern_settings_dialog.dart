@@ -202,7 +202,11 @@ class _PatternSettingsDialogState extends State<PatternSettingsDialog> {
         ElevatedButton(
           onPressed: () {
             if (newPattern != widget.pattern) {
-              Navigator.of(context).pop(newPattern);
+              if (newPattern.pageLayout != widget.pattern.pageLayout) {
+                Navigator.of(context).pop(newPattern.adjustPositionsToLayout());
+              } else {
+                Navigator.of(context).pop(newPattern);
+              }
             } else {
               Navigator.of(context).pop(null);
             }

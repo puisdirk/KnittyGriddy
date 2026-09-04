@@ -26,7 +26,7 @@ class PatternFieldControl extends StatefulWidget {
   final bool selected;
   final bool viewMode;
   final void Function() onSelect;
-  final void Function() onDelete;
+  final void Function(String fieldId) onDelete;
   final void Function(PatternField changedField) onChanged;
 
   const PatternFieldControl({
@@ -146,6 +146,10 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
     }
   }
 
+  // TODO: these colours should depend on being in editmode or viewmode
+  final Color resizeHandleColor = Colors.grey.shade300;
+  final Color cornerResizeHandleColor = Colors.grey.shade400;
+
   Widget get _draggerRegion {
     return MouseRegion(
       cursor: widget.viewMode ? SystemMouseCursors.basic : SystemMouseCursors.grab,
@@ -154,7 +158,7 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
           color: Colors.transparent,
           child: const SizedBox(width: kResizerShortSide, height: kResizerShortSide,),
         ),
-        onDragStarted: () => widget.onSelect(),
+//        onDragStarted: () => widget.onSelect(),
         onDragUpdate: (details) {
           setState(() {
             positionX = min(max(positionX + details.delta.dx, 0), patternWidth - width);
@@ -194,6 +198,14 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
                           child: Icon(Icons.warning_amber, size: 16, color: Colors.red,),
                         )
                       ),
+                    if (widget.field.fieldType == PatternFieldType.texteditor && (widget.field as PatternTextEditorField).overflowing)
+                      const Tooltip(
+                        message: 'Field may be too small to show all text',
+                        child: Padding(
+                          padding: EdgeInsets.only(left: 8.0),
+                          child: Icon(Icons.warning_amber, size: 16, color: Colors.red),
+                        )
+                      ),
                     const Spacer(),
                     if (width > 102)
                       Text(widget.field.fieldType.label),
@@ -204,8 +216,7 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
                       cursor: SystemMouseCursors.click,
                       child: GestureDetector(
                         onTap: () {
-                          widget.onSelect();
-                          Timer(const Duration(milliseconds: 10), () => widget.onDelete());
+                          Timer(const Duration(milliseconds: 10), () => widget.onDelete(widget.field.id));
                         },
                         child: const Icon(Icons.delete_outlined, size: 16,)
                       )
@@ -252,6 +263,7 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
                   )
                 ),
                 // top-side resizer
+                if (!widget.viewMode)
                 Positioned(
                   left: kCornerResizerSize,
                   child: MouseRegion(
@@ -264,14 +276,18 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
                           color: Colors.transparent,
                           child: const SizedBox(width: kResizerShortSide, height: kResizerShortSide,),
                         ),
-                        onDragStarted: () => widget.onSelect(),
                         onDragUpdate: (details) {
                           double newPositionY = max(positionY + details.delta.dy, 0);
                           double newHeight = max((positionY + height) - newPositionY, minimumHeight);
-
+      
                           double newWidth = width;
                           if (isFixedAspect) {
                             newWidth = min(aspect * newHeight, patternWidth);
+                            newHeight = aspect * newWidth;
+                          }
+      
+                          if (positionX + newWidth > patternWidth) {
+                            newWidth = patternWidth - positionX;
                             newHeight = aspect * newWidth;
                           }
 
@@ -282,12 +298,13 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
                           });
                         },
                         onDragEnd: (_) => widget.onChanged(widget.field.abstractCopyWith(positionY: positionY, height: height, width: width)),
-                        child: Container(color: Colors.transparent,),
+                        child: Container(color: resizeHandleColor,),
                       ),
                     ),
                   )
                 ),
                 // Top-left resizer
+                if (!widget.viewMode)
                 Positioned(
                   top: 0, left: 0,
                   child: MouseRegion(
@@ -300,25 +317,24 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
                           color: Colors.transparent,
                           child: const SizedBox(width: kResizerShortSide, height: kResizerShortSide,),
                         ),
-                        onDragStarted: () => widget.onSelect,
                         onDragUpdate: (details) {
                           double newPositionX = max(positionX + details.delta.dx, 0);
                           double newPositionY = max(positionY + details.delta.dy, 0);
                           double newWidth = max((positionX + width) - newPositionX, minimumWidth);
                           double newHeight = max((positionY + height) - newPositionY, minimumHeight);
-
+      
                           if (isFixedAspect) {
                             newHeight = aspect * newWidth;
                           }
-
+      
                           if (newPositionX + newWidth > patternWidth) {
                             newPositionX = patternWidth - newWidth;
                           }
-
+      
                           if (positionY + newHeight > patternHeight) {
                             newPositionY = patternHeight - newHeight;
                           }
-
+      
                           setState(() {
                             positionX = newPositionX;
                             positionY = newPositionY;
@@ -327,12 +343,13 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
                           });
                         },
                         onDragEnd: (_) => widget.onChanged(widget.field.abstractCopyWith(positionX: positionX, positionY: positionY, width: width, height: height)),
-                        child: Container(color: Colors.transparent,),
+                        child: Container(color: cornerResizeHandleColor,),
                       ),
                     ),
                   )
                 ),
                 // Left-top resizer
+                if (!widget.viewMode)
                 Positioned(
                   top: 0, left: 0,
                   child: MouseRegion(
@@ -345,25 +362,24 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
                           color: Colors.transparent,
                           child: const SizedBox(width: kResizerShortSide, height: kResizerShortSide,),
                         ),
-                        onDragStarted: () => widget.onSelect,
                         onDragUpdate: (details) {
                           double newPositionX = max(positionX + details.delta.dx, 0);
                           double newPositionY = max(positionY + details.delta.dy, 0);
                           double newWidth = max((positionX + width) - newPositionX, minimumWidth);
                           double newHeight = max((positionY + height) - newPositionY, minimumHeight);
-
+      
                           if (isFixedAspect) {
                             newHeight = aspect * newWidth;
                           }
-
+      
                           if (newPositionX + newWidth > patternWidth) {
                             newPositionX = patternWidth - newWidth;
                           }
-
+      
                           if (positionY + newHeight > patternHeight) {
                             newPositionY = patternHeight - newHeight;
                           }
-
+      
                           setState(() {
                             positionX = newPositionX;
                             positionY = newPositionY;
@@ -372,12 +388,13 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
                           });
                         },
                         onDragEnd: (_) => widget.onChanged(widget.field.abstractCopyWith(positionX: positionX, positionY: positionY, width: width, height: height)),
-                        child: Container(color: Colors.transparent,),
+                        child: Container(color: cornerResizeHandleColor,),
                       ),
                     ),
                   )                  
                 ),
                 // Top-right resizer
+                if (!widget.viewMode)
                 Positioned(
                   top: 0, right: 0,
                   child: MouseRegion(
@@ -390,27 +407,26 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
                           color: Colors.transparent,
                           child: const SizedBox(width: kResizerShortSide, height: kResizerShortSide,),
                         ),
-                        onDragStarted: () => widget.onSelect,
                         onDragUpdate: (details) {
                           double newWidth = max(width + details.delta.dx, minimumWidth);
                           double newPositionY = max(positionY + details.delta.dy, 0);
                           double newHeight = max((positionY + height) - newPositionY, minimumHeight);
-
+      
                           if (isFixedAspect) {
                             newWidth = aspect * newHeight;
                           }
-
+      
                           if (positionX + newWidth > patternWidth) {
                             newWidth = patternWidth - positionX;
                             if (isFixedAspect) {
                               newHeight = aspect * newWidth;
                             }
                           }
-
+      
                           if (positionY + newHeight > patternHeight) {
                             newPositionY = patternHeight - newHeight;
                           }
-
+      
                           setState(() {
                             width = newWidth;
                             height = newHeight;
@@ -418,12 +434,13 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
                           });
                         },
                         onDragEnd: (_) => widget.onChanged(widget.field.abstractCopyWith(positionY: positionY, width: width, height: height)),
-                        child: Container(color: Colors.transparent,),
+                        child: Container(color: cornerResizeHandleColor,),
                       ),
                     ),
                   )
                 ),
                 // Right-top resizer
+                if (!widget.viewMode)
                 Positioned(
                   top: 0, right: 0,
                   child: MouseRegion(
@@ -436,16 +453,15 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
                           color: Colors.transparent,
                           child: const SizedBox(width: kResizerShortSide, height: kResizerShortSide,),
                         ),
-                        onDragStarted: () => widget.onSelect,
                         onDragUpdate: (details) {
                           double newWidth = max(width + details.delta.dx, minimumWidth);
                           double newPositionY = max(positionY + details.delta.dy, 0);
                           double newHeight = max((positionY + height) - newPositionY, minimumHeight);
-
+      
                           if (isFixedAspect) {
                             newWidth = aspect * newHeight;
                           }
-
+      
                           if (positionX + newWidth > patternWidth) {
                             newWidth = patternWidth - positionX;
                             if (isFixedAspect) {
@@ -455,7 +471,7 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
                           if (positionY + newHeight > patternHeight) {
                             newPositionY = patternHeight - newHeight;
                           }
-
+      
                           setState(() {
                             width = newWidth;
                             height = newHeight;
@@ -463,12 +479,13 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
                           });
                         },
                         onDragEnd: (_) => widget.onChanged(widget.field.abstractCopyWith(positionY: positionY, width: width, height: height)),
-                        child: Container(color: Colors.transparent,),
+                        child: Container(color: cornerResizeHandleColor,),
                       ),
                     ),
                   )                  
                 ),
                 // right-side resizer
+                if (!widget.viewMode)
                 Positioned(
                   right: 0,
                   top: kCornerResizerSize,
@@ -482,7 +499,6 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
                           color: Colors.transparent,
                           child: const SizedBox(width: kResizerShortSide, height: kResizerShortSide,),
                         ),
-                        onDragStarted: () => widget.onSelect(),
                         onDragUpdate: (details) {
                           double newWidth = min(max(width + details.delta.dx, minimumWidth), patternWidth - positionX);
                           double newHeight = height;
@@ -496,12 +512,13 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
                           });
                         },
                         onDragEnd: (_) => widget.onChanged(widget.field.abstractCopyWith(width: width, height: height)),
-                        child: Container(color: Colors.transparent,)
+                        child: Container(color: resizeHandleColor,),
                       )
                     ),
                   )
                 ),
                 // left-side resizer
+                if (!widget.viewMode)
                 Positioned(
                   left: 0,
                   top: kCornerResizerSize,
@@ -509,13 +526,12 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
                     cursor: SystemMouseCursors.resizeLeftRight,
                     child: SizedBox(
                       width: kResizerShortSide, 
-                      height: widget.field.height - (2 * kCornerResizerSize), 
+                      height: height - (2 * kCornerResizerSize), 
                       child: Draggable(
                         feedback: Container(
                           color: Colors.transparent,
                           child: const SizedBox(width: kResizerShortSide, height: kResizerShortSide,),
                         ),
-                        onDragStarted: () => widget.onSelect(),
                         onDragUpdate: (details) {
                           double newWidth = max(width - details.delta.dx, minimumWidth);
                           double newPositionX = min(positionX + details.delta.dx, patternWidth - newWidth);
@@ -545,12 +561,13 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
                           });
                         },
                         onDragEnd: (_) => widget.onChanged(widget.field.abstractCopyWith(positionX: positionX, width: width, height: height)),
-                        child: Container(color: Colors.transparent,)
+                        child: Container(color: resizeHandleColor,),
                       ),
                     )
                   )
                 ),
                 // bottom resizer
+                if (!widget.viewMode)
                 Positioned(
                   bottom: 0,
                   left: kCornerResizerSize, 
@@ -564,7 +581,6 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
                           color: Colors.transparent,
                           child: const SizedBox(width: kResizerShortSide, height: kResizerShortSide,),
                         ),
-                        onDragStarted: () => widget.onSelect(),
                         onDragUpdate: (details) {
                           double newHeight = min(max(height + details.delta.dy, minimumHeight), patternHeight - positionY);
                           double newWidth = width;
@@ -572,18 +588,25 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
                             newWidth = min(aspect * newHeight, patternWidth);
                             newHeight = aspect * newWidth;
                           }
+
+                          if (positionX + newWidth > patternWidth) {
+                            newWidth = patternWidth - positionX;
+                            newHeight = aspect * newWidth;
+                          }
+
                           setState(() {
                             width = newWidth;
                             height = newHeight;
                           });
                         },
                         onDragEnd: (_) => widget.onChanged(widget.field.abstractCopyWith(width: width, height: height)),
-                        child: Container(color: Colors.transparent,)
+                        child: Container(color: resizeHandleColor,),
                       ),
                     )
                   )
                 ),
                 // bottom-left resizer
+                if (!widget.viewMode)
                 Positioned(
                   bottom: 0,
                   child: MouseRegion(
@@ -596,7 +619,6 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
                           color: Colors.transparent,
                           child: const SizedBox(width: kResizerShortSide, height: kResizerShortSide,),
                         ),
-                        onDragStarted: () => widget.onSelect(),
                         onDragUpdate: (details) {
                           double newWidth = max(width - details.delta.dx, minimumWidth);
                           double newPositionX = positionX + details.delta.dx;
@@ -629,12 +651,13 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
                           });
                         },
                         onDragEnd: (_) => widget.onChanged(widget.field.abstractCopyWith(positionX: positionX, width: width, height: height)),
-                        child: Container(color: Colors.transparent,)
+                        child: Container(color: cornerResizeHandleColor,),
                       ),
                     ),
                   )
                 ),
                 // left-bottom resizer
+                if (!widget.viewMode)
                 Positioned(
                   bottom: 0,
                   child: MouseRegion(
@@ -647,7 +670,6 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
                           color: Colors.transparent,
                           child: const SizedBox(width: kResizerShortSide, height: kResizerShortSide,),
                         ),
-                        onDragStarted: () => widget.onSelect(),
                         onDragUpdate: (details) {
                           double newWidth = max(width - details.delta.dx, minimumWidth);
                           double newPositionX = positionX + details.delta.dx;
@@ -680,12 +702,13 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
                           });
                         },
                         onDragEnd: (_) => widget.onChanged(widget.field.abstractCopyWith(positionX: positionX, width: width, height: height)),
-                        child: Container(color: Colors.transparent,)
+                        child: Container(color: cornerResizeHandleColor,),
                       ),
                     ),
                   )
                 ),
                 // bottom-right resizer
+                if (!widget.viewMode)
                 Positioned(
                   bottom: 0,
                   right: 0,
@@ -699,7 +722,6 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
                           color: Colors.transparent,
                           child: const SizedBox(width: kResizerShortSide, height: kResizerShortSide,),
                         ),
-                        onDragStarted: () => widget.onSelect(),
                         onDragUpdate: (details) {
                           double newWidth = min(max(width + details.delta.dx, minimumWidth), patternWidth - positionX);
                           double newHeight = height;
@@ -722,12 +744,13 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
                           });
                         },
                         onDragEnd: (_) => widget.onChanged(widget.field.abstractCopyWith(width: width, height: height)),
-                        child: Container(color: Colors.transparent,)
+                        child: Container(color: cornerResizeHandleColor,),
                       ),
                     ),
                   )
                 ),
                 // right-bottom resizer
+                if (!widget.viewMode)
                 Positioned(
                   bottom: 0,
                   right: 0,
@@ -741,7 +764,6 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
                           color: Colors.transparent,
                           child: const SizedBox(width: kResizerShortSide, height: kResizerShortSide,),
                         ),
-                        onDragStarted: () => widget.onSelect(),
                         onDragUpdate: (details) {
                           double newWidth = min(max(width + details.delta.dx, minimumWidth), patternWidth - positionX);
                           double newHeight = height;
@@ -764,12 +786,13 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
                           });
                         },
                         onDragEnd: (_) => widget.onChanged(widget.field.abstractCopyWith(width: width, height: height)),
-                        child: Container(color: Colors.transparent,)
+                        child: Container(color: cornerResizeHandleColor,),
                       ),
                     ),
                   )
                 ),
                 // drag region
+                if (!widget.viewMode)
                 Positioned(
                   top: draggerAtBottom ? null : kResizerShortSide,
                   bottom: draggerAtBottom ? kResizerShortSide : null,
@@ -781,6 +804,7 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
             ),
           ),
         ),
-      ));
+      )
+    );
   }
 }

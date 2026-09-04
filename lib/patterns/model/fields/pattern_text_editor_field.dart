@@ -9,6 +9,7 @@ import 'package:knitty_griddy/patterns/model/fields/text_editor_field_settings.d
 class PatternTextEditorField extends PatternField {
 
   final String docContents;
+  final bool overflowing;
   final TextEditorFieldSettings settings;
 
   static const String emptyDoc = '''[{"insert": "\\n"}]''';
@@ -24,6 +25,7 @@ class PatternTextEditorField extends PatternField {
     super.opacity,
     this.settings = TextEditorFieldSettings.defaultSettings,
     this.docContents = emptyDoc,
+    this.overflowing = false,
   }) : super(fieldType: PatternFieldType.texteditor);
 
   PatternTextEditorField copyWith({
@@ -37,6 +39,7 @@ class PatternTextEditorField extends PatternField {
     int? opacity,
     TextEditorFieldSettings? settings,
     String? docContents,
+    bool? overflowing,
   }) {
     return PatternTextEditorField(
       id: id?? this.id, 
@@ -49,6 +52,7 @@ class PatternTextEditorField extends PatternField {
       opacity: opacity?? this.opacity,
       settings: settings?? this.settings,
       docContents: docContents?? this.docContents,
+      overflowing: overflowing?? this.overflowing,
     );
   }
 
@@ -80,6 +84,7 @@ class PatternTextEditorField extends PatternField {
     Set<Color> colors = {};
 
     ParchmentDocument doc = ParchmentDocument.fromJson(jsonDecode(docContents));
+    
     DeltaIterator iter = DeltaIterator(doc.toDelta());
     while(iter.hasNext) {
       Operation op = iter.next();
@@ -113,6 +118,7 @@ class PatternTextEditorField extends PatternField {
       'oy': contentOffsetY,
       'fs': settings.toJson(),
       'doc': docContents,
+      'of': overflowing,
     };
   }
 
@@ -128,6 +134,7 @@ class PatternTextEditorField extends PatternField {
       opacity: json['o'] as int,
       settings: TextEditorFieldSettings.fromJson(json['fs']),
       docContents: json['doc'] as String,
+      overflowing: json.containsKey('of') ? json['of'] as bool : false,
     );
   }
 
@@ -146,8 +153,9 @@ class PatternTextEditorField extends PatternField {
     contentOffsetY == other.contentOffsetY &&
     opacity == other.opacity &&
     settings == other.settings &&
-    docContents == other.docContents;
+    docContents == other.docContents &&
+    overflowing == other.overflowing;
   
   @override
-  int get hashCode => super.hashCode ^ settings.hashCode ^ docContents.hashCode;
+  int get hashCode => super.hashCode ^ settings.hashCode ^ docContents.hashCode ^ overflowing.hashCode;
 }
