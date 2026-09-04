@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 
 class UndoRedoToolbar extends StatefulWidget {
+  final bool enabled;
   final bool canUndo;
   final bool canRedo;
   final void Function() undo;
   final void Function() redo;
 
   const UndoRedoToolbar({
+    this.enabled = true,
     required this.canUndo,
     required this.canRedo,
     required this.undo,
@@ -28,12 +30,12 @@ class _UndoRedoToolbarState extends State<UndoRedoToolbar> {
         children: [
           hspacing,
           TextButton.icon(
-            onPressed: widget.canUndo ? () => widget.undo() : null, 
+            onPressed: widget.enabled && widget.canUndo ? () => widget.undo() : null, 
             label: const Text('Undo'),
             icon: const Icon(Icons.undo),
           ),
           TextButton.icon(
-            onPressed: widget.canRedo ? () => widget.redo() : null, 
+            onPressed: widget.enabled && widget.canRedo ? () => widget.redo() : null, 
             label: const Text('Redo'),
             icon: const Icon(Icons.redo),
           ),

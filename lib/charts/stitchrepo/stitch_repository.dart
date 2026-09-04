@@ -109,11 +109,11 @@ class StitchRepository {
     )).toList();
   }
 
-  static List<StitchSet> filteredStitchSets(String filter) {
+  static List<StitchSet> filteredStitchSets(String filter, {StitchDefinition? excludeDefinition}) {
     List<StitchSet> result = [];
     for (StitchSet stsSet in instance.sets) {
       result.add(stsSet.copyWith(
-        stitchDefinitions: stsSet.definitions.where((sd) => sd.passesFilter(filter)).toList()
+        stitchDefinitions: stsSet.definitions.where((sd) => excludeDefinition?.id != sd.id && sd.passesFilter(filter)).toList()
       ));
     }
     return result;

@@ -37,11 +37,13 @@ class KnittyGriddyFleatherEditor extends StatefulWidget {
 
 class _KnittyGriddyFleatherEditorState extends State<KnittyGriddyFleatherEditor> {
   late FocusNode _fleatherFocusNode;
+  final ScrollController _scrollController = ScrollController();
 
   void _docChanged() {
     widget.onChanged(
       widget.field.copyWith(
-        docContents: jsonEncode(widget.fleatherController.document.toJson())
+        docContents: jsonEncode(widget.fleatherController.document.toJson()),
+        overflowing: _scrollController.position.maxScrollExtent > 20,
       )
     );
   }
@@ -119,6 +121,7 @@ class _KnittyGriddyFleatherEditorState extends State<KnittyGriddyFleatherEditor>
                 padding: const EdgeInsets.all(5),
                 controller: widget.fleatherController,
                 editorKey: widget.editorKey,
+                scrollController: _scrollController,
                 focusNode: _fleatherFocusNode,
               ),
             ),

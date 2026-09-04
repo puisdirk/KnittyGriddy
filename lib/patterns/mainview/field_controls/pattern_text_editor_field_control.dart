@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:knitty_griddy/patterns/mainview/fleather/knitty_griddy_fleather_editor.dart';
 import 'package:knitty_griddy/patterns/model/fields/pattern_text_editor_field.dart';
 import 'package:knitty_griddy/patterns/model/knitting_pattern.dart';
+import 'package:knitty_griddy/utils/constants.dart';
 
 class PatternTextEditorFieldControl extends StatelessWidget {
   final KnittingPattern knittingPattern;
@@ -30,15 +31,18 @@ class PatternTextEditorFieldControl extends StatelessWidget {
   Widget build(BuildContext context) {
     return Opacity(
       opacity: field.opacity == 0 ? 0 : field.opacity / 255,
-      child: KnittyGriddyFleatherEditor(
-        knittingPattern: knittingPattern, 
-        field: field,
-        fleatherController: fleatherController,
-        editorKey: editorKey,
-        selected: selected,
-        viewMode: viewMode,
-        onChanged: onChanged,
-        onSelect: onSelect,
+      child: Padding(
+        padding: const EdgeInsets.all(kDraggerHeight),
+        child: KnittyGriddyFleatherEditor(
+          knittingPattern: knittingPattern, 
+          field: field,
+          fleatherController: fleatherController,
+          editorKey: editorKey,
+          selected: selected,
+          viewMode: viewMode,
+          onChanged: onChanged,
+          onSelect: onSelect,
+        ),
       ),
     );
   }

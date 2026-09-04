@@ -12,6 +12,9 @@ const int objectversion = 1;
 const double kDraggerHeight = 20;
 const double kResizerShortSide = 5;
 
+// Links mode
+const Size kConnectorSize = Size(24, 24);
+
 // Drawings
 
 const TextStyle smallStyle = TextStyle(fontSize: 10, color: Colors.black);

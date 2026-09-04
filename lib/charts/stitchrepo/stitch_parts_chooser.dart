@@ -10,7 +10,10 @@ import 'package:knitty_griddy/charts/stitchrepo/stitch_definition.dart';
 import 'package:provider/provider.dart';
 
 class StitchPartsChooser extends StatefulWidget {
+  final StitchDefinition? excludeDefinition;
+
   const StitchPartsChooser({
+    this.excludeDefinition,
     super.key
   });
 
@@ -78,7 +81,7 @@ class _StitchPartsChooserState extends State<StitchPartsChooser> {
     return res;
   }
 
-  Widget createStandardPartsCategory() {
+  Widget createBasicSymbolsCategory() {
     List<Widget> cards = [];
     for (KnittingSymbolPart part in KnittingSymbolParts.parts) {
       
@@ -175,13 +178,13 @@ class _StitchPartsChooserState extends State<StitchPartsChooser> {
         width: 600,
         height: 400,
         child: Selector<ChartsModel, List<StitchSet>>(
-          selector: (_, model) => model.filteredStitchSets(''),
+          selector: (_, model) => model.filteredStitchSets('', excludeDefinition: widget.excludeDefinition),
           builder: (context, stitchSets, _) {
            return DefaultTabController(
             length: stitchSets.length,
             child: Column(
               children: [
-                createStandardPartsCategory(),
+                createBasicSymbolsCategory(),
                 TabBar(tabs: [
                   for (StitchSet stitchSet in stitchSets)
                     Tab(text: stitchSet.name,)

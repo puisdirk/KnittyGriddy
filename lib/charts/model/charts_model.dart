@@ -401,8 +401,8 @@ class ChartsModel extends ChangeNotifier {
   KnittingChart get knittingChart => _chartsModelObject.knittingChart;
   AppState get appState => _chartsModelObject.appState;
 
-  List<StitchSet> filteredStitchSets(String filter) {
-    return StitchRepository.filteredStitchSets(filter);
+  List<StitchSet> filteredStitchSets(String filter, {StitchDefinition? excludeDefinition}) {
+    return StitchRepository.filteredStitchSets(filter, excludeDefinition: excludeDefinition);
   }
 
   String createStitchSet(String name, List<StitchDefinition> stitches) {
