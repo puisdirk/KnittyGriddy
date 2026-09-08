@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:knitty_griddy/charts/stitchrepo/stitch_definition.dart';
 import 'package:knitty_griddy/patterns/mainview/fleather/styled_stitch_icon.dart';
 import 'package:knitty_griddy/patterns/model/fields/pattern_text_editor_field.dart';
+import 'package:knitty_griddy/utils/constants.dart';
 
 class TextEditorFieldOutline extends StatefulWidget {
   final PatternTextEditorField field;
@@ -55,33 +56,36 @@ class _TextEditorFieldOutlineState extends State<TextEditorFieldOutline> {
             color: Colors.grey.withAlpha(20),
             border: Border.all(color: Colors.grey.withAlpha(50)),
           ),
-          child: Stack(
-            children: [
-              Positioned(
-                left: widget.field.leftpadding + widget.field.contentOffsetX,
-                top: widget.field.contentOffsetY,
-                child: Opacity(
-                  opacity: .2,
-                  child: SizedBox(
-                    width: widget.field.width - (2 * widget.field.padding),
-                    height: widget.field.height - widget.field.bottompadding,
-                    child: FleatherField(
-                      embedBuilder: _embedBuilder,
-                      readOnly: true,
-                      showCursor: false,
-                      padding: const EdgeInsets.only(
-                        top: 1,
-                        left: 5,
-                        right: 5,
-                        bottom: 5
+          child: Padding(
+            padding: const EdgeInsets.all(kDraggerHeight),
+            child: Stack(
+              children: [
+                Positioned(
+                  left: widget.field.leftpadding + widget.field.contentOffsetX,
+                  top: widget.field.contentOffsetY,
+                  child: Opacity(
+                    opacity: .2,
+                    child: SizedBox(
+                      width: widget.field.width - (2 * widget.field.padding),
+                      height: widget.field.height - widget.field.bottompadding,
+                      child: FleatherField(
+                        embedBuilder: _embedBuilder,
+                        readOnly: true,
+                        showCursor: false,
+                        padding: const EdgeInsets.only(
+                          top: 1,
+                          left: 5,
+                          right: 5,
+                          bottom: 5
+                        ),
+                        controller: _controller,
+                        decoration: const InputDecoration(border: InputBorder.none),
                       ),
-                      controller: _controller,
-                      decoration: const InputDecoration(border: InputBorder.none),
                     ),
                   ),
-                ),
-              )
-            ]
+                )
+              ]
+            ),
           ),
         ),
       ),

@@ -17,6 +17,7 @@ import 'package:knitty_griddy/patterns/model/fields/pattern_panel_field.dart';
 import 'package:knitty_griddy/patterns/model/fields/pattern_text_editor_field.dart';
 import 'package:knitty_griddy/patterns/model/knitting_pattern.dart';
 import 'package:knitty_griddy/utils/constants.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 class PatternFieldControl extends StatefulWidget {
   final KnittingPattern knittingPattern;
@@ -28,6 +29,7 @@ class PatternFieldControl extends StatefulWidget {
   final void Function() onSelect;
   final void Function(String fieldId) onDelete;
   final void Function(PatternField changedField) onChanged;
+  final void Function() onReflow;
 
   const PatternFieldControl({
     required this.knittingPattern,
@@ -39,6 +41,7 @@ class PatternFieldControl extends StatefulWidget {
     required this.onSelect,
     required this.onDelete,
     required this.onChanged,
+    required this.onReflow,
     super.key
   });
 
@@ -98,54 +101,6 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
     super.didUpdateWidget(oldWidget);
   }
   
-  Widget createPatternFieldControl() {
-    switch (widget.field.fieldType) {
-      case PatternFieldType.texteditor:
-        return PatternTextEditorFieldControl(
-          knittingPattern: widget.knittingPattern,
-          field: widget.field as PatternTextEditorField,
-          fleatherController: widget.fieldChangeNotifier as FleatherController,
-          editorKey: widget.editorKey as GlobalKey<EditorState>?,
-          selected: widget.selected,
-          viewMode: widget.viewMode,
-          onChanged: widget.onChanged,
-          onSelect: widget.onSelect,
-        );
-      case PatternFieldType.knittingchart:
-        return PatternChartFieldControl(
-          opacity: widget.field.opacity.toDouble(),
-          chart: (widget.field as PatternChartField).chart,
-          viewSettings: (widget.field as PatternChartField).viewSettings,
-          selected: widget.selected,
-          onSelect: widget.onSelect,
-        );
-      case PatternFieldType.drawing: {
-        Drawing? drawing = (widget.field as PatternDrawingField).drawing;
-        if (drawing != null && !drawing.validated) {
-          drawing = drawing.validate();
-        }
-        return PatternDrawingFieldControl(
-          opacity: widget.field.opacity.toDouble(),
-          drawing: drawing, 
-          selected: widget.selected, 
-          onSelect: widget.onSelect
-        );
-      }
-      case PatternFieldType.image:
-        return PatternImageFieldControl(
-          imageData: (widget.field as PatternImageField).imageData, 
-          opacity: widget.field.opacity.toDouble(), 
-          onSelect: widget.onSelect
-        );
-      case PatternFieldType.panel:
-        return PatternPanelFieldControl(
-          panelStyle: (widget.field as PatternPanelField).style,
-          opacity: widget.field.opacity.toDouble(),
-          onSelect: widget.onSelect,
-        );
-    }
-  }
-
   // TODO: these colours should depend on being in editmode or viewmode
   final Color resizeHandleColor = Colors.grey.shade300;
   final Color cornerResizeHandleColor = Colors.grey.shade400;
@@ -158,7 +113,6 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
           color: Colors.transparent,
           child: const SizedBox(width: kResizerShortSide, height: kResizerShortSide,),
         ),
-//        onDragStarted: () => widget.onSelect(),
         onDragUpdate: (details) {
           setState(() {
             positionX = min(max(positionX + details.delta.dx, 0), patternWidth - width);
@@ -194,7 +148,7 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
                       const Tooltip(
                         message: 'Drawing is not valid',
                         child: Padding(
-                          padding: EdgeInsets.only(left: 8.0),
+                          padding: EdgeInsets.only(left: 4.0),
                           child: Icon(Icons.warning_amber, size: 16, color: Colors.red,),
                         )
                       ),
@@ -202,9 +156,21 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
                       const Tooltip(
                         message: 'Field may be too small to show all text',
                         child: Padding(
-                          padding: EdgeInsets.only(left: 8.0),
+                          padding: EdgeInsets.only(left: 4.0),
                           child: Icon(Icons.warning_amber, size: 16, color: Colors.red),
                         )
+                      ),
+                    // Linked text field, we can reflow
+                    if (widget.field.fieldType == PatternFieldType.texteditor && widget.knittingPattern.textFieldLinks.hasLink(widget.field.id))
+                      Padding(
+                        padding: const EdgeInsets.only(left: 4.0),
+                        child: MouseRegion(
+                          cursor: SystemMouseCursors.click,
+                          child: GestureDetector(
+                            onTap: widget.onReflow,
+                            child: const Icon(Symbols.conversion_path, size: 16)
+                          )
+                        ),
                       ),
                     const Spacer(),
                     if (width > 102)
@@ -259,7 +225,46 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
                   child: SizedBox(
                     width: width - (2 * widget.field.padding),
                     height: height - widget.field.bottompadding,
-                    child: createPatternFieldControl()
+                    child: //createPatternFieldControl()
+                      widget.field.fieldType == PatternFieldType.texteditor ?
+                        PatternTextEditorFieldControl(
+                          knittingPattern: widget.knittingPattern,
+                          field: widget.field as PatternTextEditorField,
+                          fleatherController: widget.fieldChangeNotifier as FleatherController,
+                          editorKey: widget.editorKey as GlobalKey<EditorState>?,
+                          selected: widget.selected,
+                          viewMode: widget.viewMode,
+                          onChanged: widget.onChanged,
+                          onSelect: widget.onSelect,
+                        ) :
+                      widget.field.fieldType == PatternFieldType.knittingchart ?
+                        PatternChartFieldControl(
+                          opacity: widget.field.opacity.toDouble(),
+                          chart: (widget.field as PatternChartField).chart,
+                          viewSettings: (widget.field as PatternChartField).viewSettings,
+                          selected: widget.selected,
+                          onSelect: widget.onSelect,
+                        ) :
+                      widget.field.fieldType == PatternFieldType.drawing ?
+                        PatternDrawingFieldControl(
+                          opacity: widget.field.opacity.toDouble(),
+                          drawing: (widget.field as PatternDrawingField).drawing, 
+                          selected: widget.selected, 
+                          onSelect: widget.onSelect
+                        ) :
+                      widget.field.fieldType == PatternFieldType.image ?
+                        PatternImageFieldControl(
+                          imageData: (widget.field as PatternImageField).imageData, 
+                          opacity: widget.field.opacity.toDouble(), 
+                          onSelect: widget.onSelect
+                        ) :
+                      widget.field.fieldType == PatternFieldType.panel ?
+                        PatternPanelFieldControl(
+                          panelStyle: (widget.field as PatternPanelField).style,
+                          opacity: widget.field.opacity.toDouble(),
+                          onSelect: widget.onSelect,
+                        ) :
+                      Container()
                   )
                 ),
                 // top-side resizer

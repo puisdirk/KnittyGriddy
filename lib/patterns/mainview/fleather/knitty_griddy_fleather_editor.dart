@@ -43,7 +43,7 @@ class _KnittyGriddyFleatherEditorState extends State<KnittyGriddyFleatherEditor>
     widget.onChanged(
       widget.field.copyWith(
         docContents: jsonEncode(widget.fleatherController.document.toJson()),
-        overflowing: _scrollController.position.maxScrollExtent > 20,
+        overflowing: _scrollController.position.maxScrollExtent > 25,
       )
     );
   }
@@ -62,6 +62,16 @@ class _KnittyGriddyFleatherEditorState extends State<KnittyGriddyFleatherEditor>
     widget.fleatherController.addListener(_docChanged);
 
     super.initState();
+  }
+
+  @override
+  void didUpdateWidget(covariant KnittyGriddyFleatherEditor oldWidget) {
+    if (oldWidget.fleatherController != widget.fleatherController) {
+      oldWidget.fleatherController.removeListener(_docChanged);
+      widget.fleatherController.addListener(_docChanged);
+    }
+
+    super.didUpdateWidget(oldWidget);
   }
 
   @override

@@ -21,6 +21,39 @@ class TextFieldLinks {
   bool hasOutgoingLink(String id) => links.any((l) => l.fromId == id);
   bool hasIncomingLink(String id) => links.any((l) => l.toId == id);
 
+  TextFieldLinks rerouteLinksForDeletion(String toDeleteId) {
+    
+    // Is it a head or a tail?
+    if ((hasOutgoingLink(toDeleteId) && !hasIncomingLink(toDeleteId)) ||
+      (hasIncomingLink(toDeleteId) && !hasOutgoingLink(toDeleteId))) {
+      // Simply disconnect
+      return copyWith(
+        links: links.where((l) => l.fromId != toDeleteId && l.toId != toDeleteId).toList()
+      );
+    }
+
+    // Else it is in the middle
+    TextFieldLink outgoingLink = links.firstWhere((l) => l.fromId == toDeleteId);
+    TextFieldLink incomingLink = links.firstWhere((l) => l.toId == toDeleteId);
+    return copyWith(
+      links: links.where((l) => l != outgoingLink && l != incomingLink).toList()..add(TextFieldLink(fromId: incomingLink.fromId, toId: outgoingLink.toId))
+    );
+
+  }
+
+  String? getStartId(String id) {
+    if (!hasLink(id)) return null;
+
+    if (!hasIncomingLink(id)) return id;
+
+    String previousId = id;
+    while (hasIncomingLink(previousId)) {
+      previousId = links.firstWhere((l) => l.toId == previousId).fromId;
+    }
+    
+    return previousId;
+  }
+
   TextFieldLinks removeLinksForField(String fieldId) {
     return copyWith(links: links.where((l) => l.fromId != fieldId && l.toId != fieldId).toList());
   }

@@ -12,6 +12,7 @@ import 'package:knitty_griddy/patterns/mainview/fieldtoolbars/pattern_image_fiel
 import 'package:knitty_griddy/patterns/mainview/fieldtoolbars/pattern_panel_field_toolbar.dart';
 import 'package:knitty_griddy/patterns/mainview/fieldtoolbars/pattern_text_editor_field_toolbar.dart';
 import 'package:knitty_griddy/patterns/mainview/fieldtoolbars/pattern_toolbar.dart';
+import 'package:knitty_griddy/patterns/mainview/fleather/fleather_font_style.dart';
 import 'package:knitty_griddy/patterns/mainview/fleather/text_editor_field_settings_dialog.dart';
 import 'package:knitty_griddy/patterns/mainview/link_mode/links_mode_view.dart';
 import 'package:knitty_griddy/patterns/mainview/page_margin_painter.dart';
@@ -29,6 +30,7 @@ import 'package:knitty_griddy/patterns/model/patterns_model.dart';
 import 'package:knitty_griddy/common/undo_redo_toolbar.dart';
 import 'package:knitty_griddy/utils/app_platform_ext.dart';
 import 'package:knitty_griddy/utils/constants.dart';
+import 'package:knitty_griddy/utils/math_utitilies.dart';
 import 'package:knitty_griddy/utils/undo_redo_manager.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
@@ -188,7 +190,7 @@ class _PatternPageState extends State<PatternPage> {
   }
 
   void _storeAndSetKnittingPattern(KnittingPattern newPattern, {void Function()? additionalState, bool? storeForUndo}) {
-    if (storeForUndo != false) {
+    if (storeForUndo != false &&_undoRedoManager.lastState != newPattern) {
       _undoRedoManager.store(newPattern);
     }
     _setKnittingPattern(newPattern, additionalState: additionalState);
@@ -305,6 +307,153 @@ class _PatternPageState extends State<PatternPage> {
     }
   }
 
+  void _reflowField(String fromFieldId, {bool forDeletion = false}) {
+    // Concatenate all contents of the linked fields into one document
+
+    // Find the start link
+    String? startId = stateKnittingPattern.textFieldLinks.getStartId(fromFieldId);
+    if (startId == null) return;
+
+    List<PatternTextEditorField> linkedFields = [];
+
+    PatternTextEditorField nextField = stateKnittingPattern.textEditorFields.firstWhere((f) => f.id == startId);
+    if (!forDeletion || nextField.id != fromFieldId) {
+      linkedFields.add(nextField);
+    }
+
+    List<dynamic> completeDocJson = [];
+
+    if (nextField.docContents != PatternTextEditorField.emptyDoc) {
+      completeDocJson.addAll(jsonDecode(nextField.docContents));
+    }
+
+    // while we have a linked field, add content to the complete document
+    while (true) {
+      String nextFieldId = stateKnittingPattern.textFieldLinks.links.firstWhere((l) => l.fromId == nextField.id).toId;
+      nextField = stateKnittingPattern.textEditorFields.firstWhere((f) => f.id == nextFieldId);
+      if (!forDeletion || nextFieldId != fromFieldId) {
+        linkedFields.add(nextField);
+      }
+      if (nextField.docContents != PatternTextEditorField.emptyDoc) {
+        completeDocJson.addAll(jsonDecode(nextField.docContents));
+      }
+      
+      if (!stateKnittingPattern.textFieldLinks.hasOutgoingLink(nextFieldId)) {
+        break;
+      }
+    }
+
+    Map<String, PatternTextEditorField> changedFields = {};
+
+    // If we have content, divide it over the linked fields
+    if (completeDocJson.isNotEmpty) {
+      ParchmentDocument completeDocument = ParchmentDocument.fromJson(completeDocJson);
+
+      LookupResult res = completeDocument.lookupLine(0);
+      if (res.isEmpty) {
+        return;
+      }
+      LineNode? lineNode = res.node! as LineNode;
+
+      for (PatternTextEditorField field in linkedFields) {
+        if (lineNode == null) {
+          changedFields[field.id] = field.copyWith(docContents: PatternTextEditorField.emptyDoc);
+          continue;
+        }
+
+        FleatherFontStyle fs = FleatherFontStyle(textStyle: field.settings.style);
+        Delta fieldDelta = Delta();
+        // We have draggerheight as padding around + padding of 5 inside the editor
+        double remainingHeight = field.height - (2 * kDraggerHeight) - (2 * 5);
+
+        while (true) {
+          if (field == linkedFields.last) {
+            // We are the last field in the link chain, so keep adding lines without measuring
+            fieldDelta = lineNode!.toDelta().compose(fieldDelta);
+          } else {
+            // Check if the line would still fit
+            TextStyle lineStyle = fs.textStyleForParchmentStyle(lineNode!.style);
+
+            TextAlign lineAlign = TextAlign.left;
+            if (lineNode.style.contains(ParchmentAttribute.alignment)) {
+              String? alignment = lineNode.style.get(ParchmentAttribute.alignment)!.value;
+              if (alignment == 'right') lineAlign = TextAlign.right;
+              if (alignment == 'center') lineAlign = TextAlign.center;
+              if (alignment == 'justify') lineAlign = TextAlign.justify;
+            }
+
+            // We have draggerheight as padding around + padding of 5 inside the editor
+            double maxWidth = field.width - (2 * kDraggerHeight) - (2 * 5);
+            if (lineNode.style.contains(ParchmentAttribute.indent)) {
+              int? indents = lineNode.style.get(ParchmentAttribute.indent)!.value;
+              if (indents != null) {
+                String indentSpaces = ''.padRight(indents * 4);
+                maxWidth -= MathUtitilies.textSize(indentSpaces, lineStyle).width;
+              }
+            }
+
+            // Measure the height of the line
+            double lineHeight = MathUtitilies.textSize(
+              lineNode.toPlainText().trim(), 
+              lineStyle, 
+              maxLines: null, 
+              maxWidth: maxWidth,
+              textAlign: lineAlign,
+            ).height;
+
+            VerticalSpacing spacing = FleatherFontStyle.spacingForParchmentStyle(lineNode!.style);
+            lineHeight += spacing.top + spacing.bottom;
+
+            print('lineHeight $lineHeight. Remaining $remainingHeight');
+
+            if (lineHeight < remainingHeight) {
+              fieldDelta = lineNode.toDelta().compose(fieldDelta);
+              remainingHeight -= lineHeight;
+            } else {
+              // No more space in this field
+              break;
+            }
+          }
+
+          lineNode = lineNode.nextLine;
+          if (lineNode == null) {
+            break;
+          }
+        }
+
+        // Delta for this field is complete
+        changedFields[field.id] = field.copyWith(docContents: fieldDelta.isEmpty ? PatternTextEditorField.emptyDoc : jsonEncode(fieldDelta.toJson()));
+      }
+    }
+
+    if (forDeletion) {
+      _storeAndSetKnittingPattern(stateKnittingPattern.copyWith(
+        fields: stateKnittingPattern.fields.where((f) => f.id != fromFieldId).map((f) => changedFields.containsKey(f.id) ? changedFields[f.id]! : f).toList(),
+        textFieldLinks: stateKnittingPattern.textFieldLinks.rerouteLinksForDeletion(fromFieldId),
+      ), additionalState: () {
+        for (PatternTextEditorField changedField in changedFields.values) {
+          fleatherControllers[changedField.id] = FleatherController(document: ParchmentDocument.fromJson(jsonDecode(changedField.docContents)));
+        }
+
+        fleatherControllers[fromFieldId]!.dispose();
+        fleatherControllers = Map.from(fleatherControllers)..remove(fromFieldId);
+        fleaterEditorKeys = Map.from(fleaterEditorKeys)..remove(fromFieldId);
+        if (selectedField?.id == fromFieldId) {
+          selectedField = null;
+        }
+      });
+    } else {
+      _storeAndSetKnittingPattern(stateKnittingPattern.copyWith(
+        fields: stateKnittingPattern.fields.map((f) => changedFields.containsKey(f.id) ? changedFields[f.id]! : f).toList()
+      ), additionalState: () {
+        for (PatternTextEditorField changedField in changedFields.values) {
+          fleatherControllers[changedField.id]!.dispose();
+          fleatherControllers[changedField.id] = FleatherController(document: ParchmentDocument.fromJson(jsonDecode(changedField.docContents)));
+        }
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     FocusScope.of(context).autofocus(_keyboardFocusNode);
@@ -337,12 +486,11 @@ class _PatternPageState extends State<PatternPage> {
           SegmentedButton<PatternPageMode>(
             emptySelectionAllowed: false,
             multiSelectionEnabled: false,
-            segments: const[
-              ButtonSegment(value: PatternPageMode.edit, icon: Icon(Icons.edit)),
-              ButtonSegment(value: PatternPageMode.view, icon: Icon(Icons.visibility)),
-              // To reenable the semi-abandonded links-mode, uncomment here
-//              if (stateKnittingPattern.textEditorFields.length > 1)
-//                const ButtonSegment(value: PatternPageMode.links, icon: Icon(Symbols.conversion_path)),
+            segments: [
+              const ButtonSegment(value: PatternPageMode.edit, icon: Icon(Icons.edit)),
+              const ButtonSegment(value: PatternPageMode.view, icon: Icon(Icons.visibility)),
+              if (stateKnittingPattern.textEditorFields.length > 1)
+                const ButtonSegment(value: PatternPageMode.links, icon: Icon(Symbols.conversion_path)),
             ], 
             selected: {patternPageMode},
             onSelectionChanged: (newMode) => setState(() => patternPageMode = newMode.first),
@@ -583,26 +731,26 @@ class _PatternPageState extends State<PatternPage> {
                       onCycleSelectedField: _onCycleSelectedField,
                       onDuplicateSelectedField: () {
                         if (selectedField == null) return;
-
+              
                         String id = const UuidV4Gen().get();
-
+              
                         // move the new field 10 down and right
                         double posX = selectedField!.positionX + 10;
                         double posY = selectedField!.positionY + 10;
-
+              
                         // if that would tip it over the page edge, move in the other direction
                         if (posX + selectedField!.width > stateKnittingPattern.pageLayout.pagewidth ||
                           posY + selectedField!.height > stateKnittingPattern.pageLayout.pageheight) {
                           posX = selectedField!.positionX - 10;
                           posY = selectedField!.positionY - 10;
                         }
-
+              
                         PatternField newField = selectedField!.abstractCopyWith(
                           id: id,
                           positionX: posX,
                           positionY: posY,
                         );
-
+              
                         switch (newField.fieldType) {
                           case PatternFieldType.texteditor:
                             _storeAndSetKnittingPattern(stateKnittingPattern.copyWith(
@@ -768,19 +916,24 @@ class _PatternPageState extends State<PatternPage> {
                                       onDelete: (String fieldId) {
                                         PatternField fieldToDelete = stateKnittingPattern.fields.firstWhere((f) => f.id == fieldId);
                                         if (fieldToDelete is PatternTextEditorField) {
-                                          _storeAndSetKnittingPattern(stateKnittingPattern.removeTextField(fieldId),
-                                            additionalState: () {
-                                              FleatherController? ctrl = fleatherControllers[fieldId];
-                                              if (ctrl != null) {
-                                                ctrl.dispose();
-                                                fleatherControllers = Map.from(fleatherControllers)..remove(fieldId);
+                                          if (stateKnittingPattern.textFieldLinks.hasLink(fieldToDelete.id)) {
+                                            _reflowField(fieldToDelete.id, forDeletion: true);
+                                          } else {
+                                            _storeAndSetKnittingPattern(stateKnittingPattern.copyWith(
+                                              fields: stateKnittingPattern.fields.where((f) => f.id != fieldToDelete.id).toList()),
+                                              additionalState: () {
+                                                FleatherController? ctrl = fleatherControllers[fieldId];
+                                                if (ctrl != null) {
+                                                  ctrl.dispose();
+                                                  fleatherControllers = Map.from(fleatherControllers)..remove(fieldId);
+                                                }
+                                                fleaterEditorKeys = Map.from(fleaterEditorKeys)..remove(fieldId);
+                                                if (selectedField?.id == fieldId) {
+                                                  selectedField = null;
+                                                }
                                               }
-                                              fleaterEditorKeys = Map.from(fleaterEditorKeys)..remove(fieldId);
-                                              if (selectedField?.id == fieldId) {
-                                                selectedField = null;
-                                              }
-                                            }
-                                          );
+                                            );
+                                          }
                                         } else {
                                           _storeAndSetKnittingPattern(stateKnittingPattern.copyWith(
                                             fields: stateKnittingPattern.fields.where((f) => f.id != fieldId).toList()
@@ -796,6 +949,7 @@ class _PatternPageState extends State<PatternPage> {
                                           fields: stateKnittingPattern.fields.map((f) => f.id != changedField.id ? f : changedField).toList()
                                         ), additionalState: () => selectedField = changedField
                                       ),
+                                      onReflow: () => _reflowField(field.id),
                                     ),
                                 ],
                               ),

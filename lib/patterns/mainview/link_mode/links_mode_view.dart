@@ -1,4 +1,3 @@
-import 'package:directed_graph/directed_graph.dart';
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/patterns/mainview/link_mode/link_control.dart';
 import 'package:knitty_griddy/patterns/mainview/link_mode/text_editor_field_outline.dart';
@@ -82,12 +81,19 @@ class _LinksModeViewState extends State<LinksModeView> {
                         top: field.positionY,
                         child: TextEditorFieldOutline(field: field)
                       ),
+                    // Input connectors
                     for (PatternTextEditorField field in stateKnittingPattern.textEditorFields)
                       Positioned(
                         left: field.positionX + 10,
                         top: field.positionY + 10,
                         child: acceptableDragSources.isEmpty || stateKnittingPattern.textFieldLinks.hasIncomingLink(field.id) ?
-                          Opacity(opacity: .2, child: Icon(stateKnittingPattern.textFieldLinks.hasIncomingLink(field.id) ? Symbols.line_end_circle : Symbols.line_end_diamond))
+                          Opacity(
+                            opacity: stateKnittingPattern.textFieldLinks.hasIncomingLink(field.id) ? 1 : .2, 
+                            child: Icon(
+                              stateKnittingPattern.textFieldLinks.hasIncomingLink(field.id) ? Symbols.line_end_circle : Symbols.line_end_diamond,
+                              color: stateKnittingPattern.textFieldLinks.hasIncomingLink(field.id) ? Colors.green : null,
+                            )
+                          )
                         : Draggable<String>(
                           data: '${field.id}:input',
                           feedback: const Icon(Symbols.line_end_diamond),
@@ -119,7 +125,13 @@ class _LinksModeViewState extends State<LinksModeView> {
                         left: field.positionX + field.width - kConnectorSize.width - 10,
                         top: field.positionY + field.height - kConnectorSize.height - 10,
                         child: acceptableDragSources.isEmpty || stateKnittingPattern.textFieldLinks.hasOutgoingLink(field.id) ?
-                          Opacity(opacity: .2, child: Icon(stateKnittingPattern.textFieldLinks.hasOutgoingLink(field.id) ? Symbols.line_start_circle : Symbols.line_start_diamond))
+                          Opacity(
+                            opacity: stateKnittingPattern.textFieldLinks.hasOutgoingLink(field.id) ? 1 : .2, 
+                            child: Icon(
+                              stateKnittingPattern.textFieldLinks.hasOutgoingLink(field.id) ? Symbols.line_start_circle : Symbols.line_start_diamond,
+                              color: stateKnittingPattern.textFieldLinks.hasOutgoingLink(field.id) ? Colors.green : null,
+                            )
+                          )
                         : Draggable<String>(
                           data: '${field.id}:output',
                           feedback: const Icon(Symbols.line_start_diamond),
@@ -151,7 +163,11 @@ class _LinksModeViewState extends State<LinksModeView> {
                         pattern: stateKnittingPattern,
                         link: link,
                         dragging: draggedLinkId.isNotEmpty,
-                        onDeleteLink: () => widget.onChanged(stateKnittingPattern.removeTextFieldLink(link))
+                        onDeleteLink: () => widget.onChanged(
+                          stateKnittingPattern.copyWith(
+                            textFieldLinks: stateKnittingPattern.textFieldLinks.removeLink(link)
+                          )
+                        )
                       ),
                   ],
                 ),

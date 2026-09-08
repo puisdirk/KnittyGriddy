@@ -47,13 +47,6 @@ class LinkControl extends StatelessWidget {
           height: encompassingRect.height,
           child: Stack(
             children: [
-/*              Positioned(
-                child: IgnorePointer(
-                  child: Container(
-                   decoration: BoxDecoration(border: Border.all(color: Colors.amber)),
-                  ),
-                ),
-              ),*/
               CustomPaint(
                 size: encompassingRect.size,
                 painter: ConnectorPainter(
@@ -61,9 +54,7 @@ class LinkControl extends StatelessWidget {
                   outputConnectorRect: outputConnectorRect,
                 ),
               ),
-              Positioned(
-                top: (encompassingRect.height / 2) - 12,
-                left: (encompassingRect.width / 2) - 12,
+              Center(
                 child: IconButton(
                   onPressed: onDeleteLink, 
                   icon: const Icon(Icons.delete)
@@ -88,7 +79,7 @@ class ConnectorPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    Paint connectorPaint = Paint()..color = Colors.green..style = PaintingStyle.stroke..strokeWidth = 2;
+    Paint connectorPaint = Paint()..color = Colors.green..style = PaintingStyle.stroke..strokeWidth = 1.5;
 
     if (inputConnectorRect.topLeft.dy <= outputConnectorRect.topRight.dy && inputConnectorRect.topLeft.dx >= outputConnectorRect.topRight.dx) {
       // input is above and to the right of the output, so drawing from bottomLeft to topRight

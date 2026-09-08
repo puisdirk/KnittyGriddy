@@ -24,6 +24,8 @@ class UndoRedoManager<T> {
   bool canUndo() => _undoStack.length > 1;
   bool canRedo() => _redoStack.isNotEmpty;
 
+  T? get lastState => _undoStack.isEmpty ? null : _undoStack.last;
+
   T? undo() {
     if (canUndo()) {
       final undoneState = _undoStack.removeLast();
