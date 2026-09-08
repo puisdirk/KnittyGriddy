@@ -114,9 +114,7 @@ class KnittingPattern {
   }
   List<String> get freeTextEditorFieldIds => textEditorFields.where((f) => !textFieldLinks.hasIncomingLink(f.id) || !textFieldLinks.hasOutgoingLink(f.id)).map((f) => f.id).toList();
 
-  List<String> acceptableLinkTargetsFor(String fieldId, bool fromOutput) {
-    List<String> linkIds = [];
-
+  DirectedGraph get textLinksGraph {
     Map<String, Set<String>> graphData = {};
     for (PatternTextEditorField f in textEditorFields) {
       graphData[f.id] = {};
@@ -124,9 +122,14 @@ class KnittingPattern {
     for (TextFieldLink l in textFieldLinks.links) {
       graphData[l.fromId]?.add(l.toId);
     }
+    return DirectedGraph(graphData);
+  }
+
+  List<String> acceptableLinkTargetsFor(String fieldId, bool fromOutput) {
+    List<String> linkIds = [];
 
     for (String freeId in freeTextEditorFieldIds) {
-      DirectedGraph graph = DirectedGraph(graphData);
+      DirectedGraph graph = textLinksGraph;
       if (fromOutput) {
         graph.addEdges(fieldId, {freeId});
       } else {
@@ -141,21 +144,8 @@ class KnittingPattern {
     return linkIds;
   }
 
-  KnittingPattern removeTextField(String id) {
-    // TODO: if there is a link from or to another textfield, shouldn't we move the contents first??
-    return copyWith(
-      fields: fields.where((f) => f.id != id).toList(),
-      textFieldLinks: textFieldLinks.removeLinksForField(id),
-    );
-  }
-
   KnittingPattern addTextFieldLink(String fromId, String toId) {
     return copyWith(textFieldLinks: textFieldLinks.addLink(fromId, toId));
-  }
-
-  KnittingPattern removeTextFieldLink(TextFieldLink link) {
-    // TODO: should copy contents?
-    return copyWith(textFieldLinks: textFieldLinks.removeLink(link));
   }
 
   List<Color> get knownColours {

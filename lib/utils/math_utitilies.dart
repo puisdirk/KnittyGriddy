@@ -14,12 +14,20 @@ class MathUtitilies {
     return (pi / 180) * degrees;
   }
 
-  static Size textSize(String text, TextStyle style, {int maxLines = 1, double minWidth = 0, double maxWidth = double.infinity,}) {
+  static Size textSize(String text, TextStyle style, {int? maxLines = 1, double minWidth = 0, double maxWidth = double.infinity, TextAlign textAlign = TextAlign.start}) {
     final TextPainter textPainter = TextPainter(
-        text: TextSpan(text: text, style: style), maxLines: maxLines, textDirection: TextDirection.ltr
+        text: TextSpan(
+          text: text, 
+          style: style, 
+        ), 
+        maxLines: maxLines, 
+        textDirection: TextDirection.ltr, 
+        textAlign: textAlign,
     )
     ..layout(minWidth: minWidth, maxWidth: maxWidth,);
-    return textPainter.size;
+    Size textSize = textPainter.size;
+    textPainter.dispose();
+    return textSize;
   }
 
   static double distance(Offset p1, Offset p2) =>
