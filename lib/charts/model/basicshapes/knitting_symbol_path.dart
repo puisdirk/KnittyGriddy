@@ -6,6 +6,7 @@ import 'package:knitty_griddy/charts/model/basicshapes/stateless_text_entry_cont
 import 'package:knitty_griddy/charts/model/knitting_symbol.dart';
 import 'package:knitty_griddy/charts/model/knitting_symbol_part.dart';
 import 'package:knitty_griddy/charts/stitchrepo/stitch_definition.dart';
+import 'package:knitty_griddy/utils/color_utilities.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 import 'package:path_drawing/path_drawing.dart';
 
@@ -97,9 +98,9 @@ class KnittingSymbolPath extends KnittingSymbolPart {
   String toSvg(Color symbolColor) {
     String svg = '<path d="$path" ';
     if (filled) {
-      svg += 'fill="rgb(${symbolColor.red}, ${symbolColor.green}, ${symbolColor.blue})" fill-opacity="${symbolColor.alpha}" ';
+      svg += 'fill="${ColorUtilities.colorToSvhHex(symbolColor)}" ${ColorUtilities.fillOpacity(symbolColor)} ';
     } else {
-      svg += 'fill="none" stroke="rgb(${symbolColor.red}, ${symbolColor.green}, ${symbolColor.blue})" stroke-width="$strokeWidth" stroke-opacity="${symbolColor.alpha}" ';
+      svg += 'fill="none" stroke="${ColorUtilities.colorToSvhHex(symbolColor)}" stroke-width="$strokeWidth" ${ColorUtilities.strokeOpacity(symbolColor)} ';
     }
 
     svg += '/>';

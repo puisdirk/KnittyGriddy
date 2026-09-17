@@ -5,6 +5,7 @@ import 'package:fleather/fleather.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:id_gen/id_gen.dart';
+import 'package:knitty_griddy/patterns/mainview/export/export_pattern_page.dart';
 import 'package:knitty_griddy/patterns/mainview/field_controls/pattern_field_control.dart';
 import 'package:knitty_griddy/patterns/mainview/fieldtoolbars/pattern_chart_field_toolbar.dart';
 import 'package:knitty_griddy/patterns/mainview/fieldtoolbars/pattern_drawing_field_toolbar.dart';
@@ -401,10 +402,8 @@ class _PatternPageState extends State<PatternPage> {
               textAlign: lineAlign,
             ).height;
 
-            VerticalSpacing spacing = FleatherFontStyle.spacingForParchmentStyle(lineNode!.style);
+            VerticalSpacing spacing = FleatherFontStyle.spacingForParchmentStyle(lineNode.style);
             lineHeight += spacing.top + spacing.bottom;
-
-            print('lineHeight $lineHeight. Remaining $remainingHeight');
 
             if (lineHeight < remainingHeight) {
               fieldDelta = lineNode.toDelta().compose(fieldDelta);
@@ -521,11 +520,9 @@ class _PatternPageState extends State<PatternPage> {
             message: 'Export',
             child: IconButton(
               icon: const Icon(Icons.ios_share),
-              onPressed: () async => {
-                await Provider.of<PatternsModel>(context, listen: false).exportPattern()
-              }/* Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const ExportPage())
-              )*/,
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => ExportPatternPage(pattern: stateKnittingPattern))
+              ),
             ),
           ),
           hspacing,

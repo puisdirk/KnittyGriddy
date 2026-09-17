@@ -42,11 +42,11 @@ class ColorUtilities {
   }
 
   static String fillOpacity(ui.Color color) {
-    return color.alpha == 255 ? '' : 'fill-opacity="${color.alpha}"';
+    return color.alpha == 0 ? 'fill-opacity="0"' : 'fill-opacity="${color.alpha / 255}"';
   }
 
   static String strokeOpacity(ui.Color color) {
-    return color.alpha == 255 ? '' : 'stroke-opacity="${color.alpha / 255}"';
+    return color.alpha == 0 ? 'stroke-opacity="0"' : 'stroke-opacity="${color.alpha / 255}"';
   }
 
 }

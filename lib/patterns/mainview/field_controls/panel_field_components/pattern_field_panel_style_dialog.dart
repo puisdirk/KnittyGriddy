@@ -170,7 +170,7 @@ class _PatternFieldPanelStyleDialogState extends State<PatternFieldPanelStyleDia
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text('Max. Width'),
+                      const Text('Width'),
                       hspacing,
                       SizedBox(
                         width: 160,
@@ -183,7 +183,7 @@ class _PatternFieldPanelStyleDialogState extends State<PatternFieldPanelStyleDia
                       ),
                       hspacing,
                       hspacing,
-                      const Text('Max. Height'),
+                      const Text('Height'),
                       hspacing,
                       SizedBox(
                         width: 160,

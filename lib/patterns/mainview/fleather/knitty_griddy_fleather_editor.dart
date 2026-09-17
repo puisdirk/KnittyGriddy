@@ -5,12 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:knitty_griddy/charts/stitchrepo/stitch_definition.dart';
 import 'package:knitty_griddy/patterns/mainview/fleather/styled_stitch_icon.dart';
 import 'package:knitty_griddy/patterns/model/fields/pattern_text_editor_field.dart';
-import 'package:knitty_griddy/patterns/model/knitting_pattern.dart';
 
 import 'package:knitty_griddy/patterns/mainview/fleather/fleather_theme_data_ext.dart';
 
 class KnittyGriddyFleatherEditor extends StatefulWidget {
-  final KnittingPattern knittingPattern;
   final PatternTextEditorField field;
   final FleatherController fleatherController;
   final GlobalKey<EditorState>? editorKey;
@@ -20,7 +18,6 @@ class KnittyGriddyFleatherEditor extends StatefulWidget {
   final void Function() onSelect;
 
   const KnittyGriddyFleatherEditor({
-    required this.knittingPattern,
     required this.field,
     required this.fleatherController,
     this.editorKey,
@@ -108,6 +105,7 @@ class _KnittyGriddyFleatherEditorState extends State<KnittyGriddyFleatherEditor>
                 bottom: 5
               ),
               controller: widget.fleatherController,
+              scrollController: _scrollController,
               decoration: const InputDecoration(border: InputBorder.none),
             )
             :

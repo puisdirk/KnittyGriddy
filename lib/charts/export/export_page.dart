@@ -1,8 +1,8 @@
 import 'dart:typed_data';
 
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:knitty_griddy/charts/export/knitting_chart_svg_service.dart';
 import 'package:knitty_griddy/charts/export/knitting_chart_view_settings.dart';
 import 'dart:ui' as ui;
 import 'package:knitty_griddy/charts/export/export_toolbar.dart';
@@ -10,8 +10,8 @@ import 'package:knitty_griddy/charts/export/preview_legend.dart';
 import 'package:knitty_griddy/charts/model/chart_operation_exception.dart';
 import 'package:knitty_griddy/charts/model/charts_model.dart';
 import 'package:knitty_griddy/charts/model/knitting_chart.dart';
+import 'package:knitty_griddy/common/file_system.dart';
 import 'package:knitty_griddy/patterns/mainview/field_controls/chartfieldcomponents/chart_field_grid.dart';
-import 'package:knitty_griddy/utils/svg_service.dart';
 import 'package:provider/provider.dart';
 
 class ExportPage extends StatefulWidget {
@@ -33,7 +33,7 @@ class _ExportPageState extends State<ExportPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Export'),
+        title: Text('Export - ${chart.name}'),
         backgroundColor: Colors.grey.shade300,
         bottom: PreferredSize(
           preferredSize: const Size(20000, toolbarHeight), 
@@ -70,14 +70,13 @@ class _ExportPageState extends State<ExportPage> {
                 if (context.mounted) {
                   chartname = Provider.of<ChartsModel>(context, listen: false).knittingChart.name;
                 }
-                await FilePicker.platform.saveFile(
-                    dialogTitle: 'Where do you want to store the output?',
-                    fileName: '$chartname.png',
-                    bytes: pngBytes,
-                  );
+                await FileSystem.saveFile(
+                  prompt: 'Where do you want to store the output?',
+                  filename: '$chartname.png',
+                  bytes: pngBytes);
             },
             exportToSVG: () async {
-              Size legendSize = Size.zero;
+/*              Size legendSize = Size.zero;
               if (exportSettings.showLegend) {
                 RenderRepaintBoundary legendBoundary = legendBoundaryKey.currentContext!.findRenderObject()! as RenderRepaintBoundary;
                 legendSize = legendBoundary.size;
@@ -89,7 +88,13 @@ class _ExportPageState extends State<ExportPage> {
                 Provider.of<ChartsModel>(context, listen: false).knittingChart.pruneUnusedStitchesAndColours(), 
                 exportSettings, 
                 drawingSize, legendSize
+              );*/
+
+              KnittingChartSvgService svgService = KnittingChartSvgService(
+                chart: chart.pruneUnusedStitchesAndColours(), 
+                viewSettings: exportSettings
               );
+              await svgService.exportKnittingChartToSVG();
             }
           ),
         ),
@@ -104,7 +109,7 @@ class _ExportPageState extends State<ExportPage> {
             child: exportSettings.showLegend == false ?
               Visibility(
                 visible: exportSettings.showGrid,
-                child: ChartFieldGrid(chart: chart, showNoStichCells: exportSettings.showNoStichCells),// const PreviewStitchesGrid()
+                child: ChartFieldGrid(chart: chart, showNoStichCells: exportSettings.showNoStichCells),
               ) :
               exportSettings.legendHorizontal ?
                 Column(

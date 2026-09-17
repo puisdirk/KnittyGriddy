@@ -22,7 +22,11 @@ class InsertStitchSymbolEmbedButton extends StatelessWidget {
       icon: icon,
       fillColor: Theme.of(context).canvasColor,
       onPressed: () async {
-        StitchDefinition? stitchDefinition = await showDialog(context: context, builder: (context) => const StitchiconChooserDialog(),);
+        StitchDefinition? stitchDefinition = await showDialog(
+          barrierDismissible: false,
+          context: context, 
+          builder: (context) => const StitchiconChooserDialog(),
+        );
         if (stitchDefinition != null) {
           // Get snapshot of the style
           ParchmentStyle style = controller.getSelectionStyle();

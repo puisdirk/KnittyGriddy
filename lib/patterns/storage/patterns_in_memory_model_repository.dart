@@ -1,7 +1,7 @@
 
 import 'dart:convert';
 
-import 'package:file_picker/file_picker.dart';
+import 'package:knitty_griddy/common/file_system.dart';
 import 'package:knitty_griddy/patterns/model/knitting_pattern.dart';
 import 'package:knitty_griddy/patterns/model/knitting_pattern_info.dart';
 import 'package:knitty_griddy/patterns/model/pattern_operation_exception.dart';
@@ -46,9 +46,9 @@ class PatternsInMemoryModelRepository implements PatternsModelRepository {
     Map<String, Object> jsonObject = pattern.toJson();
     try {
       String jsonString = jsonEncode(jsonObject);
-      await FilePicker.platform.saveFile(
-        dialogTitle: 'Where do you want to store the output?',
-        fileName: '${pattern.name}.kgp',
+      await FileSystem.saveFile(
+        prompt: 'Please select an output file',
+        filename: '${pattern.name}.kgp',
         bytes: utf8.encode(jsonString),
       );
     } catch (e) {
@@ -58,15 +58,17 @@ class PatternsInMemoryModelRepository implements PatternsModelRepository {
 
   @override
   Future<KnittingPattern?> importPattern() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      dialogTitle: 'Load a pattern (kgp)',
-      allowMultiple: false,
-      withData: true,
-    );
+    PickFileResult result = await FileSystem.pickFile(
+      prompt: 'Load pattern (.kgp)', 
+      extensions: ['kgp']);
 
-    if (result != null && result.files.isNotEmpty) {
+    if (result.resultType == PickFileResultType.incorrectExtension) {
+      throw PatternOperationException(message: '${result.filename} is not a pattern (.kgp)');
+    }
+
+    if (result.resultType == PickFileResultType.success) {
       try {
-        String jsonString = utf8.decode(result.files.first.bytes!);
+        String jsonString = utf8.decode(result.data!);
         Map<String, dynamic> jsonObject = jsonDecode(jsonString);
         KnittingPattern pattern = KnittingPattern.fromJson(jsonObject);
         return pattern;

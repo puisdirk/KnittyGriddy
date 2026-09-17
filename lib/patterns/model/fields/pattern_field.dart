@@ -60,6 +60,14 @@ abstract class PatternField {
   bool get fixedAspectRatio => true;
   double get minimumHeight => 100;
   double get minimumWidth => 100;
+
+  Rect get contentRect => Rect.fromLTWH(positionX + contentLeft, positionY + contentTop, contentWidth, contentHeight);
+
+  double get contentLeft => leftpadding + contentOffsetX;
+  double get contentTop => contentOffsetY;
+  double get contentWidth => width - (2 * padding);
+  double get contentHeight => height - bottompadding;
+
   double get padding => kResizerShortSide;
   double get leftpadding => kResizerShortSide;
   double get bottompadding => kResizerShortSide;

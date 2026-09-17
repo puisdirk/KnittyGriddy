@@ -104,13 +104,19 @@ class KnittingSymbol {
   }
 
   String toSvg(Color symbolColor) {
-    String svg = '<g class="symbol" transform-origin="${stitchCellWidth / 2} ${stitchCellHeight / 2}" transform="translate(${translation.dx}, ${translation.dy}) scale(${scale.dx}, ${scale.dy}) rotate(${MathUtitilies.toDegrees(rotationRad)})">';
+    String svg = '<g class="symbol">';
+    svg += '<g class="symboltranslate" transform="translate(${translation.dx}, ${translation.dy})">';
+    svg += '<g class="symbolscale" transform="translate(${stitchCellWidth / 2}, ${stitchCellHeight / 2}) scale(${scale.dx}, ${scale.dy}) translate(-${stitchCellWidth / 2}, -${stitchCellHeight / 2})">';
+    svg += '<g class="symbolrotate" transform="rotate(${MathUtitilies.toDegrees(rotationRad)} ${stitchCellWidth / 2} ${stitchCellHeight / 2})">';
     for (KnittingSymbolPart part in parts) {
-      svg += '<g class="symbolpart" transform-origin="${stitchCellWidth / 2} ${stitchCellHeight / 2}" transform="translate(${part.translation.dx}, ${part.translation.dy}) scale(${part.scale.dx}, ${part.scale.dy}) rotate(${MathUtitilies.toDegrees(part.rotationRad)})">';
+      svg += '<g class="symbolpart">';
+      svg += '<g class="symbolparttranslate" transform="translate(${part.translation.dx}, ${part.translation.dy})">';
+      svg += '<g class="symbolpartscale" transform="translate(${stitchCellWidth / 2}, ${stitchCellHeight / 2}) scale(${part.scale.dx}, ${part.scale.dy}) translate(-${stitchCellWidth / 2}, -${stitchCellHeight / 2})">';
+      svg += '<g class="symbolpartrotate" transform="rotate(${MathUtitilies.toDegrees(part.rotationRad)} ${stitchCellWidth / 2} ${stitchCellHeight / 2}) ">';
       svg += part.toSvg(symbolColor);
-      svg += '</g>';
+      svg += '</g></g></g></g>';
     }
-    svg += '</g>';
+    svg += '</g></g></g></g>';
 
     return svg;
   }
