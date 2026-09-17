@@ -9,6 +9,16 @@ class CellAddress implements Comparable<CellAddress> {
     required this.row,
   });
 
+  CellAddress copyWith({
+    int? column,
+    int? row,
+  }) {
+    return CellAddress(
+      column: column?? this.column, 
+      row: row?? this.row
+    );
+  }
+
   Map<String, Object> toJson() {
     return {
       'column': column,

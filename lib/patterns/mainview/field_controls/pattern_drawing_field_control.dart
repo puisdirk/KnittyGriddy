@@ -22,7 +22,7 @@ class PatternDrawingFieldControl extends StatelessWidget {
     if (drawing != null && !drawing.validated) {
       drawing = drawing.validate();
     }
-    Rect bbox = drawing == null ? Rect.zero : drawing!.getBoundingBox().inflate(20);
+    Rect bbox = drawing == null ? Rect.zero : drawing.getBoundingBox().inflate(20);
 
     return drawing == null ? GestureDetector(onTap: onSelect, child: Container(color: Colors.transparent,)) :
     GestureDetector(

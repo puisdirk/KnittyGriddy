@@ -29,10 +29,10 @@ class ArrowPainter {
 
     if (styleCommand.startArrow == ArrowType.circle) {
       Offset center = curvePath == null ? start : MathUtitilies.pointOnPathAtFraction(curvePath, 0);
-      return '<circle cx="${center.dx}" cy="${center.dy}" r="${arrowHeight / 2}" fill="${ColorUtilities.colorToSvhHex(styleCommand.color)}" ${ColorUtilities.fillOpacity(styleCommand.color)} ';
+      return '<circle cx="${center.dx}" cy="${center.dy}" r="${arrowHeight / 2}" fill="${ColorUtilities.colorToSvhHex(styleCommand.color)}" ${ColorUtilities.fillOpacity(styleCommand.color)} />';
     } else if (styleCommand.startArrow == ArrowType.hollowCircle) {
       Offset center = curvePath == null ? start : MathUtitilies.pointOnPathAtFraction(curvePath, 0);
-      return '<circle cx="${center.dx}" cy="${center.dy}" r="${arrowHeight / 2}" fill="none" stroke="${ColorUtilities.colorToSvhHex(styleCommand.color)}" ${ColorUtilities.strokeOpacity(styleCommand.color)}';
+      return '<circle cx="${center.dx}" cy="${center.dy}" r="${arrowHeight / 2}" fill="none" stroke="${ColorUtilities.colorToSvhHex(styleCommand.color)}" ${ColorUtilities.strokeOpacity(styleCommand.color)} />';
     } else if (styleCommand.startArrow != ArrowType.none) {
       Offset arrowPoint = curvePath == null ? start : 
         MathUtitilies.pointOnPathAtFraction(curvePath, 0);
@@ -80,10 +80,10 @@ class ArrowPainter {
 
     if (styleCommand.endArrow == ArrowType.circle) {
       Offset center = curvePath == null ? end : MathUtitilies.pointOnPathAtFraction(curvePath, 1);
-      return '<circle cx="${center.dx}" cy="${center.dy}" r="${arrowHeight / 2}" fill="${ColorUtilities.colorToSvhHex(styleCommand.color)}" ${ColorUtilities.fillOpacity(styleCommand.color)} ';
+      return '<circle cx="${center.dx}" cy="${center.dy}" r="${arrowHeight / 2}" fill="${ColorUtilities.colorToSvhHex(styleCommand.color)}" ${ColorUtilities.fillOpacity(styleCommand.color)} />';
     } else if (styleCommand.endArrow == ArrowType.hollowCircle) {
       Offset center = curvePath == null ? end : MathUtitilies.pointOnPathAtFraction(curvePath, 1);
-      return '<circle cx="${center.dx}" cy="${center.dy}" r="${arrowHeight / 2}" stroke="${ColorUtilities.colorToSvhHex(styleCommand.color)}" ${ColorUtilities.strokeOpacity(styleCommand.color)} ';
+      return '<circle cx="${center.dx}" cy="${center.dy}" r="${arrowHeight / 2}" stroke="${ColorUtilities.colorToSvhHex(styleCommand.color)}" ${ColorUtilities.strokeOpacity(styleCommand.color)} />';
     } else if (styleCommand.endArrow != ArrowType.none) {
       Offset arrowPoint = curvePath == null ? end : 
         MathUtitilies.pointOnPathAtFraction(curvePath, 1);

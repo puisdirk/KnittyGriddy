@@ -5,6 +5,7 @@ import 'package:flutter_spinbox/material.dart';
 import 'package:knitty_griddy/charts/model/knitting_symbol.dart';
 import 'package:knitty_griddy/charts/model/knitting_symbol_part.dart';
 import 'package:knitty_griddy/charts/stitchrepo/stitch_definition.dart';
+import 'package:knitty_griddy/utils/color_utilities.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 
 const String knittingSymbolCurveType = 'curve';
@@ -155,9 +156,9 @@ class KnittingSymbolCurve extends KnittingSymbolPart {
     String svg = '<path d="M${middle.dx - (length / 2)},${middle.dy}Q${middle.dx + slant},${middle.dy + amplitude}, ${middle.dx + (length / 2)}, ${middle.dy}${closed ? 'z' : ''}" ';
 
     if (filled) {
-      svg += 'fill="rgb(${symbolColor.red}, ${symbolColor.green}, ${symbolColor.blue})" fill-opacity="${symbolColor.alpha}" ';
+      svg += 'fill="${ColorUtilities.colorToSvhHex(symbolColor)}" ${ColorUtilities.fillOpacity(symbolColor)} ';
     } else {
-      svg += 'fill="none" stroke="rgb(${symbolColor.red}, ${symbolColor.green}, ${symbolColor.blue})" stroke-width="$strokeWidth" stroke-opacity="${symbolColor.alpha}" ';
+      svg += 'fill="none" stroke="${ColorUtilities.colorToSvhHex(symbolColor)}" stroke-width="$strokeWidth" ${ColorUtilities.strokeOpacity(symbolColor)} ';
     }
 
     svg += '/>';

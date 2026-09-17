@@ -132,8 +132,8 @@ class PatternsModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> exportPattern() async {
-    await _repository.exportPattern(_patternsModelObject.pattern);
+  Future<void> exportPattern(KnittingPattern pattern) async {
+    await _repository.exportPattern(pattern);
   }
 
   Future<KnittingPattern?> importPattern() async {

@@ -58,7 +58,7 @@ class PatternPageLayout {
     );
   }
 
-  Size getDimensionsInMM() {
+  Size getPageDimensionInMM() {
     switch (pageSize) {
       case PageSize.a5:
         return pageOrientation == PageOrientation.portrait ? const Size(148, 210) : const Size(210, 148);
@@ -81,8 +81,8 @@ class PatternPageLayout {
   static const double maxPageWidth = 594;
   static const double maxPageHeight = PatternPageLayout.maxPageWidth;
 
-  double get pageheight => getDimensionsInMM().height * pixelsPerMM;
-  double get pagewidth => getDimensionsInMM().width * pixelsPerMM;
+  double get pageheight => getPageDimensionInMM().height * pixelsPerMM;
+  double get pagewidth => getPageDimensionInMM().width * pixelsPerMM;
   Size get dimensions => Size(pagewidth, pageheight * numberOfPages);
 
   @override

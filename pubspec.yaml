@@ -41,7 +41,8 @@ dependencies:
   material_color_utilities: 0.11.1
 #  material_color_utilities: 0.13.0
   xml: ^6.5.0
-  file_picker: ^10.3.10
+#  file_picker: ^10.3.10
+  file_selector: ^1.0.3
   image_picker: ^1.1.2
   archive: ^4.0.9
   path_drawing: ^1.0.1
@@ -66,6 +67,7 @@ dependencies:
   google_fonts: 6.3.0
   image_size_getter: ^2.3.0
   flutter_popup: ^3.3.9
+  pdf: ^3.11.3
 
 dev_dependencies:
   flutter_test:

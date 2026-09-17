@@ -22,9 +22,14 @@ class PatternChartFieldControl extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return chart == null ? GestureDetector(onTap: onSelect, child: Container(color: Colors.transparent,)) :
-      GestureDetector(
-        onTap: onSelect,
+    if (chart == null) {
+      return GestureDetector(onTap: onSelect, child: Container(color: Colors.transparent,));
+    }
+    KnittingChart prunedChart = chart!.pruneUnusedStitchesAndColours();
+    return GestureDetector(
+      onTap: onSelect,
+      child: Container(
+        color: Colors.transparent,
         child: Padding(
           padding: const EdgeInsets.all(20.0),
           child: Opacity(
@@ -33,37 +38,38 @@ class PatternChartFieldControl extends StatelessWidget {
               child: viewSettings.showLegend == false ?
                 Visibility(
                   visible: viewSettings.showGrid,
-                  child: ChartFieldGrid(chart: chart!, showNoStichCells: viewSettings.showNoStichCells,)
+                  child: ChartFieldGrid(chart: prunedChart, showNoStichCells: viewSettings.showNoStichCells,)
                 ) :
                 viewSettings.legendHorizontal ?
                   Column(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       if (viewSettings.legendPosition == LegendPosition.top)
-                        ChartFieldPreviewLegend(chart: chart!, exportSettings: viewSettings,),
+                        ChartFieldPreviewLegend(chart: prunedChart, exportSettings: viewSettings,),
                       Visibility(
                         visible: viewSettings.showGrid,
-                        child: ChartFieldGrid(chart: chart!, showNoStichCells: viewSettings.showNoStichCells)
+                        child: ChartFieldGrid(chart: prunedChart, showNoStichCells: viewSettings.showNoStichCells)
                       ),
                       if (viewSettings.legendPosition == LegendPosition.bottom)
-                        ChartFieldPreviewLegend(chart: chart!, exportSettings: viewSettings,)
+                        ChartFieldPreviewLegend(chart: prunedChart, exportSettings: viewSettings,)
                     ],
                   ) :
                   Row(
                     children: [
                       if (viewSettings.legendPosition == LegendPosition.left)
-                        ChartFieldPreviewLegend(chart: chart!, exportSettings: viewSettings,),
+                        ChartFieldPreviewLegend(chart: prunedChart, exportSettings: viewSettings,),
                       Visibility(
                         visible: viewSettings.showGrid,
-                        child: ChartFieldGrid(chart: chart!, showNoStichCells: viewSettings.showNoStichCells)
+                        child: ChartFieldGrid(chart: prunedChart, showNoStichCells: viewSettings.showNoStichCells)
                       ),
                       if (viewSettings.legendPosition == LegendPosition.right)
-                        ChartFieldPreviewLegend(chart: chart!, exportSettings: viewSettings,),
+                        ChartFieldPreviewLegend(chart: prunedChart, exportSettings: viewSettings,),
                     ],
                   ),
             ),
           ),
         ),
-      );
+      ),
+    );
   }
 }

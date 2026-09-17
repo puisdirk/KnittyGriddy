@@ -61,13 +61,13 @@ class _TextEditorFieldOutlineState extends State<TextEditorFieldOutline> {
             child: Stack(
               children: [
                 Positioned(
-                  left: widget.field.leftpadding + widget.field.contentOffsetX,
-                  top: widget.field.contentOffsetY,
+                  left: widget.field.contentLeft,
+                  top: widget.field.contentTop,
                   child: Opacity(
                     opacity: .2,
                     child: SizedBox(
-                      width: widget.field.width - (2 * widget.field.padding),
-                      height: widget.field.height - widget.field.bottompadding,
+                      width: widget.field.contentWidth,
+                      height: widget.field.contentHeight,
                       child: FleatherField(
                         embedBuilder: _embedBuilder,
                         readOnly: true,

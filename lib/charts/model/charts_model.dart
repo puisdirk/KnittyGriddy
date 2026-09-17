@@ -612,13 +612,18 @@ class ChartsModel extends ChangeNotifier {
 
   // ********************************************* Edit grid *****************************************
 
-  void insertColumn(int beforeColumn) {
+  void insertColumn(int newColumn) {
     // Find multi-column stitches that will get broken
-    List<StitchCell> brokenStitches = _chartsModelObject.knittingChart.stitches.where((stitch) =>
-      StitchRepository.getStitchDefinitionById(stitch.stitchDefinitionId).columns > 1 && 
-      beforeColumn > stitch.column - (stitch.stitchDefinitionColumn - 1) && 
-      beforeColumn < (stitch.column - (stitch.stitchDefinitionColumn - 1)) + StitchRepository.getStitchDefinitionById(stitch.stitchDefinitionId).columns
-    ).toList();
+    List<StitchCell> brokenStitches = _chartsModelObject.knittingChart.stitches.where((stitchcell) {
+      StitchDefinition def = StitchRepository.getStitchDefinitionById(stitchcell.stitchDefinitionId);
+      if (def.columns == 1) return false;
+      int stitchStart = stitchcell.column - stitchcell.stitchDefinitionColumn;
+      int stitchEnd = stitchStart + def.columns - 1;
+      if (newColumn > stitchStart && newColumn <= stitchEnd) {
+        return true;
+      }
+      return false;
+    }).toList();
 
     // Clear these broken stitches
     _chartsModelObject = _chartsModelObject.copyWith(
@@ -626,7 +631,6 @@ class ChartsModel extends ChangeNotifier {
         stitches: _chartsModelObject.knittingChart.stitches.map((stitch) => 
           brokenStitches.contains(stitch) ? stitch.copyWith(
             stitchDefinitionId: BasicStitchesSet.noStitch.id, stitchDefinitionColumn: 0) : stitch
-//            stitchDefinitionId: BasicStitchesSet.noStitch.id, stitchDefinitionColumn: 1) : stitch
         ).toList()
       )
     );
@@ -638,7 +642,7 @@ class ChartsModel extends ChangeNotifier {
           columns: _chartsModelObject.knittingChart.chartSettings.columns + 1,
         ),
         stitches: _chartsModelObject.knittingChart.stitches.map((stitch) =>
-          stitch.column < beforeColumn ? 
+          stitch.column < newColumn ? 
             stitch : 
             stitch.copyWith(column: stitch.column + 1)
         ).toList(),
@@ -653,7 +657,7 @@ class ChartsModel extends ChangeNotifier {
       (idx) =>
         StitchCell(
           row: idx, 
-          column: beforeColumn, 
+          column: newColumn, 
           stitchDefinitionId: BasicStitchesSet.noStitch.id, 
           colour: _chartsModelObject.knittingChart.mainColour
         )
@@ -702,11 +706,16 @@ class ChartsModel extends ChangeNotifier {
 
   void deleteColumn(int column) {
     // Find multi-column stitches that will get broken
-    List<StitchCell> brokenStitches = _chartsModelObject.knittingChart.stitches.where((stitch) =>
-      StitchRepository.getStitchDefinitionById(stitch.stitchDefinitionId).columns > 1 && 
-      column >= stitch.column - (stitch.stitchDefinitionColumn - 1) && 
-      column < (stitch.column - (stitch.stitchDefinitionColumn - 1)) + StitchRepository.getStitchDefinitionById(stitch.stitchDefinitionId).columns
-    ).toList();
+    List<StitchCell> brokenStitches = _chartsModelObject.knittingChart.stitches.where((stitchcell) {
+      StitchDefinition def = StitchRepository.getStitchDefinitionById(stitchcell.stitchDefinitionId);
+      if (def.columns == 1) return false;
+      int stitchStart = stitchcell.column - stitchcell.stitchDefinitionColumn;
+      int stitchEnd = stitchStart + def.columns - 1;
+      if (column >= stitchStart && column <= stitchEnd) {
+        return true;
+      }
+      return false;
+    }).toList();
 
     // Clear these broken stitches
     _chartsModelObject = _chartsModelObject.copyWith(
@@ -714,18 +723,19 @@ class ChartsModel extends ChangeNotifier {
         stitches: _chartsModelObject.knittingChart.stitches.map((stitch) => 
           brokenStitches.contains(stitch) ? stitch.copyWith(
             stitchDefinitionId: BasicStitchesSet.noStitch.id, stitchDefinitionColumn: 0) : stitch
-//            stitchDefinitionId: BasicStitchesSet.noStitch.id, stitchDefinitionColumn: 1) : stitch
         ).toList()
       )
     );
 
-    // Remove the column stitches
+    // Remove the column stitches and outline addresses
     _chartsModelObject = _chartsModelObject.copyWith(
       knittingChart: _chartsModelObject.knittingChart.copyWith(
-        stitches: _chartsModelObject.knittingChart.stitches.where((stitch) => stitch.column != column).toList()
+        stitches: _chartsModelObject.knittingChart.stitches.where((stitch) => stitch.column != column).toList(),
+        outline: _chartsModelObject.knittingChart.outline.where((cell) => cell.column != column).toSet(),
       )
     );
 
+    // Apply chartsettings + set column of stitches beyond the deleted column + apply to outline
     _chartsModelObject = _chartsModelObject.copyWith(
       knittingChart: _chartsModelObject.knittingChart.copyWith(
         chartSettings: _chartsModelObject.knittingChart.chartSettings.copyWith(
@@ -736,7 +746,12 @@ class ChartsModel extends ChangeNotifier {
             stitch.copyWith(column: stitch.column - 1) :
             stitch
         ).toList(),
-        selection: emptySelection
+        selection: emptySelection,
+        outline: _chartsModelObject.knittingChart.outline.map((c) =>
+          c.column > column ?
+            c.copyWith(column: c.column - 1) :
+            c
+          ).toSet(),
       )
     );
 
@@ -745,13 +760,15 @@ class ChartsModel extends ChangeNotifier {
   }
 
   void deleteRow(int row) {
-    // Remove the stitches
+    // Remove the stitches and outline cells
     _chartsModelObject = _chartsModelObject.copyWith(
       knittingChart: _chartsModelObject.knittingChart.copyWith(
-        stitches: _chartsModelObject.knittingChart.stitches.where((stitch) => stitch.row != row).toList()
+        stitches: _chartsModelObject.knittingChart.stitches.where((stitch) => stitch.row != row).toList(),
+        outline: _chartsModelObject.knittingChart.outline.where((cell) => cell.row != row).toSet(),
       )
     );
 
+    // Apply chartsettings + set row of stitches beyond the deleted row + apply to outline
     _chartsModelObject = _chartsModelObject.copyWith(
       knittingChart: _chartsModelObject.knittingChart.copyWith(
         chartSettings: _chartsModelObject.knittingChart.chartSettings.copyWith(
@@ -762,7 +779,12 @@ class ChartsModel extends ChangeNotifier {
             row: stitch.row - 1
           )
         ).toList(),
-        selection: emptySelection
+        selection: emptySelection,
+        outline: _chartsModelObject.knittingChart.outline.map((c) =>
+          c.row > row ?
+            c.copyWith(row: c.row - 1) :
+            c
+        ).toSet(),
       )
     );
 

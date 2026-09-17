@@ -1,6 +1,5 @@
-
-import 'dart:ui';
-
+import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:knitty_griddy/patterns/model/fields/pattern_field.dart';
 import 'package:knitty_griddy/patterns/model/fields/pattern_panel_field_style.dart';
 

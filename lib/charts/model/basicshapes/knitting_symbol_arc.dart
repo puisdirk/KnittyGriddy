@@ -4,6 +4,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_spinbox/material.dart';
+import 'package:knitty_griddy/utils/color_utilities.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 import 'package:knitty_griddy/utils/math_utitilies.dart';
 import 'package:knitty_griddy/charts/model/knitting_symbol.dart';
@@ -169,9 +170,9 @@ class KnittingSymbolArc extends KnittingSymbolPart {
     svg += '" ';
 
     if (filled) {
-      svg += 'fill="rgb(${symbolColor.red}, ${symbolColor.green}, ${symbolColor.blue})" fill-opacity="${symbolColor.alpha}" ';
+      svg += 'fill="${ColorUtilities.colorToSvhHex(symbolColor)}" ${ColorUtilities.fillOpacity(symbolColor)} ';
     } else {
-      svg += 'fill="none" stroke="rgb(${symbolColor.red}, ${symbolColor.green}, ${symbolColor.blue})" stroke-width="$strokeWidth" stroke-opacity="${symbolColor.alpha}" ';
+      svg += 'fill="none" stroke="${ColorUtilities.colorToSvhHex(symbolColor)}" stroke-width="$strokeWidth" ${ColorUtilities.strokeOpacity(symbolColor)} ';
     }
 
     svg += '/>';

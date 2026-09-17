@@ -1,7 +1,7 @@
 
 import 'dart:convert';
 
-import 'package:file_picker/file_picker.dart';
+import 'package:knitty_griddy/common/file_system.dart';
 import 'package:knitty_griddy/drawings/model/drawing.dart';
 import 'package:knitty_griddy/drawings/model/drawing_info.dart';
 import 'package:knitty_griddy/drawings/model/drawing_operation_exception.dart';
@@ -48,9 +48,9 @@ class DrawingsInMemoryModelRepository implements DrawingsModelRepository {
     Map<String, Object> jsonObject = drawing.toJson();
     try {
       String jsonString = jsonEncode(jsonObject);
-      await FilePicker.platform.saveFile(
-        dialogTitle: 'Where do you want to store the output?',
-        fileName: '${drawing.name}.kgd',
+      await FileSystem.saveFile(
+        prompt: 'Where do you want to store the output?',
+        filename: '${drawing.name}.kgd',
         bytes: utf8.encode(jsonString),
       );
     } catch (e) {
@@ -60,19 +60,17 @@ class DrawingsInMemoryModelRepository implements DrawingsModelRepository {
 
   @override
   Future<Drawing?> importDrawing() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      dialogTitle: 'Load a drawing (kgd)',
-      allowMultiple: false,
-      withData: true,
-    );
+    PickFileResult result = await FileSystem.pickFile(
+      prompt: 'Load a drawing (.kgd)', 
+      extensions: ['kgd']);
 
-    if (result != null && result.files.isNotEmpty) {
-      if (result.files.first.extension != 'kgd') {
-        throw DrawingOperationException(message: '${result.files.first.name} is not a drawing (.kgd)');
-      }
+    if (result.resultType == PickFileResultType.incorrectExtension) {
+      throw DrawingOperationException(message: '${result.filename} is not a drawing (.kgd)');
+    }
 
+    if (result.resultType == PickFileResultType.success) {
       try {
-        String jsonString = utf8.decode(result.files.first.bytes!);
+        String jsonString = utf8.decode(result.data!);
         Map<String, dynamic> jsonObject = jsonDecode(jsonString);
         Drawing drawing = Drawing.fromJson(jsonObject);
         return drawing;
@@ -89,9 +87,9 @@ class DrawingsInMemoryModelRepository implements DrawingsModelRepository {
     Map<String, Object> jsonObject = partDrawing.toJson();
     try {
       String jsonString = jsonEncode(jsonObject);
-      await FilePicker.platform.saveFile(
-        dialogTitle: 'Where do you want to store the output?',
-        fileName: '${partDrawing.name}.kpd',
+      await FileSystem.saveFile(
+        prompt: 'Where do you want to store the output?',
+        filename: '${partDrawing.name}.kpd',
         bytes: utf8.encode(jsonString),
       );
     } catch (e) {
@@ -101,21 +99,20 @@ class DrawingsInMemoryModelRepository implements DrawingsModelRepository {
 
   @override
   Future<PartDrawing?> importPartDrawing() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      dialogTitle: 'Load a drawing (kpd)',
-      allowMultiple: false,
-      withData: true,
-    );
+    PickFileResult result = await FileSystem.pickFile(
+      prompt: 'Load a part drawing (.kpd)', 
+      extensions: ['kpd']);
 
-    if (result != null && result.files.isNotEmpty) {
-      if (result.files.first.extension != 'kpd') {
-        throw DrawingOperationException(message: '${result.files.first.name} is not a part drawing (.kpd)');
-      }
+    if (result.resultType == PickFileResultType.incorrectExtension) {
+      throw DrawingOperationException(message: '${result.filename} is not a part drawing (.kpd)');
+    }
+
+    if (result.resultType == PickFileResultType.success) {
       try {
-        String jsonString = utf8.decode(result.files.first.bytes!);
+        String jsonString = utf8.decode(result.data!);
         Map<String, dynamic> jsonObject = jsonDecode(jsonString);
-        PartDrawing partdrawing = PartDrawing.fromJson(jsonObject);
-        return partdrawing;
+        PartDrawing partDrawing = PartDrawing.fromJson(jsonObject);
+        return partDrawing;
       } catch (e) {
         throw DrawingOperationException(message: 'Error while importing part drawing: $e');
       }
@@ -141,9 +138,9 @@ class DrawingsInMemoryModelRepository implements DrawingsModelRepository {
     try {
       String jsonString = jsonEncode(jsonObject);
 
-      await FilePicker.platform.saveFile(
-        dialogTitle: 'Where do you want to store the output?',
-        fileName: '${partSet.name}.kps',
+      await FileSystem.saveFile(
+        prompt: 'Where do you want to store the output?',
+        filename: '${partSet.name}.kps',
         bytes: utf8.encode(jsonString),
       );
     } catch(e) {
@@ -153,20 +150,17 @@ class DrawingsInMemoryModelRepository implements DrawingsModelRepository {
   
   @override
   Future<PartSet?> importPartSet() async {
-    // Doesn't seem to work on web?
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      dialogTitle: 'Load a part set (kps)',
-      allowMultiple: false,
-//      allowedExtensions: ['kps'],
-      withData: true
-    );
+    PickFileResult result = await FileSystem.pickFile(
+      prompt: 'Load a part set (.kps)', 
+      extensions: ['kps']);
 
-    if (result != null && result.files.isNotEmpty) {
-      if (result.files.first.extension != 'kps') {
-        throw DrawingOperationException(message: '${result.files.first.name} is not a part drawing set (.kps)');
-      }
+    if (result.resultType == PickFileResultType.incorrectExtension) {
+      throw DrawingOperationException(message: '${result.filename} is not a part set (.kps)');
+    }
+
+    if (result.resultType == PickFileResultType.success) {
       try {
-        String jsonString = utf8.decode(result.files.first.bytes!);
+        String jsonString = utf8.decode(result.data!);
         Map<String, dynamic> jsonObject = jsonDecode(jsonString);
         PartSet partSet = PartSet.fromJson(jsonObject);
         return partSet;

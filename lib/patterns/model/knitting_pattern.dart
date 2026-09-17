@@ -55,6 +55,17 @@ class KnittingPattern {
     );
   }
 
+  Iterable<PatternField> fieldsOnPage(int pageNumber) {
+    Rect pageRect = Rect.fromLTWH(
+      0, 
+      pageNumber * pageLayout.pageheight, 
+      pageLayout.pagewidth, 
+      pageLayout.pageheight
+    );
+
+    return fields.where((f) => f.contentRect.overlaps(pageRect));
+  }
+
   KnittingPattern adjustPositionsToLayout() {
     List<PatternField> newFields = [];
 

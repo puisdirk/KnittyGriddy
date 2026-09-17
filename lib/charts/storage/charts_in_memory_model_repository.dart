@@ -1,12 +1,12 @@
 
 import 'dart:convert';
 
-import 'package:file_picker/file_picker.dart';
 import 'package:knitty_griddy/charts/model/chart_operation_exception.dart';
 import 'package:knitty_griddy/charts/stitchrepo/stitch_set.dart';
 import 'package:knitty_griddy/charts/model/knitting_chart.dart';
 import 'package:knitty_griddy/charts/model/chart_info.dart';
 import 'package:knitty_griddy/charts/storage/charts_model_repository.dart';
+import 'package:knitty_griddy/common/file_system.dart';
 
 class ChartsInMemoryModelRepository implements ChartsModelRepository {
   List<KnittingChart> charts = [];
@@ -59,10 +59,10 @@ class ChartsInMemoryModelRepository implements ChartsModelRepository {
     try {
       String jsonString = jsonEncode(jsonObject);
 
-      await FilePicker.platform.saveFile(
-        dialogTitle: 'Where do you want to store the output?',
-        fileName: '${stitchSet.name}.sts',
-        bytes: utf8.encode(jsonString),
+      await FileSystem.saveFile(
+        prompt: 'Where do you want to store the output?',
+        filename: '${stitchSet.name}.sts',
+        bytes: utf8.encode(jsonString)
       );
     } catch(e) {
       throw ChartOperationException(message: 'Error while exporting StitchesSet: $e');
@@ -71,26 +71,22 @@ class ChartsInMemoryModelRepository implements ChartsModelRepository {
   
   @override
   Future<StitchSet?> importStitchesSet() async {
-    // Doesn't seem to work on web?
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      dialogTitle: 'Load a stitches set (sts)',
-      allowMultiple: false,
-//      allowedExtensions: ['sts'],
-      withData: true
-    );
+    PickFileResult result = await FileSystem.pickFile(
+      prompt: 'Load a stitches set (.sts)', 
+      extensions: ['sts']);
 
-    if (result != null && result.files.isNotEmpty) {
-      if (result.files.first.extension != 'sts') {
-        throw ChartOperationException(message: '${result.files.first.name} is not a stitch set (.sts)');
-      }
+    if (result.resultType == PickFileResultType.incorrectExtension) {
+      throw ChartOperationException(message: '${result.filename} is not a stitch set (.sts)');
+    }
 
+    if (result.resultType == PickFileResultType.success) {
       try {
-        String jsonString = utf8.decode(result.files.first.bytes!);
+        String jsonString = utf8.decode(result.data!);
         Map<String, dynamic> jsonObject = jsonDecode(jsonString);
         StitchSet stitchSet = StitchSet.fromJson(jsonObject);
         return stitchSet;
       } catch (e) {
-        throw ChartOperationException(message: 'Error while importing stitches set: $e');
+        throw ChartOperationException(message: 'Error while importing stitch set: $e');
       }
     }
 
@@ -102,9 +98,9 @@ class ChartsInMemoryModelRepository implements ChartsModelRepository {
     Map<String, Object> jsonObject = chart.toJson();
     try {
       String jsonString = jsonEncode(jsonObject);
-      await FilePicker.platform.saveFile(
-        dialogTitle: 'Where do you want to store the output?',
-        fileName: '${chart.name}.kgc',
+      await FileSystem.saveFile(
+        prompt: 'Where do you want to store the output?',
+        filename: '${chart.name}.kgc',
         bytes: utf8.encode(jsonString),
       );
     } catch (e) {
@@ -114,19 +110,18 @@ class ChartsInMemoryModelRepository implements ChartsModelRepository {
 
   @override
   Future<KnittingChart?> importChart() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      dialogTitle: 'Load a chart (kgc)',
-      allowMultiple: false,
-      withData: true,
+    PickFileResult result = await FileSystem.pickFile(
+      prompt: 'Load a chart (kgc)',
+      extensions: ['kgc']
     );
 
-    if (result != null && result.files.isNotEmpty) {
-      if (result.files.first.extension != 'kgc') {
-        throw ChartOperationException(message: '${result.files.first.name} is not a chart (.kgc)');
-      }
+    if (result.resultType == PickFileResultType.incorrectExtension) {
+      throw ChartOperationException(message: '${result.filename} is not a Chart (.kgc)');
+    }
 
+    if (result.resultType == PickFileResultType.success) {
       try {
-        String jsonString = utf8.decode(result.files.first.bytes!);
+        String jsonString = utf8.decode(result.data!);
         Map<String, dynamic> jsonObject = jsonDecode(jsonString);
         KnittingChart chart = KnittingChart.fromJson(jsonObject);
         return chart;

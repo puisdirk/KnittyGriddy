@@ -87,10 +87,11 @@ class KnittingChart {
     }
 
     // Remark: this doesn't heal broken stitches yet and doesn't prune unused stitches and colours
+    // This healing and pruning happens in the updateChart method of the model
 
     return copyWith(
       chartSettings: chartSettings.copyWith(rows: rows, columns: cols),
-      outline: Set.from(outline)..removeWhere((cellAddress) => cellAddress.row > rows),
+      outline: Set.from(outline)..removeWhere((cellAddress) => cellAddress.row > rows || cellAddress.column > cols),
       selection: selection.copyWith(
         selectedCells: selection.selectedCells.where((cellAddress) => cellAddress.row <= rows).toSet()
       ),
@@ -165,7 +166,7 @@ class KnittingChart {
 
   KnittingChart pruneUnusedStitches() {
     return copyWith(
-      usedStitches: usedStitches.where((us) => us == BasicStitchesSet.noStitch || isStitchUsedInChart(us)).toList()
+      usedStitches: usedStitches.where((us) => /*us == BasicStitchesSet.noStitch ||*/ isStitchUsedInChart(us)).toList()
     );
   }
 
@@ -180,7 +181,7 @@ class KnittingChart {
 
   KnittingChart pruneUnusedStitchesAndColours() {
     return copyWith(
-      usedStitches: usedStitches.where((us) => us == BasicStitchesSet.noStitch || isStitchUsedInChart(us)).toList(),
+      usedStitches: usedStitches.where((us) => /*us == BasicStitchesSet.noStitch ||*/ isStitchUsedInChart(us)).toList(),
       usedColours: usedColours.where((colour) => isColourUsedInChart(colour)).toList()
     );
   }

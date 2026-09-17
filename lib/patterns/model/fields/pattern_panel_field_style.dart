@@ -23,6 +23,8 @@ class PatternPanelFieldStyle {
   final double topRightRadius;
   final double bottomLeftRadius;
   final double bottomRightRadius;
+  // Remark: these are the width and height of the panel. If set to 0, the panel
+  // will assume the dimensions of the field
   final double maxWidth;
   final double maxHeight;
 

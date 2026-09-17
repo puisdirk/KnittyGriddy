@@ -1,7 +1,8 @@
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:knitty_griddy/common/file_system.dart';
+import 'package:knitty_griddy/drawings/export/drawing_svg_service.dart';
 import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/part_command.dart';
@@ -9,7 +10,6 @@ import 'package:knitty_griddy/drawings/model/drawing_operation_exception.dart';
 import 'package:knitty_griddy/drawings/model/drawings_model.dart';
 import 'package:knitty_griddy/drawings/model/part_drawing.dart';
 import 'package:knitty_griddy/utils/constants.dart';
-import 'package:knitty_griddy/utils/svg_service.dart';
 import 'package:provider/provider.dart';
 import 'dart:ui' as ui;
 
@@ -67,7 +67,7 @@ class _ExportDrawingPageState extends State<ExportDrawingPage> {
                       }
                     }
                   }, 
-                  child: Text('Drawing (${widget.drawing is PartDrawing ? '.kgp' : '.kgd'})')
+                  child: Text('Drawing (${widget.drawing is PartDrawing ? '.kpd' : '.kgd'})')
                 ),
                 hspacing,
                 OutlinedButton(
@@ -76,19 +76,19 @@ class _ExportDrawingPageState extends State<ExportDrawingPage> {
                     ui.Image image = await drawingBoundary.toImage(pixelRatio: 3);
                     ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
                     Uint8List pngBytes = byteData!.buffer.asUint8List();
-
-                    await FilePicker.platform.saveFile(
-                        dialogTitle: 'Where do you want to store the output?',
-                        fileName: '${widget.drawing.name}.png',
-                        bytes: pngBytes,
-                      );
+                    await FileSystem.saveFile(
+                      prompt: 'Where do you want to store the output?',
+                      filename: '${widget.drawing.name}.png',
+                      bytes: pngBytes,
+                    );
                   }, 
                   child: const Text('PNG')
                 ),
                 hspacing,
                 OutlinedButton(
                   onPressed: () async {
-                    await SvgService.exportDrawingToSVG(widget.drawing, Size(bbox.width, bbox.height));
+                    DrawingSvgService svgService = DrawingSvgService(drawing: widget.drawing);
+                    await svgService.exportDrawingToSVG();
                   }, 
                   child: const Text('SVG')
                 ),

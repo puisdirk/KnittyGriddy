@@ -3,7 +3,6 @@ import 'dart:math';
 
 import 'package:fleather/fleather.dart';
 import 'package:flutter/material.dart';
-import 'package:knitty_griddy/drawings/model/drawing.dart';
 import 'package:knitty_griddy/patterns/mainview/field_controls/pattern_chart_field_control.dart';
 import 'package:knitty_griddy/patterns/mainview/field_controls/pattern_drawing_field_control.dart';
 import 'package:knitty_griddy/patterns/mainview/field_controls/pattern_image_field_control.dart';
@@ -101,7 +100,6 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
     super.didUpdateWidget(oldWidget);
   }
   
-  // TODO: these colours should depend on being in editmode or viewmode
   final Color resizeHandleColor = Colors.grey.shade300;
   final Color cornerResizeHandleColor = Colors.grey.shade400;
 
@@ -220,15 +218,14 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
               children: [
                 // Pattern control
                 Positioned(
-                  left: widget.field.leftpadding + widget.field.contentOffsetX,
-                  top: widget.field.contentOffsetY,
+                  left: widget.field.contentLeft,
+                  top: widget.field.contentTop,
                   child: SizedBox(
                     width: width - (2 * widget.field.padding),
                     height: height - widget.field.bottompadding,
-                    child: //createPatternFieldControl()
+                    child:
                       widget.field.fieldType == PatternFieldType.texteditor ?
                         PatternTextEditorFieldControl(
-                          knittingPattern: widget.knittingPattern,
                           field: widget.field as PatternTextEditorField,
                           fleatherController: widget.fieldChangeNotifier as FleatherController,
                           editorKey: widget.editorKey as GlobalKey<EditorState>?,

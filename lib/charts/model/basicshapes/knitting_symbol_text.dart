@@ -6,6 +6,7 @@ import 'package:knitty_griddy/charts/model/basicshapes/stateless_text_entry_cont
 import 'package:knitty_griddy/charts/model/knitting_symbol.dart';
 import 'package:knitty_griddy/charts/model/knitting_symbol_part.dart';
 import 'package:knitty_griddy/charts/stitchrepo/stitch_definition.dart';
+import 'package:knitty_griddy/utils/color_utilities.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 
 const String knittingSymbolTextType = 'text';
@@ -157,7 +158,7 @@ class KnittingSymbolText extends KnittingSymbolPart {
     Offset middle = const Offset(stitchCellWidth / 2, stitchCellHeight / 2);
     String svg = '<text x="${middle.dx}" y="${middle.dy + 8}" text-anchor="middle" ';
     svg += 'font-family="Roboto" font-size="24" font-weight="${bold ? 'bold' : 'normal'}" font-style="${italic ? 'italic' : 'normal'}" ';
-    svg += 'fill="rgb(${symbolColor.red}, ${symbolColor.green}, ${symbolColor.blue})" fill-opacity="${symbolColor.alpha}" ';
+    svg += 'fill="${ColorUtilities.colorToSvhHex(symbolColor)}" ${ColorUtilities.fillOpacity(symbolColor)} ';
     svg += '>$text</text>';
 
     return svg;
