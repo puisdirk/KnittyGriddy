@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:knitty_griddy/charts/maingrid/chart_page.dart';
 import 'package:knitty_griddy/charts/model/chart_operation_exception.dart';
 import 'package:knitty_griddy/charts/model/charts_model.dart';
@@ -16,24 +17,36 @@ class ChartCard extends StatelessWidget {
   });
 
   _confirmToDelete(BuildContext context) {
-    AlertDialog dlg = AlertDialog(
-      title: const Text('Are you sure'),
-      content: Text('Are you sure you want to delete chart ${chartInfo.name}?'),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context), 
-          child: const Text('No'),
+    showDialog(
+      context: context, 
+      barrierDismissible: false, 
+      builder: (BuildContext context) => KeyboardListener(
+        focusNode: FocusNode(),
+        onKeyEvent: (value) {
+          if (value.logicalKey == LogicalKeyboardKey.escape) {
+            Navigator.of(context).pop();
+          }
+        },
+        child: AlertDialog(
+          title: const Text('Are you sure'),
+          content: Text('Are you sure you want to delete chart ${chartInfo.name}?'),
+          actions: [
+            ElevatedButton(
+              autofocus: true,
+              onPressed: () => Navigator.of(context).pop(), 
+              child: const Text('No'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                Provider.of<ChartsModel>(context, listen: false).deleteChart(chartInfo.id);
+              }, 
+              child: const Text('Yes')
+            ),
+          ],
         ),
-        TextButton(
-          onPressed: () {
-            Navigator.pop(context);
-            Provider.of<ChartsModel>(context, listen: false).deleteChart(chartInfo.id);
-          }, 
-          child: const Text('Yes')
-        ),
-      ],
+      )
     );
-    showDialog(context: context, builder: (BuildContext context) => dlg);
   }
 
   @override
@@ -55,16 +68,28 @@ class ChartCard extends StatelessWidget {
             }
           } on ChartOperationException catch(e) {
             if (context.mounted) {
-              showDialog(context: context, builder: (context) => 
-                AlertDialog(
-                  content: SizedBox(width: 400, height: 50, child: Text(e.message)),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context), 
-                      child: const Text('Close'),
+              showDialog(
+                context: context,
+                barrierDismissible: false, 
+                builder: (context) => 
+                  KeyboardListener(
+                    focusNode: FocusNode(),
+                    onKeyEvent: (value) {
+                      if (value.logicalKey == LogicalKeyboardKey.escape || value.logicalKey == LogicalKeyboardKey.enter) {
+                        Navigator.of(context).pop();
+                      }
+                    },
+                    child: AlertDialog(
+                      content: SizedBox(width: 400, height: 50, child: Text(e.message)),
+                      actions: [
+                        ElevatedButton(
+                          autofocus: true,
+                          onPressed: () => Navigator.of(context).pop(), 
+                          child: const Text('Close'),
+                        ),
+                      ],
                     ),
-                  ],
-                )  
+                  )  
               );
             }
           }

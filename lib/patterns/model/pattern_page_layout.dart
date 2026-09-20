@@ -25,7 +25,6 @@ class PatternPageLayout {
   final PageSize pageSize;
   final PageOrientation pageOrientation;
   final int numberOfPages;
-  final bool showPageNumber;
   final bool showGrid;
   
   static const PatternPageLayout defaultLayout = PatternPageLayout(
@@ -38,7 +37,6 @@ class PatternPageLayout {
     required this.pageSize,
     required this.pageOrientation,
     required this.numberOfPages,
-    this.showPageNumber = true,
     this.showGrid = true,
   });
 
@@ -46,14 +44,12 @@ class PatternPageLayout {
     PageSize? pageSize,
     PageOrientation? pageOrientation,
     int? numberOfPages,
-    bool? showPageNumber,
     bool? showGrid,
   }) {
     return PatternPageLayout(
       pageSize: pageSize?? this.pageSize, 
       pageOrientation: pageOrientation?? this.pageOrientation,
       numberOfPages: numberOfPages?? this.numberOfPages,
-      showPageNumber: showPageNumber?? this.showPageNumber,
       showGrid: showGrid?? this.showGrid,
     );
   }
@@ -93,18 +89,16 @@ class PatternPageLayout {
     pageSize == other.pageSize &&
     pageOrientation == other.pageOrientation &&
     numberOfPages == other.numberOfPages &&
-    showPageNumber == other.showPageNumber &&
     showGrid == other.showGrid;
   
   @override
-  int get hashCode => super.hashCode ^ pageSize.hashCode ^ pageOrientation.hashCode ^ numberOfPages.hashCode ^ showPageNumber.hashCode ^ showGrid.hashCode;
+  int get hashCode => super.hashCode ^ pageSize.hashCode ^ pageOrientation.hashCode ^ numberOfPages.hashCode ^ showGrid.hashCode;
 
   Map<String, Object> toJson() {
     return {
       'si': pageSize.name,
       'or': pageOrientation.name,
       'num': numberOfPages,
-      'pn': showPageNumber,
       'gr': showGrid,
     };
   }
@@ -114,7 +108,6 @@ class PatternPageLayout {
       pageSize: PageSize.values.byName(json['si'] as String), 
       pageOrientation: PageOrientation.values.byName(json['or'] as String), 
       numberOfPages: json['num'] as int,
-      showPageNumber: json['pn'] as bool,
       showGrid: json['gr'] as bool,
     );
   }

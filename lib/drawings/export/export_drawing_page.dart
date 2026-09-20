@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:knitty_griddy/common/file_system.dart';
 import 'package:knitty_griddy/drawings/export/drawing_svg_service.dart';
 import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
@@ -53,15 +54,25 @@ class _ExportDrawingPageState extends State<ExportDrawingPage> {
                       await Provider.of<DrawingsModel>(context, listen: false).exportDrawing(widget.drawing);
                     } on DrawingOperationException catch(e) {
                       if (context.mounted) {
-                        showDialog(context: context, builder: (context) => 
-                          AlertDialog(
-                            content: SizedBox(width: 400, height: 50, child: Text(e.message)),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(context), 
-                                child: const Text('Close'),
-                              ),
-                            ],
+                        showDialog(
+                          context: context,
+                          barrierDismissible: false, 
+                          builder: (context) => KeyboardListener(
+                            focusNode: FocusNode(),
+                            onKeyEvent: (value) {
+                              if (value.logicalKey == LogicalKeyboardKey.escape || value.logicalKey == LogicalKeyboardKey.enter) {
+                                Navigator.of(context).pop();
+                              }
+                            },
+                            child: AlertDialog(
+                              content: SizedBox(width: 400, height: 50, child: Text(e.message)),
+                              actions: [
+                                ElevatedButton(
+                                  onPressed: () => Navigator.pop(context), 
+                                  child: const Text('Close'),
+                                ),
+                              ],
+                            ),
                           )  
                         );
                       }

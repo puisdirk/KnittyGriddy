@@ -108,6 +108,7 @@ class _StylingCommandControlState extends State<StylingCommandControl> {
               onTap: () async {
                 ColourReference? newColorRef = await showDialog(
                   context: context,
+                  barrierDismissible: false,
                   builder: (context) {
                     return PickColourReferenceDialog(
                       drawing: widget.drawing,

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:fleather/fleather.dart';
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/charts/stitchrepo/stitch_definition.dart';
+import 'package:knitty_griddy/patterns/mainview/fleather/fleather_theme_data_ext.dart';
 import 'package:knitty_griddy/patterns/mainview/fleather/styled_stitch_icon.dart';
 import 'package:knitty_griddy/patterns/model/fields/pattern_text_editor_field.dart';
 import 'package:knitty_griddy/utils/constants.dart';
@@ -65,21 +66,23 @@ class _TextEditorFieldOutlineState extends State<TextEditorFieldOutline> {
                   top: widget.field.contentTop,
                   child: Opacity(
                     opacity: .2,
-                    child: SizedBox(
-                      width: widget.field.contentWidth,
-                      height: widget.field.contentHeight,
-                      child: FleatherField(
-                        embedBuilder: _embedBuilder,
-                        readOnly: true,
-                        showCursor: false,
-                        padding: const EdgeInsets.only(
-                          top: 1,
-                          left: 5,
-                          right: 5,
-                          bottom: 5
+                    child: FleatherTheme(data: FleatherThemeDataExt.withTextStyle(context, widget.field.settings.style),
+                      child: SizedBox(
+                        width: widget.field.contentWidth,
+                        height: widget.field.contentHeight,
+                        child: FleatherField(
+                          embedBuilder: _embedBuilder,
+                          readOnly: true,
+                          showCursor: false,
+                          padding: const EdgeInsets.only(
+                            top: 1,
+                            left: 5,
+                            right: 5,
+                            bottom: 5
+                          ),
+                          controller: _controller,
+                          decoration: const InputDecoration(border: InputBorder.none),
                         ),
-                        controller: _controller,
-                        decoration: const InputDecoration(border: InputBorder.none),
                       ),
                     ),
                   ),

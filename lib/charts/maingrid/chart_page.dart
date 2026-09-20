@@ -37,8 +37,7 @@ class _ChartPageState extends State<ChartPage> {
   @override
   Widget build(BuildContext context) {
     FocusScope.of(context).autofocus(_focusNode);
-    String chartname = Provider.of<ChartsModel>(context, listen: false).knittingChart.name;
-
+    
     return Scaffold(
       appBar: AppBar(
         leading: BackButton(
@@ -50,7 +49,16 @@ class _ChartPageState extends State<ChartPage> {
         ),
         title: Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [const Icon(Icons.grid_on), hspacing, Text('Chart - $chartname')]
+          children: [
+            const Icon(Icons.grid_on), 
+            hspacing, 
+            Selector<ChartsModel, String>(
+              selector: (_, model) => model.knittingChart.name,
+              builder: (context, chartname, _) {
+                return Text('Chart - $chartname');
+              }
+            )
+          ]
         ),
         backgroundColor: Colors.grey.shade300,
         bottom: const PreferredSize(
@@ -61,7 +69,8 @@ class _ChartPageState extends State<ChartPage> {
           IconButton(
             onPressed: () async {
               KnittingChart? newKnittingChart = await showDialog(
-                context: context, 
+                context: context,
+                barrierDismissible: false,
                 builder: (context) => ChartSettingsDialog(knittingChart: Provider.of<ChartsModel>(context, listen: false).knittingChart),
               );
 

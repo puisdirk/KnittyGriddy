@@ -26,7 +26,9 @@ class PatternPanelFieldToolbar extends StatelessWidget {
           child: IconButton(
             onPressed: () async {
               PatternPanelFieldStyle? newStyle = await showDialog(
-                context: context, builder: (context) => PatternFieldPanelStyleDialog(
+                context: context,
+                barrierDismissible: false, 
+                builder: (context) => PatternFieldPanelStyleDialog(
                   panelStyle: field.style,
                   knownColours: pattern.knownColours,
                 ),

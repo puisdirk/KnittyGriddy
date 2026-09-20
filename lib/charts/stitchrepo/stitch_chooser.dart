@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:knitty_griddy/charts/stitch_icon.dart';
 import 'package:knitty_griddy/charts/stitchrepo/stitch_set.dart';
 import 'package:knitty_griddy/utils/math_utitilies.dart';
@@ -93,70 +94,78 @@ class _StitchChooserState extends State<StitchChooser> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Add or remove stitches'),
-      content: SizedBox(
-        width: 600,
-        height: 600,
-        child: Column(
-          children: [
-            Row(
-              children: [
-                const Text('Filter:'),
-                const SizedBox(width: 20,),
-                SizedBox(
-                  width: 500,
-                  child: TextField(controller: filterController, autofocus: true,),  
-                ),
-              ],
-            ),
-            const SizedBox(height: 20,),
-            Expanded(
-              child: Selector<ChartsModel, List<StitchSet>>(
-                selector: (_, model) => model.filteredStitchSets(filterText),
-                builder: (context, stitchSets, _) {
-                  return Selector<ChartsModel, KnittingChart>(
-                    selector: (_, model) => model.knittingChart,
-                    builder: (context, chart, _) {
-                      return DefaultTabController(
-                        length: stitchSets.length,
-                        child: Column(
-                          children: [
-                            TabBar(tabs: [
-                              for (StitchSet stitchSet in stitchSets)
-                                Tab(text: stitchSet.name,)
-                            ]),
-                            Expanded(
-                              child: TabBarView(
-                                children: [
-                                  for (StitchSet stitchSet in stitchSets)
-                                    ListView(
-                                      children: [
-                                        for (String category in Set.from(stitchSet.definitions.map((d) => d.category)))
-                                          createCategory(chart, category, stitchSet.definitions.where((d) => d.category == category).toList()),
-                                      ],
-                                    ),
-                                ]
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }
-                  );
-                }
+    return KeyboardListener(
+      autofocus: true,
+      focusNode: FocusNode(),
+      onKeyEvent: (value) {
+        if (value.logicalKey == LogicalKeyboardKey.escape) {
+          Navigator.of(context).pop();
+        }
+      },
+      child: AlertDialog(
+        title: const Text('Add or remove stitches'),
+        content: SizedBox(
+          width: 600,
+          height: 600,
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  const Text('Filter:'),
+                  const SizedBox(width: 20,),
+                  SizedBox(
+                    width: 500,
+                    child: TextField(controller: filterController, autofocus: true,),  
+                  ),
+                ],
               ),
-            ),
-          ],
+              const SizedBox(height: 20,),
+              Expanded(
+                child: Selector<ChartsModel, List<StitchSet>>(
+                  selector: (_, model) => model.filteredStitchSets(filterText),
+                  builder: (context, stitchSets, _) {
+                    return Selector<ChartsModel, KnittingChart>(
+                      selector: (_, model) => model.knittingChart,
+                      builder: (context, chart, _) {
+                        return DefaultTabController(
+                          length: stitchSets.length,
+                          child: Column(
+                            children: [
+                              TabBar(tabs: [
+                                for (StitchSet stitchSet in stitchSets)
+                                  Tab(text: stitchSet.name,)
+                              ]),
+                              Expanded(
+                                child: TabBarView(
+                                  children: [
+                                    for (StitchSet stitchSet in stitchSets)
+                                      ListView(
+                                        children: [
+                                          for (String category in Set.from(stitchSet.definitions.map((d) => d.category)))
+                                            createCategory(chart, category, stitchSet.definitions.where((d) => d.category == category).toList()),
+                                        ],
+                                      ),
+                                  ]
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+                    );
+                  }
+                ),
+              ),
+            ],
+          ),
         ),
+        actions: [
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(), 
+            child: const Text('close'),
+          )
+        ],
       ),
-      actions: [
-        ElevatedButton.icon(
-          onPressed: () => Navigator.of(context).pop(), 
-          label: const Text('close'),
-          icon: const Icon(Symbols.close_small, weight: 700,),
-        )
-      ],
     );
   }
 }

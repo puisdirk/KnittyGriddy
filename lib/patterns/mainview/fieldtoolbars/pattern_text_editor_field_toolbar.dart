@@ -104,17 +104,20 @@ class PatternTextEditorFieldToolbar extends StatelessWidget {
               nullColorLabel: FleatherLocalizations.of(context)!.foregroundColorAutomatic,
               builder: textColorBuilder,
               pickColor: (context, nullColorLabel) async {
-                return await showDialog(context: context, builder: (context) {
-                  ParchmentStyle style = fleatherController.getSelectionStyle();
-                  Color initialColor = Colors.black;
-                  if (style.contains(ParchmentAttribute.foregroundColor)) {
-                    initialColor = Color(style.get(ParchmentAttribute.foregroundColor)!.value!);
-                  }
-                  return PickColourDialog(
-                    initialColor: initialColor,
-                    knownColours: pattern.knownColours,
-                  );
-                },
+                return await showDialog(
+                  context: context,
+                  barrierDismissible: false, 
+                  builder: (context) {
+                    ParchmentStyle style = fleatherController.getSelectionStyle();
+                    Color initialColor = Colors.black;
+                    if (style.contains(ParchmentAttribute.foregroundColor)) {
+                      initialColor = Color(style.get(ParchmentAttribute.foregroundColor)!.value!);
+                    }
+                    return PickColourDialog(
+                      initialColor: initialColor,
+                      knownColours: pattern.knownColours,
+                    );
+                  },
                 );
               },
             ),
@@ -132,17 +135,20 @@ class PatternTextEditorFieldToolbar extends StatelessWidget {
                 nullColorLabel: FleatherLocalizations.of(context)!.backgroundColorNoColor,
                 builder: backgroundColorBuilder,
                 pickColor: (context, nullColorLabel) async {
-                  return await showDialog(context: context, builder: (context) {
-                    ParchmentStyle style = fleatherController.getSelectionStyle();
-                    Color initialColor = Colors.white;
-                    if (style.contains(ParchmentAttribute.backgroundColor)) {
-                      initialColor = Color(style.get(ParchmentAttribute.backgroundColor)!.value!);
-                    }
-                    return PickColourDialog(
-                      initialColor: initialColor,
-                      knownColours: pattern.knownColours,
-                    );
-                  },
+                  return await showDialog(
+                    context: context,
+                    barrierDismissible: false, 
+                    builder: (context) {
+                      ParchmentStyle style = fleatherController.getSelectionStyle();
+                      Color initialColor = Colors.white;
+                      if (style.contains(ParchmentAttribute.backgroundColor)) {
+                        initialColor = Color(style.get(ParchmentAttribute.backgroundColor)!.value!);
+                      }
+                      return PickColourDialog(
+                        initialColor: initialColor,
+                        knownColours: pattern.knownColours,
+                      );
+                    },
                   );
                 },
               ),

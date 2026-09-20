@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_popup/flutter_popup.dart';
 import 'package:flutter_spinbox/material.dart';
 import 'package:knitty_griddy/patterns/mainview/field_controls/panel_field_components/border_radius_spin_box.dart';
@@ -154,371 +155,382 @@ class _PatternFieldPanelStyleDialogState extends State<PatternFieldPanelStyleDia
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      contentPadding: const EdgeInsets.all(1),
-      title: const Text('Panel settings'),
-      content: SizedBox(
-        width: 640,
-        height: 400,
-        child: Center(
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(top: 30.0),
-                child: SizedBox(
+    return KeyboardListener(
+      autofocus: true,
+      focusNode: FocusNode(),
+      onKeyEvent: (value) {
+        if (value.logicalKey == LogicalKeyboardKey.escape) {
+          Navigator.of(context).pop(null);
+        } else if (value.logicalKey == LogicalKeyboardKey.enter) {
+          Navigator.of(context).pop(panelStyle);
+        }
+      },
+      child: AlertDialog(
+        contentPadding: const EdgeInsets.all(1),
+        title: const Text('Panel settings'),
+        content: SizedBox(
+          width: 640,
+          height: 400,
+          child: Center(
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 30.0),
+                  child: SizedBox(
+                    width: 570,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text('Width'),
+                        hspacing,
+                        SizedBox(
+                          width: 160,
+                          child: SpinBox(
+                            min: 0,
+                            max: PatternPageLayout.maxPageWidth,
+                            value: panelStyle.maxWidth,
+                            onChanged: (value) => _changeMaxWidth(value),
+                          ),
+                        ),
+                        hspacing,
+                        hspacing,
+                        const Text('Height'),
+                        hspacing,
+                        SizedBox(
+                          width: 160,
+                          child: SpinBox(
+                            min: 0,
+                            max: PatternPageLayout.maxPageHeight,
+                            value: panelStyle.maxHeight,
+                            onChanged: (value) => _changeMaxHeight(value),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                vspacing,
+                vspacing,
+                SizedBox(
                   width: 570,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  child: Column(
                     children: [
-                      const Text('Width'),
-                      hspacing,
-                      SizedBox(
-                        width: 160,
-                        child: SpinBox(
-                          min: 0,
-                          max: PatternPageLayout.maxPageWidth,
-                          value: panelStyle.maxWidth,
-                          onChanged: (value) => _changeMaxWidth(value),
-                        ),
+                      Row (
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text('Background colour:', textAlign: TextAlign.end,),
+                          hspacing,
+                          CustomPopup(
+                            content: _colourPopup(ColorField.backgroundColor.label, panelStyle.backgroundColor),
+                            barrierColor: Colors.transparent,
+                            contentDecoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey),
+                              borderRadius: const BorderRadius.all(Radius.circular(8)),
+                              color: Colors.white
+                            ),
+                            arrowColor: Colors.grey,
+                            onBeforePopup: () {
+                              if (currentColorField != ColorField.backgroundColor) {
+                                setState(() {
+                                  currentColorField = ColorField.backgroundColor;
+                                  currentColor = panelStyle.backgroundColor;
+                                });
+                              }
+                            },
+                            child: ColourWell(
+                              selected: false, 
+                              color: panelStyle.backgroundColor,
+                            ),
+                          ),
+                        ],
                       ),
-                      hspacing,
-                      hspacing,
-                      const Text('Height'),
-                      hspacing,
-                      SizedBox(
-                        width: 160,
-                        child: SpinBox(
-                          min: 0,
-                          max: PatternPageLayout.maxPageHeight,
-                          value: panelStyle.maxHeight,
-                          onChanged: (value) => _changeMaxHeight(value),
-                        ),
+                      vspacing,
+                      vspacing,
+                      Table(
+                        children: [
+                          TableRow(
+                            children: [
+                              TableCell(
+                                child: BorderRadiusSpinBox(
+                                  corner: BorderCorner.topLeft, 
+                                  initialValue: panelStyle.topLeftRadius, 
+                                  onChanged: _changeBorderRadius
+                                ),
+                              ),
+                              TableCell(
+                                child: Row(
+                                  children: [
+                                    SizedBox(
+                                      width: _kSpinBoxWidth,
+                                      child: SpinBox(
+                                        onChanged: (value) => _changeBorderWidth(BorderField.topBorder, value),
+                                        min: 0,
+                                        max: _kMaxBorderWidth,
+                                        decimals: 1,
+                                        step: .1,
+                                        value: panelStyle.topBorderWidth,
+                                      ),
+                                    ),
+                                    hspacing,
+                                    CustomPopup(
+                                      content: _colourPopup(
+                                        syncBorders ? _allBordersColour : ColorField.topBorderColor.label,
+                                        panelStyle.topBorderColor
+                                      ),
+                                      barrierColor: Colors.transparent,
+                                      contentDecoration: BoxDecoration(
+                                        border: Border.all(color: Colors.grey),
+                                        borderRadius: const BorderRadius.all(Radius.circular(8)),
+                                        color: Colors.white
+                                      ),
+                                      arrowColor: Colors.grey,
+                                      onBeforePopup: () {
+                                        if (currentColorField != ColorField.topBorderColor) {
+                                          setState(() {
+                                            currentColorField = ColorField.topBorderColor;
+                                            currentColor = panelStyle.topBorderColor;
+                                          });
+                                        }
+                                      },
+                                      child: ColourWell(
+                                        selected: false,
+                                        color: panelStyle.topBorderColor,
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              ),
+                              TableCell(
+                                child: BorderRadiusSpinBox(
+                                  corner: BorderCorner.topRight,
+                                  initialValue: panelStyle.topRightRadius,
+                                  onChanged: _changeBorderRadius,
+                                ),
+                              ),
+                            ]
+                          ),
+                          TableRow(
+                            children: [
+                              TableCell(
+                                verticalAlignment: TableCellVerticalAlignment.middle,
+                                child: Row(
+                                  children: [
+                                    SizedBox(
+                                      width: _kSpinBoxWidth,
+                                      child: SpinBox(
+                                        onChanged: (value) => _changeBorderWidth(BorderField.leftBorder, value),
+                                        min: 0,
+                                        max: _kMaxBorderWidth,
+                                        decimals: 1,
+                                        step: .1,
+                                        value: panelStyle.leftBorderWidth,
+                                      ),
+                                    ),
+                                    hspacing,
+                                    CustomPopup(
+                                      content: _colourPopup(
+                                        syncBorders ? _allBordersColour : ColorField.leftBorderColor.label, 
+                                        panelStyle.leftBorderColor
+                                      ), 
+                                      barrierColor: Colors.transparent,
+                                      contentDecoration: BoxDecoration(
+                                        border: Border.all(color: Colors.grey),
+                                        borderRadius: const BorderRadius.all(Radius.circular(8)),
+                                        color: Colors.white
+                                      ),
+                                      arrowColor: Colors.grey,
+                                      onBeforePopup: () {
+                                        if (currentColorField != ColorField.leftBorderColor) {
+                                          setState(() {
+                                            currentColorField = ColorField.leftBorderColor;
+                                            currentColor = panelStyle.leftBorderColor;
+                                          });
+                                        }
+                                      },
+                                      child: ColourWell(
+                                        selected: false,
+                                        color: panelStyle.leftBorderColor,
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              ),
+                              TableCell(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(10),
+                                  child: SizedBox(
+                                    width: 200,
+                                    height: 100,
+                                    child: Stack(
+                                      children: [
+                                        Positioned(
+                                          child: Center(
+                                            child: Container(
+                                              height: panelStyle.maxHeight == PatternPanelFieldStyle.kDefaultMaxHeight ? null : panelStyle.maxHeight,
+                                              width: panelStyle.maxWidth == PatternPanelFieldStyle.kDefaultMaxWidth ? null : panelStyle.maxWidth,
+                                              decoration: BoxDecoration(
+                                                color: panelStyle.backgroundColor,
+                                                border: Border(
+                                                  top: panelStyle.topBorderWidth == 0 ? BorderSide.none : BorderSide(color: panelStyle.topBorderColor, width: panelStyle.topBorderWidth),
+                                                  bottom: panelStyle.bottomBorderWidth == 0 ? BorderSide.none : BorderSide(color: panelStyle.bottomBorderColor, width: panelStyle.bottomBorderWidth),
+                                                  left: panelStyle.leftBorderWidth == 0 ? BorderSide.none : BorderSide(color: panelStyle.leftBorderColor, width: panelStyle.leftBorderWidth),
+                                                  right: panelStyle.rightBorderWidth == 0 ? BorderSide.none : BorderSide(color: panelStyle.rightBorderColor, width: panelStyle.rightBorderWidth),
+                                                ),
+                                                borderRadius: BorderRadius.only(
+                                                  topLeft: panelStyle.canSetRadius && panelStyle.topLeftRadius != PatternPanelFieldStyle.kDefaultBorderRadius ? Radius.circular(panelStyle.topLeftRadius) : Radius.zero,
+                                                  topRight: panelStyle.canSetRadius && panelStyle.topRightRadius != PatternPanelFieldStyle.kDefaultBorderRadius ? Radius.circular(panelStyle.topRightRadius) : Radius.zero,
+                                                  bottomLeft: panelStyle.canSetRadius && panelStyle.bottomLeftRadius != PatternPanelFieldStyle.kDefaultBorderRadius ? Radius.circular(panelStyle.bottomLeftRadius) : Radius.zero,
+                                                  bottomRight: panelStyle.canSetRadius && panelStyle.bottomRightRadius != PatternPanelFieldStyle.kDefaultBorderRadius ? Radius.circular(panelStyle.bottomRightRadius) : Radius.zero,
+                                                )
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        Positioned(
+                                          child: Center(
+                                            child: IconButton(
+                                              onPressed: () => setState(() => syncBorders = !syncBorders), 
+                                              icon: Icon(syncBorders ? Icons.lock : Icons.lock_open)
+                                            ),
+                                           ),
+                                        ),
+                                      ]
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              TableCell(
+                                verticalAlignment: TableCellVerticalAlignment.middle,
+                                child: Row(
+                                  children: [
+                                    SizedBox(
+                                      width: _kSpinBoxWidth,
+                                      child: SpinBox(
+                                        onChanged: (value) => _changeBorderWidth(BorderField.rightBorder, value),
+                                        min: 0,
+                                        max: _kMaxBorderWidth,
+                                        decimals: 1,
+                                        step: .1,
+                                        value: panelStyle.rightBorderWidth,
+                                      ),
+                                    ),
+                                    hspacing,
+                                    CustomPopup(
+                                      content: _colourPopup(
+                                        syncBorders ? _allBordersColour : ColorField.rightBorderColor.label, 
+                                        panelStyle.rightBorderColor
+                                      ), 
+                                      barrierColor: Colors.transparent,
+                                      contentDecoration: BoxDecoration(
+                                        border: Border.all(color: Colors.grey),
+                                        borderRadius: const BorderRadius.all(Radius.circular(8)),
+                                        color: Colors.white
+                                      ),
+                                      arrowColor: Colors.grey,
+                                      onBeforePopup: () {
+                                        if (currentColorField != ColorField.rightBorderColor) {
+                                          setState(() {
+                                            currentColorField = ColorField.rightBorderColor;
+                                            currentColor = panelStyle.rightBorderColor;
+                                          });
+                                        }
+                                      },
+                                      child: ColourWell(
+                                        selected: false,
+                                        color: panelStyle.rightBorderColor,
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              ),
+                            ]
+                          ),
+                          TableRow(
+                            children: [
+                              TableCell(
+                                child: BorderRadiusSpinBox(
+                                  corner: BorderCorner.bottomLeft, 
+                                  initialValue: panelStyle.bottomLeftRadius, 
+                                  onChanged: _changeBorderRadius
+                                )
+                              ),
+                              TableCell(
+                                child: Row(
+                                  children: [
+                                    SizedBox(
+                                      width: _kSpinBoxWidth,
+                                      child: SpinBox(
+                                        onChanged: (value) => _changeBorderWidth(BorderField.bottomBorder, value),
+                                        min: 0,
+                                        max: _kMaxBorderWidth,
+                                        decimals: 1,
+                                        step: .1,
+                                        value: panelStyle.bottomBorderWidth,
+                                      ),
+                                    ),
+                                    hspacing,
+                                    CustomPopup(
+                                      content: _colourPopup(
+                                        syncBorders ? _allBordersColour : ColorField.bottomBorderColor.label, 
+                                        panelStyle.bottomBorderColor
+                                      ), 
+                                      barrierColor: Colors.transparent,
+                                      contentDecoration: BoxDecoration(
+                                        border: Border.all(color: Colors.grey),
+                                        borderRadius: const BorderRadius.all(Radius.circular(8)),
+                                        color: Colors.white
+                                      ),
+                                      arrowColor: Colors.grey,
+                                      onBeforePopup: () {
+                                        if (currentColorField != ColorField.bottomBorderColor) {
+                                          setState(() {
+                                            currentColorField = ColorField.bottomBorderColor;
+                                            currentColor = panelStyle.bottomBorderColor;
+                                          });
+                                        }
+                                      },
+                                      child: ColourWell(
+                                        selected: false,
+                                        color: panelStyle.bottomBorderColor,
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              ),
+                              TableCell(
+                                child: BorderRadiusSpinBox(
+                                  corner: BorderCorner.bottomRight, 
+                                  initialValue: panelStyle.bottomRightRadius, 
+                                  onChanged: _changeBorderRadius
+                                )
+                              ),
+                            ]
+                          )
+                        ],
                       ),
                     ],
                   ),
                 ),
-              ),
-              vspacing,
-              vspacing,
-              SizedBox(
-                width: 570,
-                child: Column(
-                  children: [
-                    Row (
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text('Background colour:', textAlign: TextAlign.end,),
-                        hspacing,
-                        CustomPopup(
-                          content: _colourPopup(ColorField.backgroundColor.label, panelStyle.backgroundColor),
-                          barrierColor: Colors.transparent,
-                          contentDecoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey),
-                            borderRadius: const BorderRadius.all(Radius.circular(8)),
-                            color: Colors.white
-                          ),
-                          arrowColor: Colors.grey,
-                          onBeforePopup: () {
-                            if (currentColorField != ColorField.backgroundColor) {
-                              setState(() {
-                                currentColorField = ColorField.backgroundColor;
-                                currentColor = panelStyle.backgroundColor;
-                              });
-                            }
-                          },
-                          child: ColourWell(
-                            selected: false, 
-                            color: panelStyle.backgroundColor,
-                          ),
-                        ),
-                      ],
-                    ),
-                    vspacing,
-                    vspacing,
-                    Table(
-                      children: [
-                        TableRow(
-                          children: [
-                            TableCell(
-                              child: BorderRadiusSpinBox(
-                                corner: BorderCorner.topLeft, 
-                                initialValue: panelStyle.topLeftRadius, 
-                                onChanged: _changeBorderRadius
-                              ),
-                            ),
-                            TableCell(
-                              child: Row(
-                                children: [
-                                  SizedBox(
-                                    width: _kSpinBoxWidth,
-                                    child: SpinBox(
-                                      onChanged: (value) => _changeBorderWidth(BorderField.topBorder, value),
-                                      min: 0,
-                                      max: _kMaxBorderWidth,
-                                      decimals: 1,
-                                      step: .1,
-                                      value: panelStyle.topBorderWidth,
-                                    ),
-                                  ),
-                                  hspacing,
-                                  CustomPopup(
-                                    content: _colourPopup(
-                                      syncBorders ? _allBordersColour : ColorField.topBorderColor.label,
-                                      panelStyle.topBorderColor
-                                    ),
-                                    barrierColor: Colors.transparent,
-                                    contentDecoration: BoxDecoration(
-                                      border: Border.all(color: Colors.grey),
-                                      borderRadius: const BorderRadius.all(Radius.circular(8)),
-                                      color: Colors.white
-                                    ),
-                                    arrowColor: Colors.grey,
-                                    onBeforePopup: () {
-                                      if (currentColorField != ColorField.topBorderColor) {
-                                        setState(() {
-                                          currentColorField = ColorField.topBorderColor;
-                                          currentColor = panelStyle.topBorderColor;
-                                        });
-                                      }
-                                    },
-                                    child: ColourWell(
-                                      selected: false,
-                                      color: panelStyle.topBorderColor,
-                                    ),
-                                  ),
-                                ],
-                              )
-                            ),
-                            TableCell(
-                              child: BorderRadiusSpinBox(
-                                corner: BorderCorner.topRight,
-                                initialValue: panelStyle.topRightRadius,
-                                onChanged: _changeBorderRadius,
-                              ),
-                            ),
-                          ]
-                        ),
-                        TableRow(
-                          children: [
-                            TableCell(
-                              verticalAlignment: TableCellVerticalAlignment.middle,
-                              child: Row(
-                                children: [
-                                  SizedBox(
-                                    width: _kSpinBoxWidth,
-                                    child: SpinBox(
-                                      onChanged: (value) => _changeBorderWidth(BorderField.leftBorder, value),
-                                      min: 0,
-                                      max: _kMaxBorderWidth,
-                                      decimals: 1,
-                                      step: .1,
-                                      value: panelStyle.leftBorderWidth,
-                                    ),
-                                  ),
-                                  hspacing,
-                                  CustomPopup(
-                                    content: _colourPopup(
-                                      syncBorders ? _allBordersColour : ColorField.leftBorderColor.label, 
-                                      panelStyle.leftBorderColor
-                                    ), 
-                                    barrierColor: Colors.transparent,
-                                    contentDecoration: BoxDecoration(
-                                      border: Border.all(color: Colors.grey),
-                                      borderRadius: const BorderRadius.all(Radius.circular(8)),
-                                      color: Colors.white
-                                    ),
-                                    arrowColor: Colors.grey,
-                                    onBeforePopup: () {
-                                      if (currentColorField != ColorField.leftBorderColor) {
-                                        setState(() {
-                                          currentColorField = ColorField.leftBorderColor;
-                                          currentColor = panelStyle.leftBorderColor;
-                                        });
-                                      }
-                                    },
-                                    child: ColourWell(
-                                      selected: false,
-                                      color: panelStyle.leftBorderColor,
-                                    ),
-                                  ),
-                                ],
-                              )
-                            ),
-                            TableCell(
-                              child: Padding(
-                                padding: const EdgeInsets.all(10),
-                                child: SizedBox(
-                                  width: 200,
-                                  height: 100,
-                                  child: Stack(
-                                    children: [
-                                      Positioned(
-                                        child: Center(
-                                          child: Container(
-                                            height: panelStyle.maxHeight == PatternPanelFieldStyle.kDefaultMaxHeight ? null : panelStyle.maxHeight,
-                                            width: panelStyle.maxWidth == PatternPanelFieldStyle.kDefaultMaxWidth ? null : panelStyle.maxWidth,
-                                            decoration: BoxDecoration(
-                                              color: panelStyle.backgroundColor,
-                                              border: Border(
-                                                top: panelStyle.topBorderWidth == 0 ? BorderSide.none : BorderSide(color: panelStyle.topBorderColor, width: panelStyle.topBorderWidth),
-                                                bottom: panelStyle.bottomBorderWidth == 0 ? BorderSide.none : BorderSide(color: panelStyle.bottomBorderColor, width: panelStyle.bottomBorderWidth),
-                                                left: panelStyle.leftBorderWidth == 0 ? BorderSide.none : BorderSide(color: panelStyle.leftBorderColor, width: panelStyle.leftBorderWidth),
-                                                right: panelStyle.rightBorderWidth == 0 ? BorderSide.none : BorderSide(color: panelStyle.rightBorderColor, width: panelStyle.rightBorderWidth),
-                                              ),
-                                              borderRadius: BorderRadius.only(
-                                                topLeft: panelStyle.canSetRadius && panelStyle.topLeftRadius != PatternPanelFieldStyle.kDefaultBorderRadius ? Radius.circular(panelStyle.topLeftRadius) : Radius.zero,
-                                                topRight: panelStyle.canSetRadius && panelStyle.topRightRadius != PatternPanelFieldStyle.kDefaultBorderRadius ? Radius.circular(panelStyle.topRightRadius) : Radius.zero,
-                                                bottomLeft: panelStyle.canSetRadius && panelStyle.bottomLeftRadius != PatternPanelFieldStyle.kDefaultBorderRadius ? Radius.circular(panelStyle.bottomLeftRadius) : Radius.zero,
-                                                bottomRight: panelStyle.canSetRadius && panelStyle.bottomRightRadius != PatternPanelFieldStyle.kDefaultBorderRadius ? Radius.circular(panelStyle.bottomRightRadius) : Radius.zero,
-                                              )
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      Positioned(
-                                        child: Center(
-                                          child: IconButton(
-                                            onPressed: () => setState(() => syncBorders = !syncBorders), 
-                                            icon: Icon(syncBorders ? Icons.lock : Icons.lock_open)
-                                          ),
-                                         ),
-                                      ),
-                                    ]
-                                  ),
-                                ),
-                              ),
-                            ),
-                            TableCell(
-                              verticalAlignment: TableCellVerticalAlignment.middle,
-                              child: Row(
-                                children: [
-                                  SizedBox(
-                                    width: _kSpinBoxWidth,
-                                    child: SpinBox(
-                                      onChanged: (value) => _changeBorderWidth(BorderField.rightBorder, value),
-                                      min: 0,
-                                      max: _kMaxBorderWidth,
-                                      decimals: 1,
-                                      step: .1,
-                                      value: panelStyle.rightBorderWidth,
-                                    ),
-                                  ),
-                                  hspacing,
-                                  CustomPopup(
-                                    content: _colourPopup(
-                                      syncBorders ? _allBordersColour : ColorField.rightBorderColor.label, 
-                                      panelStyle.rightBorderColor
-                                    ), 
-                                    barrierColor: Colors.transparent,
-                                    contentDecoration: BoxDecoration(
-                                      border: Border.all(color: Colors.grey),
-                                      borderRadius: const BorderRadius.all(Radius.circular(8)),
-                                      color: Colors.white
-                                    ),
-                                    arrowColor: Colors.grey,
-                                    onBeforePopup: () {
-                                      if (currentColorField != ColorField.rightBorderColor) {
-                                        setState(() {
-                                          currentColorField = ColorField.rightBorderColor;
-                                          currentColor = panelStyle.rightBorderColor;
-                                        });
-                                      }
-                                    },
-                                    child: ColourWell(
-                                      selected: false,
-                                      color: panelStyle.rightBorderColor,
-                                    ),
-                                  ),
-                                ],
-                              )
-                            ),
-                          ]
-                        ),
-                        TableRow(
-                          children: [
-                            TableCell(
-                              child: BorderRadiusSpinBox(
-                                corner: BorderCorner.bottomLeft, 
-                                initialValue: panelStyle.bottomLeftRadius, 
-                                onChanged: _changeBorderRadius
-                              )
-                            ),
-                            TableCell(
-                              child: Row(
-                                children: [
-                                  SizedBox(
-                                    width: _kSpinBoxWidth,
-                                    child: SpinBox(
-                                      onChanged: (value) => _changeBorderWidth(BorderField.bottomBorder, value),
-                                      min: 0,
-                                      max: _kMaxBorderWidth,
-                                      decimals: 1,
-                                      step: .1,
-                                      value: panelStyle.bottomBorderWidth,
-                                    ),
-                                  ),
-                                  hspacing,
-                                  CustomPopup(
-                                    content: _colourPopup(
-                                      syncBorders ? _allBordersColour : ColorField.bottomBorderColor.label, 
-                                      panelStyle.bottomBorderColor
-                                    ), 
-                                    barrierColor: Colors.transparent,
-                                    contentDecoration: BoxDecoration(
-                                      border: Border.all(color: Colors.grey),
-                                      borderRadius: const BorderRadius.all(Radius.circular(8)),
-                                      color: Colors.white
-                                    ),
-                                    arrowColor: Colors.grey,
-                                    onBeforePopup: () {
-                                      if (currentColorField != ColorField.bottomBorderColor) {
-                                        setState(() {
-                                          currentColorField = ColorField.bottomBorderColor;
-                                          currentColor = panelStyle.bottomBorderColor;
-                                        });
-                                      }
-                                    },
-                                    child: ColourWell(
-                                      selected: false,
-                                      color: panelStyle.bottomBorderColor,
-                                    ),
-                                  ),
-                                ],
-                              )
-                            ),
-                            TableCell(
-                              child: BorderRadiusSpinBox(
-                                corner: BorderCorner.bottomRight, 
-                                initialValue: panelStyle.bottomRightRadius, 
-                                onChanged: _changeBorderRadius
-                              )
-                            ),
-                          ]
-                        )
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              vspacing,
-            ]
+                vspacing,
+              ]
+            ),
           ),
         ),
+        actions: [
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop(null);
+            }, 
+            child: const Text('Cancel')
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop(panelStyle);
+            }, 
+            child: const Text('Ok')
+          )
+        ],
       ),
-      actions: [
-        ElevatedButton(
-          onPressed: () {
-            Navigator.of(context).pop(null);
-          }, 
-          child: const Text('Cancel')
-        ),
-        ElevatedButton(
-          onPressed: () {
-            Navigator.of(context).pop(panelStyle);
-          }, 
-          child: const Text('Ok')
-        )
-      ],
     );
   }
 }

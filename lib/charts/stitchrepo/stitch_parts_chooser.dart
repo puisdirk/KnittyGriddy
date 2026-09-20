@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:knitty_griddy/charts/stitch_icon.dart';
 import 'package:knitty_griddy/charts/stitch_part_icon.dart';
 import 'package:knitty_griddy/charts/stitchrepo/stitch_set.dart';
@@ -172,54 +173,67 @@ class _StitchPartsChooserState extends State<StitchPartsChooser> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Select shapes'),
-      content: SizedBox(
-        width: 600,
-        height: 400,
-        child: Selector<ChartsModel, List<StitchSet>>(
-          selector: (_, model) => model.filteredStitchSets('', excludeDefinition: widget.excludeDefinition),
-          builder: (context, stitchSets, _) {
-           return DefaultTabController(
-            length: stitchSets.length,
-            child: Column(
-              children: [
-                createBasicSymbolsCategory(),
-                TabBar(tabs: [
-                  for (StitchSet stitchSet in stitchSets)
-                    Tab(text: stitchSet.name,)
-                ]),
-                Expanded(
-                  child: TabBarView(
-                    children: [
-                      for (StitchSet stitchSet in stitchSets)
-                        ListView(
-                          children: [
-                            for (String category in Set.from(stitchSet.definitions.map((d) => d.category)))
-                              createCategory(category, stitchSet.definitions.where((d) => d.category == category).toList())
-                          ],
-                        )
-                    ]
-                  )
-                )
-              ],
-             ),
-           );
+    return KeyboardListener(
+      autofocus: true,
+      focusNode: FocusNode(),
+      onKeyEvent: (value) {
+        if (value.logicalKey == LogicalKeyboardKey.escape) {
+          Navigator.of(context).pop(<List<KnittingSymbolPart>>[]);
+        } else if (value.logicalKey == LogicalKeyboardKey.enter) {
+          if (_selectedParts.isEmpty && _selectedStitches.isEmpty) {
+            Navigator.of(context).pop(<List<KnittingSymbolPart>>[]);
+          } else {
+            Navigator.of(context).pop(_mergedSymbols);
           }
+        }
+      },
+      child: AlertDialog(
+        title: const Text('Select shapes'),
+        content: SizedBox(
+          width: 600,
+          height: 400,
+          child: Selector<ChartsModel, List<StitchSet>>(
+            selector: (_, model) => model.filteredStitchSets('', excludeDefinition: widget.excludeDefinition),
+            builder: (context, stitchSets, _) {
+             return DefaultTabController(
+              length: stitchSets.length,
+              child: Column(
+                children: [
+                  createBasicSymbolsCategory(),
+                  TabBar(tabs: [
+                    for (StitchSet stitchSet in stitchSets)
+                      Tab(text: stitchSet.name,)
+                  ]),
+                  Expanded(
+                    child: TabBarView(
+                      children: [
+                        for (StitchSet stitchSet in stitchSets)
+                          ListView(
+                            children: [
+                              for (String category in Set.from(stitchSet.definitions.map((d) => d.category)))
+                                createCategory(category, stitchSet.definitions.where((d) => d.category == category).toList())
+                            ],
+                          )
+                      ]
+                    )
+                  )
+                ],
+               ),
+             );
+            }
+          ),
         ),
+        actions: [
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(<List<KnittingSymbolPart>>[]), 
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: (_selectedParts.isEmpty && _selectedStitches.isEmpty) ? null : () => Navigator.of(context).pop(_mergedSymbols), 
+            child: const Text('OK'),
+          )
+        ],
       ),
-      actions: [
-        ElevatedButton.icon(
-          onPressed: () => Navigator.of(context).pop(<List<KnittingSymbolPart>>[]), 
-          label: const Text('Cancel'),
-          icon: const Icon(Icons.cancel_outlined),
-        ),
-        ElevatedButton.icon(
-          onPressed: (_selectedParts.isEmpty && _selectedStitches.isEmpty) ? null : () => Navigator.of(context).pop(_mergedSymbols), 
-          label: const Text('OK'),
-          icon: const Icon(Icons.check),
-        )
-      ],
     );
   }
 }

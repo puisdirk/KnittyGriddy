@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_popup/flutter_popup.dart';
 import 'package:flutter_spinbox/material.dart';
 import 'package:knitty_griddy/drawings/drawing_editor/drawing_viewer.dart';
@@ -43,119 +44,130 @@ class _DrawingMeasurementsDialogState extends State<DrawingMeasurementsDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Change measurements'),
-      content: SizedBox(
-        width: 600,
-        height: 400,
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                children: [
-                  for (MeasurementCommand cmd in alteredDrawing.measurements)
-                    Column(
-                      children: [
-                        Row(
-                          children: [
-                            SizedBox(
-                              width: 150,
-                              child: Align(
-                                alignment: Alignment.centerRight,
-                                child: Text(cmd.label),
+    return KeyboardListener(
+      autofocus: true,
+      focusNode: FocusNode(),
+      onKeyEvent: (value) {
+        if (value.logicalKey == LogicalKeyboardKey.escape) {
+          Navigator.of(context).pop(null);
+        } else if (value.logicalKey == LogicalKeyboardKey.enter) {
+          Navigator.pop(context, alteredDrawing);
+        }
+      },
+      child: AlertDialog(
+        title: const Text('Change measurements'),
+        content: SizedBox(
+          width: 600,
+          height: 400,
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  children: [
+                    for (MeasurementCommand cmd in alteredDrawing.measurements)
+                      Column(
+                        children: [
+                          Row(
+                            children: [
+                              SizedBox(
+                                width: 150,
+                                child: Align(
+                                  alignment: Alignment.centerRight,
+                                  child: Text(cmd.label),
+                                ),
                               ),
-                            ),
-                            hspacing,
-                            if (cmd.unit == Unit.colour)
-                              CustomPopup(
-                                content: SizedBox(
-                                  width: 370,
-                                  height: 470,
-                                  child: Column(
-                                    children: [
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          SizedBox(
-                                            width: 350,
-                                            child: Center(
-                                              child: PickColourControl(
-                                                initialColor: Color(cmd.colourValue),
-                                                knownColours: widget.knownColours,
-                                                knownColoursLabel: 'Pattern colours',
-                                                onChanged: (Color newColor) {
-                                                  setState(() => alteredDrawing = alteredDrawing.copyWith(
-                                                    commands: alteredDrawing.commands.map((c) => c.id != cmd.id ? c :
-                                                      (c as MeasurementCommand).copyWith(colourValue: newColor.value)
-                                                    ).toList()
-                                                  ).validate());
-                                                },
+                              hspacing,
+                              if (cmd.unit == Unit.colour)
+                                CustomPopup(
+                                  content: SizedBox(
+                                    width: 370,
+                                    height: 470,
+                                    child: Column(
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            SizedBox(
+                                              width: 350,
+                                              child: Center(
+                                                child: PickColourControl(
+                                                  initialColor: Color(cmd.colourValue),
+                                                  knownColours: widget.knownColours,
+                                                  knownColoursLabel: 'Pattern colours',
+                                                  onChanged: (Color newColor) {
+                                                    setState(() => alteredDrawing = alteredDrawing.copyWith(
+                                                      commands: alteredDrawing.commands.map((c) => c.id != cmd.id ? c :
+                                                        (c as MeasurementCommand).copyWith(colourValue: newColor.value)
+                                                      ).toList()
+                                                    ).validate());
+                                                  },
+                                                ),
                                               ),
                                             ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  backgroundColor: Colors.transparent,
+                                  contentDecoration: BoxDecoration(
+                                    border: Border.all(color: Colors.grey),
+                                    borderRadius: const BorderRadius.all(Radius.circular(8)),
+                                    color: Colors.white
+                                  ),
+                                  arrowColor: Colors.grey,
+                                  child: ColourWell(
+                                    selected: false,
+                                    color: Color(cmd.colourValue)
+                                  )
+                                ),
+                              if (cmd.unit != Unit.colour)
+                                SizedBox(
+                                  width: 160,
+                                  child: SpinBox(
+                                    min: cmd.minValue,
+                                    max: cmd.maxValue,
+                                    value: cmd.value,
+                                    decimals: cmd.decimals,
+                                    step: 1 / pow(10, cmd.decimals),
+                                    onChanged: (value) {
+                                      setState(() => alteredDrawing = alteredDrawing.copyWith(
+                                        commands: alteredDrawing.commands.map((c) => c.id != cmd.id ? c :
+                                          (c as MeasurementCommand).copyWith(value: value)
+                                        ).toList()
+                                      ).validate());
+                                    },
                                   ),
                                 ),
-                                backgroundColor: Colors.transparent,
-                                contentDecoration: BoxDecoration(
-                                  border: Border.all(color: Colors.grey),
-                                  borderRadius: const BorderRadius.all(Radius.circular(8)),
-                                  color: Colors.white
-                                ),
-                                arrowColor: Colors.grey,
-                                child: ColourWell(
-                                  selected: false,
-                                  color: Color(cmd.colourValue)
-                                )
-                              ),
-                            if (cmd.unit != Unit.colour)
-                              SizedBox(
-                                width: 160,
-                                child: SpinBox(
-                                  min: cmd.minValue,
-                                  max: cmd.maxValue,
-                                  value: cmd.value,
-                                  decimals: cmd.decimals,
-                                  step: 1 / pow(10, cmd.decimals),
-                                  onChanged: (value) {
-                                    setState(() => alteredDrawing = alteredDrawing.copyWith(
-                                      commands: alteredDrawing.commands.map((c) => c.id != cmd.id ? c :
-                                        (c as MeasurementCommand).copyWith(value: value)
-                                      ).toList()
-                                    ).validate());
-                                  },
-                                ),
-                              ),
-                          ],
-                        ),
-                        vspacing,
-                      ],
-                    ),
-                ],
-              )
-            ),
-            SizedBox(
-              width: 250,
-              child: DrawingViewer(
-                drawing: alteredDrawing, 
-                selectedCommandId: null
+                            ],
+                          ),
+                          vspacing,
+                        ],
+                      ),
+                  ],
+                )
               ),
-            )
-          ],
+              SizedBox(
+                width: 250,
+                child: DrawingViewer(
+                  drawing: alteredDrawing, 
+                  selectedCommandId: null
+                ),
+              )
+            ],
+          ),
         ),
+        actions: [
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(null), 
+            child: const Text('Cancel')
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, alteredDrawing), 
+            child: const Text('OK')
+          )
+        ],
       ),
-      actions: [
-        ElevatedButton(
-          onPressed: () => Navigator.pop(context, null), 
-          child: const Text('Cancel')
-        ),
-        ElevatedButton(
-          onPressed: () => Navigator.pop(context, alteredDrawing), 
-          child: const Text('OK')
-        )
-      ],
     );
   }
 }
