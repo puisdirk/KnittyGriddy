@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
 import 'package:knitty_griddy/drawings/model/part_drawing.dart';
 import 'package:knitty_griddy/utils/constants.dart';
@@ -79,82 +80,95 @@ class _DrawingSettingsDialogState extends State<DrawingSettingsDialog> {
 
   static const double _kLabelWidth = 80;
 
+  void _confirm() {
+    if (widget.drawing is PartDrawing) {
+      Navigator.of(context).pop(
+        (widget.drawing as PartDrawing).copyWith(
+          name: name,
+          description: description,
+          category: category
+        )
+      );
+    } else {
+      Navigator.of(context).pop(
+        widget.drawing.abstractCopyWith(
+          name: name, 
+          description: description,
+      ));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Drawing settings'),
-      content: SizedBox(
-        width: 400,
-        height: 490,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const SizedBox(width: _kLabelWidth, child: Text('Name', textAlign: TextAlign.right)),
-                hspacing,
-                SizedBox(width: 300,
-                  child: TextField(
-                    controller: nameController,
-                  ),)
-              ],
-            ),
-            vspacing,
-            Row(
-              children: [
-                const SizedBox(width: _kLabelWidth, child: Text('Description', textAlign: TextAlign.right)),
-                hspacing,
-                SizedBox(width: 300,
-                  child: TextField(
-                    controller: descriptionController,
-                    maxLines: 3,
-                  ),)
-              ],
-            ),
-            vspacing,
-            if (widget.drawing is PartDrawing)
+    return KeyboardListener(
+      autofocus: true,
+      focusNode: FocusNode(),
+      onKeyEvent: (value) {
+        if (value.logicalKey == LogicalKeyboardKey.escape) {
+          Navigator.of(context).pop(null);
+        } else if (value.logicalKey == LogicalKeyboardKey.enter) {
+          _confirm();
+        }
+      },
+      child: AlertDialog(
+        title: const Text('Drawing settings'),
+        content: SizedBox(
+          width: 400,
+          height: 490,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
               Row(
                 children: [
-                  const SizedBox(width: _kLabelWidth, child: Text('Category', textAlign: TextAlign.right)),
+                  const SizedBox(width: _kLabelWidth, child: Text('Name', textAlign: TextAlign.right)),
                   hspacing,
                   SizedBox(width: 300,
                     child: TextField(
-                      controller: categoryController,
+                      controller: nameController,
                     ),)
                 ],
               ),
-          ],
+              vspacing,
+              Row(
+                children: [
+                  const SizedBox(width: _kLabelWidth, child: Text('Description', textAlign: TextAlign.right)),
+                  hspacing,
+                  SizedBox(width: 300,
+                    child: TextField(
+                      controller: descriptionController,
+                      maxLines: 3,
+                    ),)
+                ],
+              ),
+              vspacing,
+              if (widget.drawing is PartDrawing)
+                Row(
+                  children: [
+                    const SizedBox(width: _kLabelWidth, child: Text('Category', textAlign: TextAlign.right)),
+                    hspacing,
+                    SizedBox(width: 300,
+                      child: TextField(
+                        controller: categoryController,
+                      ),)
+                  ],
+                ),
+            ],
+          ),
         ),
+        actions: [
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop(null);
+            }, 
+            child: const Text('Cancel')
+          ),
+          ElevatedButton(
+            onPressed: _confirm, 
+            child: const Text('Ok')
+          )
+      
+        ],
       ),
-      actions: [
-        ElevatedButton(
-          onPressed: () {
-            Navigator.of(context).pop(null);
-          }, 
-          child: const Text('Cancel')
-        ),
-        ElevatedButton(
-          onPressed: () {
-            if (widget.drawing is PartDrawing) {
-              Navigator.of(context).pop(
-                (widget.drawing as PartDrawing).copyWith(
-                  name: name,
-                  description: description,
-                  category: category
-                )
-              );
-            } else {
-              Navigator.of(context).pop(
-                widget.drawing.abstractCopyWith(
-                  name: name, 
-                  description: description,
-              ));
-            }
-          }, 
-          child: const Text('Ok')
-        )
-
-      ],
     );
   }
 }

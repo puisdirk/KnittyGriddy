@@ -123,8 +123,7 @@ class _IncludedPartCommandControlState extends State<IncludedPartCommandControl>
                 PartInfo? partInfo = await showDialog(
                   barrierDismissible: false, 
                   context: context, 
-                  builder: (context) => 
-                  PartChooser(
+                  builder: (context) => PartChooser(
                     selectedPartInfo: 
                     PartInfo(
                       partDrawingId: widget.command.partDrawingId, 

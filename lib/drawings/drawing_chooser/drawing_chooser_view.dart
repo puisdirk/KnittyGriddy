@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:knitty_griddy/drawings/drawing_chooser/drawing_card.dart';
 import 'package:knitty_griddy/drawings/model/drawing_operation_exception.dart';
 import 'package:knitty_griddy/drawings/partrepo/part_repository_page.dart';
@@ -77,15 +78,25 @@ class _DrawingChooserViewState extends State<DrawingChooserView> {
                   await Provider.of<DrawingsModel>(context, listen: false).importDrawing();
                 } on DrawingOperationException catch(e) {
                   if (context.mounted) {
-                    showDialog(context: context, builder: (context) => 
-                      AlertDialog(
-                        content: SizedBox(width: 400, height: 100, child: Text(e.message)),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context), 
-                            child: const Text('Close'),
-                          ),
-                        ],
+                    showDialog(
+                      context: context,
+                      barrierDismissible: false, 
+                      builder: (context) => KeyboardListener(
+                        focusNode: FocusNode(),
+                        onKeyEvent: (value) {
+                          if (value.logicalKey == LogicalKeyboardKey.escape || value.logicalKey == LogicalKeyboardKey.enter) {
+                            Navigator.of(context).pop();
+                          }
+                        },
+                        child: AlertDialog(
+                          content: SizedBox(width: 400, height: 100, child: Text(e.message)),
+                          actions: [
+                            ElevatedButton(
+                              onPressed: () => Navigator.pop(context), 
+                              child: const Text('Close'),
+                            ),
+                          ],
+                        ),
                       )  
                     );
                   }

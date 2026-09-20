@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:knitty_griddy/charts/stitch_icon.dart';
 import 'package:knitty_griddy/charts/stitchrepo/stitch_set.dart';
 import 'package:knitty_griddy/utils/math_utitilies.dart';
@@ -96,70 +97,78 @@ class _StitchiconChooserDialogState extends State<StitchiconChooserDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Choose a stitch symbol'),
-      content: SizedBox(
-        width: 600,
-        height: 400,
-        child: Column(
-          children: [
-            Row(
-              children: [
-                const Text('Filter:'),
-                const SizedBox(width: 20,),
-                SizedBox(
-                  width: 500,
-                  child: TextField(controller: filterController, autofocus: true,),  
-                ),
-              ],
-            ),
-            const SizedBox(height: 20,),
-            Expanded(
-              child: Selector<ChartsModel, List<StitchSet>>(
-                selector: (_, model) => model.filteredStitchSets(filterText),
-                builder: (context, stitchSets, _) {
-                  return DefaultTabController(
-                    length: stitchSets.length,
-                    child: Column(
-                      children: [
-                        TabBar(tabs: [
-                          for (StitchSet stitchSet in stitchSets)
-                            Tab(text: stitchSet.name,)
-                        ]),
-                        Expanded(
-                          child: TabBarView(
-                            children: [
-                              for (StitchSet stitchSet in stitchSets)
-                                ListView(
-                                  children: [
-                                    for (String category in Set.from(stitchSet.definitions.map((d) => d.category)))
-                                      createCategory(category, stitchSet.definitions.where((d) => d.category == category).toList()),
-                                  ],
-                                ),
-                            ]
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }
+    return KeyboardListener(
+      focusNode: FocusNode(),
+      onKeyEvent: (value) {
+        if (value.logicalKey == LogicalKeyboardKey.escape) {
+          Navigator.of(context).pop(null);
+        } else if (value.logicalKey == LogicalKeyboardKey.enter) {
+          Navigator.of(context).pop(selectedDefinition);
+        }
+      },
+      child: AlertDialog(
+        title: const Text('Choose a stitch symbol'),
+        content: SizedBox(
+          width: 600,
+          height: 400,
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  const Text('Filter:'),
+                  const SizedBox(width: 20,),
+                  SizedBox(
+                    width: 500,
+                    child: TextField(controller: filterController, autofocus: true,),  
+                  ),
+                ],
               ),
-            ),
-          ],
+              const SizedBox(height: 20,),
+              Expanded(
+                child: Selector<ChartsModel, List<StitchSet>>(
+                  selector: (_, model) => model.filteredStitchSets(filterText),
+                  builder: (context, stitchSets, _) {
+                    return DefaultTabController(
+                      length: stitchSets.length,
+                      child: Column(
+                        children: [
+                          TabBar(tabs: [
+                            for (StitchSet stitchSet in stitchSets)
+                              Tab(text: stitchSet.name,)
+                          ]),
+                          Expanded(
+                            child: TabBarView(
+                              children: [
+                                for (StitchSet stitchSet in stitchSets)
+                                  ListView(
+                                    children: [
+                                      for (String category in Set.from(stitchSet.definitions.map((d) => d.category)))
+                                        createCategory(category, stitchSet.definitions.where((d) => d.category == category).toList()),
+                                    ],
+                                  ),
+                              ]
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                ),
+              ),
+            ],
+          ),
         ),
+        actions: [
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(), 
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: selectedDefinition == null ? null : () => Navigator.of(context).pop(selectedDefinition), 
+            child: const Text('Ok'),
+          )
+        ],
       ),
-      actions: [
-        ElevatedButton.icon(
-          onPressed: () => Navigator.of(context).pop(), 
-          label: const Text('Cancel'),
-          icon: const Icon(Symbols.close_small, weight: 700,),
-        ),
-        ElevatedButton.icon(
-          onPressed: selectedDefinition == null ? null : () => Navigator.pop(context, selectedDefinition), 
-          label: const Text('Ok'),
-          icon: const Icon(Icons.check),
-        )
-      ],
     );
   }
 }

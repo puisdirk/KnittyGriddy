@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:knitty_griddy/charts/maingrid/chart_page.dart';
 import 'package:knitty_griddy/charts/chart_chooser/chart_card.dart';
 import 'package:knitty_griddy/charts/chart_chooser/stitch_repository_page.dart';
@@ -71,16 +72,28 @@ class _ChartChooserViewState extends State<ChartChooserView> {
                   await Provider.of<ChartsModel>(context, listen: false).importChart();
                 } on ChartOperationException catch(e) {
                   if (context.mounted) {
-                    showDialog(context: context, builder: (context) => 
-                      AlertDialog(
-                        content: SizedBox(width: 400, height: 50, child: Text(e.message)),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context), 
-                            child: const Text('Close'),
+                    showDialog(
+                      context: context, 
+                      barrierDismissible: false, 
+                      builder: (context) => 
+                        KeyboardListener(
+                          focusNode: FocusNode(),
+                          onKeyEvent: (value) {
+                            if (value.logicalKey == LogicalKeyboardKey.escape || value.logicalKey == LogicalKeyboardKey.enter) {
+                              Navigator.of(context).pop(null);
+                            }
+                          },
+                          child: AlertDialog(
+                            content: SizedBox(width: 400, height: 50, child: Text(e.message)),
+                            actions: [
+                              ElevatedButton(
+                                autofocus: true,
+                                onPressed: () => Navigator.of(context).pop(), 
+                                child: const Text('Close'),
+                              ),
+                            ],
                           ),
-                        ],
-                      )  
+                        )  
                     );
                   }
                 }

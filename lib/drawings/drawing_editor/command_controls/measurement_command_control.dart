@@ -242,7 +242,8 @@ class _MeasurementCommandControlState extends State<MeasurementCommandControl> {
                     GestureDetector(
                       onTap: () async {
                         Color? newColor = await showDialog(
-                          context: context, 
+                          context: context,
+                          barrierDismissible: false,
                           builder: (context) => PickColourDialog(
                             initialColor: Color(widget.command.colourValue),
                             knownColours: widget.drawing.knownColours,

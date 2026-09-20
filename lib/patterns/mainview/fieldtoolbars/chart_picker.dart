@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:knitty_griddy/charts/model/chart_info.dart';
 import 'package:knitty_griddy/charts/model/charts_model.dart';
 import 'package:knitty_griddy/utils/constants.dart';
-import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
 class ChartPicker extends StatefulWidget {
@@ -67,53 +67,65 @@ class _ChartPickerState extends State<ChartPicker> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Select chart'),
-      content: SizedBox(
-        width: 600,
-        height: 400,
-        child: Column(
-          children: [
-            Row(
-              children: [
-                const Text('Filter'),
-                hspacing,
-                SizedBox(
-                  width: 500,
-                  child: TextField(controller: _filterController, autofocus: true,),
+    return KeyboardListener(
+      focusNode: FocusNode(),
+      onKeyEvent: (value) {
+        if (value.logicalKey == LogicalKeyboardKey.escape) {
+          Navigator.of(context).pop(null);
+        } else if (value.logicalKey == LogicalKeyboardKey.enter) {
+          if (selectedChartInfo == null || selectedChartInfo == ChartInfo.emptyChartInfo) {
+            Navigator.of(context).pop(null);
+          } else {
+            Navigator.of(context).pop(selectedChartInfo);
+          }
+        }
+      },
+      child: AlertDialog(
+        title: const Text('Select chart'),
+        content: SizedBox(
+          width: 600,
+          height: 400,
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  const Text('Filter'),
+                  hspacing,
+                  SizedBox(
+                    width: 500,
+                    child: TextField(controller: _filterController, autofocus: true,),
+                  )
+                ],
+              ),
+              vspacing,
+              Expanded(
+                child: Selector<ChartsModel, List<ChartInfo>>(
+                  selector: (_, model) => model.filteredChartInfos(_filterText),
+                  builder: (context, chartInfos, _) {
+                    return Wrap(
+                      children: [
+                        for (ChartInfo chartInfo in chartInfos)
+                          _chartInfoCard(chartInfo),
+                      ],
+                    );
+                  }
                 )
-              ],
-            ),
-            vspacing,
-            Expanded(
-              child: Selector<ChartsModel, List<ChartInfo>>(
-                selector: (_, model) => model.filteredChartInfos(_filterText),
-                builder: (context, chartInfos, _) {
-                  return Wrap(
-                    children: [
-                      for (ChartInfo chartInfo in chartInfos)
-                        _chartInfoCard(chartInfo),
-                    ],
-                  );
-                }
               )
-            )
-          ],
+            ],
+          ),
         ),
+        actions: [
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(null), 
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: selectedChartInfo == null || selectedChartInfo == ChartInfo.emptyChartInfo ? null : 
+              () => Navigator.of(context).pop(selectedChartInfo), 
+            child: const Text('Choose'),
+          )
+        ],
       ),
-      actions: [
-        ElevatedButton.icon(
-          onPressed: () => Navigator.of(context).pop(null), 
-          label: const Text('Cancel'),
-          icon: const Icon(Icons.cancel_outlined),
-        ),
-        ElevatedButton.icon(
-          onPressed: selectedChartInfo == null || selectedChartInfo == ChartInfo.emptyChartInfo ? null : 
-            () => Navigator.of(context).pop(selectedChartInfo), 
-          label: const Text('Choose'),
-          icon: const Icon(Symbols.close_small, weight: 700,),
-        )
-      ],
     );
   }
 }

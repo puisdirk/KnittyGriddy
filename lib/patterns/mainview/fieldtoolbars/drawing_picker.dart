@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:knitty_griddy/drawings/model/drawing_info.dart';
 import 'package:knitty_griddy/drawings/model/drawings_model.dart';
 import 'package:knitty_griddy/utils/constants.dart';
@@ -67,53 +68,65 @@ class _DrawingPickerState extends State<DrawingPicker> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Select drawing'),
-      content: SizedBox(
-        width: 600,
-        height: 400,
-        child: Column(
-          children: [
-            Row(
-              children: [
-                const Text('Filter'),
-                hspacing,
-                SizedBox(
-                  width: 500,
-                  child: TextField(controller: _filterController, autofocus: true,),
+    return KeyboardListener(
+      focusNode: FocusNode(),
+      onKeyEvent: (value) {
+        if (value.logicalKey == LogicalKeyboardKey.escape) {
+          Navigator.of(context).pop(null);
+        } else if (value.logicalKey == LogicalKeyboardKey.enter) {
+          if (selectedDrawingInfo == null || selectedDrawingInfo == DrawingInfo.emptyDrawingInfo) {
+            Navigator.of(context).pop(null);
+          } else {
+            Navigator.of(context).pop(selectedDrawingInfo);
+          }
+        }
+      },
+      child: AlertDialog(
+        title: const Text('Select drawing'),
+        content: SizedBox(
+          width: 600,
+          height: 400,
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  const Text('Filter'),
+                  hspacing,
+                  SizedBox(
+                    width: 500,
+                    child: TextField(controller: _filterController, autofocus: true,),
+                  )
+                ],
+              ),
+              vspacing,
+              Expanded(
+                child: Selector<DrawingsModel, List<DrawingInfo>>(
+                  selector: (_, model) => model.filteredDrawingInfos(_filterText),
+                  builder: (context, drawingInfos, _) {
+                    return Wrap(
+                      children: [
+                        for (DrawingInfo drawingInfo in drawingInfos)
+                          _drawingInfoCard(drawingInfo),
+                      ],
+                    );
+                  }
                 )
-              ],
-            ),
-            vspacing,
-            Expanded(
-              child: Selector<DrawingsModel, List<DrawingInfo>>(
-                selector: (_, model) => model.filteredDrawingInfos(_filterText),
-                builder: (context, drawingInfos, _) {
-                  return Wrap(
-                    children: [
-                      for (DrawingInfo drawingInfo in drawingInfos)
-                        _drawingInfoCard(drawingInfo),
-                    ],
-                  );
-                }
               )
-            )
-          ],
+            ],
+          ),
         ),
+        actions: [
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(null), 
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: selectedDrawingInfo == null || selectedDrawingInfo == DrawingInfo.emptyDrawingInfo ? null : 
+              () => Navigator.of(context).pop(selectedDrawingInfo), 
+            child: const Text('Choose'),
+          )
+        ],
       ),
-      actions: [
-        ElevatedButton.icon(
-          onPressed: () => Navigator.of(context).pop(null), 
-          label: const Text('Cancel'),
-          icon: const Icon(Icons.cancel_outlined),
-        ),
-        ElevatedButton.icon(
-          onPressed: selectedDrawingInfo == null || selectedDrawingInfo == DrawingInfo.emptyDrawingInfo ? null : 
-            () => Navigator.of(context).pop(selectedDrawingInfo), 
-          label: const Text('Choose'),
-          icon: const Icon(Symbols.close_small, weight: 700,),
-        )
-      ],
     );
   }
 }

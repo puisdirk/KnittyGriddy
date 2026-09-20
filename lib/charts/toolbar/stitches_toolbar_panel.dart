@@ -108,10 +108,11 @@ class StitchesToolbarPanel extends StatelessWidget {
                   children: [
                     IconButton.outlined(
                       onPressed: () {
-//                        Navigator.of(context).push(
-//                          MaterialPageRoute(builder: (context) => const StitchRepoPage())
-//                        );
-                        showDialog(context: context, builder: (context) => const StitchChooser(),);
+                        showDialog(
+                          context: context,
+                          barrierDismissible: false, 
+                          builder: (context) => const StitchChooser()
+                        );
                       }, 
                       icon: const Icon(Icons.add)
                     ),

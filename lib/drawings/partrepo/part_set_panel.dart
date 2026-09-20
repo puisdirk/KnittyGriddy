@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:grouped_scroll_view/grouped_scroll_view.dart';
 import 'package:id_gen/id_gen.dart';
 import 'package:knitty_griddy/drawings/drawing_part_icon.dart';
@@ -56,15 +57,25 @@ class _PartSetPanelState extends State<PartSetPanel> {
                     await Provider.of<DrawingsModel>(context, listen: false).exportPartSet(widget.partSet);
                   } on DrawingOperationException catch(e) {
                     if (context.mounted) {
-                      showDialog(context: context, builder: (context) => 
-                        AlertDialog(
-                          content: SizedBox(width: 400, height: 50, child: Text(e.message)),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(context), 
-                              child: const Text('Close'),
-                            ),
-                          ],
+                      showDialog(
+                        context: context,
+                        barrierDismissible: false, 
+                        builder: (context) => KeyboardListener(
+                          focusNode: FocusNode(),
+                          onKeyEvent: (value) {
+                            if (value.logicalKey == LogicalKeyboardKey.escape || value.logicalKey == LogicalKeyboardKey.enter) {
+                              Navigator.of(context).pop();
+                            }
+                          },
+                          child: AlertDialog(
+                            content: SizedBox(width: 400, height: 50, child: Text(e.message)),
+                            actions: [
+                              ElevatedButton(
+                                onPressed: () => Navigator.pop(context), 
+                                child: const Text('Close'),
+                              ),
+                            ],
+                          ),
                         )  
                       );
                     }
@@ -79,25 +90,35 @@ class _PartSetPanelState extends State<PartSetPanel> {
                   if (widget.partSet.partDrawings.isNotEmpty) {
                     showDialog(
                       context: context, 
-                      builder: (context) => AlertDialog(
-                        title: const Text('Are you sure?'),
-                        content: SizedBox(
-                          height: 50,
-                          child: Text('Are you sure you want to delete set "${widget.partSet.name}"? All its parts will be deleted.'),
+                      barrierDismissible: false,
+                      builder: (context) => KeyboardListener(
+                        focusNode: FocusNode(),
+                        onKeyEvent: (value) {
+                          if (value.logicalKey == LogicalKeyboardKey.escape) {
+                            Navigator.of(context).pop();
+                          }
+                        },
+                        child: AlertDialog(
+                          title: const Text('Are you sure?'),
+                          content: SizedBox(
+                            height: 50,
+                            child: Text('Are you sure you want to delete set "${widget.partSet.name}"? All its parts will be deleted.'),
+                          ),
+                          actions: [
+                            ElevatedButton(
+                              autofocus: true,
+                              onPressed: () => Navigator.pop(context), 
+                              child: const Text('No')
+                            ),
+                            ElevatedButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                                Provider.of<DrawingsModel>(context, listen: false).deletePartSet(widget.partSet.id);
+                              },
+                              child: const Text('Yes')
+                            ),
+                          ],
                         ),
-                        actions: [
-                          OutlinedButton(
-                            onPressed: () => Navigator.pop(context), 
-                            child: const Text('Cancel')
-                          ),
-                          OutlinedButton(
-                            onPressed: () {
-                              Provider.of<DrawingsModel>(context, listen: false).deletePartSet(widget.partSet.id);
-                              Navigator.pop(context);
-                            },
-                            child: const Text('OK')
-                          ),
-                        ],
                       ),
                     );
                   } else {
@@ -126,15 +147,25 @@ class _PartSetPanelState extends State<PartSetPanel> {
                     await Provider.of<DrawingsModel>(context, listen: false).importPartDrawing(widget.partSet.id);
                   } on DrawingOperationException catch(e) {
                     if (context.mounted) {
-                      showDialog(context: context, builder: (context) => 
-                        AlertDialog(
-                          content: SizedBox(width: 400, height: 50, child: Text(e.message)),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(context), 
-                              child: const Text('Close'),
-                            ),
-                          ],
+                      showDialog(
+                        context: context,
+                        barrierDismissible: false, 
+                        builder: (context) => KeyboardListener(
+                          focusNode: FocusNode(),
+                          onKeyEvent: (value) {
+                            if (value.logicalKey == LogicalKeyboardKey.escape || value.logicalKey == LogicalKeyboardKey.enter) {
+                              Navigator.of(context).pop();
+                            }
+                          },
+                          child: AlertDialog(
+                            content: SizedBox(width: 400, height: 50, child: Text(e.message)),
+                            actions: [
+                              ElevatedButton(
+                                onPressed: () => Navigator.pop(context), 
+                                child: const Text('Close'),
+                              ),
+                            ],
+                          ),
                         )  
                       );
                     }
@@ -219,25 +250,35 @@ class _PartSetPanelState extends State<PartSetPanel> {
                         ),
                         IconButton(
                           onPressed: () {
-                            showDialog(context: context, builder: (context) {
-                              return AlertDialog(
-                                title: const Text('Delete part'),
-                                content: const Text('Are you sure you want to delete the drawing? This action cannot be undone'),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () => Navigator.pop(context), 
-                                    child: const Text('Cancel')
-                                  ),
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                      Provider.of<DrawingsModel>(context, listen: false).deletePartDrawing(partDrawing);
-                                    },
-                                    child: const Text('Delete')
-                                  ),
-                                ],
-                              );
-                            });
+                            showDialog(
+                              context: context,
+                              barrierDismissible: false, 
+                              builder: (context) => KeyboardListener(
+                                focusNode: FocusNode(),
+                                onKeyEvent: (value) {
+                                  if (value.logicalKey == LogicalKeyboardKey.escape) {
+                                    Navigator.of(context).pop();
+                                  }
+                                },
+                                child: AlertDialog(
+                                  title: const Text('Delete part'),
+                                  content: const Text('Are you sure you want to delete the drawing? This action cannot be undone'),
+                                  actions: [
+                                    ElevatedButton(
+                                      autofocus: true,
+                                      onPressed: () => Navigator.pop(context), 
+                                      child: const Text('No')
+                                    ),
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                        Provider.of<DrawingsModel>(context, listen: false).deletePartDrawing(partDrawing);
+                                      },
+                                      child: const Text('Yes')
+                                    ),
+                                  ],
+                                ),
+                              ));
                           }, 
                           icon: const Icon(Icons.delete),
                         ),
@@ -296,25 +337,35 @@ class _PartSetPanelState extends State<PartSetPanel> {
                                 ),
                                 IconButton(
                                   onPressed: () {
-                                    showDialog(context: context, builder: (context) {
-                                      return AlertDialog(
-                                        title: const Text('Delete part'),
-                                        content: const Text('Are you sure you want to delete the drawing? This action cannot be undone'),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () => Navigator.pop(context), 
-                                            child: const Text('Cancel')
-                                          ),
-                                          TextButton(
-                                            onPressed: () {
-                                              Navigator.pop(context);
-                                              Provider.of<DrawingsModel>(context, listen: false).deletePartDrawing(partDrawing);
-                                            },
-                                            child: const Text('Delete')
-                                          ),
-                                        ],
-                                      );
-                                    });
+                                    showDialog(
+                                      context: context,
+                                      barrierDismissible: false, 
+                                      builder: (context) => KeyboardListener(
+                                        focusNode: FocusNode(),
+                                        onKeyEvent: (value) {
+                                          if (value.logicalKey == LogicalKeyboardKey.escape) {
+                                            Navigator.of(context).pop();
+                                          }
+                                        },
+                                        child: AlertDialog(
+                                          title: const Text('Delete part'),
+                                          content: const Text('Are you sure you want to delete the drawing? This action cannot be undone'),
+                                          actions: [
+                                            ElevatedButton(
+                                              autofocus: true,
+                                              onPressed: () => Navigator.pop(context), 
+                                              child: const Text('Cancel')
+                                            ),
+                                            ElevatedButton(
+                                              onPressed: () {
+                                                Navigator.pop(context);
+                                                Provider.of<DrawingsModel>(context, listen: false).deletePartDrawing(partDrawing);
+                                              },
+                                              child: const Text('Delete')
+                                            ),
+                                          ],
+                                        ),
+                                      ));
                                   }, 
                                   icon: const Icon(Icons.delete),
                                 ),

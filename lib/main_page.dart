@@ -46,7 +46,22 @@ class _MainPageState extends State<MainPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Knitty-Griddy'),
+        title: Row(
+          children: [
+            const Spacer(),
+            const Text('Knitty-Griddy'),
+            const Spacer(),
+            IconButton(
+              onPressed: () => showLicensePage(
+                context: context,
+                applicationName: 'Knitty-Griddy',
+                applicationVersion: '1.0.0',
+                applicationLegalese: 'hideliho'
+              ), 
+              icon: const Icon(Icons.info_outline)
+            ),
+          ],
+        ),
         backgroundColor: Colors.grey.shade300,
       ),
       body: DefaultTabController(

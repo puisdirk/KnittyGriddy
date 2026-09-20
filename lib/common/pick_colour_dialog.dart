@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:knitty_griddy/common/pick_colour_control.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 
@@ -39,26 +40,37 @@ class _PickColourDialogState extends State<PickColourDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Pick a colour'),
-      content: SizedBox(
-        height: kColourPickerHeight + (widget.knownColours.isNotEmpty ? kKnowColoursHeight : 0),
-        child: PickColourControl(
-          initialColor: currentColour,
-          knownColours: widget.knownColours,
-          onChanged: _colorChanged,
+    return KeyboardListener(
+      autofocus: true,
+      focusNode: FocusNode(),
+      onKeyEvent: (value) {
+        if (value.logicalKey == LogicalKeyboardKey.escape) {
+          Navigator.of(context).pop(null);
+        } else if (value.logicalKey == LogicalKeyboardKey.enter) {
+          Navigator.of(context).pop(currentColour);
+        }
+      },
+      child: AlertDialog(
+        title: const Text('Pick a colour'),
+        content: SizedBox(
+          height: kColourPickerHeight + (widget.knownColours.isNotEmpty ? kKnowColoursHeight : 0),
+          child: PickColourControl(
+            initialColor: currentColour,
+            knownColours: widget.knownColours,
+            onChanged: _colorChanged,
+          ),
         ),
+        actions: [
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, null), 
+            child: const Text('Cancel')
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, currentColour), 
+            child: const Text('OK')
+          )
+        ],
       ),
-      actions: [
-        ElevatedButton(
-          onPressed: () => Navigator.pop(context, null), 
-          child: const Text('Cancel')
-        ),
-        ElevatedButton(
-          onPressed: () => Navigator.pop(context, currentColour), 
-          child: const Text('OK')
-        )
-      ],
     );
   }
 }

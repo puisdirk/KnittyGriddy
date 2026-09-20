@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:knitty_griddy/drawings/drawing_part_icon.dart';
 import 'package:knitty_griddy/drawings/model/drawings_model.dart';
 import 'package:knitty_griddy/drawings/model/part_info.dart';
@@ -100,70 +101,79 @@ class _PartChooserState extends State<PartChooser> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Select Part'),
-      content: SizedBox(
-        width: 600,
-        height: 400,
-        child: Column(
-          children: [
-            Row(
-              children: [
-                const Text('Filter:'),
-                const SizedBox(width: 20,),
-                SizedBox(
-                  width: 500,
-                  child: TextField(controller: filterController, autofocus: true,),  
-                ),
-              ],
-            ),
-            const SizedBox(height: 20,),
-            Expanded(
-              child: Selector<DrawingsModel, List<PartSetInfo>>(
-                selector: (_, model) => model.filteredPartSetInfos(filterText),
-                builder: (context, partSetsInfos, _) {
-                  return DefaultTabController(
-                    length: partSetsInfos.length,
-                    child: Column(
-                      children: [
-                        TabBar(tabs: [
-                          for (PartSetInfo partSetInfo in partSetsInfos)
-                            Tab(text: partSetInfo.setName,)
-                        ]),
-                        Expanded(
-                          child: TabBarView(
-                            children: [
-                              for (PartSetInfo partSetInfo in partSetsInfos)
-                                ListView(
-                                  children: [
-                                    for (String category in Set.from(partSetInfo.partInfos.map((d) => d.category)))
-                                      createCategory(category, partSetInfo.partInfos.where((d) => d.category == category).map((d) => d).toList()),
-                                  ],
-                                ),
-                            ]
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }
+    return KeyboardListener(
+      autofocus: true,
+      focusNode: FocusNode(),
+      onKeyEvent: (value) {
+        if (value.logicalKey == LogicalKeyboardKey.escape) {
+          Navigator.of(context).pop(null);
+        } else if (value.logicalKey == LogicalKeyboardKey.enter) {
+          Navigator.of(context).pop(selectedPartInfo);
+        }
+      },
+      child: AlertDialog(
+        title: const Text('Select Part'),
+        content: SizedBox(
+          width: 600,
+          height: 400,
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  const Text('Filter:'),
+                  const SizedBox(width: 20,),
+                  SizedBox(
+                    width: 500,
+                    child: TextField(controller: filterController, autofocus: true,),  
+                  ),
+                ],
               ),
-            ),
-          ],
+              const SizedBox(height: 20,),
+              Expanded(
+                child: Selector<DrawingsModel, List<PartSetInfo>>(
+                  selector: (_, model) => model.filteredPartSetInfos(filterText),
+                  builder: (context, partSetsInfos, _) {
+                    return DefaultTabController(
+                      length: partSetsInfos.length,
+                      child: Column(
+                        children: [
+                          TabBar(tabs: [
+                            for (PartSetInfo partSetInfo in partSetsInfos)
+                              Tab(text: partSetInfo.setName,)
+                          ]),
+                          Expanded(
+                            child: TabBarView(
+                              children: [
+                                for (PartSetInfo partSetInfo in partSetsInfos)
+                                  ListView(
+                                    children: [
+                                      for (String category in Set.from(partSetInfo.partInfos.map((d) => d.category)))
+                                        createCategory(category, partSetInfo.partInfos.where((d) => d.category == category).map((d) => d).toList()),
+                                    ],
+                                  ),
+                              ]
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                ),
+              ),
+            ],
+          ),
         ),
+        actions: [
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(null), 
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: selectedPartInfo == null ? null : () => Navigator.of(context).pop(selectedPartInfo), 
+            child: const Text('Choose'),
+          )
+        ],
       ),
-      actions: [
-        ElevatedButton.icon(
-          onPressed: () => Navigator.of(context).pop(null), 
-          label: const Text('Cancel'),
-          icon: const Icon(Icons.cancel_outlined),
-        ),
-        ElevatedButton.icon(
-          onPressed: selectedPartInfo == null ? null : () => Navigator.of(context).pop(selectedPartInfo), 
-          label: const Text('Choose'),
-          icon: const Icon(Symbols.close_small, weight: 700,),
-        )
-      ],
     );
   }
 }

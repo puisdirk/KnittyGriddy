@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:knitty_griddy/charts/chart_chooser/stitch_set_name_control.dart';
 import 'package:knitty_griddy/charts/chart_chooser/stitch_set_panel.dart';
 import 'package:knitty_griddy/charts/model/chart_operation_exception.dart';
@@ -111,16 +112,28 @@ class _StitchRepositoryPageState extends State<StitchRepositoryPage> with Ticker
                             }
                           } on ChartOperationException catch(e) {
                             if (context.mounted) {
-                              showDialog(context: context, builder: (context) => 
-                                AlertDialog(
-                                  content: SizedBox(width: 400, height: 50, child: Text(e.message)),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => Navigator.pop(context), 
-                                      child: const Text('Close'),
+                              showDialog(
+                                context: context, 
+                                barrierDismissible: false, 
+                                builder: (context) => 
+                                  KeyboardListener(
+                                    focusNode: FocusNode(),
+                                    onKeyEvent: (value) {
+                                      if (value.logicalKey == LogicalKeyboardKey.escape || value.logicalKey == LogicalKeyboardKey.enter) {
+                                        Navigator.of(context).pop(null);
+                                      }
+                                    },
+                                    child: AlertDialog(
+                                      content: SizedBox(width: 400, height: 50, child: Text(e.message)),
+                                      actions: [
+                                        ElevatedButton(
+                                          autofocus: true,
+                                          onPressed: () => Navigator.of(context).pop(), 
+                                          child: const Text('Close'),
+                                        ),
+                                      ],
                                     ),
-                                  ],
-                                )  
+                                  )
                               );
                             }
                           }

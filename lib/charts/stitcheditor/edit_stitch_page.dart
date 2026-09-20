@@ -135,29 +135,34 @@ class _EditStitchPageState extends State<EditStitchPage> {
         actions: [
           IconButton(
             onPressed: () {
-              // set up the AlertDialog
-              AlertDialog alert = AlertDialog(
-                title: const Text("Are you sure"),
-                content: const Text('Are you sure you want to delete the stitch? This action cannot be undone'),
-                actions: [
-                  TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('No')),
-                  TextButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        Navigator.pop(context);
-                        Provider.of<ChartsModel>(context, listen: false).deleteStitch(stitchDefinition);
-                      },
-                      child: const Text('Yes')),
-                ],
-              );
-              // show the dialog
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return alert;
-                },
+              showDialog(context: context,
+                barrierDismissible: false, 
+                builder: (context) => KeyboardListener(
+                  focusNode: FocusNode(),
+                  onKeyEvent: (value) {
+                    if (value.logicalKey == LogicalKeyboardKey.escape) {
+                      Navigator.of(context).pop();
+                    }
+                  },
+                  child: AlertDialog(
+                    title: const Text("Are you sure"),
+                    content: const Text('Are you sure you want to delete the stitch? This action cannot be undone'),
+                    actions: [
+                      ElevatedButton(
+                        autofocus: true,
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: const Text('No')),
+                      ElevatedButton(
+                        onPressed: () {
+                          // Double pop to take us out of the dlg and out of the edit stitch page
+                          Navigator.of(context).pop();
+                          Navigator.of(context).pop();
+                          Provider.of<ChartsModel>(context, listen: false).deleteStitch(stitchDefinition);
+                        },
+                        child: const Text('Yes')),
+                    ],
+                  ),
+                )
               );
             }, 
             icon: const Icon(Icons.delete)

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:grouped_scroll_view/grouped_scroll_view.dart';
 import 'package:id_gen/id_gen.dart';
 import 'package:knitty_griddy/charts/chart_chooser/move_stitch_to_set_menu.dart';
@@ -54,16 +55,28 @@ class _StitchSetPanelState extends State<StitchSetPanel> {
                     await Provider.of<ChartsModel>(context, listen: false).exportStitchesSet(widget.stitchSet);
                   } on ChartOperationException catch(e) {
                     if (context.mounted) {
-                      showDialog(context: context, builder: (context) => 
-                        AlertDialog(
-                          content: SizedBox(width: 400, height: 50, child: Text(e.message)),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(context), 
-                              child: const Text('Close'),
+                      showDialog(
+                        context: context, 
+                        barrierDismissible: false, 
+                        builder: (context) => 
+                          KeyboardListener(
+                            focusNode: FocusNode(),
+                            onKeyEvent: (value) {
+                              if (value.logicalKey == LogicalKeyboardKey.escape || value.logicalKey == LogicalKeyboardKey.enter) {
+                                Navigator.of(context).pop(null);
+                              }
+                            },
+                            child: AlertDialog(
+                              content: SizedBox(width: 400, height: 50, child: Text(e.message)),
+                              actions: [
+                                ElevatedButton(
+                                  autofocus: true,
+                                  onPressed: () => Navigator.of(context).pop(), 
+                                  child: const Text('Close'),
+                                ),
+                              ],
                             ),
-                          ],
-                        )  
+                          )  
                       );
                     }
                   }
@@ -88,25 +101,35 @@ class _StitchSetPanelState extends State<StitchSetPanel> {
                 onPressed: () {
                   showDialog(
                     context: context, 
-                    builder: (context) => AlertDialog(
-                      title: const Text('Are you sure?'),
-                      content: SizedBox(
-                        height: 50,
-                        child: Text('Are you sure you want to delete set "${widget.stitchSet.name}"? All its stitches will be deleted.'),
+                    barrierDismissible: false,
+                    builder: (context) => KeyboardListener(
+                      focusNode: FocusNode(),
+                      onKeyEvent: (value) {
+                        if (value.logicalKey == LogicalKeyboardKey.escape) {
+                          Navigator.of(context).pop();
+                        }
+                      },
+                      child: AlertDialog(
+                        title: const Text('Are you sure?'),
+                        content: SizedBox(
+                          height: 50,
+                          child: Text('Are you sure you want to delete set "${widget.stitchSet.name}"? All its stitches will be deleted.'),
+                        ),
+                        actions: [
+                          ElevatedButton(
+                            autofocus: true,
+                            onPressed: () => Navigator.of(context).pop(), 
+                            child: const Text('Cancel')
+                          ),
+                          ElevatedButton(
+                            onPressed: () {
+                              Provider.of<ChartsModel>(context, listen: false).deleteStitchSet(widget.stitchSet.id);
+                              Navigator.of(context).pop();
+                            },
+                            child: const Text('OK')
+                          ),
+                        ],
                       ),
-                      actions: [
-                        OutlinedButton(
-                          onPressed: () => Navigator.pop(context), 
-                          child: const Text('Cancel')
-                        ),
-                        OutlinedButton(
-                          onPressed: () {
-                            Provider.of<ChartsModel>(context, listen: false).deleteStitchSet(widget.stitchSet.id);
-                            Navigator.pop(context);
-                          },
-                          child: const Text('OK')
-                        ),
-                      ],
                     ),
                   );
                 }, 
@@ -188,24 +211,36 @@ class _StitchSetPanelState extends State<StitchSetPanel> {
                       ),
                       IconButton(
                         onPressed: () {
-                          showDialog(context: context, builder: (context) {
-                            return AlertDialog(
-                              title: const Text('Delete stitch'),
-                              content: const Text('Are you sure you want to delete the stitch? This action cannot be undone'),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context), 
-                                  child: const Text('Cancel')
+                          showDialog(
+                            context: context, 
+                            barrierDismissible: false, 
+                            builder: (context) {
+                              return KeyboardListener(
+                                focusNode: FocusNode(),
+                                onKeyEvent: (value) {
+                                  if (value.logicalKey == LogicalKeyboardKey.escape) {
+                                    Navigator.of(context).pop();
+                                  }
+                                },
+                                child: AlertDialog(
+                                  title: const Text('Delete stitch'),
+                                  content: const Text('Are you sure you want to delete the stitch? This action cannot be undone'),
+                                  actions: [
+                                    ElevatedButton(
+                                      autofocus: true,
+                                      onPressed: () => Navigator.of(context).pop(), 
+                                      child: const Text('Cancel')
+                                    ),
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                        Provider.of<ChartsModel>(context, listen: false).deleteStitch(def);
+                                      }, 
+                                      child: const Text('Delete')
+                                    )
+                                  ],
                                 ),
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                    Provider.of<ChartsModel>(context, listen: false).deleteStitch(def);
-                                  }, 
-                                  child: const Text('Delete')
-                                )
-                              ],
-                            );
+                              );
                           });
                         }, 
                         icon: const Icon(Icons.delete),

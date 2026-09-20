@@ -24,7 +24,6 @@ class PatternFieldControl extends StatefulWidget {
   final ChangeNotifier? fieldChangeNotifier;
   final GlobalKey? editorKey;
   final bool selected;
-  final bool viewMode;
   final void Function() onSelect;
   final void Function(String fieldId) onDelete;
   final void Function(PatternField changedField) onChanged;
@@ -36,7 +35,6 @@ class PatternFieldControl extends StatefulWidget {
     required this.fieldChangeNotifier,
     this.editorKey,
     required this.selected,
-    required this.viewMode,
     required this.onSelect,
     required this.onDelete,
     required this.onChanged,
@@ -105,7 +103,7 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
 
   Widget get _draggerRegion {
     return MouseRegion(
-      cursor: widget.viewMode ? SystemMouseCursors.basic : SystemMouseCursors.grab,
+      cursor: SystemMouseCursors.basic,
       child: Draggable(
         feedback: Container(
           color: Colors.transparent,
@@ -129,65 +127,62 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
             positionY: positionY
           ));
         },
-        child: Visibility(
-          visible: !widget.viewMode, maintainSize: true,maintainAnimation: true,maintainState: true,
-          child: GestureDetector(
-            onTap: widget.onSelect,
-            child: SizedBox(
-              width: width,
-              height: kDraggerHeight,
-              child: Container(
-                color: widget.selected ? Colors.green.shade700.withAlpha(50) : Colors.grey.shade400.withAlpha(50),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    hspacing,
-                    if (widget.field.fieldType == PatternFieldType.drawing && (widget.field as PatternDrawingField).drawing != null && !(widget.field as PatternDrawingField).drawing!.valid)
-                      const Tooltip(
-                        message: 'Drawing is not valid',
-                        child: Padding(
-                          padding: EdgeInsets.only(left: 4.0),
-                          child: Icon(Icons.warning_amber, size: 16, color: Colors.red,),
-                        )
-                      ),
-                    if (widget.field.fieldType == PatternFieldType.texteditor && (widget.field as PatternTextEditorField).overflowing)
-                      const Tooltip(
-                        message: 'Field may be too small to show all text',
-                        child: Padding(
-                          padding: EdgeInsets.only(left: 4.0),
-                          child: Icon(Icons.warning_amber, size: 16, color: Colors.red),
-                        )
-                      ),
-                    // Linked text field, we can reflow
-                    if (widget.field.fieldType == PatternFieldType.texteditor && widget.knittingPattern.textFieldLinks.hasLink(widget.field.id))
-                      Padding(
-                        padding: const EdgeInsets.only(left: 4.0),
-                        child: MouseRegion(
-                          cursor: SystemMouseCursors.click,
-                          child: GestureDetector(
-                            onTap: widget.onReflow,
-                            child: const Icon(Symbols.conversion_path, size: 16)
-                          )
-                        ),
-                      ),
-                    const Spacer(),
-                    if (width > 102)
-                      Text(widget.field.fieldType.label),
-                    const Spacer(),
-                    if (widget.field.fieldType == PatternFieldType.drawing && (widget.field as PatternDrawingField).drawing != null && !(widget.field as PatternDrawingField).drawing!.valid)
-                      const Spacer(),
-                    MouseRegion(
-                      cursor: SystemMouseCursors.click,
-                      child: GestureDetector(
-                        onTap: () {
-                          Timer(const Duration(milliseconds: 10), () => widget.onDelete(widget.field.id));
-                        },
-                        child: const Icon(Icons.delete_outlined, size: 16,)
+        child: GestureDetector(
+          onTap: widget.onSelect,
+          child: SizedBox(
+            width: width,
+            height: kDraggerHeight,
+            child: Container(
+              color: widget.selected ? Colors.green.shade700.withAlpha(50) : Colors.grey.shade400.withAlpha(50),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  hspacing,
+                  if (widget.field.fieldType == PatternFieldType.drawing && (widget.field as PatternDrawingField).drawing != null && !(widget.field as PatternDrawingField).drawing!.valid)
+                    const Tooltip(
+                      message: 'Drawing is not valid',
+                      child: Padding(
+                        padding: EdgeInsets.only(left: 4.0),
+                        child: Icon(Icons.warning_amber, size: 16, color: Colors.red,),
                       )
                     ),
-                    hspacing,
-                  ]
-                ),
+                  if (widget.field.fieldType == PatternFieldType.texteditor && (widget.field as PatternTextEditorField).overflowing)
+                    const Tooltip(
+                      message: 'Field may be too small to show all text',
+                      child: Padding(
+                        padding: EdgeInsets.only(left: 4.0),
+                        child: Icon(Icons.warning_amber, size: 16, color: Colors.red),
+                      )
+                    ),
+                  // Linked text field, we can reflow
+                  if (widget.field.fieldType == PatternFieldType.texteditor && widget.knittingPattern.textFieldLinks.hasLink(widget.field.id))
+                    Padding(
+                      padding: const EdgeInsets.only(left: 4.0),
+                      child: MouseRegion(
+                        cursor: SystemMouseCursors.click,
+                        child: GestureDetector(
+                          onTap: widget.onReflow,
+                          child: const Icon(Symbols.conversion_path, size: 16)
+                        )
+                      ),
+                    ),
+                  const Spacer(),
+                  if (width > 102)
+                    Text(widget.field.fieldType.label),
+                  const Spacer(),
+                  if (widget.field.fieldType == PatternFieldType.drawing && (widget.field as PatternDrawingField).drawing != null && !(widget.field as PatternDrawingField).drawing!.valid)
+                    const Spacer(),
+                  MouseRegion(
+                    cursor: SystemMouseCursors.click,
+                    child: GestureDetector(
+                      onTap: () {
+                        Timer(const Duration(milliseconds: 10), () => widget.onDelete(widget.field.id));
+                      },
+                      child: const Icon(Icons.delete_outlined, size: 16,)
+                    )
+                  ),
+                  hspacing,
+                ]
               ),
             ),
           ),
@@ -209,7 +204,7 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
           decoration: BoxDecoration(
             color: Colors.transparent,
             border: Border.all(
-              color: widget.viewMode ? Colors.transparent : widget.selected ? Colors.greenAccent.shade700 : Colors.grey,
+              color: widget.selected ? Colors.greenAccent.shade700 : Colors.grey,
             ),
           ),
           child: GestureDetector(
@@ -229,8 +224,8 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
                           field: widget.field as PatternTextEditorField,
                           fleatherController: widget.fieldChangeNotifier as FleatherController,
                           editorKey: widget.editorKey as GlobalKey<EditorState>?,
+                          viewMode: false,
                           selected: widget.selected,
-                          viewMode: widget.viewMode,
                           onChanged: widget.onChanged,
                           onSelect: widget.onSelect,
                         ) :
@@ -265,7 +260,7 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
                   )
                 ),
                 // top-side resizer
-                if (!widget.viewMode)
+                if (widget.selected)
                 Positioned(
                   left: kCornerResizerSize,
                   child: MouseRegion(
@@ -306,7 +301,7 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
                   )
                 ),
                 // Top-left resizer
-                if (!widget.viewMode)
+                if (widget.selected)
                 Positioned(
                   top: 0, left: 0,
                   child: MouseRegion(
@@ -351,7 +346,7 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
                   )
                 ),
                 // Left-top resizer
-                if (!widget.viewMode)
+                if (widget.selected)
                 Positioned(
                   top: 0, left: 0,
                   child: MouseRegion(
@@ -396,7 +391,7 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
                   )                  
                 ),
                 // Top-right resizer
-                if (!widget.viewMode)
+                if (widget.selected)
                 Positioned(
                   top: 0, right: 0,
                   child: MouseRegion(
@@ -442,7 +437,7 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
                   )
                 ),
                 // Right-top resizer
-                if (!widget.viewMode)
+                if (widget.selected)
                 Positioned(
                   top: 0, right: 0,
                   child: MouseRegion(
@@ -487,7 +482,7 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
                   )                  
                 ),
                 // right-side resizer
-                if (!widget.viewMode)
+                if (widget.selected)
                 Positioned(
                   right: 0,
                   top: kCornerResizerSize,
@@ -520,7 +515,7 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
                   )
                 ),
                 // left-side resizer
-                if (!widget.viewMode)
+                if (widget.selected)
                 Positioned(
                   left: 0,
                   top: kCornerResizerSize,
@@ -569,7 +564,7 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
                   )
                 ),
                 // bottom resizer
-                if (!widget.viewMode)
+                if (widget.selected)
                 Positioned(
                   bottom: 0,
                   left: kCornerResizerSize, 
@@ -608,7 +603,7 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
                   )
                 ),
                 // bottom-left resizer
-                if (!widget.viewMode)
+                if (widget.selected)
                 Positioned(
                   bottom: 0,
                   child: MouseRegion(
@@ -659,7 +654,7 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
                   )
                 ),
                 // left-bottom resizer
-                if (!widget.viewMode)
+                if (widget.selected)
                 Positioned(
                   bottom: 0,
                   child: MouseRegion(
@@ -710,7 +705,7 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
                   )
                 ),
                 // bottom-right resizer
-                if (!widget.viewMode)
+                if (widget.selected)
                 Positioned(
                   bottom: 0,
                   right: 0,
@@ -752,7 +747,7 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
                   )
                 ),
                 // right-bottom resizer
-                if (!widget.viewMode)
+                if (widget.selected)
                 Positioned(
                   bottom: 0,
                   right: 0,
@@ -794,7 +789,6 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
                   )
                 ),
                 // drag region
-                if (!widget.viewMode)
                 Positioned(
                   top: draggerAtBottom ? null : kResizerShortSide,
                   bottom: draggerAtBottom ? kResizerShortSide : null,

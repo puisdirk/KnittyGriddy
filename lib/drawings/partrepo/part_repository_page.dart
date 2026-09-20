@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:knitty_griddy/drawings/model/drawing_operation_exception.dart';
 import 'package:knitty_griddy/drawings/partrepo/part_set_name_control.dart';
 import 'package:knitty_griddy/drawings/partrepo/part_set_panel.dart';
@@ -104,15 +105,25 @@ class _PartRepositoryPageState extends State<PartRepositoryPage> with TickerProv
                             }
                           } on DrawingOperationException catch (e) {
                             if (context.mounted) {
-                              showDialog(context: context, builder: (context) => 
-                                AlertDialog(
-                                  content: SizedBox(width: 400, height: 50, child: Text(e.message)),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => Navigator.pop(context), 
-                                      child: const Text('Close'),
-                                    ),
-                                  ],
+                              showDialog(
+                                context: context,
+                                barrierDismissible: false, 
+                                builder: (context) => KeyboardListener(
+                                  focusNode: FocusNode(),
+                                  onKeyEvent: (value) {
+                                    if (value.logicalKey == LogicalKeyboardKey.escape || value.logicalKey == LogicalKeyboardKey.enter) {
+                                      Navigator.of(context).pop();
+                                    }
+                                  },
+                                  child: AlertDialog(
+                                    content: SizedBox(width: 400, height: 50, child: Text(e.message)),
+                                    actions: [
+                                      ElevatedButton(
+                                        onPressed: () => Navigator.pop(context), 
+                                        child: const Text('Close'),
+                                      ),
+                                    ],
+                                  ),
                                 )  
                               );
                             }

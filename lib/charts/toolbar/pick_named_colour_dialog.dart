@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:knitty_griddy/charts/model/named_colour.dart';
 import 'package:knitty_griddy/common/pick_colour_control.dart';
 
@@ -56,57 +57,70 @@ class _PickNamedColourDialogState extends State<PickNamedColourDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text(''),
-      content: SizedBox(
-        height: 510,
-        child: Column(
-          children: [
-            PickColourControl(
-              initialColor: newNamedColour.color,
-              onChanged: (newColor) => setState(() => newNamedColour = newNamedColour.copyWith(color: newColor)),
-              knownColours: widget.usedColours.map((uc) => uc.color).toList(),
-            ),
-            Row(
-              children: [
-                TooltipVisibility(
-                  visible: !isValidColourName,
-                  child: Tooltip(
-                    message: pickerColorNameController.text.isEmpty ? 'You must provide a name' : 'This name is already used',
-                    child: Text('Name: ', style: isValidColourName ?
-                      Theme.of(context).textTheme.bodyMedium! :
-                      Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.red)
+    return KeyboardListener(
+      autofocus: true,
+      focusNode: FocusNode(),
+      onKeyEvent: (value) {
+        if (value.logicalKey == LogicalKeyboardKey.escape) {
+          Navigator.of(context).pop(null);
+        } else if (value.logicalKey == LogicalKeyboardKey.enter) {
+          if (isValidColourName) {
+            Navigator.of(context).pop(newNamedColour);
+          }
+        }
+      },
+      child: AlertDialog(
+        title: const Text(''),
+        content: SizedBox(
+          height: 510,
+          child: Column(
+            children: [
+              PickColourControl(
+                initialColor: newNamedColour.color,
+                onChanged: (newColor) => setState(() => newNamedColour = newNamedColour.copyWith(color: newColor)),
+                knownColours: widget.usedColours.map((uc) => uc.color).toList(),
+              ),
+              Row(
+                children: [
+                  TooltipVisibility(
+                    visible: !isValidColourName,
+                    child: Tooltip(
+                      message: pickerColorNameController.text.isEmpty ? 'You must provide a name' : 'This name is already used',
+                      child: Text('Name: ', style: isValidColourName ?
+                        Theme.of(context).textTheme.bodyMedium! :
+                        Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.red)
+                      ),
                     ),
                   ),
-                ),
-                SizedBox(
-                  width: 200,
-                  child: TextField(
-                    controller: pickerColorNameController,
-                  ),
-                )
-              ],
-            )
-          ],
+                  SizedBox(
+                    width: 200,
+                    child: TextField(
+                      controller: pickerColorNameController,
+                    ),
+                  )
+                ],
+              )
+            ],
+          ),
         ),
+        actions: <Widget>[
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            }, 
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: 
+              isValidColourName ?
+              () {
+                Navigator.of(context).pop(newNamedColour);
+              } :
+              null,
+            child: const Text('Ok'),
+          ),
+        ],
       ),
-      actions: <Widget>[
-        ElevatedButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-          }, 
-          child: const Text('Cancel'),
-        ),
-        ElevatedButton(
-          onPressed: 
-            isValidColourName ?
-            () {
-              Navigator.of(context).pop(newNamedColour);
-            } :
-            null,
-          child: const Text('Ok'),
-        ),
-      ],
     );
   }
 }

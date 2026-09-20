@@ -58,6 +58,12 @@ class _KnittyGriddyFleatherEditorState extends State<KnittyGriddyFleatherEditor>
 
     widget.fleatherController.addListener(_docChanged);
 
+    if (widget.selected) {
+      _fleatherFocusNode.requestFocus();
+    } else {
+      _fleatherFocusNode.unfocus();
+    }
+
     super.initState();
   }
 
@@ -66,6 +72,14 @@ class _KnittyGriddyFleatherEditorState extends State<KnittyGriddyFleatherEditor>
     if (oldWidget.fleatherController != widget.fleatherController) {
       oldWidget.fleatherController.removeListener(_docChanged);
       widget.fleatherController.addListener(_docChanged);
+    }
+
+    if (!oldWidget.selected && widget.selected) {
+      // we became selected, so get focus
+      _fleatherFocusNode.requestFocus();
+    } else if (oldWidget.selected && !widget.selected) {
+      // we became deselected, so give up focus
+      _fleatherFocusNode.unfocus();
     }
 
     super.didUpdateWidget(oldWidget);
@@ -83,12 +97,12 @@ class _KnittyGriddyFleatherEditorState extends State<KnittyGriddyFleatherEditor>
   @override
   Widget build(BuildContext context) {
 
-    if (widget.selected) {
+/*    if (widget.selected) {
       _fleatherFocusNode.requestFocus();
     } else {
       _fleatherFocusNode.unfocus();
     }
-
+*/
     return Column(
       children: [
         FleatherTheme(data: FleatherThemeDataExt.withTextStyle(context, widget.field.settings.style), 
