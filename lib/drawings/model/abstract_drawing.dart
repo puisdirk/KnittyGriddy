@@ -215,20 +215,30 @@ abstract class AbstractDrawing {
 
     printTiming('------- start bounding box -------');
 
-    Rect bbox = Rect.zero;
+    Rect? completeBox;
     for (DrawingCommand command in commands) {
+      if (!command.valid) {
+        continue;
+      }
       Rect cbbox = command.getBoundingBox(this);
+      if (cbbox == Rect.zero) {
+        continue;
+      }
 
       printTiming('got bbox of ${command.label} in ${stopwatch.elapsedMilliseconds - lastTick})');
       lastTick = stopwatch.elapsedMilliseconds;
 
-      bbox = bbox.expandToInclude(cbbox);
+      if (completeBox == null) {
+        completeBox = cbbox;
+      } else {
+        completeBox = completeBox.expandToInclude(cbbox);
+      }
     }
 
     printTiming('------- end bbox in ${stopwatch.elapsedMilliseconds} ------');
     stopwatch.stop();
 
-    return bbox;
+    return completeBox?? Rect.zero;
   }
 
   static List<DrawingCommand> commandsFromJson(Map<String, dynamic> json) {

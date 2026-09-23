@@ -24,7 +24,8 @@ class PatternDrawingFieldControl extends StatelessWidget {
     }
     Rect bbox = drawing == null ? Rect.zero : drawing.getBoundingBox().inflate(20);
 
-    return drawing == null ? GestureDetector(onTap: onSelect, child: Container(color: Colors.transparent,)) :
+    return drawing == null ? 
+    GestureDetector(onTap: onSelect, child: Container(color: Colors.transparent,)) :
     GestureDetector(
       onTap: onSelect,
       child: Container(
@@ -62,9 +63,20 @@ class DrawingPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    Rect bbox = drawing.getBoundingBox();
+    Offset middle = Offset(size.width / 2, size.height / 2);
+
+    bbox = bbox.translate(middle.dx, middle.dy);
+
+    canvas.save();
+    canvas.translate(-bbox.left + 10, -bbox.top + 10);
+
     for (DrawingCommand command in drawing.commands) {
+      // Remark: the drawing here is never a PartDrawing
       command.paint(canvas, size, drawing, false, forPreview: true);
     }
+
+    canvas.restore();
   }
 
   @override

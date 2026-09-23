@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -112,46 +110,54 @@ class _ExportPageState extends State<ExportPage> {
           ),
         ),
       ),
-      body: RepaintBoundary(
-        key: drawingBoundaryKey, 
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: (!exportSettings.showGrid && !exportSettings.showLegend) ?
-            const SizedBox(width: 10, height: 10,) :
-          FittedBox(
-            child: exportSettings.showLegend == false ?
-              Visibility(
-                visible: exportSettings.showGrid,
-                child: ChartFieldGrid(chart: chart, showNoStichCells: exportSettings.showNoStichCells),
-              ) :
-              exportSettings.legendHorizontal ?
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    if (exportSettings.legendPosition == LegendPosition.top)
-                      RepaintBoundary(key: legendBoundaryKey, child: PreviewLegend(exportSettings: exportSettings,)),
-                    Visibility(
-                      visible: exportSettings.showGrid,
-                      child: ChartFieldGrid(chart: chart, showNoStichCells: exportSettings.showNoStichCells),//const PreviewStitchesGrid()
+      body: Container(
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey)
+        ),
+        child: RepaintBoundary(
+          key: drawingBoundaryKey, 
+          child: Container(
+            color: Colors.white,
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: (!exportSettings.showGrid && !exportSettings.showLegend) ?
+                const SizedBox(width: 10, height: 10,) :
+              FittedBox(
+                child: exportSettings.showLegend == false ?
+                  Visibility(
+                    visible: exportSettings.showGrid,
+                    child: ChartFieldGrid(chart: chart, showNoStichCells: exportSettings.showNoStichCells),
+                  ) :
+                  exportSettings.legendHorizontal ?
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        if (exportSettings.legendPosition == LegendPosition.top)
+                          RepaintBoundary(key: legendBoundaryKey, child: PreviewLegend(exportSettings: exportSettings,)),
+                        Visibility(
+                          visible: exportSettings.showGrid,
+                          child: ChartFieldGrid(chart: chart, showNoStichCells: exportSettings.showNoStichCells),//const PreviewStitchesGrid()
+                        ),
+                        if (exportSettings.legendPosition == LegendPosition.bottom)
+                          RepaintBoundary(key: legendBoundaryKey, child: PreviewLegend(exportSettings: exportSettings,)),
+                      ],
+                    ) :
+                    Row(
+                      children: [
+                        if (exportSettings.legendPosition == LegendPosition.left)
+                          RepaintBoundary(key: legendBoundaryKey, child: PreviewLegend(exportSettings: exportSettings,)),
+                        Visibility(
+                          visible: exportSettings.showGrid,
+                          child: ChartFieldGrid(chart: chart, showNoStichCells: exportSettings.showNoStichCells),//const PreviewStitchesGrid()
+                        ),
+                        if (exportSettings.legendPosition == LegendPosition.right)
+                          RepaintBoundary(key: legendBoundaryKey, child: PreviewLegend(exportSettings: exportSettings,)),
+                      ],
                     ),
-                    if (exportSettings.legendPosition == LegendPosition.bottom)
-                      RepaintBoundary(key: legendBoundaryKey, child: PreviewLegend(exportSettings: exportSettings,)),
-                  ],
-                ) :
-                Row(
-                  children: [
-                    if (exportSettings.legendPosition == LegendPosition.left)
-                      RepaintBoundary(key: legendBoundaryKey, child: PreviewLegend(exportSettings: exportSettings,)),
-                    Visibility(
-                      visible: exportSettings.showGrid,
-                      child: ChartFieldGrid(chart: chart, showNoStichCells: exportSettings.showNoStichCells),//const PreviewStitchesGrid()
-                    ),
-                    if (exportSettings.legendPosition == LegendPosition.right)
-                      RepaintBoundary(key: legendBoundaryKey, child: PreviewLegend(exportSettings: exportSettings,)),
-                  ],
-                ),
-          ),
-        )
+              ),
+            ),
+          )
+        ),
       ),
     );
   }

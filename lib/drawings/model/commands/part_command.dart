@@ -10,6 +10,7 @@ import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/styling_command.dart';
 import 'package:knitty_griddy/drawings/model/part_drawing.dart';
 import 'package:knitty_griddy/utils/constants.dart';
+import 'package:knitty_griddy/utils/rect_ex.dart';
 
 class PartCommand extends DrawingCommand {
 
@@ -100,16 +101,28 @@ class PartCommand extends DrawingCommand {
   double get editHeight => 310;
 
   Rect calculateBoundingBox(AbstractDrawing drawing) {
-    if (valid) {
-      Rect r = Rect.zero;
-      for (String commandId in commandIds) {
-        DrawingCommand command = drawing.commandById(commandId)!;
-        r = r.expandToInclude(command.getBoundingBox(drawing));
-      }
-      return r;
+    if (!valid) {
+      return Rect.zero;
     }
 
-    return Rect.zero;
+    Rect? completeBox;
+    for (String commandId in commandIds) {
+      DrawingCommand command = drawing.commandById(commandId)!;
+      if (!command.valid) {
+        continue;
+      }
+      Rect bbox = command.getBoundingBox(drawing);
+      if (bbox == Rect.zero) {
+        continue;
+      }
+      if (completeBox == null) {
+        completeBox = bbox;
+      } else {
+        completeBox = completeBox.expandToInclude(bbox);
+      }
+    }
+
+    return completeBox?? Rect.zero;
   }
 
   // We avoid expensive calculation as we don't require this in a PartDrawing

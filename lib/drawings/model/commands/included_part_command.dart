@@ -52,6 +52,27 @@ class IncludedPartCommand extends DrawingCommand {
     super.initiallyOpen,
   });
 
+  IncludedPartCommand copyWithNewPart({
+    required String partDrawingId,
+    required String partId,
+    required String partLabel,
+  }) {
+    return IncludedPartCommand(
+      id: id, 
+      label: label, 
+      version: version + 1,
+      anchorPointId: anchorPointId,
+      partDrawingId: partDrawingId,
+      partLabel: partLabel,
+      partId: partId,
+      storedOffsetPartDrawing: null,
+      storedOffset: null,
+      storedAnchorOffset: null,
+      validated: false,
+      isDirty: true,
+    );
+  }
+
   IncludedPartCommand copyWith({
     String? id,
     String? label,
@@ -118,7 +139,7 @@ class IncludedPartCommand extends DrawingCommand {
 
   @override
   Rect getBoundingBox(AbstractDrawing drawing) {
-    if (!valid) return Rect.zero;
+    if (!valid || isDirty) return Rect.zero;
 
     if (storedOffsetPartDrawing == null) return Rect.zero;
 

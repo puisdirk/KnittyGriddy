@@ -6,7 +6,6 @@ import 'package:knitty_griddy/drawings/model/drawings_model.dart';
 import 'package:knitty_griddy/drawings/model/part_info.dart';
 import 'package:knitty_griddy/drawings/model/part_set_info.dart';
 import 'package:knitty_griddy/utils/math_utitilies.dart';
-import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
 class PartChooser extends StatefulWidget {

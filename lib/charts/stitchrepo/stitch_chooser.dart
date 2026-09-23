@@ -7,7 +7,6 @@ import 'package:knitty_griddy/utils/math_utitilies.dart';
 import 'package:knitty_griddy/charts/model/knitting_chart.dart';
 import 'package:knitty_griddy/charts/model/charts_model.dart';
 import 'package:knitty_griddy/charts/stitchrepo/stitch_definition.dart';
-import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
 class StitchChooser extends StatefulWidget {

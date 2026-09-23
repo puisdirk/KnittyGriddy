@@ -161,41 +161,51 @@ class CurveCommand extends DrawingCommand {
   }
 
   Rect getBoundingBoxWithoutControlPoints(AbstractDrawing drawing) {
-    if (valid) {
-      Path? p = getPath(drawing, Offset.zero);
-
-      if (p != null) {
-        Rect r = Rect.zero;
-        for (double fraction = 0; fraction <= 1; fraction += 0.01) {
-          Offset point = MathUtitilies.pointOnPathAtFraction(p, fraction);
-          if (point.dx < r.left) {
-            r = Rect.fromLTRB(point.dx, r.top, r.right, r.bottom);
-          }
-          if (point.dx > r.right) {
-            r = Rect.fromLTRB(r.left, r.top, point.dx, r.bottom);
-          }
-          if (point.dy < r.top) {
-            r = Rect.fromLTRB(r.left, point.dy, r.right, r.bottom);
-          }
-          if (point.dy > r.bottom) {
-            r = Rect.fromLTRB(r.left, r.top, r.right, point.dy);
-          }
-        }
-        return r;
-      }
+    if (!valid) {
+      return Rect.zero;
     }
 
-    return Rect.zero;
+    Path? p = getPath(drawing, Offset.zero);
+
+    if (p == null) {
+      return Rect.zero;
+    }
+
+    Rect? completeBox;
+    for (double fraction = 0; fraction <= 1; fraction += 0.01) {
+      Offset point = MathUtitilies.pointOnPathAtFraction(p, fraction);
+
+      if (completeBox == null) {
+        completeBox = Rect.fromLTWH(point.dx, point.dy, 1, 1);
+      } else {
+        if (point.dx < completeBox.left) {
+          completeBox = Rect.fromLTRB(point.dx, completeBox.top, completeBox.right, completeBox.bottom);
+        }
+        if (point.dx > completeBox.right) {
+          completeBox = Rect.fromLTRB(completeBox.left, completeBox.top, point.dx, completeBox.bottom);
+        }
+        if (point.dy < completeBox.top) {
+          completeBox = Rect.fromLTRB(completeBox.left, point.dy, completeBox.right, completeBox.bottom);
+        }
+        if (point.dy > completeBox.bottom) {
+          completeBox = Rect.fromLTRB(completeBox.left, completeBox.top, completeBox.right, point.dy);
+        }
+      }
+    }
+    
+    return completeBox?? Rect.zero;
   }
 
   @override
   Rect getBoundingBox(AbstractDrawing drawing) {
     // Remark: I cannot get this correct unless I know the offset
-    if (valid) {
+/*    if (valid) {
       Path? p = getPath(drawing, Offset.zero);
       if (p != null) return p.getBounds();
     }
     return Rect.zero;
+*/
+    return getBoundingBoxWithoutControlPoints(drawing);
   }
 
   @override

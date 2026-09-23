@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -11,6 +10,7 @@ import 'package:knitty_griddy/drawings/model/drawing_operation_exception.dart';
 import 'package:knitty_griddy/drawings/model/drawings_model.dart';
 import 'package:knitty_griddy/drawings/model/part_drawing.dart';
 import 'package:knitty_griddy/utils/constants.dart';
+import 'package:knitty_griddy/utils/rect_ex.dart';
 import 'package:provider/provider.dart';
 import 'dart:ui' as ui;
 
@@ -111,16 +111,15 @@ class _ExportDrawingPageState extends State<ExportDrawingPage> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
-      //          child: FittedBox(
-        child: RepaintBoundary(
-          key: drawingBoundaryKey,
-          child: SizedBox(
-            width: bbox.width,
-            height: bbox.height,
-            child: Container(
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey)
-              ),
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey)
+          ),
+          child: RepaintBoundary(
+            key: drawingBoundaryKey,
+            child: SizedBox(
+              width: bbox.width,
+              height: bbox.height,
               child: LayoutBuilder(
                 builder: (context, constraints) {              
                   return CustomPaint(
@@ -132,7 +131,6 @@ class _ExportDrawingPageState extends State<ExportDrawingPage> {
             ),
           ),
         )
-      //          ),
       ),
     );
   }
@@ -148,11 +146,20 @@ class PreviewDrawingPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), Paint()..color = Colors.white..style = PaintingStyle.fill);
+
+    Offset middle = Offset(size.width / 2, size.height / 2);
+
+    Rect bbox = drawing.getBoundingBox();
+    bbox = bbox.translate(middle.dx, middle.dy);
+
+    canvas.save();
+    canvas.translate(-bbox.left + 20, -bbox.top + 20);
     for (DrawingCommand command in drawing.commands) {
       // For PartDrawings, we only draw the parts
       if (drawing is PartDrawing && command is! PartCommand) continue;
       command.paint(canvas, size, drawing, false, forPreview: true);
     }
+    canvas.restore();
   }
 
   @override

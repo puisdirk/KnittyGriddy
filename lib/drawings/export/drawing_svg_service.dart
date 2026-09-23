@@ -45,7 +45,13 @@ class DrawingSvgService {
   }
 
   String _getDrawingString(Size drawingSize) {
-    String drawingString = '<g class="inset" transform="translate(20, 20)">';
+    Rect bbox = drawing.getBoundingBox();
+    Offset middle = Offset(drawingSize.width / 2, drawingSize.height / 2);
+    bbox = bbox.translate(middle.dx, middle.dy);
+
+    double xtrans = -bbox.left + 10;
+    double ytrans = -bbox.top + 10;
+    String drawingString = '<g class="centeringtransform" transform="translate($xtrans, $ytrans)">';
 
     String drawingGroup = '<g>';
     for (DrawingCommand command in drawing.commands) {
