@@ -128,6 +128,7 @@ class _TextCommandControlState extends State<TextCommandControl> {
             const SmallLabel(label: 'Text'),
             hspacing,
             SmallMultilineTextField(
+              key: ValueKey('${widget.command.id}-${widget.command.version}-textcontent'),
               initialText: widget.command.text, 
               width: _fieldWidth, 
               lines: 3, 

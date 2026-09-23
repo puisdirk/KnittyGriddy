@@ -17,6 +17,7 @@ import 'package:knitty_griddy/utils/color_utilities.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 import 'package:knitty_griddy/utils/dashed_painter.dart';
 import 'package:knitty_griddy/utils/math_utitilies.dart';
+import 'package:knitty_griddy/utils/rect_ex.dart';
 import 'package:path_drawing/path_drawing.dart';
 
 enum TapeUnit {
@@ -241,7 +242,7 @@ class TapeCommand extends DrawingCommand {
   @override
   double get editHeight {
     double h = tapeType == TapeType.linesAndcurves ? 380 : 200;
-    h += (unit == TapeUnit.rows || unit == TapeUnit.sts) ? 30 : 0;
+    h += (unit == TapeUnit.rows || unit == TapeUnit.sts) ? 60 : 0;
     return h;
   }
 
@@ -253,22 +254,38 @@ class TapeCommand extends DrawingCommand {
           Offset? start = drawing.pointById(fromPointId)!.getCoordinate(drawing);
           Offset? end = drawing.pointById(toPointId)!.getCoordinate(drawing);
           if (start != null && end != null) {
-            return Rect.fromPoints(start, end);
+            Rect bbox = Rect.fromPoints(start, end);
+            bbox = Rect.fromLTWH(bbox.left, -bbox.top, bbox.width, -bbox.height).naturalize();
+            if (directionType == TapeDirectionType.horizontal || directionType == TapeDirectionType.vertical) {
+              return bbox.inflate(70);
+            } else {
+              return bbox;
+            }
           } else {
             return Rect.zero;
           }
         }
 
         case TapeType.line: {
-          return drawing.lineById(lineId)!.getBoundingBox(drawing);
+          Rect bbox = drawing.lineById(lineId)!.getBoundingBox(drawing);
+          return bbox.inflate(70);
         }
 
         case TapeType.linesAndcurves: {
-          Rect res = Rect.zero;
+          Rect? res;
           for (String lineOrCurveId in lineAndCurveIds) {
-            res = res.expandToInclude(drawing.commandById(lineOrCurveId)!.getBoundingBox(drawing));
+            Rect bbox = drawing.commandById(lineOrCurveId)!.getBoundingBox(drawing);
+            if (res == null) {
+              res = bbox;
+            } else {
+              res = res.expandToInclude(bbox);
+            }
           }
-          return res;
+          if (res == null) {
+            return Rect.zero;
+          } else {
+            return res.inflate(70);
+          }
         }
       }
     }

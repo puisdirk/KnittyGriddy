@@ -126,7 +126,28 @@ class StylingCommand extends DrawingCommand {
   Color get color => colorRef.color;
 
   @override
-  Rect getBoundingBox(AbstractDrawing drawing) => Rect.zero;
+  Rect getBoundingBox(AbstractDrawing drawing) {
+    if (!valid) return Rect.zero;
+
+    Rect? bbox;
+    for (String commandId in commandIds) {
+      DrawingCommand? command = drawing.commandById(commandId);
+      if (command == null) continue;
+      if (!command.valid) continue;
+      Rect cbbox = command.getBoundingBox(drawing);
+      if (cbbox == Rect.zero) continue;
+      if (bbox == null) {
+        bbox = cbbox;
+      } else {
+        bbox = bbox.expandToInclude(cbbox);
+      }
+    }
+    if (bbox == null || bbox == Rect.zero) {
+      return Rect.zero;
+    }
+
+    return bbox.inflate(thickness + arrowSize.size);
+  }
 
   @override
   Set<String> dependencies(AbstractDrawing drawing) {

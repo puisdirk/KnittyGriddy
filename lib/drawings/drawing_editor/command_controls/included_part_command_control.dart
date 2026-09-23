@@ -135,7 +135,7 @@ class _IncludedPartCommandControlState extends State<IncludedPartCommandControl>
                 );
                 if (partInfo != null && 
                   (partInfo.partDrawingId != widget.command.partDrawingId || partInfo.partId != widget.command.partId)) {
-                    widget.onChanged(widget.command.copyWith(
+                    widget.onChanged(widget.command.copyWithNewPart(
                       partDrawingId: partInfo.partDrawingId, 
                       partId: partInfo.partId,
                       partLabel: partInfo.partLabel,

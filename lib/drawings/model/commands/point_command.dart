@@ -14,6 +14,7 @@ import 'package:knitty_griddy/drawings/model/commands/styling_command.dart';
 import 'package:knitty_griddy/drawings/model/part_drawing.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 import 'package:knitty_griddy/utils/math_utitilies.dart';
+import 'package:knitty_griddy/utils/rect_ex.dart';
 
 const String originId = '063f22af-bc7f-4e77-bc8b-60e48c821259';
 const PointCommand origin = PointCommand(id: originId, label: 'origin', validated: true, valid: true, );
@@ -175,7 +176,8 @@ class PointCommand extends DrawingCommand {
     if (valid) {
       Offset? coord = getCoordinate(drawing);
       if (coord != null) {
-        return Rect.fromPoints(coord - const Offset(1, 1), coord + const Offset(1, 1));
+        Rect bbox = Rect.fromPoints(coord - const Offset(1, 1), coord + const Offset(1, 1));
+        return Rect.fromLTWH(bbox.left, -bbox.top, bbox.width, -bbox.height).naturalize();
       }
     }
     return Rect.zero;

@@ -862,7 +862,7 @@ class _PatternEditorState extends State<PatternEditor> {
                                     fieldChangeNotifier: fleatherControllers[field.id],
                                     editorKey: (field is PatternTextEditorField) ? fleaterEditorKeys[field.id] : null,
                                     selected: field.id == selectedField?.id, 
-                                    onSelect: () => setState(() => selectedField = field), 
+                                    onSelect: () => setState(() => selectedField = field),
                                     onDelete: _deleteField,
                                     onChanged: (newField) => _storeAndSetKnittingPattern(
                                       stateKnittingPattern.copyWith(

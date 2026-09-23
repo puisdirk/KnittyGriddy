@@ -40,7 +40,7 @@ class _TapeCommandControlState extends State<TapeCommandControl> {
     }
   }
 
-    Widget createViewContent() {
+  Widget createViewContent() {
     String content = '';
 
     switch (widget.command.tapeType) {
@@ -331,7 +331,7 @@ class _TapeCommandControlState extends State<TapeCommandControl> {
         if (widget.command.unit == TapeUnit.rows)
           Row(
             children: [
-              const SmallLabel(label: 'Rows gauge / 10 cm'),
+              const SmallLabel(label: 'Rows gauge/10 cm', width: 100,),
               hspacing,
               SizedBox(
                 width: 180,
@@ -357,7 +357,7 @@ class _TapeCommandControlState extends State<TapeCommandControl> {
         if (widget.command.unit == TapeUnit.sts)
           Row(
             children: [
-              const SmallLabel(label: 'Stitch gauge / 10 cm'),
+              const SmallLabel(label: 'Stitch gauge/10 cm', width: 100,),
               hspacing,
               SizedBox(
                 width: 180,

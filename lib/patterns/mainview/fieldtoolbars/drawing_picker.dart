@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:knitty_griddy/drawings/model/drawing_info.dart';
 import 'package:knitty_griddy/drawings/model/drawings_model.dart';
 import 'package:knitty_griddy/utils/constants.dart';
-import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
 class DrawingPicker extends StatefulWidget {

@@ -16,6 +16,7 @@ import 'package:knitty_griddy/utils/dashed_painter.dart';
 import 'package:knitty_griddy/utils/infinite_line.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 import 'package:knitty_griddy/utils/math_utitilies.dart';
+import 'package:knitty_griddy/utils/rect_ex.dart';
 import 'package:vector_math/vector_math_64.dart' as vec;
 
 @immutable
@@ -96,7 +97,8 @@ class LineCommand extends DrawingCommand {
       Offset? start = getStartCoordinate(drawing);
       Offset? end = getEndCoordinate(drawing);
       if (start != null && end != null) {
-        return Rect.fromPoints(start, end);
+        Rect bbox = Rect.fromPoints(start, end);
+        return Rect.fromLTWH(bbox.left, -bbox.top, bbox.width, -bbox.height).naturalize();
       }
     }
 

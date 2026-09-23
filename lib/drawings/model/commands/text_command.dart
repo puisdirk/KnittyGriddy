@@ -12,6 +12,7 @@ import 'package:knitty_griddy/drawings/model/commands/styling_command.dart';
 import 'package:knitty_griddy/utils/color_utilities.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 import 'package:knitty_griddy/utils/math_utitilies.dart';
+import 'package:knitty_griddy/utils/rect_ex.dart';
 
 class TextCommand extends DrawingCommand {
   final String text;
@@ -179,16 +180,18 @@ class TextCommand extends DrawingCommand {
   @override
   Rect getBoundingBox(AbstractDrawing drawing) {
     if (!valid || text.isEmpty) return Rect.zero;
+
     Offset? anchorCoordinate = getAnchorCoordinate(drawing);
-//    PointCommand? anchor = drawing.pointById(anchorPointId);
     if (anchorCoordinate == null) return Rect.zero;
+
     TextStyle style = TextStyle(
       fontSize: textSize.toDouble(), 
       fontStyle: italic ? FontStyle.italic : FontStyle.normal,
       fontWeight: bold ? FontWeight.w700 : FontWeight.normal);
-    Size ts = MathUtitilies.textSize(text, style, maxLines: text.split('\n').length);
 
-    return Rect.fromLTWH(anchorCoordinate.dx, anchorCoordinate.dy, ts.width, ts.height);
+    Size ts = MathUtitilies.textSize(text, style, maxLines: text.split('\n').length);
+    Rect bbox = Rect.fromLTWH(anchorCoordinate.dx, anchorCoordinate.dy, ts.width, -ts.height);
+    return Rect.fromLTWH(bbox.left, -bbox.top, bbox.width, -bbox.height).naturalize();
   }
 
   @override

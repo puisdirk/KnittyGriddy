@@ -3,10 +3,14 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
+import 'package:knitty_griddy/drawings/model/commands/curve_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
+import 'package:knitty_griddy/drawings/model/commands/included_part_command.dart';
+import 'package:knitty_griddy/drawings/model/commands/line_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/tape_command.dart';
 import 'package:knitty_griddy/utils/constants.dart';
+import 'package:knitty_griddy/utils/rect_ex.dart';
   
 class DrawingViewer extends StatelessWidget {
   final AbstractDrawing drawing;
@@ -157,7 +161,13 @@ class DrawingPainter extends CustomPainter {
     }
 
     _printTiming('-------------------- done drawing in ${stopwatch.elapsedMilliseconds}msec ---------------------');
-    
+
+//============******************================
+//    Rect completeBox = drawing.getBoundingBox();
+//    completeBox = completeBox.translate(middle.dx, middle.dy);
+//    canvas.drawRect(completeBox, Paint()..color = Colors.pink.withAlpha(20)..style = PaintingStyle.fill);
+//============******************================
+
     stopwatch.stop();
   }
 
