@@ -26,9 +26,14 @@ abstract class PatternField {
   final double contentOffsetX;
   final double contentOffsetY;
   final int opacity;
+  final double rotation;
+  final bool flipX;
+  final bool flipY;
 
   static const double minWidth = 600;
   static const double minHeight = 600;
+
+  bool get hasContent => true;
 
   const PatternField({
     required this.id,
@@ -40,6 +45,9 @@ abstract class PatternField {
     this.contentOffsetX = 0,
     this.contentOffsetY = 0,
     this.opacity = 255,
+    this.rotation = 0,
+    this.flipX = false,
+    this.flipY = false,
   });
 
   PatternField abstractCopyWith({
@@ -51,6 +59,9 @@ abstract class PatternField {
     double? contentOffsetX,
     double? contentOffsetY,
     int? opacity,
+    double? rotation,
+    bool? flipX,
+    bool? flipY,
   });
 
   List<Color> get knownColours;
@@ -74,7 +85,8 @@ abstract class PatternField {
 
   @override
   int get hashCode => id.hashCode ^ fieldType.hashCode ^ positionX.hashCode ^ positionY.hashCode ^
-    width.hashCode ^ height.hashCode ^ contentOffsetX.hashCode ^ contentOffsetY.hashCode ^ opacity.hashCode;
+    width.hashCode ^ height.hashCode ^ contentOffsetX.hashCode ^ contentOffsetY.hashCode ^ 
+    opacity.hashCode ^ rotation.hashCode ^ flipX.hashCode ^ flipY.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -89,5 +101,8 @@ abstract class PatternField {
     height == other.height &&
     contentOffsetX == other.contentOffsetX &&
     contentOffsetY == other.contentOffsetY &&
-    opacity == other.opacity;
+    opacity == other.opacity &&
+    rotation == other.rotation &&
+    flipX == other.flipX &&
+    flipY == other.flipY;
 }

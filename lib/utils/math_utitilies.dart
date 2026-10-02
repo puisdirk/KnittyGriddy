@@ -14,6 +14,16 @@ class MathUtitilies {
     return (pi / 180) * degrees;
   }
 
+  static Offset rotatePointAroundZ(Offset point, double radians) {
+    final double cosTheta = cos(radians);
+    final double sinTheta = sin(radians);
+
+    final double newX = point.dx * cosTheta - point.dy * sinTheta;
+    final double newY = point.dx * sinTheta + point.dy * cosTheta;
+
+    return Offset(newX, newY);
+  }
+
   static Size textSize(String text, TextStyle style, {int? maxLines = 1, double minWidth = 0, double maxWidth = double.infinity, TextAlign textAlign = TextAlign.start}) {
     final TextPainter textPainter = TextPainter(
         text: TextSpan(

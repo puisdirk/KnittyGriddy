@@ -23,6 +23,9 @@ class PatternTextEditorField extends PatternField {
     super.contentOffsetX,
     super.contentOffsetY,
     super.opacity,
+    super.rotation,
+    super.flipX,
+    super.flipY,
     this.settings = TextEditorFieldSettings.defaultSettings,
     this.docContents = emptyDoc,
     this.overflowing = false,
@@ -37,6 +40,9 @@ class PatternTextEditorField extends PatternField {
     double? contentOffsetX,
     double? contentOffsetY,
     int? opacity,
+    double? rotation,
+    bool? flipX,
+    bool? flipY,
     TextEditorFieldSettings? settings,
     String? docContents,
     bool? overflowing,
@@ -50,6 +56,9 @@ class PatternTextEditorField extends PatternField {
       contentOffsetX: contentOffsetX?? this.contentOffsetX,
       contentOffsetY: contentOffsetY?? this.contentOffsetY,
       opacity: opacity?? this.opacity,
+      rotation: rotation?? this.rotation,
+      flipX: flipX?? this.flipX,
+      flipY: flipY?? this.flipY,
       settings: settings?? this.settings,
       docContents: docContents?? this.docContents,
       overflowing: overflowing?? this.overflowing,
@@ -66,6 +75,9 @@ class PatternTextEditorField extends PatternField {
     double? contentOffsetX,
     double? contentOffsetY,
     int? opacity,
+    double? rotation,
+    bool? flipX,
+    bool? flipY,
   }) {
     return copyWith(
       id: id?? this.id,
@@ -76,6 +88,9 @@ class PatternTextEditorField extends PatternField {
       contentOffsetX: contentOffsetX?? this.contentOffsetX,
       contentOffsetY: contentOffsetY?? this.contentOffsetY,
       opacity: opacity,
+      rotation: rotation?? this.rotation,
+      flipX: flipX?? this.flipX,
+      flipY: flipY?? this.flipY,
     );
   }
 
@@ -116,6 +131,9 @@ class PatternTextEditorField extends PatternField {
       'o': opacity,
       'ox': contentOffsetX,
       'oy': contentOffsetY,
+      'r': rotation,
+      'fx': flipX,
+      'fy': flipY,
       'fs': settings.toJson(),
       'doc': docContents,
       'of': overflowing,
@@ -132,6 +150,9 @@ class PatternTextEditorField extends PatternField {
       contentOffsetX: json['ox'] as double,
       contentOffsetY: json['oy'] as double,
       opacity: json['o'] as int,
+      rotation: json.containsKey('r') ? json['r'] as double : 0,
+      flipX: json.containsKey('fx') ? json['fx'] as bool : false,
+      flipY: json.containsKey('fy') ? json['fy'] as bool : false,
       settings: TextEditorFieldSettings.fromJson(json['fs']),
       docContents: json['doc'] as String,
       overflowing: json.containsKey('of') ? json['of'] as bool : false,
@@ -152,6 +173,9 @@ class PatternTextEditorField extends PatternField {
     contentOffsetX == other.contentOffsetX &&
     contentOffsetY == other.contentOffsetY &&
     opacity == other.opacity &&
+    rotation == other.rotation &&
+    flipX == other.flipX &&
+    flipY == other.flipY &&
     settings == other.settings &&
     docContents == other.docContents &&
     overflowing == other.overflowing;

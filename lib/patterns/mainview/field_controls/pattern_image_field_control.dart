@@ -2,7 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 
-class PatternImageFieldControl extends StatelessWidget {
+class PatternImageFieldControl extends StatefulWidget {
   final Uint8List? imageData;
   final double opacity;
   final void Function() onSelect;
@@ -15,25 +15,45 @@ class PatternImageFieldControl extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    return imageData == null || imageData!.isEmpty ? GestureDetector(onTap: onSelect, child: Container(color: Colors.transparent,)) :
-    Builder(
-      builder: (context) {
-        Image image = Image.memory(imageData!);
-        return GestureDetector(
-          onTap: onSelect,
-          child: FittedBox(
-            child: SizedBox(
-              width: image.width,
-              height: image.height,
-              child: Opacity(
-                opacity: opacity == 0 ? 0 : opacity / 255,
-                child: image
-              ),
-            ),
-          ),
-        );
+  State<PatternImageFieldControl> createState() => _PatternImageFieldControlState();
+}
+
+class _PatternImageFieldControlState extends State<PatternImageFieldControl> {
+  late Image? image;
+
+  @override
+  void initState() {
+    if (widget.imageData != null && widget.imageData!.isNotEmpty) {
+      image = Image.memory(widget.imageData!);
+    } else {
+      image = null;
+    }
+
+    super.initState();
+  }
+
+  @override
+  void didUpdateWidget(covariant PatternImageFieldControl oldWidget) {
+    if (widget.imageData != oldWidget.imageData) {
+      if (widget.imageData != null && widget.imageData!.isNotEmpty) {
+        image = Image.memory(widget.imageData!);
+      } else {
+        image = null;
       }
+    }
+
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return image == null ? GestureDetector(onTap: widget.onSelect, child: Container(color: Colors.transparent,)) :
+    GestureDetector(
+      onTap: widget.onSelect,
+        child: Opacity(
+          opacity: widget.opacity == 0 ? 0 : widget.opacity / 255,
+          child: image
+      ),
     )
     ;
   }

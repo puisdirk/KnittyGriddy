@@ -7,6 +7,7 @@ import 'package:knitty_griddy/drawings/model/commands/styling_command.dart';
 import 'package:knitty_griddy/patterns/mainview/export/pdf_service.dart';
 import 'package:knitty_griddy/patterns/mainview/preview_pattern_field_control.dart';
 import 'package:knitty_griddy/patterns/model/fields/pattern_field.dart';
+import 'package:knitty_griddy/patterns/model/fields/pattern_image_field.dart';
 import 'package:knitty_griddy/patterns/model/fields/pattern_panel_field.dart';
 import 'package:knitty_griddy/patterns/model/fields/pattern_text_editor_field.dart';
 import 'package:knitty_griddy/patterns/model/knitting_pattern.dart';
@@ -14,6 +15,7 @@ import 'package:knitty_griddy/patterns/model/pattern_page_layout.dart';
 import 'package:knitty_griddy/patterns/model/patterns_model.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 import 'package:knitty_griddy/utils/dashed_painter.dart';
+import 'package:knitty_griddy/utils/math_utitilies.dart';
 import 'package:provider/provider.dart';
 
 class PatternViewer extends StatefulWidget {
@@ -58,10 +60,33 @@ class _PatternViewerState extends State<PatternViewer> {
     return textFieldImages;
   }
 
+  Future<Map<String, Uint8List>> loadImageFieldImages() async {
+
+    Map<String, Uint8List> imageFieldImages = {};
+
+    for (PatternImageField imageField in widget.pattern.fields.whereType<PatternImageField>()) {
+      if (imageField.imageData == null || imageField.imageData!.isEmpty) {
+        continue;
+      }
+      RenderRepaintBoundary drawingBoundary = fieldKeys[imageField.id]!.currentContext!.findRenderObject()! as RenderRepaintBoundary;
+      ui.Image image = await drawingBoundary.toImage(pixelRatio: 3);
+      ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      Uint8List pngBytes = byteData!.buffer.asUint8List();
+      imageFieldImages[imageField.id] = pngBytes;
+    }
+    return imageFieldImages;
+  }
+
   Future<void> saveAsPdf() async {
     Map<String, Uint8List> panelImages = await loadPanelImages();
     Map<String, Uint8List> textFieldImages = await loadTextFieldImages();
-    PdfService pdfService = PdfService(pattern: widget.pattern, panelImages: panelImages, textFieldImages: textFieldImages);
+    Map<String, Uint8List> imageFieldImages = await loadImageFieldImages();
+    PdfService pdfService = PdfService(
+      pattern: widget.pattern, 
+      panelImages: panelImages, 
+      textFieldImages: textFieldImages,
+      imageFieldImages: imageFieldImages
+    );
     await pdfService.saveAsPdf();
   }
 
@@ -73,6 +98,10 @@ class _PatternViewerState extends State<PatternViewer> {
 
     for (PatternTextEditorField textField in widget.pattern.fields.whereType<PatternTextEditorField>()) {
       fieldKeys[textField.id] = GlobalKey();
+    }
+
+    for (PatternImageField imageField in widget.pattern.fields.whereType<PatternImageField>()) {
+      fieldKeys[imageField.id] = GlobalKey();
     }
 
     super.initState();
@@ -88,6 +117,10 @@ class _PatternViewerState extends State<PatternViewer> {
 
     for (PatternTextEditorField textField in widget.pattern.fields.whereType<PatternTextEditorField>()) {
       fieldKeys[textField.id] = GlobalKey();
+    }
+
+    for (PatternImageField imageField in widget.pattern.fields.whereType<PatternImageField>()) {
+      fieldKeys[imageField.id] = GlobalKey();
     }
 
     super.didUpdateWidget(oldWidget);
@@ -164,15 +197,26 @@ class _PatternViewerState extends State<PatternViewer> {
                           Positioned(
                             left: field.positionX,
                             top: field.positionY,
-                            child: SizedBox(
-                              width: field.width,
-                              height: field.height,
+                            child: Transform.rotate(
+                              angle: MathUtitilies.toRadians(-field.rotation),
+                              // Note: the repaint boundary takes the flipping into account, 
+                              // but not the rotation. This is done on purpose to prevent having 
+                              // to do the flips in PDF. The rotation _is_ done in PDF to prevent
+                              // content clipping
                               child: RepaintBoundary(
                                 key: fieldKeys[field.id],
-                                child: PreviewPatternFieldControl(
-                                  field: field, 
+                                child: Transform.flip(
+                                  flipX: field.flipX,
+                                  flipY: field.flipY,
+                                  child: SizedBox(
+                                    width: field.width,
+                                    height: field.height,
+                                    child: PreviewPatternFieldControl(
+                                      field: field, 
+                                    ),
+                                  )
                                 ),
-                              )
+                              ),
                             )
                           )
                       ],

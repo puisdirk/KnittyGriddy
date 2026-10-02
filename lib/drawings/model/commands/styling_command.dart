@@ -123,6 +123,9 @@ class StylingCommand extends DrawingCommand {
   @override
   double get editHeight => 520;
 
+  @override
+  bool get allowedInPartDrawings => false;
+
   Color get color => colorRef.color;
 
   @override

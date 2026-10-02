@@ -16,6 +16,7 @@ import 'package:knitty_griddy/patterns/model/fields/pattern_panel_field.dart';
 import 'package:knitty_griddy/patterns/model/fields/pattern_text_editor_field.dart';
 import 'package:knitty_griddy/patterns/model/knitting_pattern.dart';
 import 'package:knitty_griddy/utils/constants.dart';
+import 'package:knitty_griddy/utils/math_utitilies.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 class PatternFieldControl extends StatefulWidget {
@@ -86,7 +87,7 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
     positionY = widget.field.positionY;
     width = widget.field.width;
     height = widget.field.height;
-    aspect = widget.field.height / widget.field.width;
+    aspect = height / width;
     isFixedAspect = widget.field.fixedAspectRatio;
     minimumWidth = widget.field.minimumWidth;
     minimumHeight = widget.field.minimumHeight;
@@ -197,606 +198,617 @@ class _PatternFieldControlState extends State<PatternFieldControl> {
     return Positioned(
       left: positionX,
       top: positionY,
-      child: SizedBox(
-        width: width,
-        height: height,
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.transparent,
-            border: Border.all(
-              color: widget.selected ? Colors.greenAccent.shade700 : Colors.grey,
-            ),
-          ),
-          child: GestureDetector(
-            onTap: widget.onSelect,
-            child: Stack(
-              children: [
-                // Pattern control
-                Positioned(
-                  left: widget.field.contentLeft,
-                  top: widget.field.contentTop,
-                  child: SizedBox(
-                    width: width - (2 * widget.field.padding),
-                    height: height - widget.field.bottompadding,
-                    child:
-                      widget.field.fieldType == PatternFieldType.texteditor ?
-                        PatternTextEditorFieldControl(
-                          field: widget.field as PatternTextEditorField,
-                          fleatherController: widget.fieldChangeNotifier as FleatherController,
-                          editorKey: widget.editorKey as GlobalKey<EditorState>?,
-                          viewMode: false,
-                          selected: widget.selected,
-                          onChanged: widget.onChanged,
-                          onSelect: widget.onSelect,
-                        ) :
-                      widget.field.fieldType == PatternFieldType.knittingchart ?
-                        PatternChartFieldControl(
-                          opacity: widget.field.opacity.toDouble(),
-                          chart: (widget.field as PatternChartField).chart,
-                          viewSettings: (widget.field as PatternChartField).viewSettings,
-                          selected: widget.selected,
-                          onSelect: widget.onSelect,
-                        ) :
-                      widget.field.fieldType == PatternFieldType.drawing ?
-                        PatternDrawingFieldControl(
-                          opacity: widget.field.opacity.toDouble(),
-                          drawing: (widget.field as PatternDrawingField).drawing, 
-                          selected: widget.selected, 
-                          onSelect: widget.onSelect
-                        ) :
-                      widget.field.fieldType == PatternFieldType.image ?
-                        PatternImageFieldControl(
-                          imageData: (widget.field as PatternImageField).imageData, 
-                          opacity: widget.field.opacity.toDouble(), 
-                          onSelect: widget.onSelect
-                        ) :
-                      widget.field.fieldType == PatternFieldType.panel ?
-                        PatternPanelFieldControl(
-                          panelStyle: (widget.field as PatternPanelField).style,
-                          opacity: widget.field.opacity.toDouble(),
-                          onSelect: widget.onSelect,
-                        ) :
-                      Container()
-                  )
+      child: Transform.rotate(
+        angle: MathUtitilies.toRadians(-widget.field.rotation),
+        child: Transform.scale(
+          scaleX: widget.field.flipX ? -1 : 1,
+          scaleY: widget.field.flipY ? -1 : 1,
+          child: SizedBox(
+            width: width,
+            height: height,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.transparent,
+                border: Border.all(
+                  color: widget.selected ? Colors.greenAccent.shade700 : Colors.grey,
                 ),
-                // top-side resizer
-                if (widget.selected)
-                Positioned(
-                  left: kCornerResizerSize,
-                  child: MouseRegion(
-                    cursor: SystemMouseCursors.resizeUpDown,
-                    child: SizedBox(
-                      width: width - (2 * kCornerResizerSize),
-                      height: kResizerShortSide,
-                      child: Draggable(
-                        feedback: Container(
-                          color: Colors.transparent,
-                          child: const SizedBox(width: kResizerShortSide, height: kResizerShortSide,),
-                        ),
-                        onDragUpdate: (details) {
-                          double newPositionY = max(positionY + details.delta.dy, 0);
-                          double newHeight = max((positionY + height) - newPositionY, minimumHeight);
-      
-                          double newWidth = width;
-                          if (isFixedAspect) {
-                            newWidth = min(aspect * newHeight, patternWidth);
-                            newHeight = aspect * newWidth;
-                          }
-      
-                          if (positionX + newWidth > patternWidth) {
-                            newWidth = patternWidth - positionX;
-                            newHeight = aspect * newWidth;
-                          }
-
-                          setState(() {
-                            height = newHeight;
-                            positionY = newPositionY;
-                            width = newWidth;
-                          });
-                        },
-                        onDragEnd: (_) => widget.onChanged(widget.field.abstractCopyWith(positionY: positionY, height: height, width: width)),
-                        child: Container(color: resizeHandleColor,),
-                      ),
-                    ),
-                  )
-                ),
-                // Top-left resizer
-                if (widget.selected)
-                Positioned(
-                  top: 0, left: 0,
-                  child: MouseRegion(
-                    cursor: SystemMouseCursors.resizeUpLeftDownRight,
-                    child: SizedBox(
-                      width: kCornerResizerSize,
-                      height: kResizerShortSide,
-                      child: Draggable(
-                        feedback: Container(
-                          color: Colors.transparent,
-                          child: const SizedBox(width: kResizerShortSide, height: kResizerShortSide,),
-                        ),
-                        onDragUpdate: (details) {
-                          double newPositionX = max(positionX + details.delta.dx, 0);
-                          double newPositionY = max(positionY + details.delta.dy, 0);
-                          double newWidth = max((positionX + width) - newPositionX, minimumWidth);
-                          double newHeight = max((positionY + height) - newPositionY, minimumHeight);
-      
-                          if (isFixedAspect) {
-                            newHeight = aspect * newWidth;
-                          }
-      
-                          if (newPositionX + newWidth > patternWidth) {
-                            newPositionX = patternWidth - newWidth;
-                          }
-      
-                          if (positionY + newHeight > patternHeight) {
-                            newPositionY = patternHeight - newHeight;
-                          }
-      
-                          setState(() {
-                            positionX = newPositionX;
-                            positionY = newPositionY;
-                            width = newWidth;
-                            height = newHeight;
-                          });
-                        },
-                        onDragEnd: (_) => widget.onChanged(widget.field.abstractCopyWith(positionX: positionX, positionY: positionY, width: width, height: height)),
-                        child: Container(color: cornerResizeHandleColor,),
-                      ),
-                    ),
-                  )
-                ),
-                // Left-top resizer
-                if (widget.selected)
-                Positioned(
-                  top: 0, left: 0,
-                  child: MouseRegion(
-                    cursor: SystemMouseCursors.resizeUpLeftDownRight,
-                    child: SizedBox(
-                      width: kResizerShortSide,
-                      height: kCornerResizerSize,
-                      child: Draggable(
-                        feedback: Container(
-                          color: Colors.transparent,
-                          child: const SizedBox(width: kResizerShortSide, height: kResizerShortSide,),
-                        ),
-                        onDragUpdate: (details) {
-                          double newPositionX = max(positionX + details.delta.dx, 0);
-                          double newPositionY = max(positionY + details.delta.dy, 0);
-                          double newWidth = max((positionX + width) - newPositionX, minimumWidth);
-                          double newHeight = max((positionY + height) - newPositionY, minimumHeight);
-      
-                          if (isFixedAspect) {
-                            newHeight = aspect * newWidth;
-                          }
-      
-                          if (newPositionX + newWidth > patternWidth) {
-                            newPositionX = patternWidth - newWidth;
-                          }
-      
-                          if (positionY + newHeight > patternHeight) {
-                            newPositionY = patternHeight - newHeight;
-                          }
-      
-                          setState(() {
-                            positionX = newPositionX;
-                            positionY = newPositionY;
-                            width = newWidth;
-                            height = newHeight;
-                          });
-                        },
-                        onDragEnd: (_) => widget.onChanged(widget.field.abstractCopyWith(positionX: positionX, positionY: positionY, width: width, height: height)),
-                        child: Container(color: cornerResizeHandleColor,),
-                      ),
-                    ),
-                  )                  
-                ),
-                // Top-right resizer
-                if (widget.selected)
-                Positioned(
-                  top: 0, right: 0,
-                  child: MouseRegion(
-                    cursor: SystemMouseCursors.resizeUpRightDownLeft,
-                    child: SizedBox(
-                      width: kCornerResizerSize,
-                      height: kResizerShortSide,
-                      child: Draggable(
-                        feedback: Container(
-                          color: Colors.transparent,
-                          child: const SizedBox(width: kResizerShortSide, height: kResizerShortSide,),
-                        ),
-                        onDragUpdate: (details) {
-                          double newWidth = max(width + details.delta.dx, minimumWidth);
-                          double newPositionY = max(positionY + details.delta.dy, 0);
-                          double newHeight = max((positionY + height) - newPositionY, minimumHeight);
-      
-                          if (isFixedAspect) {
-                            newWidth = aspect * newHeight;
-                          }
-      
-                          if (positionX + newWidth > patternWidth) {
-                            newWidth = patternWidth - positionX;
-                            if (isFixedAspect) {
-                              newHeight = aspect * newWidth;
-                            }
-                          }
-      
-                          if (positionY + newHeight > patternHeight) {
-                            newPositionY = patternHeight - newHeight;
-                          }
-      
-                          setState(() {
-                            width = newWidth;
-                            height = newHeight;
-                            positionY = newPositionY;
-                          });
-                        },
-                        onDragEnd: (_) => widget.onChanged(widget.field.abstractCopyWith(positionY: positionY, width: width, height: height)),
-                        child: Container(color: cornerResizeHandleColor,),
-                      ),
-                    ),
-                  )
-                ),
-                // Right-top resizer
-                if (widget.selected)
-                Positioned(
-                  top: 0, right: 0,
-                  child: MouseRegion(
-                    cursor: SystemMouseCursors.resizeUpRightDownLeft,
-                    child: SizedBox(
-                      width: kResizerShortSide,
-                      height: kCornerResizerSize,
-                      child: Draggable(
-                        feedback: Container(
-                          color: Colors.transparent,
-                          child: const SizedBox(width: kResizerShortSide, height: kResizerShortSide,),
-                        ),
-                        onDragUpdate: (details) {
-                          double newWidth = max(width + details.delta.dx, minimumWidth);
-                          double newPositionY = max(positionY + details.delta.dy, 0);
-                          double newHeight = max((positionY + height) - newPositionY, minimumHeight);
-      
-                          if (isFixedAspect) {
-                            newWidth = aspect * newHeight;
-                          }
-      
-                          if (positionX + newWidth > patternWidth) {
-                            newWidth = patternWidth - positionX;
-                            if (isFixedAspect) {
-                              newHeight = aspect * newWidth;
-                            }
-                          }
-                          if (positionY + newHeight > patternHeight) {
-                            newPositionY = patternHeight - newHeight;
-                          }
-      
-                          setState(() {
-                            width = newWidth;
-                            height = newHeight;
-                            positionY = newPositionY;
-                          });
-                        },
-                        onDragEnd: (_) => widget.onChanged(widget.field.abstractCopyWith(positionY: positionY, width: width, height: height)),
-                        child: Container(color: cornerResizeHandleColor,),
-                      ),
-                    ),
-                  )                  
-                ),
-                // right-side resizer
-                if (widget.selected)
-                Positioned(
-                  right: 0,
-                  top: kCornerResizerSize,
-                  child: MouseRegion(
-                    cursor: SystemMouseCursors.resizeLeftRight,
-                    child: SizedBox(
-                      width: kResizerShortSide, 
-                      height: height - (2 * kCornerResizerSize), 
-                      child: Draggable(
-                        feedback: Container(
-                          color: Colors.transparent,
-                          child: const SizedBox(width: kResizerShortSide, height: kResizerShortSide,),
-                        ),
-                        onDragUpdate: (details) {
-                          double newWidth = min(max(width + details.delta.dx, minimumWidth), patternWidth - positionX);
-                          double newHeight = height;
-                          if (isFixedAspect) {
-                            newHeight = min(aspect * newWidth, patternHeight - positionY);
-                            newWidth = aspect * newHeight;
-                          }
-                          setState(() {
-                            width = newWidth;
-                            height = newHeight;
-                          });
-                        },
-                        onDragEnd: (_) => widget.onChanged(widget.field.abstractCopyWith(width: width, height: height)),
-                        child: Container(color: resizeHandleColor,),
+              ),
+              child: GestureDetector(
+                onTap: widget.onSelect,
+                child: Stack(
+                  children: [
+                    // Pattern control
+                    Positioned(
+                      left: widget.field.contentLeft,
+                      top: widget.field.contentTop,
+                      child: SizedBox(
+                        width: width - (2 * widget.field.padding),
+                        height: height - widget.field.bottompadding,
+                        child:
+                          widget.field.fieldType == PatternFieldType.texteditor ?
+                            PatternTextEditorFieldControl(
+                              field: widget.field as PatternTextEditorField,
+                              fleatherController: widget.fieldChangeNotifier as FleatherController,
+                              editorKey: widget.editorKey as GlobalKey<EditorState>?,
+                              viewMode: false,
+                              selected: widget.selected,
+                              onChanged: widget.onChanged,
+                              onSelect: widget.onSelect,
+                            ) :
+                          widget.field.fieldType == PatternFieldType.knittingchart ?
+                            PatternChartFieldControl(
+                              opacity: widget.field.opacity.toDouble(),
+                              chart: (widget.field as PatternChartField).chart,
+                              viewSettings: (widget.field as PatternChartField).viewSettings,
+                              selected: widget.selected,
+                              onSelect: widget.onSelect,
+                            ) :
+                          widget.field.fieldType == PatternFieldType.drawing ?
+                            PatternDrawingFieldControl(
+                              opacity: widget.field.opacity.toDouble(),
+                              drawing: (widget.field as PatternDrawingField).drawing, 
+                              selected: widget.selected, 
+                              onSelect: widget.onSelect
+                            ) :
+                          widget.field.fieldType == PatternFieldType.image ?
+                            PatternImageFieldControl(
+                              key: ValueKey(widget.field.id),
+                              imageData: (widget.field as PatternImageField).imageData, 
+                              opacity: widget.field.opacity.toDouble(), 
+                              onSelect: widget.onSelect
+                            ) :
+                          widget.field.fieldType == PatternFieldType.panel ?
+                            PatternPanelFieldControl(
+                              panelStyle: (widget.field as PatternPanelField).style,
+                              opacity: widget.field.opacity.toDouble(),
+                              onSelect: widget.onSelect,
+                            ) :
+                          Container()
                       )
                     ),
-                  )
-                ),
-                // left-side resizer
-                if (widget.selected)
-                Positioned(
-                  left: 0,
-                  top: kCornerResizerSize,
-                  child: MouseRegion(
-                    cursor: SystemMouseCursors.resizeLeftRight,
-                    child: SizedBox(
-                      width: kResizerShortSide, 
-                      height: height - (2 * kCornerResizerSize), 
-                      child: Draggable(
-                        feedback: Container(
-                          color: Colors.transparent,
-                          child: const SizedBox(width: kResizerShortSide, height: kResizerShortSide,),
+                    // top-side resizer
+                    if (widget.selected)
+                    Positioned(
+                      left: kCornerResizerSize,
+                      child: MouseRegion(
+                        cursor: SystemMouseCursors.resizeUpDown,
+                        child: SizedBox(
+                          width: width - (2 * kCornerResizerSize),
+                          height: kResizerShortSide,
+                          child: Draggable(
+                            feedback: Container(
+                              color: Colors.transparent,
+                              child: const SizedBox(width: kResizerShortSide, height: kResizerShortSide,),
+                            ),
+                            onDragUpdate: (details) {
+                              double newPositionY = max(positionY + details.delta.dy, 0);
+                              double newHeight = max((positionY + height) - newPositionY, minimumHeight);
+          
+                              double newWidth = width;
+                              if (isFixedAspect) {
+                                newWidth = max(min(newHeight / aspect, patternWidth), minimumWidth);
+                                newHeight = aspect * newWidth;
+                              }
+          
+                              if (positionX + newWidth > patternWidth) {
+                                newWidth = patternWidth - positionX;
+                                newHeight = aspect * newWidth;
+                              }
+          
+                              setState(() {
+                                height = newHeight;
+                                positionY = newPositionY;
+                                width = newWidth;
+                              });
+                            },
+                            onDragEnd: (_) => widget.onChanged(widget.field.abstractCopyWith(positionY: positionY, height: height, width: width)),
+                            child: Container(color: resizeHandleColor,),
+                          ),
                         ),
-                        onDragUpdate: (details) {
-                          double newWidth = max(width - details.delta.dx, minimumWidth);
-                          double newPositionX = min(positionX + details.delta.dx, patternWidth - newWidth);
-                          double newHeight = height;
-                          if (isFixedAspect) {
-                            newHeight = aspect * newWidth;
-                          }
-                          if (newPositionX < 0) {
-                            newWidth += newPositionX;
-                            newPositionX = 0;
-                            if (isFixedAspect) {
-                              newHeight = aspect * newWidth;
-                            }
-                          }
+                      )
+                    ),
+                    // Top-left resizer
+                    if (widget.selected)
+                    Positioned(
+                      top: 0, left: 0,
+                      child: MouseRegion(
+                        cursor: SystemMouseCursors.resizeUpLeftDownRight,
+                        child: SizedBox(
+                          width: kCornerResizerSize,
+                          height: kResizerShortSide,
+                          child: Draggable(
+                            feedback: Container(
+                              color: Colors.transparent,
+                              child: const SizedBox(width: kResizerShortSide, height: kResizerShortSide,),
+                            ),
+                            onDragUpdate: (details) {
+                              double newPositionX = max(positionX + details.delta.dx, 0);
+                              double newPositionY = max(positionY + details.delta.dy, 0);
+                              double newWidth = max((positionX + width) - newPositionX, minimumWidth);
+                              double newHeight = max((positionY + height) - newPositionY, minimumHeight);
           
-                          if (positionY + newHeight > patternHeight) {
-                            newHeight = patternHeight - positionY;
-                            if (isFixedAspect) {
-                              newWidth = aspect * newHeight;
-                            }
-                          }
+                              if (isFixedAspect) {
+                                newHeight = aspect * newWidth;
+                              }
           
-                          setState(() {
-                            width = newWidth;
-                            height = newHeight;
-                            positionX = newPositionX;
-                          });
-                        },
-                        onDragEnd: (_) => widget.onChanged(widget.field.abstractCopyWith(positionX: positionX, width: width, height: height)),
-                        child: Container(color: resizeHandleColor,),
-                      ),
+                              if (newPositionX + newWidth > patternWidth) {
+                                newPositionX = patternWidth - newWidth;
+                              }
+          
+                              if (positionY + newHeight > patternHeight) {
+                                newPositionY = patternHeight - newHeight;
+                              }
+          
+                              setState(() {
+                                positionX = newPositionX;
+                                positionY = newPositionY;
+                                width = newWidth;
+                                height = newHeight;
+                              });
+                            },
+                            onDragEnd: (_) => widget.onChanged(widget.field.abstractCopyWith(positionX: positionX, positionY: positionY, width: width, height: height)),
+                            child: Container(color: cornerResizeHandleColor,),
+                          ),
+                        ),
+                      )
+                    ),
+                    // Left-top resizer
+                    if (widget.selected)
+                    Positioned(
+                      top: 0, left: 0,
+                      child: MouseRegion(
+                        cursor: SystemMouseCursors.resizeUpLeftDownRight,
+                        child: SizedBox(
+                          width: kResizerShortSide,
+                          height: kCornerResizerSize,
+                          child: Draggable(
+                            feedback: Container(
+                              color: Colors.transparent,
+                              child: const SizedBox(width: kResizerShortSide, height: kResizerShortSide,),
+                            ),
+                            onDragUpdate: (details) {
+                              double newPositionX = max(positionX + details.delta.dx, 0);
+                              double newPositionY = max(positionY + details.delta.dy, 0);
+                              double newWidth = max((positionX + width) - newPositionX, minimumWidth);
+                              double newHeight = max((positionY + height) - newPositionY, minimumHeight);
+          
+                              if (isFixedAspect) {
+                                newHeight = aspect * newWidth;
+                              }
+          
+                              if (newPositionX + newWidth > patternWidth) {
+                                newPositionX = patternWidth - newWidth;
+                              }
+          
+                              if (positionY + newHeight > patternHeight) {
+                                newPositionY = patternHeight - newHeight;
+                              }
+          
+                              setState(() {
+                                positionX = newPositionX;
+                                positionY = newPositionY;
+                                width = newWidth;
+                                height = newHeight;
+                              });
+                            },
+                            onDragEnd: (_) => widget.onChanged(widget.field.abstractCopyWith(positionX: positionX, positionY: positionY, width: width, height: height)),
+                            child: Container(color: cornerResizeHandleColor,),
+                          ),
+                        ),
+                      )                  
+                    ),
+                    // Top-right resizer
+                    if (widget.selected)
+                    Positioned(
+                      top: 0, right: 0,
+                      child: MouseRegion(
+                        cursor: SystemMouseCursors.resizeUpRightDownLeft,
+                        child: SizedBox(
+                          width: kCornerResizerSize,
+                          height: kResizerShortSide,
+                          child: Draggable(
+                            feedback: Container(
+                              color: Colors.transparent,
+                              child: const SizedBox(width: kResizerShortSide, height: kResizerShortSide,),
+                            ),
+                            onDragUpdate: (details) {
+                              double newWidth = min(max(width + details.delta.dx, minimumWidth), patternWidth - positionX);
+                              double newPositionY = max(positionY + details.delta.dy, 0);
+                              double newHeight = max((positionY + height) - newPositionY, minimumHeight);
+          
+                              if (isFixedAspect) {
+                                newWidth = max(newHeight / aspect, minimumWidth);
+                                newHeight = newWidth * aspect;
+                              }
+          
+                              if (positionX + newWidth > patternWidth) {
+                                newWidth = patternWidth - positionX;
+                                if (isFixedAspect) {
+                                  newHeight = aspect * newWidth;
+                                }
+                              }
+          
+                              if (positionY + newHeight > patternHeight) {
+                                newPositionY = patternHeight - newHeight;
+                              }
+          
+                              setState(() {
+                                width = newWidth;
+                                height = newHeight;
+                                positionY = newPositionY;
+                              });
+                            },
+                            onDragEnd: (_) => widget.onChanged(widget.field.abstractCopyWith(positionY: positionY, width: width, height: height)),
+                            child: Container(color: cornerResizeHandleColor,),
+                          ),
+                        ),
+                      )
+                    ),
+                    // Right-top resizer
+                    if (widget.selected)
+                    Positioned(
+                      top: 0, right: 0,
+                      child: MouseRegion(
+                        cursor: SystemMouseCursors.resizeUpRightDownLeft,
+                        child: SizedBox(
+                          width: kResizerShortSide,
+                          height: kCornerResizerSize,
+                          child: Draggable(
+                            feedback: Container(
+                              color: Colors.transparent,
+                              child: const SizedBox(width: kResizerShortSide, height: kResizerShortSide,),
+                            ),
+                            onDragUpdate: (details) {
+                              double newWidth = min(max(width + details.delta.dx, minimumWidth), patternWidth - positionX);
+                              double newPositionY = max(positionY + details.delta.dy, 0);
+                              double newHeight = max((positionY + height) - newPositionY, minimumHeight);
+          
+                              if (isFixedAspect) {
+                                newWidth = max(newHeight / aspect, minimumWidth);
+                                newHeight = newWidth * aspect;
+                              }
+          
+                              if (positionX + newWidth > patternWidth) {
+                                newWidth = patternWidth - positionX;
+                                if (isFixedAspect) {
+                                  newHeight = aspect * newWidth;
+                                }
+                              }
+                              if (positionY + newHeight > patternHeight) {
+                                newPositionY = patternHeight - newHeight;
+                              }
+          
+                              setState(() {
+                                width = newWidth;
+                                height = newHeight;
+                                positionY = newPositionY;
+                              });
+                            },
+                            onDragEnd: (_) => widget.onChanged(widget.field.abstractCopyWith(positionY: positionY, width: width, height: height)),
+                            child: Container(color: cornerResizeHandleColor,),
+                          ),
+                        ),
+                      )                  
+                    ),
+                    // right-side resizer
+                    if (widget.selected)
+                    Positioned(
+                      right: 0,
+                      top: kCornerResizerSize,
+                      child: MouseRegion(
+                        cursor: SystemMouseCursors.resizeLeftRight,
+                        child: SizedBox(
+                          width: kResizerShortSide, 
+                          height: height - (2 * kCornerResizerSize), 
+                          child: Draggable(
+                            feedback: Container(
+                              color: Colors.transparent,
+                              child: const SizedBox(width: kResizerShortSide, height: kResizerShortSide,),
+                            ),
+                            onDragUpdate: (details) {
+                              double newWidth = min(max(width + details.delta.dx, minimumWidth), patternWidth - positionX);
+                              double newHeight = height;
+                              if (isFixedAspect) {
+                                newHeight = max(min(aspect * newWidth, patternHeight - positionY), minimumHeight);
+                                newWidth = max(newHeight / aspect, minimumWidth);
+                                newHeight = newWidth * aspect;
+                              }
+                              setState(() {
+                                width = newWidth;
+                                height = newHeight;
+                              });
+                            },
+                            onDragEnd: (_) => widget.onChanged(widget.field.abstractCopyWith(width: width, height: height)),
+                            child: Container(color: resizeHandleColor,),
+                          )
+                        ),
+                      )
+                    ),
+                    // left-side resizer
+                    if (widget.selected)
+                    Positioned(
+                      left: 0,
+                      top: kCornerResizerSize,
+                      child: MouseRegion(
+                        cursor: SystemMouseCursors.resizeLeftRight,
+                        child: SizedBox(
+                          width: kResizerShortSide, 
+                          height: height - (2 * kCornerResizerSize), 
+                          child: Draggable(
+                            feedback: Container(
+                              color: Colors.transparent,
+                              child: const SizedBox(width: kResizerShortSide, height: kResizerShortSide,),
+                            ),
+                            onDragUpdate: (details) {
+                              double newWidth = max(width - details.delta.dx, minimumWidth);
+                              double newPositionX = min(positionX + details.delta.dx, patternWidth - newWidth);
+                              double newHeight = height;
+                              if (isFixedAspect) {
+                                newHeight = aspect * newWidth;
+                              }
+                              if (newPositionX < 0) {
+                                newWidth += newPositionX;
+                                newPositionX = 0;
+                                if (isFixedAspect) {
+                                  newHeight = aspect * newWidth;
+                                }
+                              }
+              
+                              if (positionY + newHeight > patternHeight) {
+                                newHeight = patternHeight - positionY;
+                                if (isFixedAspect) {
+                                  newWidth = aspect * newHeight;
+                                }
+                              }
+              
+                              setState(() {
+                                width = newWidth;
+                                height = newHeight;
+                                positionX = newPositionX;
+                              });
+                            },
+                            onDragEnd: (_) => widget.onChanged(widget.field.abstractCopyWith(positionX: positionX, width: width, height: height)),
+                            child: Container(color: resizeHandleColor,),
+                          ),
+                        )
+                      )
+                    ),
+                    // bottom resizer
+                    if (widget.selected)
+                    Positioned(
+                      bottom: 0,
+                      left: kCornerResizerSize, 
+                      child: MouseRegion(
+                        cursor: SystemMouseCursors.resizeUpDown,
+                        child: SizedBox(
+                          height: kResizerShortSide, 
+                          width: width - (2 * kCornerResizerSize), 
+                          child: Draggable(
+                            feedback: Container(
+                              color: Colors.transparent,
+                              child: const SizedBox(width: kResizerShortSide, height: kResizerShortSide,),
+                            ),
+                            onDragUpdate: (details) {
+                              double newHeight = min(max(height + details.delta.dy, minimumHeight), patternHeight - positionY);
+                              double newWidth = width;
+                              if (isFixedAspect) {
+                                newWidth = max(min(newHeight / aspect, patternWidth), minimumWidth);
+                                newHeight = aspect * newWidth;
+                              }
+          
+                              if (positionX + newWidth > patternWidth) {
+                                newWidth = patternWidth - positionX;
+                                newHeight = aspect * newWidth;
+                              }
+          
+                              setState(() {
+                                width = newWidth;
+                                height = newHeight;
+                              });
+                            },
+                            onDragEnd: (_) => widget.onChanged(widget.field.abstractCopyWith(width: width, height: height)),
+                            child: Container(color: resizeHandleColor,),
+                          ),
+                        )
+                      )
+                    ),
+                    // bottom-left resizer
+                    if (widget.selected)
+                    Positioned(
+                      bottom: 0,
+                      child: MouseRegion(
+                        cursor: SystemMouseCursors.resizeUpRightDownLeft,
+                        child: SizedBox(
+                          height: kCornerResizerSize, 
+                          width: kResizerShortSide, 
+                          child: Draggable(
+                            feedback: Container(
+                              color: Colors.transparent,
+                              child: const SizedBox(width: kResizerShortSide, height: kResizerShortSide,),
+                            ),
+                            onDragUpdate: (details) {
+                              double newWidth = max(width - details.delta.dx, minimumWidth);
+                              double newPositionX = positionX + details.delta.dx;
+                              double newHeight = height;
+                              if (isFixedAspect) {
+                                newHeight = aspect * newWidth;
+                              } else {
+                                newHeight = max(height + details.delta.dy, minimumHeight);
+                              }
+              
+                              if (newPositionX < 0) {
+                                newWidth += newPositionX;
+                                newPositionX = 0;
+                                if (isFixedAspect) {
+                                  newHeight = aspect * newWidth;
+                                }
+                              }
+              
+                              if (positionY + newHeight > patternHeight) {
+                                newHeight = patternHeight - positionY;
+                                if (isFixedAspect) {
+                                  newWidth = aspect * newHeight;
+                                }
+                              }
+              
+                              setState(() {
+                                width = newWidth;
+                                height = newHeight;
+                                positionX = newPositionX;
+                              });
+                            },
+                            onDragEnd: (_) => widget.onChanged(widget.field.abstractCopyWith(positionX: positionX, width: width, height: height)),
+                            child: Container(color: cornerResizeHandleColor,),
+                          ),
+                        ),
+                      )
+                    ),
+                    // left-bottom resizer
+                    if (widget.selected)
+                    Positioned(
+                      bottom: 0,
+                      child: MouseRegion(
+                        cursor: SystemMouseCursors.resizeUpRightDownLeft,
+                        child: SizedBox(
+                          width: kCornerResizerSize, 
+                          height: kResizerShortSide, 
+                          child: Draggable(
+                            feedback: Container(
+                              color: Colors.transparent,
+                              child: const SizedBox(width: kResizerShortSide, height: kResizerShortSide,),
+                            ),
+                            onDragUpdate: (details) {
+                              double newWidth = max(width - details.delta.dx, minimumWidth);
+                              double newPositionX = positionX + details.delta.dx;
+                              double newHeight = height;
+                              if (isFixedAspect) {
+                                newHeight = aspect * newWidth;
+                              } else {
+                                newHeight = max(height + details.delta.dy, minimumHeight);
+                              }
+              
+                              if (newPositionX < 0) {
+                                newWidth += newPositionX;
+                                newPositionX = 0;
+                                if (isFixedAspect) {
+                                  newHeight = aspect * newWidth;
+                                }
+                              }
+              
+                              if (positionY + newHeight > patternHeight) {
+                                newHeight = patternHeight - positionY;
+                                if (isFixedAspect) {
+                                  newWidth = aspect * newHeight;
+                                }
+                              }
+              
+                              setState(() {
+                                width = newWidth;
+                                height = newHeight;
+                                positionX = newPositionX;
+                              });
+                            },
+                            onDragEnd: (_) => widget.onChanged(widget.field.abstractCopyWith(positionX: positionX, width: width, height: height)),
+                            child: Container(color: cornerResizeHandleColor,),
+                          ),
+                        ),
+                      )
+                    ),
+                    // bottom-right resizer
+                    if (widget.selected)
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: MouseRegion(
+                        cursor: SystemMouseCursors.resizeUpLeftDownRight,
+                        child: SizedBox(
+                          height: kCornerResizerSize, 
+                          width: kResizerShortSide, 
+                          child: Draggable(
+                            feedback: Container(
+                              color: Colors.transparent,
+                              child: const SizedBox(width: kResizerShortSide, height: kResizerShortSide,),
+                            ),
+                            onDragUpdate: (details) {
+                              double newWidth = min(max(width + details.delta.dx, minimumWidth), patternWidth - positionX);
+                              double newHeight = height;
+                              if (isFixedAspect) {
+                                newHeight = aspect * newWidth;
+                              } else {
+                                newHeight = max(height + details.delta.dy, minimumHeight);
+                              }
+              
+                              if (newHeight > patternHeight - positionY) {
+                                newHeight = patternHeight - positionY;
+                                if (isFixedAspect) {
+                                  newWidth = aspect * newHeight;
+                                }
+                              }
+              
+                              setState(() {
+                                width = newWidth;
+                                height = newHeight;
+                              });
+                            },
+                            onDragEnd: (_) => widget.onChanged(widget.field.abstractCopyWith(width: width, height: height)),
+                            child: Container(color: cornerResizeHandleColor,),
+                          ),
+                        ),
+                      )
+                    ),
+                    // right-bottom resizer
+                    if (widget.selected)
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: MouseRegion(
+                        cursor: SystemMouseCursors.resizeUpLeftDownRight,
+                        child: SizedBox(
+                          width: kCornerResizerSize, 
+                          height: kResizerShortSide, 
+                          child: Draggable(
+                            feedback: Container(
+                              color: Colors.transparent,
+                              child: const SizedBox(width: kResizerShortSide, height: kResizerShortSide,),
+                            ),
+                            onDragUpdate: (details) {
+                              double newWidth = min(max(width + details.delta.dx, minimumWidth), patternWidth - positionX);
+                              double newHeight = height;
+                              if (isFixedAspect) {
+                                newHeight = aspect * newWidth;
+                              } else {
+                                newHeight = max(height + details.delta.dy, minimumHeight);
+                              }
+              
+                              if (newHeight > patternHeight - positionY) {
+                                newHeight = patternHeight - positionY;
+                                if (isFixedAspect) {
+                                  newWidth = aspect * newHeight;
+                                }
+                              }
+              
+                              setState(() {
+                                width = newWidth;
+                                height = newHeight;
+                              });
+                            },
+                            onDragEnd: (_) => widget.onChanged(widget.field.abstractCopyWith(width: width, height: height)),
+                            child: Container(color: cornerResizeHandleColor,),
+                          ),
+                        ),
+                      )
+                    ),
+                    // drag region
+                    Positioned(
+                      top: draggerAtBottom ? null : kResizerShortSide,
+                      bottom: draggerAtBottom ? kResizerShortSide : null,
+                      left: kResizerShortSide,
+                      right: kResizerShortSide,
+                      child: _draggerRegion
                     )
-                  )
+                  ],
                 ),
-                // bottom resizer
-                if (widget.selected)
-                Positioned(
-                  bottom: 0,
-                  left: kCornerResizerSize, 
-                  child: MouseRegion(
-                    cursor: SystemMouseCursors.resizeUpDown,
-                    child: SizedBox(
-                      height: kResizerShortSide, 
-                      width: width - (2 * kCornerResizerSize), 
-                      child: Draggable(
-                        feedback: Container(
-                          color: Colors.transparent,
-                          child: const SizedBox(width: kResizerShortSide, height: kResizerShortSide,),
-                        ),
-                        onDragUpdate: (details) {
-                          double newHeight = min(max(height + details.delta.dy, minimumHeight), patternHeight - positionY);
-                          double newWidth = width;
-                          if (isFixedAspect) {
-                            newWidth = min(aspect * newHeight, patternWidth);
-                            newHeight = aspect * newWidth;
-                          }
-
-                          if (positionX + newWidth > patternWidth) {
-                            newWidth = patternWidth - positionX;
-                            newHeight = aspect * newWidth;
-                          }
-
-                          setState(() {
-                            width = newWidth;
-                            height = newHeight;
-                          });
-                        },
-                        onDragEnd: (_) => widget.onChanged(widget.field.abstractCopyWith(width: width, height: height)),
-                        child: Container(color: resizeHandleColor,),
-                      ),
-                    )
-                  )
-                ),
-                // bottom-left resizer
-                if (widget.selected)
-                Positioned(
-                  bottom: 0,
-                  child: MouseRegion(
-                    cursor: SystemMouseCursors.resizeUpRightDownLeft,
-                    child: SizedBox(
-                      height: kCornerResizerSize, 
-                      width: kResizerShortSide, 
-                      child: Draggable(
-                        feedback: Container(
-                          color: Colors.transparent,
-                          child: const SizedBox(width: kResizerShortSide, height: kResizerShortSide,),
-                        ),
-                        onDragUpdate: (details) {
-                          double newWidth = max(width - details.delta.dx, minimumWidth);
-                          double newPositionX = positionX + details.delta.dx;
-                          double newHeight = height;
-                          if (isFixedAspect) {
-                            newHeight = aspect * newWidth;
-                          } else {
-                            newHeight = max(height + details.delta.dy, minimumHeight);
-                          }
-          
-                          if (newPositionX < 0) {
-                            newWidth += newPositionX;
-                            newPositionX = 0;
-                            if (isFixedAspect) {
-                              newHeight = aspect * newWidth;
-                            }
-                          }
-          
-                          if (positionY + newHeight > patternHeight) {
-                            newHeight = patternHeight - positionY;
-                            if (isFixedAspect) {
-                              newWidth = aspect * newHeight;
-                            }
-                          }
-          
-                          setState(() {
-                            width = newWidth;
-                            height = newHeight;
-                            positionX = newPositionX;
-                          });
-                        },
-                        onDragEnd: (_) => widget.onChanged(widget.field.abstractCopyWith(positionX: positionX, width: width, height: height)),
-                        child: Container(color: cornerResizeHandleColor,),
-                      ),
-                    ),
-                  )
-                ),
-                // left-bottom resizer
-                if (widget.selected)
-                Positioned(
-                  bottom: 0,
-                  child: MouseRegion(
-                    cursor: SystemMouseCursors.resizeUpRightDownLeft,
-                    child: SizedBox(
-                      width: kCornerResizerSize, 
-                      height: kResizerShortSide, 
-                      child: Draggable(
-                        feedback: Container(
-                          color: Colors.transparent,
-                          child: const SizedBox(width: kResizerShortSide, height: kResizerShortSide,),
-                        ),
-                        onDragUpdate: (details) {
-                          double newWidth = max(width - details.delta.dx, minimumWidth);
-                          double newPositionX = positionX + details.delta.dx;
-                          double newHeight = height;
-                          if (isFixedAspect) {
-                            newHeight = aspect * newWidth;
-                          } else {
-                            newHeight = max(height + details.delta.dy, minimumHeight);
-                          }
-          
-                          if (newPositionX < 0) {
-                            newWidth += newPositionX;
-                            newPositionX = 0;
-                            if (isFixedAspect) {
-                              newHeight = aspect * newWidth;
-                            }
-                          }
-          
-                          if (positionY + newHeight > patternHeight) {
-                            newHeight = patternHeight - positionY;
-                            if (isFixedAspect) {
-                              newWidth = aspect * newHeight;
-                            }
-                          }
-          
-                          setState(() {
-                            width = newWidth;
-                            height = newHeight;
-                            positionX = newPositionX;
-                          });
-                        },
-                        onDragEnd: (_) => widget.onChanged(widget.field.abstractCopyWith(positionX: positionX, width: width, height: height)),
-                        child: Container(color: cornerResizeHandleColor,),
-                      ),
-                    ),
-                  )
-                ),
-                // bottom-right resizer
-                if (widget.selected)
-                Positioned(
-                  bottom: 0,
-                  right: 0,
-                  child: MouseRegion(
-                    cursor: SystemMouseCursors.resizeUpLeftDownRight,
-                    child: SizedBox(
-                      height: kCornerResizerSize, 
-                      width: kResizerShortSide, 
-                      child: Draggable(
-                        feedback: Container(
-                          color: Colors.transparent,
-                          child: const SizedBox(width: kResizerShortSide, height: kResizerShortSide,),
-                        ),
-                        onDragUpdate: (details) {
-                          double newWidth = min(max(width + details.delta.dx, minimumWidth), patternWidth - positionX);
-                          double newHeight = height;
-                          if (isFixedAspect) {
-                            newHeight = aspect * newWidth;
-                          } else {
-                            newHeight = max(height + details.delta.dy, minimumHeight);
-                          }
-          
-                          if (newHeight > patternHeight - positionY) {
-                            newHeight = patternHeight - positionY;
-                            if (isFixedAspect) {
-                              newWidth = aspect * newHeight;
-                            }
-                          }
-          
-                          setState(() {
-                            width = newWidth;
-                            height = newHeight;
-                          });
-                        },
-                        onDragEnd: (_) => widget.onChanged(widget.field.abstractCopyWith(width: width, height: height)),
-                        child: Container(color: cornerResizeHandleColor,),
-                      ),
-                    ),
-                  )
-                ),
-                // right-bottom resizer
-                if (widget.selected)
-                Positioned(
-                  bottom: 0,
-                  right: 0,
-                  child: MouseRegion(
-                    cursor: SystemMouseCursors.resizeUpLeftDownRight,
-                    child: SizedBox(
-                      width: kCornerResizerSize, 
-                      height: kResizerShortSide, 
-                      child: Draggable(
-                        feedback: Container(
-                          color: Colors.transparent,
-                          child: const SizedBox(width: kResizerShortSide, height: kResizerShortSide,),
-                        ),
-                        onDragUpdate: (details) {
-                          double newWidth = min(max(width + details.delta.dx, minimumWidth), patternWidth - positionX);
-                          double newHeight = height;
-                          if (isFixedAspect) {
-                            newHeight = aspect * newWidth;
-                          } else {
-                            newHeight = max(height + details.delta.dy, minimumHeight);
-                          }
-          
-                          if (newHeight > patternHeight - positionY) {
-                            newHeight = patternHeight - positionY;
-                            if (isFixedAspect) {
-                              newWidth = aspect * newHeight;
-                            }
-                          }
-          
-                          setState(() {
-                            width = newWidth;
-                            height = newHeight;
-                          });
-                        },
-                        onDragEnd: (_) => widget.onChanged(widget.field.abstractCopyWith(width: width, height: height)),
-                        child: Container(color: cornerResizeHandleColor,),
-                      ),
-                    ),
-                  )
-                ),
-                // drag region
-                Positioned(
-                  top: draggerAtBottom ? null : kResizerShortSide,
-                  bottom: draggerAtBottom ? kResizerShortSide : null,
-                  left: kResizerShortSide,
-                  right: kResizerShortSide,
-                  child: _draggerRegion
-                )
-              ],
+              ),
             ),
           ),
         ),

@@ -11,6 +11,7 @@ import 'package:knitty_griddy/patterns/model/fields/pattern_field.dart';
 import 'package:knitty_griddy/patterns/model/fields/pattern_image_field.dart';
 import 'package:knitty_griddy/patterns/model/knitting_pattern.dart';
 import 'package:knitty_griddy/patterns/model/pattern_page_layout.dart';
+import 'package:knitty_griddy/utils/math_utitilies.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
@@ -24,11 +25,13 @@ class PdfService {
   final KnittingPattern pattern;
   final Map<String, Uint8List> panelImages;
   final Map<String, Uint8List> textFieldImages;
+  final Map<String, Uint8List> imageFieldImages;
 
   PdfService({
     required this.pattern,
     required this.panelImages,
     required this.textFieldImages,
+    required this.imageFieldImages,
   });
 
   Future<void> saveAsPdf() async {
@@ -70,54 +73,80 @@ class PdfService {
                       pw.Positioned(
                         left: (field.positionX / PatternPageLayout.pixelsPerMM) * PdfPageFormat.mm,
                         top: ((field.positionY - (pageNumber * pattern.pageLayout.pageheight)) / PatternPageLayout.pixelsPerMM) * PdfPageFormat.mm,
-                        child: pw.SizedBox(
-                          width: (field.width / PatternPageLayout.pixelsPerMM) * PdfPageFormat.mm,
-                          height: (field.height / PatternPageLayout.pixelsPerMM) * PdfPageFormat.mm,
-                          child: pw.Opacity(
-                            opacity: field.opacity == 0 ? 0 : field.opacity / 255,
-                            child: pw.Stack(
-                              children: [
-                                 pw.Positioned(
-                                  left: (field.contentLeft / PatternPageLayout.pixelsPerMM) * PdfPageFormat.mm,
-                                  top: (field.contentTop / PatternPageLayout.pixelsPerMM) * PdfPageFormat.mm,
-                                  child: pw.SizedBox(
-                                    width: (field.contentWidth / PatternPageLayout.pixelsPerMM) * PdfPageFormat.mm,
-                                    height: (field.contentHeight / PatternPageLayout.pixelsPerMM) * PdfPageFormat.mm,
-                                    child: pw.Builder(
-                                      builder: (context) {
-                                        switch(field.fieldType) {
-                                          case PatternFieldType.drawing: 
-                                            if ((field as PatternDrawingField).drawing == null) {
-                                              return pw.SizedBox.shrink();
+                        child: pw.Builder(
+                          builder: (context) {
+                            Matrix4 fieldTransformMatrix = Matrix4.rotationZ(MathUtitilies.toRadians(field.rotation));
+
+                            return pw.Transform(
+                              transform: fieldTransformMatrix,
+                              origin: PdfPoint(
+                                ((field.width / 2) / PatternPageLayout.pixelsPerMM) * PdfPageFormat.mm, 
+                                ((field.height / 2) / PatternPageLayout.pixelsPerMM) * PdfPageFormat.mm
+                              ),
+                              child: pw.SizedBox(
+                                width: (field.width / PatternPageLayout.pixelsPerMM) * PdfPageFormat.mm,
+                                height: (field.height / PatternPageLayout.pixelsPerMM) * PdfPageFormat.mm,
+                                child: pw.Opacity(
+                                  opacity: field.opacity == 0 ? 0 : field.opacity / 255,
+                                  child: pw.Stack(
+                                    children: [
+                                      // The contents
+                                      pw.Positioned(
+                                        left: (field.contentLeft / PatternPageLayout.pixelsPerMM) * PdfPageFormat.mm,
+                                        top: (field.contentTop / PatternPageLayout.pixelsPerMM) * PdfPageFormat.mm,
+                                        child: pw.SizedBox(
+                                          width: (field.contentWidth / PatternPageLayout.pixelsPerMM) * PdfPageFormat.mm,
+                                          height: (field.contentHeight / PatternPageLayout.pixelsPerMM) * PdfPageFormat.mm,
+                                          child: pw.Builder(
+                                            builder: (context) {
+                                              switch(field.fieldType) {
+                                                case PatternFieldType.drawing: 
+                                                  if ((field as PatternDrawingField).drawing == null) {
+                                                    return pw.SizedBox.shrink();
+                                                  }
+                                                  DrawingSvgService svgService = DrawingSvgService(
+                                                    drawing: field.drawing!,
+                                                    flipX: field.flipX,
+                                                    flipY: field.flipY
+                                                  );
+                                                  return pw.Center(
+                                                    child: pw.SvgImage(svg: svgService.getCompleteDrawing())
+                                                  );
+                                                case PatternFieldType.knittingchart:
+                                                  if ((field as PatternChartField).chart == null) {
+                                                    return pw.SizedBox.shrink();
+                                                  }
+                                                  KnittingChartSvgService svgService = KnittingChartSvgService(
+                                                    chart: field.chart!.pruneUnusedStitchesAndColours(), 
+                                                    viewSettings: field.viewSettings,
+                                                    flipX: field.flipX,
+                                                    flipY: field.flipY
+                                                  );
+                                                  return pw.SvgImage(svg: svgService.getCompleteSvg().svgString);
+                                                case PatternFieldType.image:
+                                                  PatternImageField imageField = field as PatternImageField;
+                                                  if (!imageField.hasImage) {
+                                                    return pw.SizedBox.shrink();
+                                                  }
+//                                                  return pw.Image(pw.MemoryImage(field.imageData!));
+                                                  return pw.Image(pw.MemoryImage(imageFieldImages[field.id]!));
+                                                case PatternFieldType.panel:
+                                                  return pw.Image(pw.MemoryImage(panelImages[field.id]!));
+                                                case PatternFieldType.texteditor:
+                                                  return pw.Image(pw.MemoryImage(textFieldImages[field.id]!));
+                                              }
                                             }
-                                            DrawingSvgService svgService = DrawingSvgService(drawing: field.drawing!);
-                                            return pw.SvgImage(svg: svgService.getCompleteDrawing());
-                                          case PatternFieldType.knittingchart:
-                                            if ((field as PatternChartField).chart == null) {
-                                              return pw.SizedBox.shrink();
-                                            }
-                                            KnittingChartSvgService svgService = KnittingChartSvgService(chart: field.chart!.pruneUnusedStitchesAndColours(), viewSettings: field.viewSettings);
-                                            return pw.SvgImage(svg: svgService.getCompleteSvg().svgString);
-                                          case PatternFieldType.image:
-                                            PatternImageField imageField = field as PatternImageField;
-                                            if (!imageField.hasImage) {
-                                              return pw.SizedBox.shrink();
-                                            }
-                                            return pw.Image(pw.MemoryImage(field.imageData!));
-                                          case PatternFieldType.panel:
-                                            return pw.Image(pw.MemoryImage(panelImages[field.id]!));
-                                          case PatternFieldType.texteditor:
-                                            return pw.Image(pw.MemoryImage(textFieldImages[field.id]!));
-                                        }
-                                      }
-                                    ),
+                                          ),
+                                        )
+                                      )
+                                    ]
                                   )
-                                 )
-                              ]
-                            )
-                          ),
-                        ),
-                      ),
+                                ),
+                              ),
+                            );
+                          }
+                        )
+                      )
                   ]
                 )
               )

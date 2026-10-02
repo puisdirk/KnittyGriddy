@@ -6,7 +6,10 @@ import 'package:knitty_griddy/drawings/model/drawing.dart';
 import 'package:knitty_griddy/drawings/model/drawing_info.dart';
 import 'package:knitty_griddy/drawings/model/drawing_operation_exception.dart';
 import 'package:knitty_griddy/drawings/model/drawings_model.dart';
+import 'package:knitty_griddy/drawings/model/part_drawing.dart';
+import 'package:knitty_griddy/drawings/partrepo/part_repository_page.dart';
 import 'package:knitty_griddy/utils/constants.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
 class DrawingCard extends StatelessWidget {
@@ -124,16 +127,59 @@ class DrawingCard extends StatelessWidget {
                     Tooltip(
                       message: 'Duplicate',
                       child: IconButton(
-                        iconSize: 16,
                         onPressed: () => Provider.of<DrawingsModel>(context, listen: false).duplicateDrawing(drawingInfo), 
                         icon: const Icon(Icons.content_copy)
+                      ),
+                    ),
+                    hspacing,
+                    Tooltip(
+                      message: 'Duplicate to Part drawing',
+                      child: IconButton(
+                        onPressed: () async {
+                          bool proceed = await showDialog(
+                            context: context,
+                            barrierDismissible: false, 
+                            builder: (context) => KeyboardListener(
+                              focusNode: FocusNode(),
+                              onKeyEvent: (value) {
+                                if (value.logicalKey == LogicalKeyboardKey.escape) {
+                                  Navigator.of(context).pop(false);
+                                }
+                              },
+                              child: AlertDialog(
+                                content: const SizedBox(
+                                  width: 400, 
+                                  height: 60, 
+                                  child: Text('When converting to a Part Drawing, the following elements will not be copied: included parts, repeats, styles, text, and tapes')),
+                                actions: [
+                                  ElevatedButton(
+                                    onPressed: () => Navigator.of(context).pop(false), 
+                                    child: const Text('Cancel'),
+                                  ),
+                                  ElevatedButton(
+                                    onPressed: () => Navigator.of(context).pop(true), 
+                                    child: const Text('Proceed'),
+                                  ),
+                                ],
+                              ),
+                            )
+                          );
+                          if (proceed && context.mounted) {
+                            PartDrawing partDrawing = await Provider.of<DrawingsModel>(context, listen: false).duplicateDrawingToPartDrawing(drawingInfo);
+                            
+                            if (context.mounted) {
+                              Navigator.push(context, MaterialPageRoute(builder: (context) => const PartRepositoryPage(),));
+                              Navigator.push(context, MaterialPageRoute(builder: (context) => EditDrawingPage(drawing: partDrawing)));
+                            }
+                          }
+                        }, 
+                        icon: const Icon(Symbols.apparel)
                       ),
                     ),
                     const Spacer(),
                     Tooltip(
                       message: 'Delete',
                       child: IconButton(
-                        iconSize: 16,
                         onPressed: () => _confirmToDelete(context), 
                         icon: const Icon(Icons.delete)
                       ),

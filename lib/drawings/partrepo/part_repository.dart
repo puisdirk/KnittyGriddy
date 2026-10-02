@@ -6,6 +6,7 @@ import 'package:knitty_griddy/drawings/model/part_drawing.dart';
 import 'package:knitty_griddy/drawings/model/part_info.dart';
 import 'package:knitty_griddy/drawings/model/part_set_info.dart';
 import 'package:knitty_griddy/drawings/partrepo/basic_parts_set.dart';
+import 'package:knitty_griddy/drawings/partrepo/converted_parts_set.dart';
 import 'package:knitty_griddy/drawings/partrepo/imported_parts_set.dart';
 import 'package:knitty_griddy/drawings/partrepo/part_set.dart';
 
@@ -60,6 +61,16 @@ class PartRepository {
       )).toList();
     } else {
       instance.sets = [...instance.sets, const ImportedPartsSet().copyWith(partDrawings: [part])];
+    }
+  }
+
+  static void addPartDrawingToConvertedSet(PartDrawing part) {
+    if (instance.sets.any((s) => s.id == ConvertedPartsSet.convertedPartsSetId)) {
+      instance.sets = instance.sets.map((s) => s.id != ConvertedPartsSet.convertedPartsSetId ? s : s.copyWith(
+        partDrawings: [...s.partDrawings, part]
+      )).toList();
+    } else {
+      instance.sets = [...instance.sets, const ConvertedPartsSet().copyWith(partDrawings: [part])];
     }
   }
 

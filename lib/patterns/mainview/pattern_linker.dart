@@ -5,6 +5,7 @@ import 'package:knitty_griddy/patterns/model/fields/pattern_text_editor_field.da
 import 'package:knitty_griddy/patterns/model/knitting_pattern.dart';
 import 'package:knitty_griddy/patterns/model/text_field_link.dart';
 import 'package:knitty_griddy/utils/constants.dart';
+import 'package:knitty_griddy/utils/math_utitilies.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 class PatternLinker extends StatefulWidget {
@@ -79,83 +80,93 @@ class _PatternLinkerState extends State<PatternLinker> {
                           Positioned(
                             left: field.positionX,
                             top: field.positionY,
-                            child: TextEditorFieldOutline(field: field)
-                          ),
-                        // Input connectors
-                        for (PatternTextEditorField field in stateKnittingPattern.textEditorFields)
-                          Positioned(
-                            left: field.positionX + 10,
-                            top: field.positionY + 10,
-                            child: acceptableDragSources.isEmpty || stateKnittingPattern.textFieldLinks.hasIncomingLink(field.id) ?
-                              Opacity(
-                                opacity: stateKnittingPattern.textFieldLinks.hasIncomingLink(field.id) ? 1 : .2, 
-                                child: Icon(
-                                  stateKnittingPattern.textFieldLinks.hasIncomingLink(field.id) ? Symbols.line_end_circle : Symbols.line_end_diamond,
-                                  color: stateKnittingPattern.textFieldLinks.hasIncomingLink(field.id) ? Colors.green : null,
+                            child: Transform.rotate(
+                              angle: MathUtitilies.toRadians(-field.rotation),
+                              child: Transform.scale(
+                                scaleX: field.flipX ? -1 : 1,
+                                scaleY: field.flipY ? -1 : 1,
+                                child: Stack(
+                                  children: [
+                                    Positioned(child: TextEditorFieldOutline(field: field)),
+                                    // Input connector
+                                    Positioned(
+                                      left: 10,
+                                      top: 10,
+                                      child: acceptableDragSources.isEmpty || stateKnittingPattern.textFieldLinks.hasIncomingLink(field.id) ?
+                                        Opacity(
+                                          opacity: stateKnittingPattern.textFieldLinks.hasIncomingLink(field.id) ? 1 : .2, 
+                                          child: Icon(
+                                            stateKnittingPattern.textFieldLinks.hasIncomingLink(field.id) ? Symbols.line_end_circle : Symbols.line_end_diamond,
+                                            color: stateKnittingPattern.textFieldLinks.hasIncomingLink(field.id) ? Colors.green : null,
+                                          )
+                                        )
+                                      : Draggable<String>(
+                                        data: '${field.id}:input',
+                                        feedback: const Icon(Symbols.line_end_diamond),
+                                        onDragStarted: () => _startDragging(field.id, false),
+                                        onDragEnd: (details) {
+                                          setState(() => draggedLinkId = '');
+                                        },
+                                        child: DragTarget<String>(
+                                          onWillAcceptWithDetails: (details) => acceptableDropTargets.contains('${field.id}:input'),
+                                          onAcceptWithDetails: (details) {
+                                            widget.onChanged(stateKnittingPattern.addTextFieldLink(draggedLinkId.split(':').first, field.id));
+                                            setState(() => draggedLinkId = '');                              
+                                          },
+                                          builder: (context, candidateData, rejectedData) {
+                                            if (draggedLinkId.isEmpty || acceptableDropTargets.contains('${field.id}:input')) {
+                                              return const MouseRegion(
+                                                cursor: SystemMouseCursors.grab,
+                                                child: Icon(Symbols.line_end_diamond)
+                                              );
+                                            } else {
+                                              return const Opacity(opacity: 0.2, child: Icon(Symbols.line_end_diamond),);
+                                            }
+                                          },
+                                        ),
+                                      )
+                                    ),
+                                    // Output connector
+                                    Positioned(
+                                      right: 10,
+                                      bottom: 10,
+                                      child: acceptableDragSources.isEmpty || stateKnittingPattern.textFieldLinks.hasOutgoingLink(field.id) ?
+                                        Opacity(
+                                          opacity: stateKnittingPattern.textFieldLinks.hasOutgoingLink(field.id) ? 1 : .2, 
+                                          child: Icon(
+                                            stateKnittingPattern.textFieldLinks.hasOutgoingLink(field.id) ? Symbols.line_start_circle : Symbols.line_start_diamond,
+                                            color: stateKnittingPattern.textFieldLinks.hasOutgoingLink(field.id) ? Colors.green : null,
+                                          )
+                                        )
+                                      : Draggable<String>(
+                                        data: '${field.id}:output',
+                                        feedback: const Icon(Symbols.line_start_diamond),
+                                        onDragStarted: () => _startDragging(field.id, true),
+                                        onDragEnd: (details) {
+                                          setState(() => draggedLinkId = '');
+                                        },
+                                        child: DragTarget<String>(
+                                          onWillAcceptWithDetails: (details) => acceptableDropTargets.contains('${field.id}:output'),
+                                          onAcceptWithDetails: (details) {
+                                            widget.onChanged(stateKnittingPattern.addTextFieldLink(field.id, draggedLinkId.split(':').first));
+                                            setState(() => draggedLinkId = '');                              
+                                          },
+                                          builder: (context, candidateData, rejectedData) {
+                                            if (draggedLinkId.isEmpty || acceptableDropTargets.contains('${field.id}:output')) {
+                                              return const MouseRegion(
+                                                cursor: SystemMouseCursors.grab,
+                                                child: Icon(Symbols.line_start_diamond)
+                                              );
+                                            } else {
+                                              return const Opacity(opacity: 0.2, child: Icon(Symbols.line_start_diamond),);
+                                            }
+                                          }
+                                        ),
+                                      )
+                                    )
+                                  ]
                                 )
                               )
-                            : Draggable<String>(
-                              data: '${field.id}:input',
-                              feedback: const Icon(Symbols.line_end_diamond),
-                              onDragStarted: () => _startDragging(field.id, false),
-                              onDragEnd: (details) {
-                                setState(() => draggedLinkId = '');
-                              },
-                              child: DragTarget<String>(
-                                onWillAcceptWithDetails: (details) => acceptableDropTargets.contains('${field.id}:input'),
-                                onAcceptWithDetails: (details) {
-                                  widget.onChanged(stateKnittingPattern.addTextFieldLink(draggedLinkId.split(':').first, field.id));
-                                  setState(() => draggedLinkId = '');                              
-                                },
-                                builder: (context, candidateData, rejectedData) {
-                                  if (draggedLinkId.isEmpty || acceptableDropTargets.contains('${field.id}:input')) {
-                                    return const MouseRegion(
-                                      cursor: SystemMouseCursors.grab,
-                                      child: Icon(Symbols.line_end_diamond)
-                                    );
-                                  } else {
-                                    return const Opacity(opacity: 0.2, child: Icon(Symbols.line_end_diamond),);
-                                  }
-                                },
-                              ),
-                            )
-                          ),
-                        for (PatternTextEditorField field in stateKnittingPattern.textEditorFields)
-                          Positioned(
-                            left: field.positionX + field.width - kConnectorSize.width - 10,
-                            top: field.positionY + field.height - kConnectorSize.height - 10,
-                            child: acceptableDragSources.isEmpty || stateKnittingPattern.textFieldLinks.hasOutgoingLink(field.id) ?
-                              Opacity(
-                                opacity: stateKnittingPattern.textFieldLinks.hasOutgoingLink(field.id) ? 1 : .2, 
-                                child: Icon(
-                                  stateKnittingPattern.textFieldLinks.hasOutgoingLink(field.id) ? Symbols.line_start_circle : Symbols.line_start_diamond,
-                                  color: stateKnittingPattern.textFieldLinks.hasOutgoingLink(field.id) ? Colors.green : null,
-                                )
-                              )
-                            : Draggable<String>(
-                              data: '${field.id}:output',
-                              feedback: const Icon(Symbols.line_start_diamond),
-                              onDragStarted: () => _startDragging(field.id, true),
-                              onDragEnd: (details) {
-                                setState(() => draggedLinkId = '');
-                              },
-                              child: DragTarget<String>(
-                                onWillAcceptWithDetails: (details) => acceptableDropTargets.contains('${field.id}:output'),
-                                onAcceptWithDetails: (details) {
-                                  widget.onChanged(stateKnittingPattern.addTextFieldLink(field.id, draggedLinkId.split(':').first));
-                                  setState(() => draggedLinkId = '');                              
-                                },
-                                builder: (context, candidateData, rejectedData) {
-                                  if (draggedLinkId.isEmpty || acceptableDropTargets.contains('${field.id}:output')) {
-                                    return const MouseRegion(
-                                      cursor: SystemMouseCursors.grab,
-                                      child: Icon(Symbols.line_start_diamond)
-                                    );
-                                  } else {
-                                    return const Opacity(opacity: 0.2, child: Icon(Symbols.line_start_diamond),);
-                                  }
-                                }
-                              ),
                             )
                           ),
                         for (TextFieldLink link in stateKnittingPattern.textFieldLinks.links)

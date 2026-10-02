@@ -56,6 +56,9 @@ abstract class DrawingCommand implements SameAs {
   // How much space does the control need?
   double get editHeight;
   
+  bool get allowedInPartDrawings => true;
+  bool get allowedInDrawings => true;
+
   Map<String, Object> toJson();  
 
   void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected, 

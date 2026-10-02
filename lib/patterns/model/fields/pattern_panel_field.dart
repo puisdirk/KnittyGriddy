@@ -16,6 +16,9 @@ class PatternPanelField extends PatternField {
     super.contentOffsetX,
     super.contentOffsetY,
     super.opacity,
+    super.rotation,
+    super.flipX,
+    super.flipY,
     this.style = const PatternPanelFieldStyle(),
   }) : super(fieldType: PatternFieldType.panel);
 
@@ -43,6 +46,9 @@ class PatternPanelField extends PatternField {
     double? contentOffsetX,
     double? contentOffsetY,
     int? opacity,
+    double? rotation,
+    bool? flipX,
+    bool? flipY,
     PatternPanelFieldStyle? style,
   }) {
     return PatternPanelField(
@@ -54,6 +60,9 @@ class PatternPanelField extends PatternField {
       contentOffsetX: contentOffsetX?? this.contentOffsetX,
       contentOffsetY: contentOffsetY?? this.contentOffsetY,
       opacity: opacity?? this.opacity,
+      rotation: rotation?? this.rotation,
+      flipX: flipX?? this.flipX,
+      flipY: flipY?? this.flipY,
       style: style?? this.style,
     );
   }
@@ -68,6 +77,9 @@ class PatternPanelField extends PatternField {
     double? contentOffsetX,
     double? contentOffsetY,
     int? opacity,
+    double? rotation,
+    bool? flipX,
+    bool? flipY,
   }) {
     return copyWith(
       id: id?? this.id,
@@ -78,6 +90,9 @@ class PatternPanelField extends PatternField {
       contentOffsetX: contentOffsetX?? this.contentOffsetX,
       contentOffsetY: contentOffsetY?? this.contentOffsetY,
       opacity: opacity?? this.opacity,
+      rotation: rotation?? this.rotation,
+      flipX: flipX?? this.flipX,
+      flipY: flipY?? this.flipY,
     );
   }
 
@@ -93,6 +108,9 @@ class PatternPanelField extends PatternField {
       'ox': contentOffsetX,
       'oy': contentOffsetY,
       'o': opacity,
+      'r': rotation,
+      'fx': flipX,
+      'fy': flipY,
       'style': style.toJson(),
     };
   }
@@ -107,6 +125,9 @@ class PatternPanelField extends PatternField {
       contentOffsetX: json['ox'] as double,
       contentOffsetY: json['oy'] as double,
       opacity: json['o'] as int,
+      rotation: json.containsKey('r') ? json['r'] as double : 0,
+      flipX: json.containsKey('fx') ? json['fx'] as bool : false,
+      flipY: json.containsKey('fy') ? json['fy'] as bool : false,
       style: PatternPanelFieldStyle.fromJson(json['style']),
     );
   }
@@ -125,6 +146,9 @@ class PatternPanelField extends PatternField {
     contentOffsetX == other.contentOffsetX &&
     contentOffsetY == other.contentOffsetY &&
     opacity == other.opacity &&
+    rotation == other.rotation &&
+    flipX == other.flipX &&
+    flipY == other.flipY &&
     style == other.style;
   
   @override

@@ -11,9 +11,13 @@ import 'package:knitty_griddy/drawings/model/part_drawing.dart';
 
 class DrawingSvgService {
   final AbstractDrawing drawing;
+  final bool flipX;
+  final bool flipY;
 
   const DrawingSvgService({
     required this.drawing,
+    this.flipX = false,
+    this.flipY = false,
   });
 
   Future<void> exportDrawingToSVG() async {
@@ -27,16 +31,19 @@ class DrawingSvgService {
     );
   }
 
-  Size getSize() {
-    return drawing.getBoundingBox().inflate(20).size;
-  }
-
   String getCompleteDrawing() {
 
-    Size drawingSize = drawing.getBoundingBox().inflate(20).size;
+    Rect bbox = drawing.getBoundingBox();
+    Size drawingSize = bbox.inflate(20).size;
     
     String drawingString = _getDrawingString(drawingSize);
-    
+
+    if (flipX || flipY) {
+      double halfWidth = drawingSize.width / 2;
+      double halfHeight = drawingSize.height / 2;
+      drawingString = '<g class="fieldfliptransform" transform="translate($halfWidth, $halfHeight) scale(${flipX ? -1 : 1}, ${flipY ? -1 : 1}) translate(-$halfWidth, -$halfHeight)">$drawingString</g>';
+    }
+
     String completeDrawing = '<svg width="${drawingSize.width}" height="${drawingSize.height}" viewBox="0 0 ${drawingSize.width} ${drawingSize.height}" xmlns="http://www.w3.org/2000/svg">';
     completeDrawing += drawingString;
     completeDrawing += '</svg>';

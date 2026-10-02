@@ -247,6 +247,9 @@ class TapeCommand extends DrawingCommand {
   }
 
   @override
+  bool get allowedInPartDrawings => false;
+
+  @override
   Rect getBoundingBox(AbstractDrawing drawing) {
     if (valid) {
       switch (tapeType) {

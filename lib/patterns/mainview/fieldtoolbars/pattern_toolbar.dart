@@ -1,10 +1,5 @@
-import 'package:fitted_scale/fitted_scale.dart';
 import 'package:flutter/material.dart';
-import 'package:knitty_griddy/patterns/mainview/fieldtoolbars/nudge_control.dart';
-import 'package:knitty_griddy/patterns/model/fields/pattern_chart_field.dart';
-import 'package:knitty_griddy/patterns/model/fields/pattern_drawing_field.dart';
 import 'package:knitty_griddy/patterns/model/fields/pattern_field.dart';
-import 'package:knitty_griddy/patterns/model/fields/pattern_image_field.dart';
 import 'package:knitty_griddy/utils/constants.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
@@ -14,8 +9,10 @@ class PatternToolbar extends StatelessWidget {
   final bool keyboardControlDown;
   final bool fieldIsAtBottom;
   final bool fieldIsAtTop;
+  final bool showContentControls;
   final bool patternHasMultipleFields;
   final Widget? fieldToolbar;
+  final void Function() onToggleShowContentControls;
   final void Function(PatternFieldType type) onAddField;
   final void Function(PatternFieldType type, bool reverse) onCycleSelectedField;
   final void Function(PatternField newField, {bool? storeForUndo}) onChanged;
@@ -29,8 +26,10 @@ class PatternToolbar extends StatelessWidget {
     required this.keyboardControlDown,
     required this.fieldIsAtBottom,
     required this.fieldIsAtTop,
+    required this.showContentControls,
     required this.patternHasMultipleFields,
     required this.fieldToolbar,
+    required this.onToggleShowContentControls,
     required this.onAddField,
     required this.onCycleSelectedField,
     required this.onChanged,
@@ -39,12 +38,6 @@ class PatternToolbar extends StatelessWidget {
     required this.onDuplicateSelectedField,
     super.key
   });
-
-  bool _hasContent(PatternField field) {
-    return (field.fieldType != PatternFieldType.drawing || (field as PatternDrawingField).drawing != null) &&
-      (field.fieldType != PatternFieldType.knittingchart || (field as PatternChartField).chart != null) &&
-      (field.fieldType != PatternFieldType.image || (field as PatternImageField).hasImage);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -107,42 +100,6 @@ class PatternToolbar extends StatelessWidget {
                   icon: const Icon(Icons.content_copy)
                 ),
               ),
-            if (selectedField != null && _hasContent(selectedField!))
-              Tooltip(
-                message: 'Move field content',
-                child: NudgeControl(
-                  initialOffset: Offset(selectedField!.contentOffsetX, selectedField!.contentOffsetY), 
-                  onNudged: (newOffset) => onChanged(selectedField!.abstractCopyWith(
-                    contentOffsetX: newOffset.dx,
-                    contentOffsetY: newOffset.dy)
-                  ),
-                ),
-              ),
-            if (selectedField != null && _hasContent(selectedField!))
-              Tooltip(
-                message: 'Opacity',
-                child: Column(
-                  children: [
-                    Text('${((selectedField!.opacity / 255) * 100).toInt()}%', style: const TextStyle(fontSize: 10),),
-                    Material(
-                      child: FittedScale(
-                        scale: .5,
-                        child: Slider(
-                          min: 0,
-                          max: 255,
-                          value: selectedField!.opacity as double, 
-                          onChanged: (value) {
-                            onChanged(selectedField!.abstractCopyWith(opacity: value.toInt()), storeForUndo: false);
-                          },
-                          onChangeEnd: (value) {
-                            onChanged(selectedField!.abstractCopyWith(opacity: value.toInt()));
-                          },
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
             if (selectedField != null && patternHasMultipleFields)
               Row(
                 children: [
@@ -162,7 +119,12 @@ class PatternToolbar extends StatelessWidget {
                   ),
                   hspacing,
                 ],
-              )
+              ),
+            if (selectedField != null && selectedField!.hasContent)
+              GestureDetector(
+                onTap: onToggleShowContentControls,
+                child: Icon(showContentControls ? Icons.arrow_drop_down : Icons.arrow_left),
+              ),
           ],
         ),
       ),

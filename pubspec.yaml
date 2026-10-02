@@ -68,6 +68,7 @@ dependencies:
   image_size_getter: ^2.3.0
   flutter_popup: ^3.3.9
   pdf: ^3.11.3
+  flutter_svg: 2.1.0
 
 dev_dependencies:
   flutter_test:
