@@ -138,6 +138,9 @@ class IncludedPartCommand extends DrawingCommand {
   double get editHeight => 200 + (measurementOverrides.length * 50);
 
   @override
+  bool get allowedInPartDrawings => false;
+
+  @override
   Rect getBoundingBox(AbstractDrawing drawing) {
     if (!valid || isDirty) return Rect.zero;
 

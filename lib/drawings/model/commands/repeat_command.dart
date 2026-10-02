@@ -137,6 +137,9 @@ class RepeatCommand extends DrawingCommand {
   double get editHeight => 800;
 
   @override
+  bool get allowedInPartDrawings => false;
+
+  @override
   Rect getBoundingBox(AbstractDrawing drawing) {
     Rect completeRect = Rect.zero;
 

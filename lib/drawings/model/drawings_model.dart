@@ -247,6 +247,26 @@ class DrawingsModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<PartDrawing> duplicateDrawingToPartDrawing(DrawingInfo originalInfo) async {
+    Drawing original = await getDrawing(originalInfo);
+
+    final String id = const UuidV4Gen().get();
+
+    PartDrawing newDrawing = PartDrawing(
+      id: id, 
+      name: '${original.name} part',
+      category: 'General',
+      description: original.description,
+      commands: original.commands.where((c) => c.allowedInPartDrawings).toList()
+    );
+
+    PartRepository.addPartDrawingToConvertedSet(newDrawing);
+
+    notifyListeners();
+
+    return newDrawing;
+  }
+
   Future<void> createNewDrawing(String name) async {
     final String id = const UuidV4Gen().get();
 

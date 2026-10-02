@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:grouped_scroll_view/grouped_scroll_view.dart';
 import 'package:id_gen/id_gen.dart';
 import 'package:knitty_griddy/drawings/drawing_part_icon.dart';
+import 'package:knitty_griddy/drawings/model/drawing.dart';
 import 'package:knitty_griddy/drawings/model/drawing_operation_exception.dart';
 import 'package:knitty_griddy/drawings/model/part_info.dart';
 import 'package:knitty_griddy/drawings/partrepo/move_part_drawing_to_set_menu.dart';
@@ -30,16 +31,54 @@ class PartSetPanel extends StatefulWidget {
 
 class _PartSetPanelState extends State<PartSetPanel> {
 
-  List<PartDrawing> selectedPartDrawings = [];
+  Future<void> _duplicateToDrawing(PartDrawing partDrawing) async {
+    bool proceed = await showDialog(
+      context: context,
+      barrierDismissible: false, 
+      builder: (context) => KeyboardListener(
+        focusNode: FocusNode(),
+        onKeyEvent: (value) {
+          if (value.logicalKey == LogicalKeyboardKey.escape) {
+            Navigator.of(context).pop(false);
+          }
+        },
+        child: AlertDialog(
+          content: const SizedBox(
+            width: 400, 
+            height: 60, 
+            child: Text('When converting to a Drawing, the Part commands will not be copied')),
+          actions: [
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(false), 
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(true), 
+              child: const Text('Proceed'),
+            ),
+          ],
+        ),
+      )
+    );
 
-  void togglePartDrawingSelection(PartDrawing partDrawing) {
-    setState(() {
-      if (selectedPartDrawings.contains(partDrawing)) {
-        selectedPartDrawings.remove(partDrawing);
-      } else {
-        selectedPartDrawings.add(partDrawing);
+    if (proceed) {
+      String id = const UuidV4Gen().get();
+      Drawing drawing = Drawing(
+        id: id,
+        name: '${partDrawing.name} - copy',
+        description: partDrawing.description,
+        commands: partDrawing.commands.where((c) => c.allowedInDrawings).toList()
+      );
+
+      if (context.mounted) {
+        drawing = await Provider.of<DrawingsModel>(context, listen: false).saveDrawingAndAux(drawing);
       }
-    });
+
+      if (context.mounted) {
+        Navigator.of(context).pop();
+        Navigator.push(context, MaterialPageRoute(builder: (context) => EditDrawingPage(drawing: drawing)));
+      }
+    }
   }
 
   @override
@@ -209,26 +248,25 @@ class _PartSetPanelState extends State<PartSetPanel> {
             itemBuilder: (context, partDrawing) {
               if (partDrawing.validPartInfos.isEmpty) {
                 // Provide entry for the part drawing itself
-                return GestureDetector(
-                  onTap: null, //() => toggleStitchSelection(def),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      border: Border(bottom: BorderSide(color: Colors.grey.shade300)),
-                      color: selectedPartDrawings.contains(partDrawing) ? Colors.blue.withAlpha(60) : null,
-                    ),
-                    constraints: const BoxConstraints.tightFor(height: 50),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        hspacing,
-                        const Icon(Symbols.apparel),
-                        const SizedBox(width: 20,),
-                        Text(partDrawing.name),
-                        const SizedBox(width: 20,),
-                        if (partDrawing.description.isNotEmpty)
-                          Text(partDrawing.description.replaceAll('\n', ' '), overflow: TextOverflow.ellipsis,),
-                        const Spacer(),
-                        IconButton(
+                return Container(
+                  decoration: BoxDecoration(
+                    border: Border(bottom: BorderSide(color: Colors.grey.shade300)),
+                  ),
+                  constraints: const BoxConstraints.tightFor(height: 50),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      hspacing,
+                      const Icon(Symbols.apparel),
+                      const SizedBox(width: 20,),
+                      Text(partDrawing.name),
+                      const SizedBox(width: 20,),
+                      if (partDrawing.description.isNotEmpty)
+                        Text(partDrawing.description.replaceAll('\n', ' '), overflow: TextOverflow.ellipsis,),
+                      const Spacer(),
+                      Tooltip(
+                        message: 'Edit',
+                        child: IconButton(
                           onPressed: () {
                             Navigator.of(context).push(
                               MaterialPageRoute(builder: (context) => EditDrawingPage(drawing: partDrawing)),
@@ -236,9 +274,15 @@ class _PartSetPanelState extends State<PartSetPanel> {
                           }, 
                           icon: const Icon(Icons.edit)
                         ),
-                        if (PartRepository.instance.sets.length > 1)
-                          MovePartDrawingToSetMenu(partDrawing: partDrawing, currentPartSet: widget.partSet),
-                        IconButton(
+                      ),
+                      if (PartRepository.instance.sets.length > 1)
+                        Tooltip(
+                          message: 'Move to set',
+                          child: MovePartDrawingToSetMenu(partDrawing: partDrawing, currentPartSet: widget.partSet)
+                        ),
+                      Tooltip(
+                        message: 'Duplicate',
+                        child: IconButton(
                           onPressed: () {
                             PartDrawing newDrawing = partDrawing.copyWith(id: const UuidV4Gen().get());
                             Provider.of<DrawingsModel>(context, listen: false).addPartToSet(
@@ -248,7 +292,17 @@ class _PartSetPanelState extends State<PartSetPanel> {
                           }, 
                           icon: const Icon(Symbols.content_copy, weight: 700,)
                         ),
-                        IconButton(
+                      ),
+                      Tooltip(
+                        message: 'Duplicate to Drawing',
+                        child: IconButton(
+                          onPressed: () async => await _duplicateToDrawing(partDrawing), 
+                          icon: const Icon(Icons.design_services)
+                        ),
+                      ),
+                      Tooltip(
+                        message: 'Delete',
+                        child: IconButton(
                           onPressed: () {
                             showDialog(
                               context: context,
@@ -282,40 +336,39 @@ class _PartSetPanelState extends State<PartSetPanel> {
                           }, 
                           icon: const Icon(Icons.delete),
                         ),
-                        hspacing,
-                      ],
-                    ),
+                      ),
+                      hspacing,
+                    ],
                   ),
                 );
               } else {
                 return Column(
                   children: [
                     // Make one entry per partdrawing, with the valid parts as subitems
-                    GestureDetector(
-                      onTap: null, //() => toggleStitchSelection(def),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          border: Border(bottom: BorderSide(color: Colors.grey.shade300)),
-                          color: selectedPartDrawings.contains(partDrawing) ? Colors.blue.withAlpha(60) : null,
-                        ),
-                        constraints: const BoxConstraints.tightFor(height: 100),
-                        child: Column(
-                          children: [
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Text(partDrawing.name),
-                                const SizedBox(width: 20,),
-                                if (partDrawing.description.isNotEmpty)
-                                  Expanded(
-                                    child: RichText(
-                                      overflow: TextOverflow.ellipsis,
-                                      text: TextSpan(text: partDrawing.description.replaceAll('\n', ' '),)
-                                    ),
+                    Container(
+                      decoration: BoxDecoration(
+                        border: Border(bottom: BorderSide(color: Colors.grey.shade300)),
+                      ),
+                      constraints: const BoxConstraints.tightFor(height: 100),
+                      child: Column(
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(partDrawing.name),
+                              const SizedBox(width: 20,),
+                              if (partDrawing.description.isNotEmpty)
+                                Expanded(
+                                  child: RichText(
+                                    overflow: TextOverflow.ellipsis,
+                                    text: TextSpan(text: partDrawing.description.replaceAll('\n', ' '),)
                                   ),
-                                if (partDrawing.description.isEmpty)
-                                const Spacer(),
-                                IconButton(
+                                ),
+                              if (partDrawing.description.isEmpty)
+                              const Spacer(),
+                              Tooltip(
+                                message: 'Edit',
+                                child: IconButton(
                                   onPressed: () {
                                     Navigator.of(context).push(
                                       MaterialPageRoute(builder: (context) => EditDrawingPage(drawing: partDrawing)),
@@ -323,9 +376,15 @@ class _PartSetPanelState extends State<PartSetPanel> {
                                   }, 
                                   icon: const Icon(Icons.edit)
                                 ),
-                                if (PartRepository.instance.sets.length > 1)
-                                  MovePartDrawingToSetMenu(partDrawing: partDrawing, currentPartSet: widget.partSet),
-                                IconButton(
+                              ),
+                              if (PartRepository.instance.sets.length > 1)
+                                Tooltip(
+                                  message: 'Move to set',
+                                  child: MovePartDrawingToSetMenu(partDrawing: partDrawing, currentPartSet: widget.partSet)
+                                ),
+                              Tooltip(
+                                message: 'Duplicate',
+                                child: IconButton(
                                   onPressed: () {
                                     PartDrawing newDrawing = partDrawing.copyWith(id: const UuidV4Gen().get());
                                     Provider.of<DrawingsModel>(context, listen: false).addPartToSet(
@@ -335,7 +394,17 @@ class _PartSetPanelState extends State<PartSetPanel> {
                                   }, 
                                   icon: const Icon(Symbols.content_copy, weight: 700,)
                                 ),
-                                IconButton(
+                              ),
+                              Tooltip(
+                                message: 'Duplicate to Drawing',
+                                child: IconButton(
+                                  onPressed: () async => await _duplicateToDrawing(partDrawing), 
+                                  icon: const Icon(Icons.design_services)
+                                ),
+                              ),
+                              Tooltip(
+                                message: 'Delete',
+                                child: IconButton(
                                   onPressed: () {
                                     showDialog(
                                       context: context,
@@ -369,35 +438,35 @@ class _PartSetPanelState extends State<PartSetPanel> {
                                   }, 
                                   icon: const Icon(Icons.delete),
                                 ),
-                                hspacing,
-                              ],
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                const Text('Parts:'),
-                                hspacing,
-                                Wrap(
-                                  alignment: WrapAlignment.start,
-                                  children: [
-                                    hspacing,
-                                      for (PartInfo partInfo in partDrawing.validPartInfos)
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.start,
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            DrawingPartIcon(partInfo: partInfo),
-                                            Text(partInfo.partLabel),
-                                            hspacing,
-                                            hspacing,
-                                          ],
-                                        )                                    
-                                  ],
-                                ),
-                              ],
-                            )
-                          ],
-                        ),
+                              ),
+                              hspacing,
+                            ],
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              const Text('Parts:'),
+                              hspacing,
+                              Wrap(
+                                alignment: WrapAlignment.start,
+                                children: [
+                                  hspacing,
+                                    for (PartInfo partInfo in partDrawing.validPartInfos)
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.start,
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          DrawingPartIcon(partInfo: partInfo),
+                                          Text(partInfo.partLabel),
+                                          hspacing,
+                                          hspacing,
+                                        ],
+                                      )                                    
+                                ],
+                              ),
+                            ],
+                          )
+                        ],
                       ),
                     ),
                   ],

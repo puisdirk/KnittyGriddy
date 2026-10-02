@@ -1,11 +1,15 @@
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:fitted_scale/fitted_scale.dart';
 import 'package:fleather/fleather.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_spinbox/material.dart';
 import 'package:id_gen/id_gen.dart';
+import 'package:knitty_griddy/drawings/drawing_editor/command_controls/small_label.dart';
 import 'package:knitty_griddy/patterns/mainview/field_controls/pattern_field_control.dart';
+import 'package:knitty_griddy/patterns/mainview/fieldtoolbars/nudge_control.dart';
 import 'package:knitty_griddy/patterns/mainview/fieldtoolbars/pattern_chart_field_toolbar.dart';
 import 'package:knitty_griddy/patterns/mainview/fieldtoolbars/pattern_drawing_field_toolbar.dart';
 import 'package:knitty_griddy/patterns/mainview/fieldtoolbars/pattern_image_field_toolbar.dart';
@@ -51,6 +55,7 @@ class _PatternEditorState extends State<PatternEditor> {
   late FocusNode _keyboardFocusNode;
   bool keyboardShiftDown = false;
   bool keyboardControlDown = false;
+  late bool showContentControls;
 
   PatternField? selectedField;
 
@@ -68,6 +73,8 @@ class _PatternEditorState extends State<PatternEditor> {
     stateKnittingPattern = widget.pattern;
     selectedField = null;
     clipboardData = null;
+
+    showContentControls = false;
 
     fleatherControllers = {};
     fleaterEditorKeys = {};
@@ -565,7 +572,6 @@ class _PatternEditorState extends State<PatternEditor> {
   Widget build(BuildContext context) {
     FocusScope.of(context).autofocus(_keyboardFocusNode);
 
-
     return KeyboardListener(
       focusNode: _keyboardFocusNode,
       autofocus: true,
@@ -752,7 +758,9 @@ class _PatternEditorState extends State<PatternEditor> {
                 keyboardControlDown: keyboardControlDown, 
                 fieldIsAtBottom: stateKnittingPattern.fields.isNotEmpty && selectedField == stateKnittingPattern.fields.first,
                 fieldIsAtTop: stateKnittingPattern.fields.isNotEmpty && selectedField == stateKnittingPattern.fields.last,
+                showContentControls: showContentControls,
                 patternHasMultipleFields: stateKnittingPattern.fields.length > 1, 
+                onToggleShowContentControls: () => setState(() => showContentControls = !showContentControls),
                 onAddField: (type) => _addNewField(type), 
                 onCycleSelectedField: _cycleSelectedField, 
                 onChanged: (newField, {storeForUndo}) => _storeAndSetKnittingPattern(stateKnittingPattern.copyWith(
@@ -831,56 +839,209 @@ class _PatternEditorState extends State<PatternEditor> {
 
               ),
               Expanded(
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.vertical,
-                  controller: _verticalScrollController,
-                    child: Container(
-                      color: Colors.grey,
-                      child: Center(
-                        child: SizedBox(
-                          width: stateKnittingPattern.pageLayout.pagewidth,
-                          height: stateKnittingPattern.pageLayout.pageheight * stateKnittingPattern.pageLayout.numberOfPages,
+                child: Stack(
+                  children: [
+                    Positioned(
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.vertical,
+                        controller: _verticalScrollController,
                           child: Container(
-                            color: Colors.white,
-                            child: Stack(
-                              children: [
-                                GestureDetector(
-                                  onTap: () => setState(() => selectedField = null),
-                                  child: CustomPaint(
-                                    size: Size(
-                                      stateKnittingPattern.pageLayout.pagewidth, 
-                                      stateKnittingPattern.pageLayout.pageheight * stateKnittingPattern.pageLayout.numberOfPages),
-                                    painter: PageMarginPainter(
-                                      pageLayout: stateKnittingPattern.pageLayout,
-                                    ),
+                            color: Colors.grey,
+                            child: Center(
+                              child: SizedBox(
+                                width: stateKnittingPattern.pageLayout.pagewidth,
+                                height: stateKnittingPattern.pageLayout.pageheight * stateKnittingPattern.pageLayout.numberOfPages,
+                                child: Container(
+                                  color: Colors.white,
+                                  child: Stack(
+                                    children: [
+                                      GestureDetector(
+                                        onTap: () => setState(() => selectedField = null),
+                                        child: CustomPaint(
+                                          size: Size(
+                                            stateKnittingPattern.pageLayout.pagewidth, 
+                                            stateKnittingPattern.pageLayout.pageheight * stateKnittingPattern.pageLayout.numberOfPages),
+                                          painter: PageMarginPainter(
+                                            pageLayout: stateKnittingPattern.pageLayout,
+                                          ),
+                                        ),
+                                      ),
+                                      for (PatternField field in stateKnittingPattern.fields)
+                                        PatternFieldControl(
+                                          knittingPattern: stateKnittingPattern, 
+                                          field: field, 
+                                          fieldChangeNotifier: fleatherControllers[field.id],
+                                          editorKey: (field is PatternTextEditorField) ? fleaterEditorKeys[field.id] : null,
+                                          selected: field.id == selectedField?.id, 
+                                          onSelect: () => setState(() => selectedField = field),
+                                          onDelete: _deleteField,
+                                          onChanged: (newField) => _storeAndSetKnittingPattern(
+                                            stateKnittingPattern.copyWith(
+                                              fields: stateKnittingPattern.fields.map((f) => f.id == newField.id ? newField : f).toList()
+                                            ), additionalState: () {
+                                              if (selectedField?.id == newField.id) {
+                                                selectedField = newField;
+                                              }
+                                            },
+                                          ),
+                                          onReflow: () => _reflowField(field.id),
+                                        ),
+                                    ],
                                   ),
                                 ),
-                                for (PatternField field in stateKnittingPattern.fields)
-                                  PatternFieldControl(
-                                    knittingPattern: stateKnittingPattern, 
-                                    field: field, 
-                                    fieldChangeNotifier: fleatherControllers[field.id],
-                                    editorKey: (field is PatternTextEditorField) ? fleaterEditorKeys[field.id] : null,
-                                    selected: field.id == selectedField?.id, 
-                                    onSelect: () => setState(() => selectedField = field),
-                                    onDelete: _deleteField,
-                                    onChanged: (newField) => _storeAndSetKnittingPattern(
-                                      stateKnittingPattern.copyWith(
-                                        fields: stateKnittingPattern.fields.map((f) => f.id == newField.id ? newField : f).toList()
-                                      ), additionalState: () {
-                                        if (selectedField?.id == newField.id) {
-                                          selectedField = newField;
-                                        }
-                                      },
-                                    ),
-                                    onReflow: () => _reflowField(field.id),
-                                  ),
-                              ],
+                              ),
                             ),
                           ),
-                        ),
                       ),
                     ),
+                    if (showContentControls && selectedField != null && selectedField!.hasContent)
+                      Positioned(
+                        right: 15,
+                        child: SizedBox(
+                          width: 240,
+                          height: 260,
+                          child: Container(
+                            decoration: const BoxDecoration(
+                              borderRadius: BorderRadius.only(
+                                bottomLeft: Radius.circular(8),
+                                bottomRight: Radius.circular(8),
+                              ),
+                              border: Border(
+                                bottom: BorderSide(color: Colors.grey),
+                                left: BorderSide(color: Colors.grey),
+                                right:  BorderSide(color: Colors.grey),
+                              ),
+                              color: Color.fromARGB(255, 247, 249, 254)
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    children: [
+                                      const SmallLabel(label: 'Offset'),
+                                      hspacing,
+                                      NudgeControl(
+                                        initialOffset: Offset(selectedField!.contentOffsetX, selectedField!.contentOffsetY), 
+                                        size: 60,
+                                        onNudged: (newOffset) {
+                                          PatternField newField = selectedField!.abstractCopyWith(
+                                            contentOffsetX: newOffset.dx,
+                                            contentOffsetY: newOffset.dy
+                                          );
+                                          _storeAndSetKnittingPattern(stateKnittingPattern.copyWith(
+                                            fields: stateKnittingPattern.fields.map((f) => f.id == selectedField?.id ? newField : f).toList()
+                                          ), additionalState: () => selectedField = newField,);
+                                        } 
+                                      )
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      const SmallLabel(label: 'Opacity'),
+                                      hspacing,
+                                      Column(
+                                        children: [
+                                          Text('${((selectedField!.opacity / 255) * 100).toInt()}%', style: const TextStyle(fontSize: 10),),
+                                          Material(
+                                            child: FittedScale(
+                                              scale: .8,
+                                              child: Slider(
+                                                min: 0,
+                                                max: 255,
+                                                value: selectedField!.opacity as double, 
+                                                onChanged: (value) {
+                                                  PatternField newField = selectedField!.abstractCopyWith(opacity: value.toInt());
+                                                  _storeAndSetKnittingPattern(stateKnittingPattern.copyWith(
+                                                    fields: stateKnittingPattern.fields.map((f) => f.id == selectedField?.id ? newField : f).toList()
+                                                  ), additionalState: () => selectedField = newField, storeForUndo: false);
+                                                },
+                                                onChangeEnd: (value) {
+                                                  PatternField newField = selectedField!.abstractCopyWith(opacity: value.toInt());
+                                                  _storeAndSetKnittingPattern(stateKnittingPattern.copyWith(
+                                                    fields: stateKnittingPattern.fields.map((f) => f.id == selectedField?.id ? newField : f).toList()
+                                                  ), additionalState: () => selectedField = newField);
+                                                },
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      )
+                                    ],
+                                  ),
+                                  vspacing,
+                                  Row(
+                                    children: [
+                                      const SmallLabel(label: 'Rotation',),
+                                      hspacing,
+                                      SizedBox(
+                                        width: 150,
+                                        child: SpinBox(
+                                          value: selectedField!.rotation,
+                                          min: -360,
+                                          max: 360,
+                                          decimals: 1,
+                                          step: .1,
+                                          onChanged: (value) {
+                                            PatternField newField = selectedField!.abstractCopyWith(rotation: value);
+                                            _storeAndSetKnittingPattern(stateKnittingPattern.copyWith(
+                                              fields: stateKnittingPattern.fields.map((f) => f.id == selectedField?.id ? newField : f).toList()
+                                            ), additionalState: () => selectedField = newField);
+                                          },
+                                        )
+                                      )
+                                    ],
+                                  ),
+                                  vspacing,
+                                  Row(
+                                    children: [
+                                      const SmallLabel(label: 'Flip'),
+                                      hspacing,
+                                      Container(
+                                        decoration: BoxDecoration(
+                                          color: selectedField!.flipX ? Colors.blue.withAlpha(60) : null,
+                                          shape: BoxShape.circle
+                                        ),
+                                        child: IconButton(
+                                          isSelected: selectedField!.flipX,
+                                          onPressed: () {
+                                            PatternField newField = selectedField!.abstractCopyWith(flipX: !selectedField!.flipX);
+                                            _storeAndSetKnittingPattern(stateKnittingPattern.copyWith(
+                                              fields: stateKnittingPattern.fields.map((f) => f.id == selectedField?.id ? newField : f).toList()
+                                            ), additionalState: () => selectedField = newField);
+                                          }, 
+                                          icon: const Icon(Icons.flip),
+                                        ),
+                                      ),
+                                      hspacing,
+                                      Container(
+                                        decoration: BoxDecoration(
+                                          color: selectedField!.flipY ? Colors.blue.withAlpha(60) : null,
+                                          shape: BoxShape.circle
+                                        ),
+                                        child: Transform.rotate(
+                                          angle: MathUtitilies.toRadians(90),
+                                          child: IconButton(
+                                            isSelected: selectedField!.flipY,
+                                            onPressed: () {
+                                              PatternField newField = selectedField!.abstractCopyWith(flipY: !selectedField!.flipY);
+                                              _storeAndSetKnittingPattern(stateKnittingPattern.copyWith(
+                                                fields: stateKnittingPattern.fields.map((f) => f.id == selectedField?.id ? newField : f).toList()
+                                              ), additionalState: () => selectedField = newField);
+                                            }, 
+                                            icon: const Icon(Icons.flip),
+                                          ),
+                                        ),
+                                      )
+                                    ],
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
+                        )
+                      ),
+                  ],
                 )
               )
             ],

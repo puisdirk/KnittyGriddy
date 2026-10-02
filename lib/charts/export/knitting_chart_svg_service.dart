@@ -28,12 +28,16 @@ class KnittingChartSvgService {
   final KnittingChart chart;
   final KnittingChartViewSettings viewSettings;
   final TextStyle textStyle;
+  final bool flipX;
+  final bool flipY;
 
   static const double _gap = 10;
 
   const KnittingChartSvgService({
     required this.chart,
-    required this.viewSettings
+    required this.viewSettings,
+    this.flipX = false,
+    this.flipY = false
   }) : textStyle = const TextStyle(fontFamily: 'roboto', fontSize: 14);
 
   Future<void> exportKnittingChartToSVG() async {
@@ -146,6 +150,12 @@ class KnittingChartSvgService {
       }
 
       chartAndLegendGroup += '</g>';
+    }
+
+    if (flipX || flipY) {
+      double halfWidth = completeSize.width / 2;
+      double halfHeight = completeSize.height / 2;
+      chartAndLegendGroup = '<g class="fieldfliptransform" transform="translate($halfWidth, $halfHeight) scale(${flipX ? -1 : 1}, ${flipY ? -1 : 1}) translate(-$halfWidth, -$halfHeight)">$chartAndLegendGroup</g>';
     }
 
     return SvgElement(dimensions: completeSize, svgString: chartAndLegendGroup);

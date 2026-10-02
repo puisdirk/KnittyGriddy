@@ -173,6 +173,9 @@ class TextCommand extends DrawingCommand {
   @override
   double get editHeight => 310;
 
+  @override
+  bool get allowedInPartDrawings => false;
+
   Offset? getAnchorCoordinate(AbstractDrawing drawing) {
     return storedAnchorCoordinate;
   }

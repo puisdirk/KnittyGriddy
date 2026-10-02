@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -52,7 +53,10 @@ class _PatternImageFieldToolbarState extends State<PatternImageFieldToolbar> {
         aspectRatio = res.width / res.height;
       }
 
-      _updateField(field.copyWith(height: field.width * aspectRatio, imageData: imageData));
+      double newHeight = min(field.width * aspectRatio, 500);
+      double newWidth = newHeight / aspectRatio;
+
+      _updateField(field.copyWith(height: newHeight, width: newWidth, imageData: imageData));
     }
   }
  

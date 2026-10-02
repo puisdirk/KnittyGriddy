@@ -18,8 +18,14 @@ class PatternImageField extends PatternField {
     super.contentOffsetX,
     super.contentOffsetY,
     super.opacity,
+    super.rotation,
+    super.flipX,
+    super.flipY,
     this.imageData,
   }) : super(fieldType: PatternFieldType.image);
+
+  @override
+  bool get hasContent => imageData != null && imageData!.isNotEmpty;
 
   PatternImageField copyWith({
     String? id,
@@ -30,6 +36,9 @@ class PatternImageField extends PatternField {
     double? contentOffsetX,
     double? contentOffsetY,
     int? opacity,
+    double? rotation,
+    bool? flipX,
+    bool? flipY,
     Uint8List? imageData,
   }) {
     return PatternImageField(
@@ -41,6 +50,9 @@ class PatternImageField extends PatternField {
       contentOffsetX: contentOffsetX?? this.contentOffsetX,
       contentOffsetY: contentOffsetY?? this.contentOffsetY,
       opacity: opacity?? this.opacity,
+      rotation: rotation?? this.rotation,
+      flipX: flipX?? this.flipX,
+      flipY: flipY?? this.flipY,
       imageData: imageData?? this.imageData,
     );
   }
@@ -58,6 +70,9 @@ class PatternImageField extends PatternField {
       contentOffsetX: contentOffsetX,
       contentOffsetY: contentOffsetY,
       opacity: opacity,
+      rotation: rotation,
+      flipX: flipX,
+      flipY: flipY,
       imageData: null,
     );
   }
@@ -72,6 +87,9 @@ class PatternImageField extends PatternField {
     double? contentOffsetX,
     double? contentOffsetY,
     int? opacity,
+    double? rotation,
+    bool? flipX,
+    bool? flipY,
   }) {
     return copyWith(
       id: id?? this.id,
@@ -82,6 +100,9 @@ class PatternImageField extends PatternField {
       contentOffsetX: contentOffsetX?? this.contentOffsetX,
       contentOffsetY: contentOffsetY?? this.contentOffsetY,
       opacity: opacity?? this.opacity,
+      rotation: rotation?? this.rotation,
+      flipX: flipX?? this.flipX,
+      flipY: flipY?? this.flipY,
     );
   }
 
@@ -100,6 +121,9 @@ class PatternImageField extends PatternField {
       'ox': contentOffsetX,
       'oy': contentOffsetY,
       'o': opacity,
+      'r': rotation,
+      'fx': flipX,
+      'fy': flipY,
       'image': base64.encode(imageData?? Uint8List(0)),
     };
   }
@@ -114,6 +138,9 @@ class PatternImageField extends PatternField {
       contentOffsetX: json['ox'] as double,
       contentOffsetY: json['oy'] as double,
       opacity: json['o'] as int,
+      rotation: json.containsKey('r') ? json['r'] as double : 0,
+      flipX: json.containsKey('fx') ? json['fx'] as bool : false,
+      flipY: json.containsKey('fy') ? json['fy'] as bool : false,
       imageData: base64.decode(json['image'] as String),
     );
   }
@@ -132,6 +159,9 @@ class PatternImageField extends PatternField {
     contentOffsetX == other.contentOffsetX &&
     contentOffsetY == other.contentOffsetY &&
     opacity == other.opacity &&
+    rotation == other.rotation &&
+    flipX == other.flipX &&
+    flipY == other.flipY &&
     listEquals(imageData, other.imageData);
   
   @override

@@ -18,9 +18,15 @@ class PatternChartField extends PatternField {
     super.contentOffsetX,
     super.contentOffsetY,
     super.opacity,
+    super.rotation,
+    super.flipX,
+    super.flipY,
     this.chart,
     this.viewSettings = const KnittingChartViewSettings(),
   }) : super(fieldType: PatternFieldType.knittingchart);
+
+  @override
+  bool get hasContent => chart != null;
 
   PatternChartField copyWith({
     String? id,
@@ -31,6 +37,9 @@ class PatternChartField extends PatternField {
     double? contentOffsetX,
     double? contentOffsetY,
     int? opacity,
+    double? rotation,
+    bool? flipX,
+    bool? flipY,
     KnittingChart? chart,
     KnittingChartViewSettings? viewSettings,
   }) {
@@ -43,6 +52,9 @@ class PatternChartField extends PatternField {
       contentOffsetX: contentOffsetX?? this.contentOffsetX,
       contentOffsetY: contentOffsetY?? this.contentOffsetY,
       opacity: opacity?? this.opacity,
+      rotation: rotation?? this.rotation,
+      flipX: flipX?? this.flipX,
+      flipY: flipY?? this.flipY,
       chart: chart?? this.chart,
       viewSettings: viewSettings?? this.viewSettings,
     );
@@ -59,6 +71,9 @@ class PatternChartField extends PatternField {
       contentOffsetX: contentOffsetX,
       contentOffsetY: contentOffsetY,
       opacity: opacity,
+      rotation: rotation,
+      flipX: flipX,
+      flipY: flipY,
       chart: null,
       viewSettings: viewSettings,
     );
@@ -74,6 +89,9 @@ class PatternChartField extends PatternField {
     double? contentOffsetX,
     double? contentOffsetY,
     int? opacity,
+    double? rotation,
+    bool? flipX,
+    bool? flipY,
   }) {
     return copyWith(
       id: id?? this.id,
@@ -84,6 +102,9 @@ class PatternChartField extends PatternField {
       contentOffsetX: contentOffsetX?? this.contentOffsetX,
       contentOffsetY: contentOffsetY?? this.contentOffsetY,
       opacity: opacity?? this.opacity,
+      rotation: rotation?? this.rotation,
+      flipX: flipX?? this.flipX,
+      flipY: flipY?? this.flipY,
     );
   }
 
@@ -105,6 +126,9 @@ class PatternChartField extends PatternField {
         'ox': contentOffsetX,
         'oy': contentOffsetY,
         'o': opacity,
+        'r': rotation,
+        'fx': flipX,
+        'fy': flipY,
         'chart': chart!.toJson(),
         'settings': viewSettings.toJson(),
       };
@@ -120,6 +144,9 @@ class PatternChartField extends PatternField {
       'ox': contentOffsetX,
       'oy': contentOffsetY,
       'o': opacity,
+      'r': rotation,
+      'fx': flipX,
+      'fy': flipY,
       'settings': viewSettings.toJson(),
     };
   }
@@ -139,6 +166,9 @@ class PatternChartField extends PatternField {
       contentOffsetX: json['ox'] as double,
       contentOffsetY: json['oy'] as double,
       opacity: json['o'] as int,
+      rotation: json.containsKey('r') ? json['r'] as double : 0,
+      flipX: json.containsKey('fx') ? json['fx'] as bool : false,
+      flipY: json.containsKey('fy') ? json['fy'] as bool : false,
       chart: chart,
       viewSettings: KnittingChartViewSettings.fromJson(json['settings']),
     );
@@ -158,6 +188,9 @@ class PatternChartField extends PatternField {
     contentOffsetX == other.contentOffsetX &&
     contentOffsetY == other.contentOffsetY &&
     opacity == other.opacity &&
+    rotation == other.rotation &&
+    flipX == other.flipX &&
+    flipY == other.flipY &&
     chart == other.chart &&
     viewSettings == other.viewSettings;
 

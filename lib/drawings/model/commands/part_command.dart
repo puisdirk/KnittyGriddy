@@ -100,6 +100,9 @@ class PartCommand extends DrawingCommand {
   @override
   double get editHeight => 310;
 
+  @override
+  bool get allowedInDrawings => false;
+
   Rect calculateBoundingBox(AbstractDrawing drawing) {
     if (!valid) {
       return Rect.zero;
