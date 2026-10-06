@@ -153,8 +153,8 @@ class RepeatingCurveCommand extends RepeatingDrawingCommand {
   int get hashCode => super.hashCode ^ wrappedCurve.hashCode;
 
   @override
-  String toSvg(Size drawingSize, AbstractDrawing drawing, {List<StylingCommand> stylings = const []}) {
-    return wrappedCurve.toSvg(drawingSize, drawing, stylings: stylings);
+  String toSvg(Size drawingSize, AbstractDrawing drawing, {List<StylingCommand> stylings = const [], double? lineThicknessOverride}) {
+    return wrappedCurve.toSvg(drawingSize, drawing, stylings: stylings, lineThicknessOverride: lineThicknessOverride);
   }
 
   @override

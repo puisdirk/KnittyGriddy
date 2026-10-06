@@ -315,13 +315,18 @@ class IncludedPartCommand extends DrawingCommand {
   }
 
   @override
-  String toSvg(Size drawingSize, AbstractDrawing drawing, {List<StylingCommand> stylings = const []}) {
+  String toSvg(Size drawingSize, AbstractDrawing drawing, {List<StylingCommand> stylings = const [], double? lineThicknessOverride}) {
     if (!valid) return '';
     if (storedOffsetPartDrawing == null) return '';
     
     PartCommand partCommand = storedOffsetPartDrawing!.parts.firstWhere((p) => p.id == partId);
 
-    return '<g id="${partCommand.label}">${partCommand.toSvg(drawingSize, storedOffsetPartDrawing!, stylings: drawing.commands.whereType<StylingCommand>().toList())}</g>';    
+    return '<g id="${partCommand.label}">${partCommand.toSvg(
+      drawingSize, 
+      storedOffsetPartDrawing!, 
+      stylings: drawing.commands.whereType<StylingCommand>().toList(),
+      lineThicknessOverride: lineThicknessOverride,
+    )}</g>';    
   }
 
   @override

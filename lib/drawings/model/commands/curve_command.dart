@@ -627,7 +627,7 @@ class CurveCommand extends DrawingCommand {
   }
 
   @override
-  String toSvg(Size drawingSize, AbstractDrawing drawing, {List<StylingCommand> stylings = const []}) {
+  String toSvg(Size drawingSize, AbstractDrawing drawing, {List<StylingCommand> stylings = const [], double? lineThicknessOverride}) {
     if (!valid) return '';
 
     Offset middle = Offset(drawingSize.width / 2, drawingSize.height / 2);
@@ -643,9 +643,18 @@ class CurveCommand extends DrawingCommand {
     String curvePathSvg = '<g id="$label"><path d="${_getPathSvg(drawing, middle)}" fill="none" ';
 
     if (styling == null) {
-      curvePathSvg += ' stroke="${ColorUtilities.colorToSvhHex(Colors.grey.shade700)}"/>';
+      curvePathSvg += ' stroke="${ColorUtilities.colorToSvhHex(Colors.grey.shade700)}" ';
+      if (lineThicknessOverride != null) {
+        curvePathSvg += 'stroke-width="$lineThicknessOverride"';
+      }
+      curvePathSvg += '/>';
     } else {
-      curvePathSvg += ' stroke="${ColorUtilities.colorToSvhHex(styling.color)}" ${ColorUtilities.strokeOpacity(styling.color)} stroke-width="${styling.thickness}" ';
+      curvePathSvg += ' stroke="${ColorUtilities.colorToSvhHex(styling.color)}" ${ColorUtilities.strokeOpacity(styling.color)} ';
+      if (lineThicknessOverride != null && lineThicknessOverride > styling.thickness) {
+        curvePathSvg += 'stroke-width="$lineThicknessOverride" ';
+      } else {
+        curvePathSvg += 'stroke-width="${styling.thickness}" ';
+      }
       if (styling.dashStyle == DashStyle.full) {
         curvePathSvg += '/>';
       } else {

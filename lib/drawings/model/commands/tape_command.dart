@@ -366,7 +366,7 @@ class TapeCommand extends DrawingCommand {
   }
 
   @override
-  String toSvg(Size drawingSize, AbstractDrawing drawing, {List<StylingCommand> stylings = const []}) {
+  String toSvg(Size drawingSize, AbstractDrawing drawing, {List<StylingCommand> stylings = const [], double? lineThicknessOverride}) {
     if (!valid) return '';
 
     Offset middle = Offset(drawingSize.width / 2, drawingSize.height / 2);

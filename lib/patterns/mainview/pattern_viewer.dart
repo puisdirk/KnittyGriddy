@@ -4,7 +4,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:knitty_griddy/drawings/model/commands/styling_command.dart';
-import 'package:knitty_griddy/patterns/mainview/export/pdf_service.dart';
+import 'package:knitty_griddy/patterns/export/pdf_service.dart';
 import 'package:knitty_griddy/patterns/mainview/preview_pattern_field_control.dart';
 import 'package:knitty_griddy/patterns/model/fields/pattern_field.dart';
 import 'package:knitty_griddy/patterns/model/fields/pattern_image_field.dart';

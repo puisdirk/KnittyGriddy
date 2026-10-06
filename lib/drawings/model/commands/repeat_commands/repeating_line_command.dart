@@ -152,8 +152,8 @@ class RepeatingLineCommand extends RepeatingDrawingCommand {
   int get hashCode => super.hashCode ^ wrappedLine.hashCode;
 
   @override
-  String toSvg(Size drawingSize, AbstractDrawing drawing, {List<StylingCommand> stylings = const []}) {
-    return wrappedLine.toSvg(drawingSize, drawing, stylings: stylings);
+  String toSvg(Size drawingSize, AbstractDrawing drawing, {List<StylingCommand> stylings = const [], double? lineThicknessOverride}) {
+    return wrappedLine.toSvg(drawingSize, drawing, stylings: stylings, lineThicknessOverride: lineThicknessOverride);
   }
 
   @override

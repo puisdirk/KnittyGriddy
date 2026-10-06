@@ -10,7 +10,6 @@ import 'package:knitty_griddy/drawings/model/commands/point_command.dart';
 import 'package:knitty_griddy/drawings/model/commands/styling_command.dart';
 import 'package:knitty_griddy/drawings/model/part_drawing.dart';
 import 'package:knitty_griddy/utils/constants.dart';
-import 'package:knitty_griddy/utils/rect_ex.dart';
 
 class PartCommand extends DrawingCommand {
 
@@ -159,11 +158,11 @@ class PartCommand extends DrawingCommand {
   }
 
   @override
-  String toSvg(Size drawingSize, AbstractDrawing drawing, {List<StylingCommand> stylings = const []}) {
+  String toSvg(Size drawingSize, AbstractDrawing drawing, {List<StylingCommand> stylings = const [], double? lineThicknessOverride}) {
     String svg = '<g id="$label">';
     for (String commandId in commandIds) {
       DrawingCommand command = drawing.commandById(commandId)!;
-      svg += command.toSvg(drawingSize, drawing, stylings: stylings);
+      svg += command.toSvg(drawingSize, drawing, stylings: stylings, lineThicknessOverride: lineThicknessOverride);
     }
     svg += '</g>';
     return svg;

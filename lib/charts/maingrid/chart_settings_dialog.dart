@@ -100,8 +100,6 @@ class _ChartSettingsDialogState extends State<ChartSettingsDialog> {
       onKeyEvent: (value) {
         if (value.logicalKey == LogicalKeyboardKey.escape) {
           Navigator.of(context).pop(null);
-        } else if (value.logicalKey == LogicalKeyboardKey.enter) {
-          _confirm();
         }
       },
       child: AlertDialog(

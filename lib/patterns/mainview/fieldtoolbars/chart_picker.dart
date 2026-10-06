@@ -43,7 +43,7 @@ class _ChartPickerState extends State<ChartPicker> {
   Widget _chartInfoCard(ChartInfo chartInfo) {
     return SizedBox(
       width: 300,
-      height: 100,
+      height: 110,
       child: Card(
         color: chartInfo == selectedChartInfo ? Colors.blue.withAlpha(60) : null,
         child: InkWell(
@@ -53,11 +53,34 @@ class _ChartPickerState extends State<ChartPicker> {
           onDoubleTap: () => Navigator.of(context).pop(chartInfo),
           child: ListTile(
             mouseCursor: SystemMouseCursors.click,
-            title: Text(chartInfo.name, overflow: TextOverflow.ellipsis,),
-            subtitle: Text(
-              chartInfo.description,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
+            title: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                if (chartInfo.hasPreview)
+                  SizedBox(
+                    width: ChartInfo.previewImageWidth,
+                    height: ChartInfo.previewImageHeight,
+                    child: Image(
+                      width: ChartInfo.previewImageWidth, 
+                      height: ChartInfo.previewImageHeight, 
+                      image: MemoryImage(chartInfo.previewImage!)
+                    )
+                  ),
+                if (chartInfo.hasPreview)
+                  hspacing,
+                Column(
+                  children: [
+                    Text(chartInfo.name, textAlign: TextAlign.center,),
+                    Text(
+                      style: smallStyle,
+                      chartInfo.description,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ],
             ),
           )
         ),
