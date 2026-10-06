@@ -6,6 +6,7 @@ import 'package:knitty_griddy/charts/model/knitting_symbol.dart';
 import 'package:knitty_griddy/charts/model/knitting_symbol_part.dart';
 import 'package:knitty_griddy/charts/model/knitting_symbol_parts.dart';
 import 'package:knitty_griddy/charts/model/charts_model.dart';
+import 'package:knitty_griddy/common/undo_redo_toolbar.dart';
 import 'package:knitty_griddy/utils/undo_redo_manager.dart';
 import 'package:knitty_griddy/charts/stitchrepo/stitch_definition.dart';
 import 'package:knitty_griddy/charts/stitcheditor/edit_stitch_parts_control.dart';
@@ -132,6 +133,15 @@ class _EditStitchPageState extends State<EditStitchPage> {
       appBar: AppBar(
         title: const Text('Edit stitch'),
         backgroundColor: Colors.grey.shade300,
+        bottom: PreferredSize(
+          preferredSize: const Size(2000, 40), 
+          child: UndoRedoToolbar(
+            canUndo: _undoRedoManager.canUndo(),
+            canRedo: _undoRedoManager.canRedo(),
+            undo: _undo,
+            redo: _redo,
+          ),
+        ),
         actions: [
           IconButton(
             onPressed: () {

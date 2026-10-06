@@ -118,24 +118,20 @@ class _PatternPageState extends State<PatternPage> {
             onSelectionChanged: (newMode) => setState(() => patternPageMode = newMode.first),
           ),
           const SizedBox(width: 30,),
-          Visibility(
-            visible: patternPageMode == PatternPageMode.edit,
-            maintainSize: true,maintainAnimation: true,maintainState: true,
-            child: Tooltip(
-              message: 'Pattern settings',
-              child: IconButton(
-                onPressed: () async {
-                  KnittingPattern? newPattern = await showDialog(
-                    barrierDismissible: false,
-                    context: context, 
-                    builder: (context) => PatternSettingsDialog(pattern: stateKnittingPattern),
-                  );
-                  if (newPattern != null) {
-                    _storeAndSetKnittingPattern(newPattern);
-                  }
-                }, 
-                icon: const Icon(Icons.settings),
-              ),
+          Tooltip(
+            message: 'Pattern settings',
+            child: IconButton(
+              onPressed: () async {
+                KnittingPattern? newPattern = await showDialog(
+                  barrierDismissible: false,
+                  context: context, 
+                  builder: (context) => PatternSettingsDialog(pattern: stateKnittingPattern),
+                );
+                if (newPattern != null) {
+                  _storeAndSetKnittingPattern(newPattern);
+                }
+              }, 
+              icon: const Icon(Icons.settings),
             ),
           ),
           hspacing,

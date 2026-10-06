@@ -330,7 +330,7 @@ class LineCommand extends DrawingCommand {
   }
 
   @override
-  String toSvg(Size drawingSize, AbstractDrawing drawing, {List<StylingCommand> stylings = const[]}) {
+  String toSvg(Size drawingSize, AbstractDrawing drawing, {List<StylingCommand> stylings = const[], double? lineThicknessOverride}) {
     if (!valid) return '';    
 
     Offset? start = getStartCoordinate(drawing);
@@ -358,9 +358,19 @@ class LineCommand extends DrawingCommand {
     }
 
     if (styling == null) {
-      return '<g id="$label"><line x1="${start.dx}" y1="${start.dy}" x2="${end.dx}" y2="${end.dy}" fill="none" stroke="${ColorUtilities.colorToSvhHex(Colors.grey.shade700)}"/></g>';
+      String svg = '<g id="$label"><line x1="${start.dx}" y1="${start.dy}" x2="${end.dx}" y2="${end.dy}" fill="none" stroke="${ColorUtilities.colorToSvhHex(Colors.grey.shade700)}" ';
+      if (lineThicknessOverride != null) {
+        svg += 'stroke-width="$lineThicknessOverride"';
+      }
+      svg += '/></g>';
+      return svg;
     } else {
-      String svg = '<g id="$label"><line x1="${start.dx}" y1="${start.dy}" x2="${end.dx}" y2="${end.dy}" fill="none" stroke="${ColorUtilities.colorToSvhHex(styling.color)}" ${ColorUtilities.strokeOpacity(styling.color)} stroke-width="${styling.thickness}" ';
+      String svg = '<g id="$label"><line x1="${start.dx}" y1="${start.dy}" x2="${end.dx}" y2="${end.dy}" fill="none" stroke="${ColorUtilities.colorToSvhHex(styling.color)}" ${ColorUtilities.strokeOpacity(styling.color)} ';
+      if (lineThicknessOverride != null && lineThicknessOverride > styling.thickness) {
+        svg += 'stroke-width="$lineThicknessOverride" ';
+      } else {
+        svg += 'stroke-width="${styling.thickness}" ';
+      }
       if (styling.dashStyle == DashStyle.full) {
         svg += '/>';
       } else {

@@ -1,5 +1,10 @@
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:id_gen/id_gen.dart';
+import 'package:knitty_griddy/charts/export/knitting_chart_svg_service.dart';
+import 'package:knitty_griddy/drawings/export/drawing_svg_service.dart';
 import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
 import 'package:knitty_griddy/drawings/model/commands/included_part_command.dart';
 import 'package:knitty_griddy/drawings/model/drawing.dart';
@@ -126,20 +131,22 @@ class DrawingsModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void updateDrawing({
+  Future<void> updateDrawing({
     required AbstractDrawing oldDrawing,
     required AbstractDrawing newDrawing,
-  }) {
+  }) async {
     if (oldDrawing is PartDrawing && newDrawing is PartDrawing) {
       PartRepository.updatePartDrawing(oldDrawing, newDrawing);
     } else {
+      Uint8List previewImage = await getDrawingPreviewImage(newDrawing as Drawing);
       _drawingsModelObject = _drawingsModelObject.copyWith(
-        drawing: newDrawing as Drawing,
+        drawing: newDrawing,
         drawingInfos: _drawingsModelObject.drawingInfos.map((di) => 
           di.id != newDrawing.id ? di : di.copyWith(
             name: newDrawing.name,
             description: newDrawing.description,
-            contentHashCode: newDrawing.contentHashCode
+            contentHashCode: newDrawing.contentHashCode,
+            previewImage: previewImage,
           )
         ).toList()
       );
@@ -194,10 +201,12 @@ class DrawingsModel extends ChangeNotifier {
 
     if (oldModel.drawing != _lastSaved!.drawing) {
       await _repository.saveDrawing(_lastSaved!.drawing);
+      Uint8List previewImage = await getDrawingPreviewImage(_lastSaved!.drawing);
       _drawingsModelObject = _drawingsModelObject.copyWith(
         drawingInfos: _drawingsModelObject.drawingInfos.map((di) =>
           di.id != _drawingsModelObject.drawing.id ? di : di.copyWith(
-            contentHashCode: _drawingsModelObject.drawing.contentHashCode
+            contentHashCode: _drawingsModelObject.drawing.contentHashCode,
+            previewImage: previewImage
           )
         ).toList()
       );
@@ -205,18 +214,33 @@ class DrawingsModel extends ChangeNotifier {
     }
   }
 
+  Future<Uint8List> getDrawingPreviewImage(Drawing drawing) async {
+    DrawingSvgService svgService = DrawingSvgService(drawing: drawing, lineThicknessOverride: 6);
+    SvgElement svgElement = svgService.getCompleteDrawing();
+    PictureInfo pi = await vg.loadPicture(SvgStringLoader(svgElement.svgString), null);
+    Image img = await pi.picture.toImage(svgElement.dimensions.width.toInt(), svgElement.dimensions.height.toInt());
+    ByteData? data = await img.toByteData(format: ImageByteFormat.png);
+    pi.picture.dispose();
+    if (data == null) {
+      return Uint8List(0);
+    }
+    return data.buffer.asUint8List();
+  }
+
   Future<void> saveCurrentDrawing() async {
     await _repository.saveDrawing(_drawingsModelObject.drawing);
-
+    Uint8List previewImage = await getDrawingPreviewImage(_drawingsModelObject.drawing);
     _drawingsModelObject = _drawingsModelObject.copyWith(
       drawingInfos: drawingInfos.map((di) => di.id != drawing.id ? di : di.copyWith(
         name: _drawingsModelObject.drawing.name,
         description: _drawingsModelObject.drawing.description,
         contentHashCode: _drawingsModelObject.drawing.contentHashCode,
+        previewImage: previewImage,
       )).toList()
     );
 
     await _saveDrawingInfos();
+    notifyListeners();
   }
 
   Future<void> _saveDrawingInfos() async {
@@ -239,7 +263,8 @@ class DrawingsModel extends ChangeNotifier {
       drawingInfos: [..._drawingsModelObject.drawingInfos, DrawingInfo(
         id: newDrawing.id, 
         name: newDrawing.name, 
-        contentHashCode: newDrawing.contentHashCode)
+        contentHashCode: newDrawing.contentHashCode,
+        previewImage: originalInfo.previewImage)
       ]
     );
 

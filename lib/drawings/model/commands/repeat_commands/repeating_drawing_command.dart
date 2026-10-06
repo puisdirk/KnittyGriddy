@@ -55,7 +55,7 @@ abstract class RepeatingDrawingCommand implements SameAs {
   void paint(Canvas canvas, Size size, AbstractDrawing drawing, bool selected,
     {bool asPart = false, String prefixLabel = '', List<StylingCommand> stylings = const[], 
      bool drawDirectionArrow = false, bool forPreview = false});
-  String toSvg(Size drawingSize, AbstractDrawing drawing, {List<StylingCommand> stylings = const[]});
+  String toSvg(Size drawingSize, AbstractDrawing drawing, {List<StylingCommand> stylings = const[], double? lineThicknessOverride});
   Rect getBoundingBox(AbstractDrawing drawing);
 
   RepeatingDrawingCommand deleteReference({required String commandId});

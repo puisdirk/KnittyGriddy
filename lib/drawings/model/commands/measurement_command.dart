@@ -167,7 +167,7 @@ class MeasurementCommand extends DrawingCommand {
   }
 
   @override
-  String toSvg(Size drawingSize, AbstractDrawing drawing, {List<StylingCommand> stylings = const[]}) => '';
+  String toSvg(Size drawingSize, AbstractDrawing drawing, {List<StylingCommand> stylings = const[], double? lineThicknessOverride}) => '';
 
   @override
   Map<String, Object> toJson() {

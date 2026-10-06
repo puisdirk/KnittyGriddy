@@ -155,8 +155,8 @@ class RepeatingPointCommand extends RepeatingDrawingCommand {
   int get hashCode => super.hashCode ^ wrappedPoint.hashCode;
 
   @override
-  String toSvg(Size drawingSize, AbstractDrawing drawing, {List<StylingCommand> stylings = const []}) {
-    return wrappedPoint.toSvg(drawingSize, drawing, stylings: stylings);
+  String toSvg(Size drawingSize, AbstractDrawing drawing, {List<StylingCommand> stylings = const [], double? lineThicknessOverride}) {
+    return wrappedPoint.toSvg(drawingSize, drawing, stylings: stylings, lineThicknessOverride: lineThicknessOverride);
   }
 
   @override

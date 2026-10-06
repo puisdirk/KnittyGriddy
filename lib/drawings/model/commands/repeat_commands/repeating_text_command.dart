@@ -116,8 +116,8 @@ class RepeatingTextCommand extends RepeatingDrawingCommand {
   }
 
   @override
-  String toSvg(Size drawingSize, AbstractDrawing drawing, {List<StylingCommand> stylings = const[]}) => 
-    wrappedText.toSvg(drawingSize, drawing, stylings: stylings);
+  String toSvg(Size drawingSize, AbstractDrawing drawing, {List<StylingCommand> stylings = const[], double? lineThicknessOverride}) => 
+    wrappedText.toSvg(drawingSize, drawing, stylings: stylings, lineThicknessOverride: lineThicknessOverride);
 
   @override
   Map<String, Object> toJson() {

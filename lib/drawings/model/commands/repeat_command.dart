@@ -260,7 +260,7 @@ class RepeatCommand extends DrawingCommand {
   int get hashCode => super.hashCode ^ repeatValueFormula.hashCode ^ commands.hashCode ^ storedRepeatValue.hashCode;
 
   @override
-  String toSvg(Size drawingSize, AbstractDrawing drawing, {List<StylingCommand> stylings = const []}) {
+  String toSvg(Size drawingSize, AbstractDrawing drawing, {List<StylingCommand> stylings = const [], double? lineThicknessOverride}) {
     if (!valid) return '';
 
     String svg = '<g id="$label>';
@@ -268,7 +268,7 @@ class RepeatCommand extends DrawingCommand {
     for (int repeatIndex = 1; repeatIndex <= repeatValue; repeatIndex++) {
       RepeatCommand withIndex = _validateWithIndex(drawing, repeatIndex);
       for (RepeatingDrawingCommand command in withIndex.commands) {
-        svg += command.toSvg(drawingSize, drawing);
+        svg += command.toSvg(drawingSize, drawing, lineThicknessOverride: lineThicknessOverride);
       }
     }
 

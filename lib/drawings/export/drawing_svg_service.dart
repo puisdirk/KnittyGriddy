@@ -2,6 +2,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:knitty_griddy/charts/export/knitting_chart_svg_service.dart';
 import 'package:knitty_griddy/common/file_system.dart';
 import 'package:knitty_griddy/drawings/model/abstract_drawing.dart';
 import 'package:knitty_griddy/drawings/model/commands/drawing_command.dart';
@@ -13,16 +14,18 @@ class DrawingSvgService {
   final AbstractDrawing drawing;
   final bool flipX;
   final bool flipY;
+  final double? lineThicknessOverride;
 
   const DrawingSvgService({
     required this.drawing,
     this.flipX = false,
     this.flipY = false,
+    this.lineThicknessOverride,
   });
 
   Future<void> exportDrawingToSVG() async {
     
-    String completeDrawing = getCompleteDrawing();
+    String completeDrawing = getCompleteDrawing().svgString;
 
     await FileSystem.saveFile(
       prompt: 'Where do you want to store the output?',
@@ -31,7 +34,7 @@ class DrawingSvgService {
     );
   }
 
-  String getCompleteDrawing() {
+  SvgElement getCompleteDrawing() {
 
     Rect bbox = drawing.getBoundingBox();
     Size drawingSize = bbox.inflate(20).size;
@@ -48,7 +51,7 @@ class DrawingSvgService {
     completeDrawing += drawingString;
     completeDrawing += '</svg>';
 
-    return completeDrawing;
+    return SvgElement(dimensions: drawingSize, svgString: completeDrawing);
   }
 
   String _getDrawingString(Size drawingSize) {
@@ -65,7 +68,7 @@ class DrawingSvgService {
       // For PartDrawings, we only draw the parts
       if (drawing is PartDrawing && command is! PartCommand) continue;
       if (command is PointCommand) continue;
-      drawingGroup += command.toSvg(drawingSize, drawing);
+      drawingGroup += command.toSvg(drawingSize, drawing, lineThicknessOverride: lineThicknessOverride);
     }
     drawingGroup += '</g>';
 

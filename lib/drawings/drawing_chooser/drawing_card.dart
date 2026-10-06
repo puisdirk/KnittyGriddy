@@ -110,12 +110,35 @@ class DrawingCard extends StatelessWidget {
               Expanded(
                 child: ListTile(
                   mouseCursor: SystemMouseCursors.click,
-                  leading: const Icon(Icons.design_services),
-                  title: Text(drawingInfo.name, overflow: TextOverflow.ellipsis,),
-                  subtitle: Text(
-                    drawingInfo.description,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+                  leading: drawingInfo.hasPreview ? null : const Icon(Icons.design_services),
+                  title: Row(
+                    children: [
+                      if (drawingInfo.hasPreview)
+                        FittedBox(
+                          child: SizedBox(
+                            width: DrawingInfo.previewImageWidth, 
+                            height: DrawingInfo.previewImageHeight,
+                            child: Image(
+                              width: DrawingInfo.previewImageWidth, 
+                              height: DrawingInfo.previewImageHeight, 
+                              image: MemoryImage(drawingInfo.previewImage!)
+                            )
+                          ),
+                        ),
+                      if (drawingInfo.hasPreview)
+                        hspacing,
+                      Column(
+                        children: [
+                          Text(drawingInfo.name, textAlign: TextAlign.center,),
+                          Text(
+                            style: smallStyle,
+                            drawingInfo.description,
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -127,14 +150,15 @@ class DrawingCard extends StatelessWidget {
                     Tooltip(
                       message: 'Duplicate',
                       child: IconButton(
+                        iconSize: 16,
                         onPressed: () => Provider.of<DrawingsModel>(context, listen: false).duplicateDrawing(drawingInfo), 
                         icon: const Icon(Icons.content_copy)
                       ),
                     ),
-                    hspacing,
                     Tooltip(
                       message: 'Duplicate to Part drawing',
                       child: IconButton(
+                        iconSize: 16,
                         onPressed: () async {
                           bool proceed = await showDialog(
                             context: context,
@@ -180,6 +204,7 @@ class DrawingCard extends StatelessWidget {
                     Tooltip(
                       message: 'Delete',
                       child: IconButton(
+                        iconSize: 16,
                         onPressed: () => _confirmToDelete(context), 
                         icon: const Icon(Icons.delete)
                       ),

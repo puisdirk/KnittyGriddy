@@ -53,11 +53,34 @@ class _DrawingPickerState extends State<DrawingPicker> {
           onDoubleTap: () => Navigator.of(context).pop(drawingInfo),
           child: ListTile(
             mouseCursor: SystemMouseCursors.click,
-            title: Text(drawingInfo.name, overflow: TextOverflow.ellipsis,),
-            subtitle: Text(
-              drawingInfo.description,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
+            title: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                if (drawingInfo.hasPreview)
+                  SizedBox(
+                    width: DrawingInfo.previewImageWidth,
+                    height: DrawingInfo.previewImageHeight,
+                    child: Image(
+                      width: DrawingInfo.previewImageWidth, 
+                      height: DrawingInfo.previewImageHeight, 
+                      image: MemoryImage(drawingInfo.previewImage!)
+                    )
+                  ),
+                if (drawingInfo.hasPreview)
+                  hspacing,
+                Column(
+                  children: [
+                    Text(drawingInfo.name, textAlign: TextAlign.center,),
+                    Text(
+                      style: smallStyle,
+                      drawingInfo.description,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ],
             ),
           )
         ),

@@ -4,7 +4,6 @@ import 'package:knitty_griddy/patterns/mainview/link_mode/text_editor_field_outl
 import 'package:knitty_griddy/patterns/model/fields/pattern_text_editor_field.dart';
 import 'package:knitty_griddy/patterns/model/knitting_pattern.dart';
 import 'package:knitty_griddy/patterns/model/text_field_link.dart';
-import 'package:knitty_griddy/utils/constants.dart';
 import 'package:knitty_griddy/utils/math_utitilies.dart';
 import 'package:material_symbols_icons/symbols.dart';
 

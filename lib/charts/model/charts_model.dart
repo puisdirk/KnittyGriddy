@@ -1,8 +1,12 @@
 
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:id_gen/id_gen.dart';
+import 'package:knitty_griddy/charts/export/knitting_chart_svg_service.dart';
+import 'package:knitty_griddy/charts/export/knitting_chart_view_settings.dart';
 import 'package:knitty_griddy/charts/stitchrepo/basic_stitches_set.dart';
 import 'package:knitty_griddy/charts/stitchrepo/stitch_set.dart';
 import 'package:knitty_griddy/charts/model/charts_save_model_object.dart';
@@ -85,10 +89,12 @@ class ChartsModel extends ChangeNotifier {
 
     if (oldModel.knittingChart != _lastSaved!.knittingChart) {
       await _repository.saveChart(_lastSaved!.knittingChart);
+      Uint8List previewImage = await getChartPreviewImage(_lastSaved!.knittingChart);
       _chartsModelObject = _chartsModelObject.copyWith(
         chartInfos: _chartsModelObject.chartInfos.map((ci) => 
           ci.id != _chartsModelObject.knittingChart.id ? ci : ci.copyWith(
-            contentHashCode: _chartsModelObject.knittingChart.contentHashCode
+            contentHashCode: _chartsModelObject.knittingChart.contentHashCode,
+            previewImage: previewImage
           )
         ).toList()
       );
@@ -96,16 +102,36 @@ class ChartsModel extends ChangeNotifier {
     }
   }
 
+  Future<Uint8List> getChartPreviewImage(KnittingChart chart) async {
+    KnittingChartSvgService svgService = KnittingChartSvgService(
+      chart: chart, 
+      viewSettings: const KnittingChartViewSettings(showStitches: false, showColours: false)
+    );
+
+    SvgElement svgElement = svgService.getCompleteSvg();
+    PictureInfo pi = await vg.loadPicture(SvgStringLoader(svgElement.svgString), null);
+    Image img = await pi.picture.toImage(svgElement.dimensions.width.toInt(), svgElement.dimensions.height.toInt());
+    ByteData? data = await img.toByteData(format: ImageByteFormat.png);
+    pi.picture.dispose();
+    if (data == null) {
+      return Uint8List(0);
+    }
+    return data.buffer.asUint8List();
+  }
+
   Future<void> saveCurrentChart() async {
     await _repository.saveChart(_chartsModelObject.knittingChart);
+    Uint8List previewImage = await getChartPreviewImage(_chartsModelObject.knittingChart);
     _chartsModelObject = _chartsModelObject.copyWith(
       chartInfos: _chartsModelObject.chartInfos.map((ci) => 
         ci.id != _chartsModelObject.knittingChart.id ? ci : ci.copyWith(
-          contentHashCode: _chartsModelObject.knittingChart.contentHashCode
+          contentHashCode: _chartsModelObject.knittingChart.contentHashCode,
+          previewImage: previewImage
         )
       ).toList()
     );
     await _saveChartInfos();
+    notifyListeners();
   }
 
   Future<void> _saveChartInfos() async {
@@ -129,7 +155,8 @@ class ChartsModel extends ChangeNotifier {
         id: newChart.id, 
         name: newChart.name, 
         description: newChart.description,
-        contentHashCode: newChart.contentHashCode
+        contentHashCode: newChart.contentHashCode,
+        previewImage: originalInfo.previewImage
       )]
     );
 
@@ -210,12 +237,14 @@ class ChartsModel extends ChangeNotifier {
       );
     }
 
+    Uint8List previewImage = await getChartPreviewImage(healedChart);
     _chartsModelObject = _chartsModelObject.copyWith(
       knittingChart: healedChart,
       chartInfos: _chartsModelObject.chartInfos.map((ci) => ci.id != healedChart.id ? ci : ci.copyWith(
         name: healedChart.name,
         description: healedChart.description,
         contentHashCode: healedChart.contentHashCode,
+        previewImage: previewImage
       )).toList()
     );
 

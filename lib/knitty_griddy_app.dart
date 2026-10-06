@@ -73,7 +73,7 @@ class KnittyGriddyApp extends StatelessWidget {
             debugShowCheckedModeBanner: false,
             title: 'Knitty-Griddy',
             theme: ThemeData(
-              colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue.shade200),
+              colorScheme: ColorScheme.fromSeed(seedColor: Colors.grey.shade200),
               useMaterial3: true
             ),
             home: const MainPage(),

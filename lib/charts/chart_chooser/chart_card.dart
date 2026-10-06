@@ -103,12 +103,35 @@ class ChartCard extends StatelessWidget {
               Expanded(
                 child: ListTile(
                   mouseCursor: SystemMouseCursors.click,
-                  leading: const Icon(Icons.grid_on),
-                  title: Text(chartInfo.name),
-                  subtitle: Text(
-                    chartInfo.description,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+                  leading: chartInfo.hasPreview ? null : const Icon(Icons.grid_on),
+                  title: Row(
+                    children: [
+                      if (chartInfo.hasPreview)
+                        FittedBox(
+                          child: SizedBox(
+                              width: ChartInfo.previewImageWidth, 
+                              height: ChartInfo.previewImageHeight,
+                              child: Image(
+                                width: ChartInfo.previewImageWidth, 
+                                height: ChartInfo.previewImageHeight, 
+                                image: MemoryImage(chartInfo.previewImage!)
+                              )
+                            ),
+                        ),
+                      if (chartInfo.hasPreview)
+                        hspacing,
+                      Column(
+                        children: [
+                          Text(chartInfo.name, textAlign: TextAlign.center,),
+                          Text(
+                            style: smallStyle,
+                            chartInfo.description,
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
               ),

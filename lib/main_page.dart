@@ -51,14 +51,17 @@ class _MainPageState extends State<MainPage> {
             const Spacer(),
             const Text('Knitty-Griddy'),
             const Spacer(),
-            IconButton(
-              onPressed: () => showLicensePage(
-                context: context,
-                applicationName: 'Knitty-Griddy',
-                applicationVersion: '1.0.0',
-                applicationLegalese: 'hideliho'
-              ), 
-              icon: const Icon(Icons.info_outline)
+            Visibility(
+              visible: false,
+              child: IconButton(
+                onPressed: () => showLicensePage(
+                  context: context,
+                  applicationName: 'Knitty-Griddy',
+                  applicationVersion: '1.0.0',
+                  applicationLegalese: 'hideliho'
+                ), 
+                icon: const Icon(Icons.info_outline)
+              ),
             ),
           ],
         ),

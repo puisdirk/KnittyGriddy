@@ -110,7 +110,7 @@ class PdfService {
                                                     flipY: field.flipY
                                                   );
                                                   return pw.Center(
-                                                    child: pw.SvgImage(svg: svgService.getCompleteDrawing())
+                                                    child: pw.SvgImage(svg: svgService.getCompleteDrawing().svgString)
                                                   );
                                                 case PatternFieldType.knittingchart:
                                                   if ((field as PatternChartField).chart == null) {
